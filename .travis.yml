@@ -11,6 +11,9 @@ deploy:
   on:
     tags: true
     branch: master
+    python:
+      - '2.7'
+      - '3.6'
   distributions: "bdist_wheel" # Your distributions here
 
 cache:
