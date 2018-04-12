@@ -9,13 +9,11 @@ class TopTest(unittest.TestCase):
 
     def testConstants(self):
         self.assertTrue(isinstance(transmission_rpc.__author__, str))
-        self.assertTrue(isinstance(transmission_rpc.__version_major__, int))
-        self.assertTrue(isinstance(transmission_rpc.__version_minor__, int))
         self.assertTrue(isinstance(transmission_rpc.__version__, str))
+        self.assertTrue(isinstance(transmission_rpc.__author_email__, str))
         self.assertTrue(isinstance(transmission_rpc.__copyright__, str))
         self.assertTrue(isinstance(transmission_rpc.__license__, str))
 
-        self.assertEqual('{0}.{1}'.format(transmission_rpc.__version_major__, transmission_rpc.__version_minor__), transmission_rpc.__version__)
 
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(TopTest)
