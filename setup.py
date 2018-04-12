@@ -4,15 +4,15 @@
 # Licensed under the MIT license.
 
 from setuptools import setup
-
+from transmission_rpc import __version__, __author__, __author_email__
 required = ['six>=1.1.0']
 
 setup(
     name='transmission_rpc',
-    version='0.0.1',
+    version=__version__,
     description='Python module that implements the Transmission bittorent client RPC protocol.',
-    author='Trim21',
-    author_email='trim21me@hotmail.com',
+    author=__author__,
+    author_email=__author_email__,
     url='https://github.com/Trim21/transmission-rpc',
     keywords='transmission rpc',
     packages=['transmission_rpc'],
