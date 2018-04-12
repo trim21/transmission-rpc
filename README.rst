@@ -11,34 +11,28 @@ for the bittorent client Transmission.
 
 transmission_rpc is licensed under the MIT license.
 
-Getting started
-===============
-
-transmission_rpc 0.12 is compatible with Transmission 1.31 - 2.82.
-
 Requirements
 ------------
 
 transmission_rpc requires:
 
- * Python >= 2.6
+ * Python >= 3.4 or * Python >=2.6,<3.0
  * Six >= 1.1.0, https://pypi.python.org/pypi/six/
 
 Install
 -------
 
-transmission_rpc is installed by running setup.py
-
-$ python setup.py install
+$ pip install transmission-rpc
 
 NOTE: You might need administrator privileges to install python modules.
 
-The setup program will take care of the simplejson requirement. Please refer to
-the Transmission documentation on how to install Transmission.
+The setup program will take care of the simplejson requirement.
+I'm still writing documents.
 
 Developer
 =========
 
-transmission_rpc is hosted by bitbucket at http://www.bitbucket.org/blueluna/transmission_rpc/.
+transmission-rpc is hosted by GitHub at https://github.com/Trim21/transmission-rpc
 
+Copyright (c) 2018 Trim21.
 Copyright (c) 2008-2014 Erik Svensson.

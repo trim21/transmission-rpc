@@ -6,7 +6,8 @@
 from setuptools import setup
 from transmission_rpc import __version__, __author__, __author_email__
 required = ['six>=1.1.0']
-
+with open('./README.rst', 'r') as f:
+    readme = f.read()
 setup(
     name='transmission_rpc',
     version=__version__,
@@ -17,6 +18,7 @@ setup(
     keywords='transmission rpc',
     packages=['transmission_rpc'],
     install_requires = required,
+    long_description=readme,
     test_suite = "test",
     zip_safe=True,
     classifiers = [
