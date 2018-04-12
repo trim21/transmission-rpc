@@ -1,0 +1,115 @@
+{
+"test sequence":
+    [
+        {
+            "request": {"tag": 0, "method": "session-get", "arguments": {}},
+            "response": {
+                "tag": 0, 
+                "arguments": {
+                    "alt-speed-time-end": 1020, 
+                    "alt-speed-time-begin": 540, 
+                    "speed-limit-up-enabled": true, 
+                    "rename-partial-files": true, 
+                    "seedRatioLimited": true, 
+                    "peer-limit-per-torrent": 60, 
+                    "incomplete-dir": "/var/incomplete", 
+                    "rpc-version": 8, 
+                    "blocklist-enabled": false, 
+                    "speed-limit-down-enabled": true, 
+                    "seedRatioLimit": 1.0, 
+                    "encryption": "preferred", 
+                    "alt-speed-down": 50, 
+                    "download-dir": "/var/torrents", 
+                    "alt-speed-enabled": false, 
+                    "version": "1.92", 
+                    "blocklist-size": 0, 
+                    "dht-enabled": true, 
+                    "peer-limit-global": 240, 
+                    "alt-speed-time-day": 127, 
+                    "alt-speed-up": 50, 
+                    "peer-port-random-on-start": 0, 
+                    "rpc-version-minimum": 1, 
+                    "peer-port": 51413, 
+                    "port-forwarding-enabled": true, 
+                    "speed-limit-up": 500, 
+                    "speed-limit-down": 500, 
+                    "alt-speed-time-enabled": false, 
+                    "config-dir": "/etc/transmission-daemon", 
+                    "incomplete-dir-enabled": false, 
+                    "pex-enabled": true
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 1, "method": "torrent-add", "arguments": {"metainfo": "data"}},
+            "response": {
+                "tag": 1, 
+                "arguments": {
+                    "torrent-added": {
+                        "hashString": "A000", 
+                        "id": 0, 
+                        "name": "testtransfer0"
+                    }
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 2, "method": "torrent-add", "arguments": {"metainfo": "data", "paused": 1}},
+            "response": {
+                "tag": 2, 
+                "arguments": {
+                    "torrent-added": {
+                        "hashString": "A001", 
+                        "id": 1, 
+                        "name": "testtransfer1"
+                    }
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 3, "method": "torrent-add", "arguments": {"metainfo": "data", "download-dir": "/tmp"}},
+            "response": {
+                "tag": 3, 
+                "arguments": {
+                    "torrent-added": {
+                        "hashString": "A002", 
+                        "id": 2, 
+                        "name": "testtransfer2"
+                    }
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 4, "method": "torrent-add", "arguments": {"metainfo": "data", "peer-limit": 10}},
+            "response": {
+                "tag": 4, 
+                "arguments": {
+                    "torrent-added": {
+                        "hashString": "A003", 
+                        "id": 3, 
+                        "name": "testtransfer3"
+                    }
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 5, "method": "torrent-add", "arguments": {"metainfo": "data", "paused": 1, "download-dir": "/tmp", "peer-limit": 10}},
+            "response": {
+                "tag": 5, 
+                "arguments": {
+                    "torrent-added": {
+                        "hashString": "A004", 
+                        "id": 4, 
+                        "name": "testtransfer4"
+                    }
+                }, 
+                "result": "success"
+            }
+        }
+    ]
+}

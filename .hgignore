@@ -1,0 +1,14 @@
+syntax: glob
+*.pyc
+*.pyo
+*.torrent
+*.wpr
+*.tmproj
+syntax: regexp
+^build/*
+^dist/*
+^html/*
+.+\.egg-info/*
+^doc/out/*
+^\.idea/*
+^\hgmessage

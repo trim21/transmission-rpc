@@ -1,0 +1,69 @@
+{
+"test sequence":
+    [
+        {
+            "request": {"tag": 0, "method": "session-get", "arguments": {}},
+            "response": {
+                "tag": 0, 
+                "arguments": {
+                    "alt-speed-time-end": 1020, 
+                    "alt-speed-time-begin": 540, 
+                    "speed-limit-up-enabled": true, 
+                    "rename-partial-files": true, 
+                    "seedRatioLimited": true, 
+                    "peer-limit-per-torrent": 60, 
+                    "incomplete-dir": "/var/incomplete", 
+                    "rpc-version": 8, 
+                    "blocklist-enabled": false, 
+                    "speed-limit-down-enabled": true, 
+                    "seedRatioLimit": 1.0, 
+                    "encryption": "preferred", 
+                    "alt-speed-down": 50, 
+                    "download-dir": "/var/torrents", 
+                    "alt-speed-enabled": false, 
+                    "version": "1.92", 
+                    "blocklist-size": 0, 
+                    "dht-enabled": true, 
+                    "peer-limit-global": 240, 
+                    "alt-speed-time-day": 127, 
+                    "alt-speed-up": 50, 
+                    "peer-port-random-on-start": 0, 
+                    "rpc-version-minimum": 1, 
+                    "peer-port": 51413, 
+                    "port-forwarding-enabled": true, 
+                    "speed-limit-up": 500, 
+                    "speed-limit-down": 500, 
+                    "alt-speed-time-enabled": false, 
+                    "config-dir": "/etc/transmission-daemon", 
+                    "incomplete-dir-enabled": false, 
+                    "pex-enabled": true
+                }, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 1, "method": "torrent-stop", "arguments": {"ids": [2]}},
+            "response": {
+                "tag": 1, 
+                "arguments": {},
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 2, "method": "torrent-stop", "arguments": {"ids": ["bad"]}},
+            "response": {
+                "tag": 2, 
+                "arguments": {}, 
+                "result": "success"
+            }
+        },
+        {
+            "request": {"tag": 3, "method": "torrent-stop", "arguments": {"ids": ["bad", "ba5", 30, 20]}},
+            "response": {
+                "tag": 3, 
+                "arguments": {}, 
+                "result": "success"
+            }
+        }
+    ]
+}
