@@ -1,0 +1,37 @@
+os:
+    - linux
+
+language: python
+
+env:
+    - TRAVIS_CI=TRAVIS_CI
+
+
+sudo: true
+
+cache:
+    - pip
+    - $HOME/virtualenv
+
+python:
+    - 2.7
+    - 3.4
+    - 3.6
+
+install:
+    - python setup.py install
+    - pip install codecov
+
+script:
+    - python -m unittest test.client
+    - python -m unittest test.top
+    - python -m unittest test.torrent
+    - python -m unittest test.utils
+#    - chmod +x ./ci/install_and_start_downloader
+#    - ./ci/install_and_start_downloader
+#    - coverage run -a -m bgmi.main search "海贼王" --regex-filter '.*MP4.*720P.*' --download
+#    - sudo python ./ci/stop_downloader.py
+#    - eval "$(coverage run -a -m bgmi.main complete)"
+
+after_success:
+  - codecov

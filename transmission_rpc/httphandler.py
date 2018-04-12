@@ -4,7 +4,7 @@
 
 import sys
 
-from transmissionrpc.error import HTTPHandlerError
+from transmission_rpc.error import HTTPHandlerError
 
 from six import PY3
 
@@ -47,7 +47,7 @@ class HTTPHandler(object):
 
 class DefaultHTTPHandler(HTTPHandler):
     """
-    The default HTTP handler provided with transmissionrpc.
+    The default HTTP handler provided with transmission_rpc.
     """
     def __init__(self):
         HTTPHandler.__init__(self)

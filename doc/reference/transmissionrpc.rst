@@ -3,10 +3,10 @@
 	Licensed under the MIT license.
 
 
-:mod:`transmissionrpc` --- Module reference
+:mod:`transmission_rpc` --- Module reference
 ###########################################
 
-.. module:: transmissionrpc
+.. module:: transmission_rpc
 .. moduleauthor:: Erik Svensson <erik.public@gmail.com>
 
 This documentation will not describe all RPC fields in detail. Please refer to
@@ -62,8 +62,8 @@ hyphen in the names though. This class has a few convenience attributes using th
 Example:
 ::
 
-	>>> import transmissionrpc
-	>>> t = transmissionrpc.Torrent(None, {'id': 1, 'comment': 'My torrent', 'addedDate': 1232281019})
+	>>> import transmission_rpc
+	>>> t = transmission_rpc.Torrent(None, {'id': 1, 'comment': 'My torrent', 'addedDate': 1232281019})
 	>>> t.comment
 	'My torrent'
 	>>> t.date_added
@@ -167,8 +167,8 @@ To reload information from Transmission use ``update()``.
 Example:
 ::
 
-	>>> import transmissionrpc
-	>>> c = transmissionrpc.Client()
+	>>> import transmission_rpc
+	>>> c = transmission_rpc.Client()
 	>>> t = c.get_torrent(0)
 	>>> t.peer_limit
 	10
@@ -283,7 +283,7 @@ Timeouts
 --------
 
 In Python 2.6 it is possible to supply a timeout to a HTTP request. This is
-accessible through transmissionrpc by either changing the timeout property of
+accessible through transmission_rpc by either changing the timeout property of
 a Client object or supply the named argument ``timeout`` in most methods of
 Client. The default timeout is 30 seconds.
 

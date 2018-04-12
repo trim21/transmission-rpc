@@ -4,7 +4,7 @@
 
 import datetime
 import unittest
-import transmissionrpc.utils as tu
+import transmission_rpc.utils as tu
 
 from six import iteritems
 
@@ -24,7 +24,7 @@ class utils(unittest.TestCase):
             result = tu.format_size(size)
             self.assertAlmostEqual(result[0], expected[0], 4)
             self.assertEqual(result[1], expected[1])
-    
+
     def testFormatSpeed(self):
         table = {
             512: (512, 'B/s'),
@@ -40,7 +40,7 @@ class utils(unittest.TestCase):
             result = tu.format_speed(size)
             self.assertAlmostEqual(result[0], expected[0], 4)
             self.assertEqual(result[1], expected[1])
-    
+
     def testFormatTimedelta(self):
         table = {
             datetime.timedelta(0, 0): '0 00:00:00',
@@ -53,7 +53,7 @@ class utils(unittest.TestCase):
         }
         for delta, expected in iteritems(table):
             self.assertEqual(tu.format_timedelta(delta), expected)
-    
+
     def testFormatTimestamp(self):
         table = {
             0: '-',
@@ -62,7 +62,7 @@ class utils(unittest.TestCase):
         }
         for timestamp, expected in iteritems(table):
             self.assertEqual(tu.format_timestamp(timestamp, utc=True), expected)
-    
+
     def testInetAddress(self):
         table = {
             ('127.0.0.1:80', 2000): ('127.0.0.1', 80),
@@ -74,9 +74,9 @@ class utils(unittest.TestCase):
         }
         for args, expected in iteritems(table):
             self.assertEqual(tu.inet_address(*args), expected)
-        
-        self.failUnlessRaises(tu.INetAddressError, tu.inet_address, '256.256.256.256', 2000)
-    
+
+        self.assertRaises(tu.INetAddressError, tu.inet_address, '256.256.256.256', 2000)
+
     def testRPCBool(self):
         table = {
             0: 0,

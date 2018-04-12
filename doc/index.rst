@@ -8,11 +8,11 @@ Transmission RPC
 Introduction
 ============
 
-This is **transmissionrpc**. This module helps using Python to connect
-to a Transmission_ JSON-RPC service. transmissionrpc is compatible with
+This is **transmission_rpc**. This module helps using Python to connect
+to a Transmission_ JSON-RPC service. transmission-rpc is compatible with
 Transmission 1.31 and later.
 
-transmissionrpc is licensed under the MIT license.
+transmission-rpc is licensed under the MIT license.
 
 .. _Transmission: http://www.transmissionbt.com/
 
@@ -20,28 +20,28 @@ Getting started
 ===============
 
 Transmission is available at
-`Python Package Index <http://pypi.python.org/pypi/transmissionrpc/>`_. To
-install the transmissionrpc python module use easy_install or pip.
+`Python Package Index <http://pypi.python.org/pypi/transmission_rpc/>`_. To
+install the transmission-rpc python module use easy_install or pip.
 
 ::
 
-    $ easy_install transmissionrpc
+    $ easy_install transmission-rpc
 
 .. NOTE::
-	You might need administrator privileges to install python modules.
+    You might need administrator privileges to install python modules.
 
-You may also download the tarball from `Python Package Index <http://pypi.python.org/pypi/transmissionrpc/>`_. Untar and install.
+You may also download the tarball from `Python Package Index <http://pypi.python.org/pypi/transmission_rpc/>`_. Untar and install.
 
 ::
 
-    $ tar -xzf transmissionrpc-0.12.tar.gz
-    $ cd transmissionrpc-0.12
+    $ tar -xzf transmission_rpc-0.12.tar.gz
+    $ cd transmission_rpc-0.12
     $ python setup.py install
 
-Dependecies
+Dependencies
 -----------
 
-transmissionrpc has the following dependencies.
+transmission-rpc has the following dependencies.
 
  * Python >= 2.6
  * Six >= 1.1.0, https://pypi.python.org/pypi/six/
@@ -49,12 +49,12 @@ transmissionrpc has the following dependencies.
 Report a problem
 ----------------
 
-Problems with transmissionrpc should be reported through the issue tracker at
+Problems with transmission_rpc should be reported through the issue tracker at
 bitbucket_. Please look through the `existing issues`_ before opening a
 `new issue`_.
 
-.. _existing issues: http://bitbucket.org/blueluna/transmissionrpc/issues/
-.. _new issue: http://bitbucket.org/blueluna/transmissionrpc/issues/new/
+.. _existing issues: http://bitbucket.org/blueluna/transmission_rpc/issues/
+.. _new issue: http://bitbucket.org/blueluna/transmission_rpc/issues/new/
 
 Installing from source
 ======================
@@ -66,35 +66,35 @@ Transmission is hosted at bitbucket_ using mercurial_. To get a working copy,
 run
 ::
 
-   $ hg clone http://www.bitbucket.org/blueluna/transmissionrpc/
+   $ hg clone http://www.bitbucket.org/blueluna/transmission_rpc/
 
-The source code will be fetched and stored the directory transmissionrpc.
+The source code will be fetched and stored the directory transmission_rpc.
 
 Then install the module using
 ::
 
     $ python setup.py install
 
-Or if you wish to further develop transmissionrpc itself use
+Or if you wish to further develop transmission_rpc itself use
 ::
 
 	$ python setup.py develop
 
-This will link this directory to the library as transmissionrpc.
+This will link this directory to the library as transmission_rpc.
 
-.. _bitbucket: http://www.bitbucket.org/blueluna/transmissionrpc/
+.. _bitbucket: http://www.bitbucket.org/blueluna/transmission_rpc/
 .. _mercurial: http://www.selenic.com/mercurial
 
 Poking around
 -------------
 
-Now that transmissionrpc has been installed, run python and start to poke
+Now that transmission_rpc has been installed, run python and start to poke
 around. Following will create a RPC client and list all torrents.
 
 ::
 
-    >>> import transmissionrpc
-    >>> tc = transmissionrpc.Client('localhost', port=9091)
+    >>> import transmission_rpc
+    >>> tc = transmission_rpc.Client('localhost', port=9091)
     >>> tc.get_torrents()
 
 List will return a dictionary of Torrent object indexed by their id. You might
@@ -129,7 +129,7 @@ remove it.
     >>> tc.stop_torrent(1)
     >>> tc.remove_torrent('33820db6dd5e5928d23bc811bbac2f4ae94cb882')
 
-See what we did there? most methods in transmissionrpc can take both torrent id
+See what we did there? most methods in transmission_rpc can take both torrent id
 and torrent hash when referring to a torrent. lists and sequences are also
 supported.
 
@@ -144,12 +144,12 @@ reference.
 A note about debugging information
 ----------------------------------
 
-If you ever need to see what's going on inside transmissionrpc, you can change
-the logging level of transmissionrpc. This is done with these easy steps
+If you ever need to see what's going on inside transmission_rpc, you can change
+the logging level of transmission_rpc. This is done with these easy steps
 ::
 
 	>>> import logging
-	>>> logging.getLogger('transmissionrpc').setLevel(logging.DEBUG)
+	>>> logging.getLogger('transmission_rpc').setLevel(logging.DEBUG)
 
 Note that this will produce a whole lot of output! Other levels are (listed by
 severity)
@@ -159,7 +159,7 @@ severity)
  * ``logging.INFO``
  * ``logging.DEBUG``
 
-The default logging level of transmissionrpc is ``logging.ERROR``.
+The default logging level of transmission_rpc is ``logging.ERROR``.
 
 Module reference
 ================
@@ -167,7 +167,7 @@ Module reference
 .. toctree::
    :maxdepth: 2
 
-   reference/transmissionrpc
+   reference/transmission_rpc
 
 Indices and tables
 ==================

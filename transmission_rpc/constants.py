@@ -5,7 +5,7 @@
 import logging
 from six import iteritems
 
-LOGGER = logging.getLogger('transmissionrpc')
+LOGGER = logging.getLogger('transmission_rpc')
 LOGGER.setLevel(logging.ERROR)
 
 def mirror_dict(source):
@@ -81,7 +81,7 @@ TORRENT_ARGS = {
         'error':                        ('number', 1, None, None, None, 'Kind of error. 0 means OK, 1 means tracker warning, 2 means tracker error, 3 means local error.'),
         'errorString':                  ('number', 1, None, None, None, 'Error message.'),
         'eta':                          ('number', 1, None, None, None, 'Estimated number of seconds left when downloading or seeding. -1 means not available and -2 means unknown.'),
-        'etaIdle':                      ('number', 15, None, None, None, 'Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.'),        
+        'etaIdle':                      ('number', 15, None, None, None, 'Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.'),
         'files':                        ('array', 1, None, None, None, 'Array of file object containing key, bytesCompleted, length and name.'),
         'fileStats':                    ('array', 5, None, None, None, 'Aray of file statistics containing bytesCompleted, wanted and priority.'),
         'hashString':                   ('string', 1, None, None, None, 'Hashstring unique for the torrent even between sessions.'),

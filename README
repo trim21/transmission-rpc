@@ -4,22 +4,22 @@ TransmissionRPC Readme
 Introduction
 ============
 
-this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview
+this project is forked from https://bitbucket.org/blueluna/transmission_rpc/overview
 
 transmission-rpc is a python module implementing the json-rpc client protocol
 for the bittorent client Transmission.
 
-transmissionrpc is licensed under the MIT license.
+transmission_rpc is licensed under the MIT license.
 
 Getting started
 ===============
 
-transmissionrpc 0.12 is compatible with Transmission 1.31 - 2.82.
+transmission_rpc 0.12 is compatible with Transmission 1.31 - 2.82.
 
 Requirements
 ------------
 
-transmissionrpc requires:
+transmission_rpc requires:
 
  * Python >= 2.6
  * Six >= 1.1.0, https://pypi.python.org/pypi/six/
@@ -27,7 +27,7 @@ transmissionrpc requires:
 Install
 -------
 
-transmissionrpc is installed by running setup.py
+transmission_rpc is installed by running setup.py
 
 $ python setup.py install
 
@@ -39,6 +39,6 @@ the Transmission documentation on how to install Transmission.
 Developer
 =========
 
-transmissionrpc is hosted by bitbucket at http://www.bitbucket.org/blueluna/transmissionrpc/.
+transmission_rpc is hosted by bitbucket at http://www.bitbucket.org/blueluna/transmission_rpc/.
 
 Copyright (c) 2008-2014 Erik Svensson.

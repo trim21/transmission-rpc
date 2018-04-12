@@ -2,7 +2,7 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-from transmissionrpc.utils import Field
+from transmission_rpc.utils import Field
 
 from six import iteritems, integer_types
 

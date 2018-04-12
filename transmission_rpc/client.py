@@ -6,21 +6,24 @@ import sys, re, time, operator, warnings, os
 import base64
 import json
 
-from transmissionrpc.constants import DEFAULT_PORT, DEFAULT_TIMEOUT
-from transmissionrpc.error import TransmissionError, HTTPHandlerError
-from transmissionrpc.utils import LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool, is_logger_configured
-from transmissionrpc.httphandler import DefaultHTTPHandler
-from transmissionrpc.torrent import Torrent
-from transmissionrpc.session import Session
+from transmission_rpc.constants import DEFAULT_PORT, DEFAULT_TIMEOUT
+from transmission_rpc.error import TransmissionError, HTTPHandlerError
+from transmission_rpc.utils import (LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool,
+                                    is_logger_configured)
+from transmission_rpc.httphandler import DefaultHTTPHandler
+from transmission_rpc.torrent import Torrent
+from transmission_rpc.session import Session
 
 from six import PY3, integer_types, string_types, iteritems
 
 if PY3:
     from urllib.parse import urlparse
     from urllib.request import urlopen
+    from urllib.request import build_opener
 else:
     from urlparse import urlparse
     from urllib2 import urlopen
+    from urllib2 import build_opener
 
 def debug_httperror(error):
     """
@@ -267,7 +270,7 @@ class Client(object):
                 LOGGER.error('Request: \"%s\"' % (query))
                 LOGGER.error('HTTP data: \"%s\"' % (http_data))
             raise
-        
+
         if use_logger:
             LOGGER.debug(json.dumps(data, indent=2))
         if 'result' in data:
@@ -388,7 +391,10 @@ class Client(object):
         if parsed_uri.scheme in ['ftp', 'ftps', 'http', 'https']:
             # there has been some problem with T's built in torrent fetcher,
             # use a python one instead
-            torrent_file = urlopen(torrent)
+            opener = build_opener()
+            opener.addheaders = [('User-Agent', 'BGmi/Torrent-Downloader')]
+            torrent_file = opener.open(torrent)
+
             torrent_data = torrent_file.read()
             torrent_data = base64.b64encode(torrent_data).decode('utf-8')
         if parsed_uri.scheme in ['file']:
@@ -398,9 +404,9 @@ class Client(object):
                 filepath = parsed_uri.path
             elif len(parsed_uri.netloc) > 0:
                 filepath = parsed_uri.netloc
-            torrent_file = open(filepath, 'rb')
-            torrent_data = torrent_file.read()
-            torrent_data = base64.b64encode(torrent_data).decode('utf-8')
+            with open(filepath, 'rb') as torrent_file:
+                torrent_data = torrent_file.read()
+                torrent_data = base64.b64encode(torrent_data).decode('utf-8')
         if not torrent_data:
             if torrent.endswith('.torrent') or torrent.startswith('magnet:'):
                 torrent_data = None
@@ -428,56 +434,6 @@ class Client(object):
             args[arg] = val
         return list(self._request('torrent-add', args, timeout=timeout).values())[0]
 
-    def add(self, data, timeout=None, **kwargs):
-        """
-
-        .. WARNING::
-            Deprecated, please use add_torrent.
-        """
-        args = {}
-        if data:
-            args = {'metainfo': data}
-        elif 'metainfo' not in kwargs and 'filename' not in kwargs:
-            raise ValueError('No torrent data or torrent uri.')
-        for key, value in iteritems(kwargs):
-            argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert('torrent-add', argument, value, self.rpc_version)
-            args[arg] = val
-        warnings.warn('add has been deprecated, please use add_torrent instead.', DeprecationWarning)
-        return self._request('torrent-add', args, timeout=timeout)
-
-    def add_uri(self, uri, **kwargs):
-        """
-
-        .. WARNING::
-            Deprecated, please use add_torrent.
-        """
-        if uri is None:
-            raise ValueError('add_uri requires a URI.')
-        # there has been some problem with T's built in torrent fetcher,
-        # use a python one instead
-        parsed_uri = urlparse(uri)
-        torrent_data = None
-        if parsed_uri.scheme in ['ftp', 'ftps', 'http', 'https']:
-            torrent_file = urlopen(uri)
-            torrent_data = torrent_file.read()
-            torrent_data = base64.b64encode(torrent_data).decode('utf-8')
-        if parsed_uri.scheme in ['file']:
-            filepath = uri
-            # uri decoded different on linux / windows ?
-            if len(parsed_uri.path) > 0:
-                filepath = parsed_uri.path
-            elif len(parsed_uri.netloc) > 0:
-                filepath = parsed_uri.netloc
-            torrent_file = open(filepath, 'rb')
-            torrent_data = torrent_file.read()
-            torrent_data = base64.b64encode(torrent_data).decode('utf-8')
-        warnings.warn('add_uri has been deprecated, please use add_torrent instead.', DeprecationWarning)
-        if torrent_data:
-            return self.add(torrent_data, **kwargs)
-        else:
-            return self.add(None, filename=uri, **kwargs)
-
     def remove_torrent(self, ids, delete_data=False, timeout=None):
         """
         remove torrent(s) with provided id(s). Local data is removed if
@@ -487,15 +443,6 @@ class Client(object):
         self._request('torrent-remove',
                     {'delete-local-data':rpc_bool(delete_data)}, ids, True, timeout=timeout)
 
-    def remove(self, ids, delete_data=False, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use remove_torrent.
-        """
-        warnings.warn('remove has been deprecated, please use remove_torrent instead.', DeprecationWarning)
-        self.remove_torrent(ids, delete_data, timeout)
-
     def start_torrent(self, ids, bypass_queue=False, timeout=None):
         """Start torrent(s) with provided id(s)"""
         method = 'torrent-start'
@@ -503,14 +450,6 @@ class Client(object):
             method = 'torrent-start-now'
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start(self, ids, bypass_queue=False, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use start_torrent.
-        """
-        warnings.warn('start has been deprecated, please use start_torrent instead.', DeprecationWarning)
-        self.start_torrent(ids, bypass_queue, timeout)
 
     def start_all(self, bypass_queue=False, timeout=None):
         """Start all torrents respecting the queue order"""
@@ -527,41 +466,16 @@ class Client(object):
         """stop torrent(s) with provided id(s)"""
         self._request('torrent-stop', {}, ids, True, timeout=timeout)
 
-    def stop(self, ids, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use stop_torrent.
-        """
-        warnings.warn('stop has been deprecated, please use stop_torrent instead.', DeprecationWarning)
-        self.stop_torrent(ids, timeout)
 
     def verify_torrent(self, ids, timeout=None):
         """verify torrent(s) with provided id(s)"""
         self._request('torrent-verify', {}, ids, True, timeout=timeout)
 
-    def verify(self, ids, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use verify_torrent.
-        """
-        warnings.warn('verify has been deprecated, please use verify_torrent instead.', DeprecationWarning)
-        self.verify_torrent(ids, timeout)
 
     def reannounce_torrent(self, ids, timeout=None):
         """Reannounce torrent(s) with provided id(s)"""
         self._rpc_version_warning(5)
         self._request('torrent-reannounce', {}, ids, True, timeout=timeout)
-
-    def reannounce(self, ids, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use reannounce_torrent.
-        """
-        warnings.warn('reannounce has been deprecated, please use reannounce_torrent instead.', DeprecationWarning)
-        self.reannounce_torrent(ids, timeout)
 
     def get_torrent(self, torrent_id, arguments=None, timeout=None):
         """
@@ -595,30 +509,6 @@ class Client(object):
             arguments = self.torrent_get_arguments
         return list(self._request('torrent-get', {'fields': arguments}, ids, timeout=timeout).values())
 
-    def info(self, ids=None, arguments=None, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use get_torrent or get_torrents. Please note that the return argument has changed in
-            the new methods. info returns a dictionary indexed by torrent id.
-        """
-        warnings.warn('info has been deprecated, please use get_torrent or get_torrents instead.', DeprecationWarning)
-        if not arguments:
-            arguments = self.torrent_get_arguments
-        return self._request('torrent-get', {'fields': arguments}, ids, timeout=timeout)
-
-    def list(self, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use get_torrent or get_torrents. Please note that the return argument has changed in
-            the new methods. list returns a dictionary indexed by torrent id.
-        """
-        warnings.warn('list has been deprecated, please use get_torrent or get_torrents instead.', DeprecationWarning)
-        fields = ['id', 'hashString', 'name', 'sizeWhenDone', 'leftUntilDone'
-            , 'eta', 'status', 'rateUpload', 'rateDownload', 'uploadedEver'
-            , 'downloadedEver', 'uploadRatio', 'queuePosition']
-        return self._request('torrent-get', {'fields': fields}, timeout=timeout)
 
     def get_files(self, ids=None, timeout=None):
         """
@@ -746,7 +636,7 @@ class Client(object):
         ============================ ===== =============== =======================================================================================
 
     	.. NOTE::
-    	   transmissionrpc will try to automatically fix argument errors.
+    	   transmission_rpc will try to automatically fix argument errors.
         """
         args = {}
         for key, value in iteritems(kwargs):
@@ -759,29 +649,11 @@ class Client(object):
         else:
             ValueError("No arguments to set")
 
-    def change(self, ids, timeout=None, **kwargs):
-        """
-
-        .. WARNING::
-            Deprecated, please use change_torrent.
-        """
-        warnings.warn('change has been deprecated, please use change_torrent instead.', DeprecationWarning)
-        self.change_torrent(ids, timeout, **kwargs)
-
     def move_torrent_data(self, ids, location, timeout=None):
         """Move torrent data to the new location."""
         self._rpc_version_warning(6)
         args = {'location': location, 'move': True}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
-
-    def move(self, ids, location, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use move_torrent_data.
-        """
-        warnings.warn('move has been deprecated, please use move_torrent_data instead.', DeprecationWarning)
-        self.move_torrent_data(ids, location, timeout)
 
     def locate_torrent_data(self, ids, location, timeout=None):
         """Locate torrent data at the provided location."""
@@ -789,14 +661,6 @@ class Client(object):
         args = {'location': location, 'move': False}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
-    def locate(self, ids, location, timeout=None):
-        """
-
-        .. WARNING::
-            Deprecated, please use locate_torrent_data.
-        """
-        warnings.warn('locate has been deprecated, please use locate_torrent_data instead.', DeprecationWarning)
-        self.locate_torrent_data(ids, location, timeout)
 
     def rename_torrent_path(self, torrent_id, location, name, timeout=None):
         """
@@ -823,7 +687,7 @@ class Client(object):
         """Move transfer to the bottom of the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-bottom', ids=ids, require_ids=True, timeout=timeout)
-        
+
     def queue_up(self, ids, timeout=None):
         """Move transfer up in the queue."""
         self._rpc_version_warning(14)
@@ -897,7 +761,7 @@ class Client(object):
         ================================ ===== ================= ==========================================================================================================================
 
         .. NOTE::
-    	   transmissionrpc will try to automatically fix argument errors.
+    	   transmission_rpc will try to automatically fix argument errors.
         """
         args = {}
         for key, value in iteritems(kwargs):

@@ -4,8 +4,8 @@
 
 import socket, datetime, logging
 from collections import namedtuple
-import transmissionrpc.constants as constants
-from transmissionrpc.constants import LOGGER
+import transmission_rpc.constants as constants
+from transmission_rpc.constants import LOGGER
 
 from six import string_types, iteritems
 
@@ -180,16 +180,16 @@ def is_logger_configured():
     """
     Check if there are any logging handlers.
     """
-    trpc_logger = logging.getLogger('transmissionrpc')
+    trpc_logger = logging.getLogger('transmission_rpc')
     return len(trpc_logger.handlers) > 0
 
 def add_stdout_logger(level='debug'):
     """
-    Add a stdout target for the transmissionrpc logging.
+    Add a stdout target for the transmission_rpc logging.
     """
     levels = {'debug': logging.DEBUG, 'info': logging.INFO, 'warning': logging.WARNING, 'error': logging.ERROR}
 
-    trpc_logger = logging.getLogger('transmissionrpc')
+    trpc_logger = logging.getLogger('transmission_rpc')
     loghandler = logging.StreamHandler()
     if level in list(levels.keys()):
         loglevel = levels[level]
@@ -199,11 +199,11 @@ def add_stdout_logger(level='debug'):
 
 def add_file_logger(filepath, level='debug'):
     """
-    Add a stdout target for the transmissionrpc logging.
+    Add a stdout target for the transmission_rpc logging.
     """
     levels = {'debug': logging.DEBUG, 'info': logging.INFO, 'warning': logging.WARNING, 'error': logging.ERROR}
 
-    trpc_logger = logging.getLogger('transmissionrpc')
+    trpc_logger = logging.getLogger('transmission_rpc')
     loghandler = logging.FileHandler(filepath, encoding='utf-8')
     if level in list(levels.keys()):
         loglevel = levels[level]

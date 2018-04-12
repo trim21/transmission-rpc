@@ -3,19 +3,19 @@
 # Licensed under the MIT license.
 
 import unittest
-import transmissionrpc
+import transmission_rpc
 
 class TopTest(unittest.TestCase):
 
     def testConstants(self):
-        self.assertTrue(isinstance(transmissionrpc.__author__, str))
-        self.assertTrue(isinstance(transmissionrpc.__version_major__, int))
-        self.assertTrue(isinstance(transmissionrpc.__version_minor__, int))
-        self.assertTrue(isinstance(transmissionrpc.__version__, str))
-        self.assertTrue(isinstance(transmissionrpc.__copyright__, str))
-        self.assertTrue(isinstance(transmissionrpc.__license__, str))
+        self.assertTrue(isinstance(transmission_rpc.__author__, str))
+        self.assertTrue(isinstance(transmission_rpc.__version_major__, int))
+        self.assertTrue(isinstance(transmission_rpc.__version_minor__, int))
+        self.assertTrue(isinstance(transmission_rpc.__version__, str))
+        self.assertTrue(isinstance(transmission_rpc.__copyright__, str))
+        self.assertTrue(isinstance(transmission_rpc.__license__, str))
 
-        self.assertEqual('{0}.{1}'.format(transmissionrpc.__version_major__, transmissionrpc.__version_minor__), transmissionrpc.__version__)
+        self.assertEqual('{0}.{1}'.format(transmission_rpc.__version_major__, transmission_rpc.__version_minor__), transmission_rpc.__version__)
 
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(TopTest)

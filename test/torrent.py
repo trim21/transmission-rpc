@@ -4,9 +4,9 @@
 
 import time, datetime
 import unittest
-import transmissionrpc
-import transmissionrpc.constants
-import transmissionrpc.utils
+import transmission_rpc
+import transmission_rpc.constants
+import transmission_rpc.utils
 
 class torrent(unittest.TestCase):
     def assertPropertyException(self, exception, object, property):
@@ -16,13 +16,13 @@ class torrent(unittest.TestCase):
             pass
         else:
             self.fail()
-    
+
     def testConstruction(self):
-        self.failUnlessRaises(ValueError, transmissionrpc.Torrent, None, {})
-        torrent = transmissionrpc.Torrent(None, {'id': 42})
-    
+        self.failUnlessRaises(ValueError, transmission_rpc.Torrent, None, {})
+        torrent = transmission_rpc.Torrent(None, {'id': 42})
+
     def testAttributes(self):
-        torrent = transmissionrpc.Torrent(None, {'id': 42})
+        torrent = transmission_rpc.Torrent(None, {'id': 42})
         self.assertTrue(hasattr(torrent, 'id'))
         self.assertEqual(torrent.id, 42)
         self.assertPropertyException(KeyError, torrent, 'status')
@@ -33,10 +33,10 @@ class torrent(unittest.TestCase):
         self.assertPropertyException(KeyError, torrent, 'date_added')
         self.assertPropertyException(KeyError, torrent, 'date_started')
         self.assertPropertyException(KeyError, torrent, 'date_done')
-        
+
         self.failUnlessRaises(KeyError, torrent.format_eta)
         self.assertEqual(torrent.files(), {})
-        
+
         data = {
             'id': 1,
             'status': 4,
@@ -51,8 +51,8 @@ class torrent(unittest.TestCase):
             'startDate': time.mktime((2008,12,11,9,10,5,0,0,-1)),
             'doneDate': time.mktime((2008,12,11,10,0,15,0,0,-1)),
         }
-        
-        torrent = transmissionrpc.Torrent(None, data)
+
+        torrent = transmission_rpc.Torrent(None, data)
         self.assertEqual(torrent.id, 1)
         self.assertEqual(torrent.leftUntilDone, 500)
         self.assertEqual(torrent.status, 'downloading')
@@ -63,10 +63,10 @@ class torrent(unittest.TestCase):
         self.assertEqual(torrent.date_added, datetime.datetime(2008,12,11,8,5,10))
         self.assertEqual(torrent.date_started, datetime.datetime(2008,12,11,9,10,5))
         self.assertEqual(torrent.date_done, datetime.datetime(2008,12,11,10,0,15))
-        
-        self.assertEqual(torrent.format_eta(), transmissionrpc.utils.format_timedelta(torrent.eta))
 
-        torrent = transmissionrpc.Torrent(None, {'id': 42, 'eta': -1})
+        self.assertEqual(torrent.format_eta(), transmission_rpc.utils.format_timedelta(torrent.eta))
+
+        torrent = transmission_rpc.Torrent(None, {'id': 42, 'eta': -1})
         self.assertPropertyException(ValueError, torrent, 'eta')
 
         data = {
@@ -84,11 +84,11 @@ class torrent(unittest.TestCase):
             'doneDate': 0,
         }
 
-        torrent = transmissionrpc.Torrent(None, data)
+        torrent = transmission_rpc.Torrent(None, data)
         self.assertEqual(torrent.date_done, None)
 
     def testUnicode(self):
-        torrent = transmissionrpc.Torrent(None, {'id': 42, 'name': 'あみ'})
+        torrent = transmission_rpc.Torrent(None, {'id': 42, 'name': 'あみ'})
         self.assertEqual(torrent.id, 42)
         repr(torrent)
         str(torrent)

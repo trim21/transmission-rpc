@@ -8,14 +8,14 @@ from setuptools import setup
 required = ['six>=1.1.0']
 
 setup(
-    name='transmission-rpc',
+    name='transmission_rpc',
     version='0.0.1',
     description='Python module that implements the Transmission bittorent client RPC protocol.',
     author='Trim21',
     author_email='trim21me@hotmail.com',
     url='https://github.com/Trim21/transmission-rpc',
     keywords='transmission rpc',
-    packages=['transmission-rpc'],
+    packages=['transmission_rpc'],
     install_requires = required,
     test_suite = "test",
     zip_safe=True,
