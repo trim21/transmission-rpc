@@ -2,7 +2,6 @@ os: linux
 language: python
 env:
   - TRAVIS_CI=TRAVIS_CI
-sudo: true
 deploy:
   provider: pypi
   user: Trim21
@@ -12,13 +11,17 @@ deploy:
   on:
     tags: true
     branch: master
+  distributions: "bdist_wheel" # Your distributions here
+
 cache:
   - pip
   - "$HOME/virtualenv"
+
 python:
   - 2.7
   - 3.4
   - 3.6
+
 install:
   - python setup.py install
   - pip install codecov
