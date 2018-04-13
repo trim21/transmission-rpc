@@ -8,6 +8,7 @@ import transmission_rpc.utils as tu
 
 from six import iteritems
 
+
 class utils(unittest.TestCase):
     def testFormatSize(self):
         table = {
@@ -70,7 +71,7 @@ class utils(unittest.TestCase):
             (':80', 2000): ('localhost', 80),
             (':80', 2000, '127.0.0.1'): ('127.0.0.1', 80),
             ('0.0.0.0:443', 2000): ('0.0.0.0', 443),
-             ('localhost:443', 2000): ('localhost', 443),
+            ('localhost:443', 2000): ('localhost', 443),
         }
         for args, expected in iteritems(table):
             self.assertEqual(tu.inet_address(*args), expected)
@@ -94,9 +95,11 @@ class utils(unittest.TestCase):
         for value, expected in iteritems(table):
             self.assertEqual(tu.rpc_bool(value), expected)
 
+
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(utils)
     return suite
+
 
 if __name__ == '__main__':
     unittest.main()

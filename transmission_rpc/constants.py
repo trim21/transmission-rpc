@@ -8,6 +8,7 @@ from six import iteritems
 LOGGER = logging.getLogger('transmission_rpc')
 LOGGER.setLevel(logging.ERROR)
 
+
 def mirror_dict(source):
     """
     Creates a dictionary with all values as keys and all keys as values.
@@ -15,38 +16,39 @@ def mirror_dict(source):
     source.update(dict((value, key) for key, value in iteritems(source)))
     return source
 
+
 DEFAULT_PORT = 9091
 
 DEFAULT_TIMEOUT = 30.0
 
-TR_PRI_LOW    = -1
-TR_PRI_NORMAL =  0
-TR_PRI_HIGH   =  1
+TR_PRI_LOW = -1
+TR_PRI_NORMAL = 0
+TR_PRI_HIGH = 1
 
 PRIORITY = mirror_dict({
-    'low'    : TR_PRI_LOW,
-    'normal' : TR_PRI_NORMAL,
-    'high'   : TR_PRI_HIGH
+    'low': TR_PRI_LOW,
+    'normal': TR_PRI_NORMAL,
+    'high': TR_PRI_HIGH
 })
 
-TR_RATIOLIMIT_GLOBAL    = 0 # follow the global settings
-TR_RATIOLIMIT_SINGLE    = 1 # override the global settings, seeding until a certain ratio
-TR_RATIOLIMIT_UNLIMITED = 2 # override the global settings, seeding regardless of ratio
+TR_RATIOLIMIT_GLOBAL = 0  # follow the global settings
+TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certain ratio
+TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
 
 RATIO_LIMIT = mirror_dict({
-    'global'    : TR_RATIOLIMIT_GLOBAL,
-    'single'    : TR_RATIOLIMIT_SINGLE,
-    'unlimited' : TR_RATIOLIMIT_UNLIMITED
+    'global': TR_RATIOLIMIT_GLOBAL,
+    'single': TR_RATIOLIMIT_SINGLE,
+    'unlimited': TR_RATIOLIMIT_UNLIMITED
 })
 
-TR_IDLELIMIT_GLOBAL     = 0 # follow the global settings
-TR_IDLELIMIT_SINGLE     = 1 # override the global settings, seeding until a certain idle time
-TR_IDLELIMIT_UNLIMITED  = 2 # override the global settings, seeding regardless of activity
+TR_IDLELIMIT_GLOBAL = 0  # follow the global settings
+TR_IDLELIMIT_SINGLE = 1  # override the global settings, seeding until a certain idle time
+TR_IDLELIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of activity
 
 IDLE_LIMIT = mirror_dict({
-    'global'    : TR_RATIOLIMIT_GLOBAL,
-    'single'    : TR_RATIOLIMIT_SINGLE,
-    'unlimited' : TR_RATIOLIMIT_UNLIMITED
+    'global': TR_RATIOLIMIT_GLOBAL,
+    'single': TR_RATIOLIMIT_SINGLE,
+    'unlimited': TR_RATIOLIMIT_UNLIMITED
 })
 
 # A note on argument maps
@@ -60,7 +62,7 @@ IDLE_LIMIT = mirror_dict({
 
 # Arguments for torrent methods
 TORRENT_ARGS = {
-    'get' : {
+    'get': {
         'activityDate':                 ('number', 1, None, None, None, 'Last time of upload or download activity.'),
         'addedDate':                    ('number', 1, None, None, None, 'The date when this torrent was first added.'),
         'announceResponse':             ('string', 1, 7, None, None, 'The announce message from the tracker.'),

@@ -5,6 +5,9 @@
 import os
 import unittest
 import base64
+import json
+import transmission_rpc.constants
+from transmission_rpc import TransmissionError, Client, HTTPHandler
 
 from six import iteritems, string_types, PY3
 
@@ -13,12 +16,10 @@ if PY3:
 else:
     from urlparse import urlparse
 
-import json
-import transmission_rpc.constants
-from transmission_rpc import TransmissionError, Client, HTTPHandler
 
 def tree_differences(a, b):
     return node_differences(a, b, '.')
+
 
 def node_differences(a, b, root):
     errors = []
@@ -44,6 +45,7 @@ def node_differences(a, b, root):
         if a != b:
             errors.append('Value %s != %s at %s' % (a[0:32], b[0:32], root))
     return errors
+
 
 class TestHTTPHandler(HTTPHandler):
     def __init__(self, test_name=None):
@@ -97,13 +99,15 @@ class TestHTTPHandler(HTTPHandler):
             errors = tree_differences(test_data['request'], q)
             if len(errors) > 0:
                 errors = '\n\t'.join(errors)
-                raise Exception('Invalid request\n%s\n%s\n. Errors: %s\n' % (json.dumps(q, indent=2), json.dumps(test_data['request'], indent=2), errors))
+                raise Exception('Invalid request\n%s\n%s\n. Errors: %s\n' %
+                                (json.dumps(q, indent=2), json.dumps(test_data['request'], indent=2), errors))
             if 'response' in test_data:
                 response = test_data['response']
         else:
             response['tag'] = int(q['tag'])
             response['result'] = 'success'
         return json.dumps(response)
+
 
 def createClient(*args, **kwargs):
     test_name = None
@@ -112,6 +116,7 @@ def createClient(*args, **kwargs):
         del kwargs['test_name']
     kwargs['http_handler'] = TestHTTPHandler(test_name)
     return Client(*args, **kwargs)
+
 
 class ClientTest(unittest.TestCase):
 
@@ -149,7 +154,6 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(tc.timeout, 100.1)
         self.assertRaises(ValueError, tc._set_timeout, '10 years')
 
-
     def testAddTorrent(self):
         data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
@@ -171,11 +175,11 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(r.hashString, 'A000')
         self.assertEqual(r.name, 'testtransfer0')
 
-        r = tc.add_torrent('file://' + os.path.join(data_path, 'torrent.txt'), paused=True, download_dir='/tmp', peer_limit=200)
+        r = tc.add_torrent('file://' + os.path.join(data_path, 'torrent.txt'),
+                           paused=True, download_dir='/tmp', peer_limit=200)
         self.assertEqual(r.id, 1)
         self.assertEqual(r.hashString, 'A001')
         self.assertEqual(r.name, 'testtransfer1')
-
 
     def testRemoveTorrent(self):
         tc = createClient(test_name='remove')
@@ -183,8 +187,6 @@ class ClientTest(unittest.TestCase):
         tc.remove_torrent(['b000', 2, 3])
         tc.remove_torrent(1, delete_data=True)
         tc.remove_torrent('b002', delete_data=False)
-
-
 
     def testStartTorrent(self):
         tc = createClient(test_name='start')
@@ -228,7 +230,7 @@ class ClientTest(unittest.TestCase):
 
     def testGetTorrentsRange(self):
         tc = createClient(test_name='get_torrents_2to3')
-        r = tc.get_torrents([2,3])
+        r = tc.get_torrents([2, 3])
         for torrent in r:
             if torrent.id == 2:
                 self.assertEqual(torrent.name, 'ubuntu-10.04-server-amd64.iso')
@@ -320,7 +322,8 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(parse_torrent_id(10.5), None)
         self.assertEqual(parse_torrent_id("10"), 10)
         self.assertEqual(parse_torrent_id("A"), "A")
-        self.assertEqual(parse_torrent_id("a21c45469c565f3fb9595e4e9707e6e9d45abca6"), "a21c45469c565f3fb9595e4e9707e6e9d45abca6")
+        self.assertEqual(parse_torrent_id("a21c45469c565f3fb9595e4e9707e6e9d45abca6"),
+                         "a21c45469c565f3fb9595e4e9707e6e9d45abca6")
         self.assertEqual(parse_torrent_id("T"), None)
         self.assertEqual(parse_torrent_id([10]), None)
         self.assertEqual(parse_torrent_id((10, 11)), None)
@@ -333,15 +336,17 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(parse_torrent_ids(10.0), [10])
         self.assertEqual(parse_torrent_ids("10"), [10])
         self.assertEqual(parse_torrent_ids("A"), ["A"])
-        self.assertEqual(parse_torrent_ids("a21c45469c565f3fb9595e4e9707e6e9d45abca6"), ["a21c45469c565f3fb9595e4e9707e6e9d45abca6"])
+        self.assertEqual(parse_torrent_ids("a21c45469c565f3fb9595e4e9707e6e9d45abca6"),
+                         ["a21c45469c565f3fb9595e4e9707e6e9d45abca6"])
         self.assertEqual(parse_torrent_ids(",, "), [])
-        self.assertEqual(parse_torrent_ids("1,2,3"), [1,2,3])
-        self.assertEqual(parse_torrent_ids("1:3"), [1,2,3])
+        self.assertEqual(parse_torrent_ids("1,2,3"), [1, 2, 3])
+        self.assertEqual(parse_torrent_ids("1:3"), [1, 2, 3])
         self.assertRaises(ValueError, parse_torrent_ids, "A:3")
         self.assertRaises(ValueError, parse_torrent_ids, "T")
         self.assertEqual(parse_torrent_ids([10]), [10])
         self.assertEqual(parse_torrent_ids((10, 11)), [10, 11])
         self.assertRaises(ValueError, parse_torrent_ids, {10: 10})
+
 
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(ClientTest)

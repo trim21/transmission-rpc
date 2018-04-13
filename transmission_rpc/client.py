@@ -23,12 +23,8 @@ from six import PY3, integer_types, string_types, iteritems
 
 if PY3:
     from urllib.parse import urlparse
-    from urllib.request import urlopen
-    from urllib.request import build_opener
 else:
     from urlparse import urlparse
-    from urllib2 import urlopen
-    from urllib2 import build_opener
 
 
 def debug_httperror(error):
@@ -95,6 +91,8 @@ def parse_torrent_ids(args):
     if args is None:
         pass
     elif isinstance(args, string_types):
+        if args == "recently-active":
+            return args
         for item in re.split('[ ,]+', args):
             if len(item) == 0:
                 continue
@@ -411,15 +409,6 @@ class Client(object):
             raise ValueError('add_torrent requires data or a URI.')
         torrent_data = None
         parsed_uri = urlparse(torrent)
-        if parsed_uri.scheme in ['ftp', 'ftps', 'http', 'https']:
-            # there has been some problem with T's built in torrent fetcher,
-            # use a python one instead
-            opener = build_opener()
-            opener.addheaders = [('User-Agent', 'BGmi/Torrent-Downloader')]
-            torrent_file = opener.open(torrent)
-
-            torrent_data = torrent_file.read()
-            torrent_data = base64.b64encode(torrent_data).decode('utf-8')
         if parsed_uri.scheme in ['file']:
             filepath = torrent
             # uri decoded different on linux / windows ?
@@ -527,6 +516,8 @@ class Client(object):
         Get information for torrents with provided ids. For more information see get_torrent.
 
         Returns a list of Torrent object.
+        :type ids: Union[int, str]
+        :rtype : list[Torrent]
         """
         if not arguments:
             arguments = self.torrent_get_arguments

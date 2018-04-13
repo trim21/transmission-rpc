@@ -2,11 +2,13 @@
 # 2008-12, Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-import time, datetime
+import time
+import datetime
 import unittest
 import transmission_rpc
 import transmission_rpc.constants
 import transmission_rpc.utils
+
 
 class torrent(unittest.TestCase):
     def assertPropertyException(self, exception, object, property):
@@ -46,10 +48,10 @@ class torrent(unittest.TestCase):
             'downloadedEver': 2000,
             'uploadRatio': 0.5,
             'eta': 3600,
-            'activityDate': time.mktime((2008,12,11,11,15,30,0,0,-1)),
-            'addedDate': time.mktime((2008,12,11,8,5,10,0,0,-1)),
-            'startDate': time.mktime((2008,12,11,9,10,5,0,0,-1)),
-            'doneDate': time.mktime((2008,12,11,10,0,15,0,0,-1)),
+            'activityDate': time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
+            'addedDate': time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
+            'startDate': time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
+            'doneDate': time.mktime((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
         }
 
         torrent = transmission_rpc.Torrent(None, data)
@@ -59,10 +61,10 @@ class torrent(unittest.TestCase):
         self.assertEqual(torrent.progress, 50.0)
         self.assertEqual(torrent.ratio, 0.5)
         self.assertEqual(torrent.eta, datetime.timedelta(seconds=3600))
-        self.assertEqual(torrent.date_active, datetime.datetime(2008,12,11,11,15,30))
-        self.assertEqual(torrent.date_added, datetime.datetime(2008,12,11,8,5,10))
-        self.assertEqual(torrent.date_started, datetime.datetime(2008,12,11,9,10,5))
-        self.assertEqual(torrent.date_done, datetime.datetime(2008,12,11,10,0,15))
+        self.assertEqual(torrent.date_active, datetime.datetime(2008, 12, 11, 11, 15, 30))
+        self.assertEqual(torrent.date_added, datetime.datetime(2008, 12, 11, 8, 5, 10))
+        self.assertEqual(torrent.date_started, datetime.datetime(2008, 12, 11, 9, 10, 5))
+        self.assertEqual(torrent.date_done, datetime.datetime(2008, 12, 11, 10, 0, 15))
 
         self.assertEqual(torrent.format_eta(), transmission_rpc.utils.format_timedelta(torrent.eta))
 
@@ -78,9 +80,9 @@ class torrent(unittest.TestCase):
             'downloadedEver': 2000,
             'uploadRatio': 0.5,
             'eta': 3600,
-            'activityDate': time.mktime((2008,12,11,11,15,30,0,0,-1)),
-            'addedDate': time.mktime((2008,12,11,8,5,10,0,0,-1)),
-            'startDate': time.mktime((2008,12,11,9,10,5,0,0,-1)),
+            'activityDate': time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
+            'addedDate': time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
+            'startDate': time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
             'doneDate': 0,
         }
 
@@ -92,6 +94,7 @@ class torrent(unittest.TestCase):
         self.assertEqual(torrent.id, 42)
         repr(torrent)
         str(torrent)
+
 
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(torrent)

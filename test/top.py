@@ -5,6 +5,7 @@
 import unittest
 import transmission_rpc
 
+
 class TopTest(unittest.TestCase):
 
     def testConstants(self):

@@ -108,3 +108,4 @@ venv.bak/
 # IDE
 .vscode/
 .idea/
+app.py
