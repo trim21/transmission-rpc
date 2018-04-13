@@ -10,7 +10,7 @@ required = ['six>=1.1.0']
 
 
 def long_description():
-    with open('./README.rst', 'rb') as f:
+    with open('./README.md', 'rb') as f:
         return f.read().decode('utf-8')
 setup(
     name='transmission_rpc',
@@ -23,7 +23,6 @@ setup(
     packages=['transmission_rpc'],
     install_requires = required,
     long_description=long_description(),
-    long_description_content_type='text/markdown; charset=UTF-8; variant=GFM',
     test_suite = "test",
     zip_safe=True,
     classifiers = [
