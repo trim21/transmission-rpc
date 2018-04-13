@@ -33,7 +33,7 @@ NOTE: You might need administrator privileges to install python modules.
 
 <https://trim21.gitbooks.io/transmission-rpc/content/>
 
-I'm still writing documents.
+I'm still working on documents.
 
 ## Developer
 
