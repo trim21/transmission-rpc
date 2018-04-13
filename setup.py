@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
+# Copyright (c) 2018 Trim21 <trim21me@hotmail.com>
 # Licensed under the MIT license.
 
 from setuptools import setup
 from transmission_rpc import __version__, __author__, __author_email__
+
 required = ['six>=1.1.0']
-with open('./README.rst', 'r') as f:
-    readme = f.read()
+
+
+def long_description():
+    with open('./README.rst', 'rb') as f:
+        return f.read().decode('utf-8')
 setup(
     name='transmission_rpc',
     version=__version__,
@@ -18,13 +22,20 @@ setup(
     keywords='transmission rpc',
     packages=['transmission_rpc'],
     install_requires = required,
-    long_description=readme,
+    long_description=long_description(),
+    long_description_content_type='text/markdown; charset=UTF-8; variant=GFM',
     test_suite = "test",
     zip_safe=True,
     classifiers = [
         'Intended Audience :: Developers',
+        'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',
         'Topic :: Communications :: File Sharing',
-        'Topic :: Internet'
+        'Topic :: Internet',
+        'Topic :: Software Development :: Version Control :: Git',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         ],
     )
