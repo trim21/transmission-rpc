@@ -4,7 +4,7 @@
 ## Introduction
 
 
-this project is forked from https://bitbucket.org/blueluna/transmission_rpc/overview
+this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview
 
 transmission-rpc is a python module implementing the json-rpc client protocol
 for the BitTorrent client Transmission.

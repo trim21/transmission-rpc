@@ -7,23 +7,26 @@ from setuptools import setup
 from transmission_rpc import __version__, __author__, __author_email__
 
 required = ['six>=1.1.0']
-
+setup_requires = ['setuptools>=38.6.0']
 
 def long_description():
     with open('./README.md', 'rb') as f:
         return f.read().decode('utf-8')
+
 setup(
     name='transmission_rpc',
     version=__version__,
-    description='Python module that implements the Transmission bittorent client RPC protocol.',
     author=__author__,
     author_email=__author_email__,
+    description='Python module that implements the Transmission bittorent client RPC protocol.',
     url='https://github.com/Trim21/transmission-rpc',
     keywords='transmission rpc',
     packages=['transmission_rpc'],
     install_requires = required,
     long_description=long_description(),
+    long_description_content_type='text/markdown',
     test_suite = "test",
+    setup_requires=setup_requires,
     zip_safe=True,
     classifiers = [
         'Intended Audience :: Developers',

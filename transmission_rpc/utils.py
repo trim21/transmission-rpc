@@ -2,7 +2,9 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-import socket, datetime, logging
+import socket
+import datetime
+import logging
 from collections import namedtuple
 import transmission_rpc.constants as constants
 from transmission_rpc.constants import LOGGER
@@ -10,6 +12,7 @@ from transmission_rpc.constants import LOGGER
 from six import string_types, iteritems
 
 UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
+
 
 def format_size(size):
     """
@@ -22,12 +25,14 @@ def format_size(size):
         size /= 1024.0
     return (size, UNITS[i])
 
+
 def format_speed(size):
     """
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
     (size, unit) = format_size(size)
     return (size, unit + '/s')
+
 
 def format_timedelta(delta):
     """
@@ -36,6 +41,7 @@ def format_timedelta(delta):
     minutes, seconds = divmod(delta.seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return '%d %02d:%02d:%02d' % (delta.days, hours, minutes, seconds)
+
 
 def format_timestamp(timestamp, utc=False):
     """
@@ -50,11 +56,13 @@ def format_timestamp(timestamp, utc=False):
     else:
         return '-'
 
+
 class INetAddressError(Exception):
     """
     Error parsing / generating a internet address.
     """
     pass
+
 
 def inet_address(address, default_port, default_address='localhost'):
     """
@@ -85,6 +93,7 @@ def inet_address(address, default_port, default_address='localhost'):
         raise INetAddressError('Cannot look up address "%s".' % address)
     return (addr, port)
 
+
 def rpc_bool(arg):
     """
     Convert between Python boolean and Transmission RPC boolean.
@@ -96,14 +105,16 @@ def rpc_bool(arg):
             arg = arg.lower() in ['true', 'yes']
     return 1 if bool(arg) else 0
 
+
 TR_TYPE_MAP = {
-    'number' : int,
-    'string' : str,
+    'number': int,
+    'string': str,
     'double': float,
-    'boolean' : rpc_bool,
+    'boolean': rpc_bool,
     'array': list,
     'object': dict
 }
+
 
 def make_python_name(name):
     """
@@ -111,11 +122,13 @@ def make_python_name(name):
     """
     return name.replace('-', '_')
 
+
 def make_rpc_name(name):
     """
     Convert python compatible name to Transmission RPC name.
     """
     return name.replace('_', '-')
+
 
 def argument_value_convert(method, argument, value, rpc_version):
     """
@@ -155,6 +168,7 @@ def argument_value_convert(method, argument, value, rpc_version):
         raise ValueError('Argument "%s" does not exists for method "%s".',
                          (argument, method))
 
+
 def get_arguments(method, rpc_version):
     """
     Get arguments for method in specified Transmission RPC version.
@@ -176,6 +190,7 @@ def get_arguments(method, rpc_version):
             accessible.append(argument)
     return accessible
 
+
 def is_logger_configured():
     """
     Check if there are any logging handlers.
@@ -183,11 +198,13 @@ def is_logger_configured():
     trpc_logger = logging.getLogger('transmission_rpc')
     return len(trpc_logger.handlers) > 0
 
+
 def add_stdout_logger(level='debug'):
     """
     Add a stdout target for the transmission_rpc logging.
     """
-    levels = {'debug': logging.DEBUG, 'info': logging.INFO, 'warning': logging.WARNING, 'error': logging.ERROR}
+    levels = {'debug': logging.DEBUG, 'info': logging.INFO,
+              'warning': logging.WARNING, 'error': logging.ERROR}
 
     trpc_logger = logging.getLogger('transmission_rpc')
     loghandler = logging.StreamHandler()
@@ -197,11 +214,13 @@ def add_stdout_logger(level='debug'):
         loghandler.setLevel(loglevel)
     trpc_logger.addHandler(loghandler)
 
+
 def add_file_logger(filepath, level='debug'):
     """
     Add a stdout target for the transmission_rpc logging.
     """
-    levels = {'debug': logging.DEBUG, 'info': logging.INFO, 'warning': logging.WARNING, 'error': logging.ERROR}
+    levels = {'debug': logging.DEBUG, 'info': logging.INFO,
+              'warning': logging.WARNING, 'error': logging.ERROR}
 
     trpc_logger = logging.getLogger('transmission_rpc')
     loghandler = logging.FileHandler(filepath, encoding='utf-8')
@@ -210,5 +229,6 @@ def add_file_logger(filepath, level='debug'):
         trpc_logger.setLevel(loglevel)
         loghandler.setLevel(loglevel)
     trpc_logger.addHandler(loghandler)
+
 
 Field = namedtuple('Field', ['value', 'dirty'])
