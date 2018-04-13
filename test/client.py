@@ -65,8 +65,8 @@ class TestHTTPHandler(HTTPHandler):
                 self.tests = test_data['test sequence']
 
     def set_authentication(self, url, user, password):
-        urlo = urlparse(url)
-        if urlo.scheme == '':
+        url_object = urlparse(url)
+        if url_object.scheme == '':
             raise ValueError('URL should have a scheme.')
         else:
             self.url = url
@@ -86,8 +86,8 @@ class TestHTTPHandler(HTTPHandler):
         response = {}
         if self.url and self.url != url:
             raise ValueError('New URL?!')
-        urlo = urlparse(url)
-        if urlo.scheme == '':
+        url_obj = urlparse(url)
+        if url_obj.scheme == '':
             raise ValueError('URL should have a scheme.')
         else:
             self.url = url

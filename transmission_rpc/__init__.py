@@ -10,8 +10,8 @@ from transmission_rpc.session import Session
 from transmission_rpc.client import Client
 from transmission_rpc.utils import add_stdout_logger, add_file_logger
 
-__author__    		= 'Trim21 <trim21me@hotmail.com>'
-__version__   		= '0.0.11'
-__author_email__ 	= 'trim21me@hotmail.com'
-__copyright__ 		= 'Copyright (c) 2018 Trim21'
-__license__   		= 'MIT'
+__author__ = 'Trim21 <trim21me@hotmail.com>'
+__version__ = '0.0.11'
+__author_email__ = 'trim21me@hotmail.com'
+__copyright__ = 'Copyright (c) 2018 Trim21'
+__license__ = 'MIT'

@@ -27,7 +27,7 @@ $ pip install https://github.com/Trim21/transmission-rpc/tarball/master
 
 NOTE: You might need administrator privileges to install python modules.
 
-<!-- The setup program will take care of the simplejson requirement. -->
+<!-- The setup program will take care of the simple json requirement. -->
 
 ## Documents
 
