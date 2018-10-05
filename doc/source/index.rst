@@ -43,7 +43,7 @@ python2 support will be deprecated in future version.
     :caption: Contents:
 
     client.rst
-    session.rst
+
 Indices and tables
 ==================
 
