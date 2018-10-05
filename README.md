@@ -31,9 +31,7 @@ NOTE: You might need administrator privileges to install python modules.
 
 ## Documents
 
-<https://trim21.gitbooks.io/transmission-rpc/content/>
-
-I'm still working on documents.
+<https://transmission-rpc.readthedocs.io/en/latest/>
 
 ## Developer
 
