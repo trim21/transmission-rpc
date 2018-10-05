@@ -11,6 +11,7 @@ this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overv
 transmission_rpc requires:
 
 * Python >= 3.4
+* requests
 
 ## Install
 
@@ -41,4 +42,4 @@ transmission-rpc is hosted by GitHub at [github.com/Trim21/transmission-rpc](htt
 `transmission-rpc` is licensed under the MIT license.
 
 Copyright (c) 2018 Trim21.
-
+Copyright (c) 2008-2014 Erik Svensson
