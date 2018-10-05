@@ -692,28 +692,29 @@ class Client(object):
     ================================ ===== ================= ===========================================================
     ``alt_speed_down``               5 -                     Alternate session download speed limit (in Kib/s).
     ``alt_speed_enabled``            5 -                     Enables alternate global download speed limiter.
-    ``alt_speed_time_begin``         5 -                     Time when alternate speeds should be enabled.
+    ``alt_speed_time_begin``         5 -                        Time when alternate speeds should be enabled.
                                                                 Minutes after midnight.
     ``alt_speed_time_day``           5 -                     Enables alternate speeds scheduling these days.
     ``alt_speed_time_enabled``       5 -                     Enables alternate speeds scheduling.
-    ``alt_speed_time_end``           5 -                     Time when alternate speeds should be disabled.
+    ``alt_speed_time_end``           5 -                         Time when alternate speeds should be disabled.
                                                                  Minutes after midnight.
     ``alt_speed_up``                 5 -                     Alternate session upload speed limit (in Kib/s).
     ``blocklist_enabled``            5 -                     Enables the block list
-    ``blocklist_url``                11 -                    Location of the block list.
+    ``blocklist_url``                11 -                       Location of the block list.
                                                                 Updated with blocklist-update.
     ``cache_size_mb``                10 -                    The maximum size of the disk cache in MB
     ``dht_enabled``                  6 -                     Enables DHT.
     ``download_dir``                 1 -                     Set the session download directory.
     ``download_queue_enabled``       14 -                    Enables download queue.
     ``download_queue_size``          14 -                    Number of slots in the download queue.
-    ``encryption``                   1 -                     Set the session encryption mode, one of ``required``,
+    ``encryption``                   1 -                         Set the session encryption mode, one of ``required``,
                                                                  ``preferred`` or ``tolerated``.
     ``idle_seeding_limit``           10 -                    The default seed inactivity limit in minutes.
     ``idle_seeding_limit_enabled``   10 -                    Enables the default seed inactivity limit
     ``incomplete_dir``               7 -                     The path to the directory of incomplete transfer data.
-    ``incomplete_dir_enabled``       7 -                     Enables the incomplete transfer data directory.
-                                             Otherwise data for incomplete transfers are stored in the download target.
+    ``incomplete_dir_enabled``       7 -                         Enables the incomplete transfer data directory.
+                                                                 Otherwise data for incomplete transfers are stored in
+                                                                 the download target.
     ``lpd_enabled``                  9 -                     Enables local peer discovery for public torrents.
     ``peer_limit``                   1 - 5 peer-limit-global Maximum number of peers.
     ``peer_limit_global``            5 -                     Maximum number of peers.
