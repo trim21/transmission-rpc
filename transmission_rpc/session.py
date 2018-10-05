@@ -4,8 +4,6 @@
 
 from transmission_rpc.utils import Field
 
-from six import iteritems, integer_types
-
 
 class Session(object):
     """
@@ -40,7 +38,7 @@ class Session(object):
         Update the session data from a Transmission JSON-RPC arguments dictionary
         """
         if isinstance(other, dict):
-            for key, value in iteritems(other):
+            for key, value in other.items():
                 self._fields[key.replace('-', '_')] = Field(value, False)
         elif isinstance(other, Session):
             for key in list(other._fields.keys()):
@@ -89,7 +87,7 @@ class Session(object):
         """
         Set the peer port.
         """
-        if isinstance(port, integer_types):
+        if isinstance(port, int):
             self._fields['peer_port'] = Field(port, True)
             self._push()
         else:

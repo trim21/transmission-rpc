@@ -9,8 +9,6 @@ from collections import namedtuple
 import transmission_rpc.constants as constants
 from transmission_rpc.constants import LOGGER
 
-from six import string_types, iteritems
-
 UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
 
 
@@ -98,7 +96,7 @@ def rpc_bool(arg):
     """
     Convert between Python boolean and Transmission RPC boolean.
     """
-    if isinstance(arg, string_types):
+    if isinstance(arg, str):
         try:
             arg = bool(int(arg))
         except ValueError:
@@ -107,12 +105,12 @@ def rpc_bool(arg):
 
 
 TR_TYPE_MAP = {
-    'number': int,
-    'string': str,
-    'double': float,
+    'number' : int,
+    'string' : str,
+    'double' : float,
     'boolean': rpc_bool,
-    'array': list,
-    'object': dict
+    'array'  : list,
+    'object' : dict
 }
 
 
@@ -180,7 +178,7 @@ def get_arguments(method, rpc_version):
     else:
         return ValueError('Method "%s" not supported' % (method))
     accessible = []
-    for argument, info in iteritems(args):
+    for argument, info in args.items():
         valid_version = True
         if rpc_version < info[1]:
             valid_version = False
@@ -189,46 +187,6 @@ def get_arguments(method, rpc_version):
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-def is_logger_configured():
-    """
-    Check if there are any logging handlers.
-    """
-    transmission_rpc_logger = logging.getLogger('transmission_rpc')
-    return len(transmission_rpc_logger.handlers) > 0
-
-
-def add_stdout_logger(level='debug'):
-    """
-    Add a stdout target for the transmission_rpc logging.
-    """
-    levels = {'debug': logging.DEBUG, 'info': logging.INFO,
-              'warning': logging.WARNING, 'error': logging.ERROR}
-
-    tranmission_rpc_logger = logging.getLogger('transmission_rpc')
-    loghandler = logging.StreamHandler()
-    if level in list(levels.keys()):
-        loglevel = levels[level]
-        tranmission_rpc_logger.setLevel(loglevel)
-        loghandler.setLevel(loglevel)
-    tranmission_rpc_logger.addHandler(loghandler)
-
-
-def add_file_logger(filepath, level='debug'):
-    """
-    Add a stdout target for the transmission_rpc logging.
-    """
-    levels = {'debug': logging.DEBUG, 'info': logging.INFO,
-              'warning': logging.WARNING, 'error': logging.ERROR}
-
-    transmission_rpc_logger = logging.getLogger('transmission_rpc')
-    loghandler = logging.FileHandler(filepath, encoding='utf-8')
-    if level in list(levels.keys()):
-        loglevel = levels[level]
-        transmission_rpc_logger.setLevel(loglevel)
-        loghandler.setLevel(loglevel)
-    transmission_rpc_logger.addHandler(loghandler)
 
 
 Field = namedtuple('Field', ['value', 'dirty'])

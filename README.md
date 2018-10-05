@@ -1,4 +1,6 @@
-# TransmissionRPC Readme
+# Transmission-rpc Readme
+
+this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview
 
 ## Introduction
 
@@ -8,8 +10,7 @@
 
 transmission_rpc requires:
 
-* Python >= 3.4 or Python >=2.7,<3.0
-* Six >= 1.1.0, https://pypi.python.org/pypi/six/
+* Python >= 3.4
 
 ## Install
 
@@ -41,4 +42,3 @@ transmission-rpc is hosted by GitHub at [github.com/Trim21/transmission-rpc](htt
 
 Copyright (c) 2018 Trim21.
 
-this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview

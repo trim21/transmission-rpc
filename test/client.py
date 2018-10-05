@@ -9,12 +9,8 @@ import json
 import transmission_rpc.constants
 from transmission_rpc import TransmissionError, Client, HTTPHandler
 
-from six import iteritems, string_types, PY3
 
-if PY3:
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 def tree_differences(a, b):
@@ -24,13 +20,13 @@ def tree_differences(a, b):
 def node_differences(a, b, root):
     errors = []
     if isinstance(a, dict) and isinstance(b, dict):
-        for k, v in iteritems(a):
+        for k, v in a.items():
             node = root + '.' + k
             if k not in b:
                 errors.append('Field %s missing from b at %s' % (k, node))
             else:
                 errors.extend(node_differences(a[k], b[k], node))
-        for k, v in iteritems(b):
+        for k, v in b.items():
             node = root + '.' + k
             if k not in a:
                 errors.append('Field %s missing from a at %s' % (k, node))
@@ -71,11 +67,11 @@ class TestHTTPHandler(HTTPHandler):
         else:
             self.url = url
         if user and password:
-            if isinstance(user, string_types):
+            if isinstance(user, str):
                 self.user = user
             else:
                 raise TypeError('Invalid type for user.')
-            if isinstance(password, string_types):
+            if isinstance(password, str):
                 self.password = password
             else:
                 raise TypeError('Invalid type for password.')
@@ -316,6 +312,7 @@ class ClientTest(unittest.TestCase):
 
     def testParseId(self):
         from transmission_rpc.client import parse_torrent_id
+
         self.assertEqual(parse_torrent_id(None), None)
         self.assertEqual(parse_torrent_id(10), 10)
         self.assertEqual(parse_torrent_id(10.0), 10)
@@ -331,6 +328,7 @@ class ClientTest(unittest.TestCase):
 
     def testParseIds(self):
         from transmission_rpc.client import parse_torrent_ids
+
         self.assertEqual(parse_torrent_ids(None), [])
         self.assertEqual(parse_torrent_ids(10), [10])
         self.assertEqual(parse_torrent_ids(10.0), [10])

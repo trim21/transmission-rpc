@@ -19,6 +19,7 @@ import pathlib
 p = pathlib.Path(os.path.dirname(__file__)).parent.parent
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, str(p))
+
 import transmission_rpc
 # -- Project information -----------------------------------------------------
 
@@ -27,7 +28,7 @@ copyright = '2018, Trim21<trim21me@gmail.com>'
 author = 'Trim21<trim21me@gmail.com>'
 
 # The short X.Y version
-version = ''
+version = '.'.join(transmission_rpc.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags
 release = transmission_rpc.__version__
 
@@ -105,7 +106,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'transmission-rpcdoc'
+htmlhelp_basename = 'transmission-rpc doc'
 
 # -- Options for LaTeX output ------------------------------------------------
 

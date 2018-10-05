@@ -6,7 +6,7 @@
 Client
 ============================================
 
-.. automodule:: transmission_rpc.client
+.. autoclass:: transmission_rpc.client.Client
     :members:
 
 .. toctree::

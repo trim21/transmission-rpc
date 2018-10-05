@@ -6,12 +6,14 @@
 from setuptools import setup
 from transmission_rpc import __version__, __author__, __author_email__
 
-required = ['six>=1.1.0']
+required = ['requests']
 setup_requires = ['setuptools>=38.6.0']
+
 
 def long_description():
     with open('./README.md', 'rb') as f:
         return f.read().decode('utf-8')
+
 
 setup(
     name='transmission_rpc',
@@ -22,22 +24,21 @@ setup(
     url='https://github.com/Trim21/transmission-rpc',
     keywords='transmission rpc',
     packages=['transmission_rpc'],
-    install_requires = required,
+    install_requires=required,
     long_description=long_description(),
-    long_description_content_type='text/markdown',
-    test_suite = "test",
+    long_description_content_type='text/x-rst',
+    test_suite="test",
     setup_requires=setup_requires,
     zip_safe=True,
-    classifiers = [
+    classifiers=[
         'Intended Audience :: Developers',
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',
         'Topic :: Communications :: File Sharing',
         'Topic :: Internet',
         'Topic :: Software Development :: Version Control :: Git',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        ],
-    )
+    ],
+)

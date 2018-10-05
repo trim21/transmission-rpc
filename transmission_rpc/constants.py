@@ -3,9 +3,8 @@
 # Licensed under the MIT license.
 
 import logging
-from six import iteritems
 
-LOGGER = logging.getLogger('transmission_rpc')
+LOGGER = logging.getLogger('transmission-rpc')
 LOGGER.setLevel(logging.ERROR)
 
 
@@ -13,7 +12,7 @@ def mirror_dict(source):
     """
     Creates a dictionary with all values as keys and all keys as values.
     """
-    source.update(dict((value, key) for key, value in iteritems(source)))
+    source.update({value: key for key, value in source.items()})
     return source
 
 
@@ -26,9 +25,9 @@ TR_PRI_NORMAL = 0
 TR_PRI_HIGH = 1
 
 PRIORITY = mirror_dict({
-    'low': TR_PRI_LOW,
+    'low'   : TR_PRI_LOW,
     'normal': TR_PRI_NORMAL,
-    'high': TR_PRI_HIGH
+    'high'  : TR_PRI_HIGH
 })
 
 TR_RATIOLIMIT_GLOBAL = 0  # follow the global settings
@@ -36,8 +35,8 @@ TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certai
 TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
 
 RATIO_LIMIT = mirror_dict({
-    'global': TR_RATIOLIMIT_GLOBAL,
-    'single': TR_RATIOLIMIT_SINGLE,
+    'global'   : TR_RATIOLIMIT_GLOBAL,
+    'single'   : TR_RATIOLIMIT_SINGLE,
     'unlimited': TR_RATIOLIMIT_UNLIMITED
 })
 
@@ -46,8 +45,8 @@ TR_IDLELIMIT_SINGLE = 1  # override the global settings, seeding until a certain
 TR_IDLELIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of activity
 
 IDLE_LIMIT = mirror_dict({
-    'global': TR_RATIOLIMIT_GLOBAL,
-    'single': TR_RATIOLIMIT_SINGLE,
+    'global'   : TR_RATIOLIMIT_GLOBAL,
+    'single'   : TR_RATIOLIMIT_SINGLE,
     'unlimited': TR_RATIOLIMIT_UNLIMITED
 })
 

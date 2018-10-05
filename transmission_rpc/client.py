@@ -3,73 +3,38 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-import sys
 import re
 import time
 import operator
-import warnings
 import os
 import base64
 import json
+from requests.auth import HTTPBasicAuth
 
 from transmission_rpc.constants import DEFAULT_PORT, DEFAULT_TIMEOUT
-from transmission_rpc.error import TransmissionError, HTTPHandlerError
-from transmission_rpc.utils import (LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool,
-                                    is_logger_configured)
-from transmission_rpc.httphandler import DefaultHTTPHandler
+from transmission_rpc.error import TransmissionError
+from transmission_rpc.utils import (LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool, )
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.session import Session
-
-from six import PY3, integer_types, string_types, iteritems
-
-if PY3:
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
-
-
-def debug_httperror(error):
-    """
-    Log the Transmission RPC HTTP error.
-    """
-    if sys.platform == 'win32':
-        m = error.message.decode(sys.stdout.encoding)
-    else:
-        m = error.message
-    try:
-        data = json.loads(error.data)
-    except ValueError:
-        data = error.data
-    LOGGER.debug(
-        json.dumps(
-            {
-                'response': {
-                    'url': error.url,
-                    'code': error.code,
-                    'msg': m,
-                    'headers': error.headers,
-                    'data': data,
-                }
-            },
-            indent=2
-        )
-    )
+import requests
+from urllib.parse import urlparse
+import logging
 
 
 def parse_torrent_id(arg):
     """Parse an torrent id or torrent hashString."""
     torrent_id = None
-    if isinstance(arg, integer_types):
+    if isinstance(arg, int):
         # handle index
         torrent_id = int(arg)
     elif isinstance(arg, float):
         torrent_id = int(arg)
         if torrent_id != arg:
             torrent_id = None
-    elif isinstance(arg, string_types):
+    elif isinstance(arg, str):
         try:
             torrent_id = int(arg)
-            if torrent_id >= 2**31:
+            if torrent_id >= 2 ** 31:
                 torrent_id = None
         except (ValueError, TypeError):
             pass
@@ -91,7 +56,7 @@ def parse_torrent_ids(args):
 
     if args is None:
         pass
-    elif isinstance(args, string_types):
+    elif isinstance(args, str):
         if args == "recently-active":
             return args
         for item in re.split('[ ,]+', args):
@@ -147,8 +112,13 @@ class Client(object):
     """
 
     def __init__(self, address='localhost', port=DEFAULT_PORT, user=None,
-                 password=None, http_handler=None, timeout=None):
-        if isinstance(timeout, (integer_types, float)):
+                 password=None, timeout=None, logger=LOGGER):
+        if isinstance(logger, logging.Logger):
+            self.logger = logger
+        else:
+            raise TypeError('logger must be instance of `logging.Logger`, '
+                            'default: logging.getLogger(\'transmission-rpc\')')
+        if isinstance(timeout, (int, float)):
             self._query_timeout = float(timeout)
         else:
             self._query_timeout = DEFAULT_TIMEOUT
@@ -159,36 +129,29 @@ class Client(object):
         else:
             if url_object.port:
                 self.url = url_object.scheme + '://' + url_object.hostname + \
-                    ':' + str(url_object.port) + url_object.path
+                           ':' + str(url_object.port) + url_object.path
             else:
                 self.url = url_object.scheme + '://' + url_object.hostname + url_object.path
-            LOGGER.info('Using custom URL "' + self.url + '".')
+            self.logger.info('Using custom URL "' + self.url + '".')
             if url_object.username and url_object.password:
                 user = url_object.username
                 password = url_object.password
             elif url_object.username or url_object.password:
-                LOGGER.warning(
+                self.logger.warning(
                     'Either user or password missing, not using authentication.')
-        if http_handler is None:
-            self.http_handler = DefaultHTTPHandler()
-        else:
-            if hasattr(http_handler, 'set_authentication') and hasattr(http_handler, 'request'):
-                self.http_handler = http_handler
-            else:
-                raise ValueError('Invalid HTTP handler.')
+
+        self.auth = None
         if user and password:
-            self.http_handler.set_authentication(self.url, user, password)
+            self.auth = HTTPBasicAuth(user, password)
         elif user or password:
-            LOGGER.warning(
-                'Either user or password missing, not using authentication.')
+            self.logger.warning('Either user or password missing, not using authentication.')
         self._sequence = 0
         self.session = None
         self.session_id = 0
         self.server_version = None
         self.protocol_version = None
         self.get_session()
-        self.torrent_get_arguments = get_arguments(
-            'torrent-get', self.rpc_version)
+        self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
     def _get_timeout(self):
         """
@@ -211,49 +174,36 @@ class Client(object):
     timeout = property(_get_timeout, _set_timeout,
                        _del_timeout, doc="HTTP query timeout.")
 
+    @property
+    def _http_header(self):
+        return {'x-transmission-session-id': str(self.session_id)}
+
     def _http_query(self, query, timeout=None):
         """
         Query Transmission through HTTP.
         """
-        headers = {'x-transmission-session-id': str(self.session_id)}
-        result = {}
         request_count = 0
         if timeout is None:
             timeout = self._query_timeout
-        use_logger = is_logger_configured()
         while True:
-            if use_logger:
-                LOGGER.debug(json.dumps(
-                    {'url': self.url, 'headers': headers, 'query': query, 'timeout': timeout}, indent=2))
-            try:
-                result = self.http_handler.request(
-                    self.url, query, headers, timeout)
-                break
-            except HTTPHandlerError as error:
-                if error.code == 409:
-                    if use_logger:
-                        LOGGER.info(
-                            'Server responded with 409, trying to set session-id.')
-                    if request_count > 1:
-                        raise TransmissionError(
-                            'Session ID negotiation failed.', error)
-                    session_id = None
-                    for key in list(error.headers.keys()):
-                        if key.lower() == 'x-transmission-session-id':
-                            session_id = error.headers[key]
-                            self.session_id = session_id
-                            headers = {
-                                'x-transmission-session-id': str(self.session_id)}
-                    if session_id is None:
-                        if use_logger:
-                            debug_httperror(error)
-                        raise TransmissionError('Unknown conflict.', error)
-                else:
-                    if use_logger:
-                        debug_httperror(error)
-                    raise TransmissionError('Request failed.', error)
+            if request_count >= 10:
+                raise TransmissionError('too much request, try enable logger to see what happened')
+            self.logger.debug({'url'    : self.url,
+                               'headers': self._http_header,
+                               'data'   : json.loads(query),
+                               'timeout': timeout})
             request_count += 1
-        return result
+            r = requests.post(self.url, headers=self._http_header, auth=self.auth,
+                              json=json.loads(query), timeout=timeout)
+            self.session_id = r.headers.get('X-Transmission-Session-Id', 0)
+            self.logger.debug(r.text)
+            if r.status_code == 401:
+                if not self.auth:
+                    raise TransmissionError('Transmission daemon need a username and password')
+                else:
+                    raise TransmissionError('username and password are incorrect')
+            if r.status_code != 409:
+                return r.text
 
     def _request(self, method, arguments=None, ids=None, require_ids=False, timeout=None):
         """
@@ -261,7 +211,7 @@ class Client(object):
         :type arguments: object
         :type method: str
         """
-        if not isinstance(method, string_types):
+        if not isinstance(method, str):
             raise ValueError('request takes method as string')
         if arguments is None:
             arguments = {}
@@ -272,32 +222,26 @@ class Client(object):
             arguments['ids'] = ids
         elif require_ids:
             raise ValueError('request require ids')
-        use_logger = is_logger_configured()
 
-        query = json.dumps(
-            {'tag': self._sequence, 'method': method, 'arguments': arguments})
+        query = json.dumps({'tag': self._sequence, 'method': method, 'arguments': arguments})
         self._sequence += 1
         start = time.time()
         http_data = self._http_query(query, timeout)
         elapsed = time.time() - start
-        if use_logger:
-            LOGGER.info('http request took %.3f s' % (elapsed))
+        self.logger.info('http request took %.3f s' % (elapsed))
 
         try:
             data = json.loads(http_data)
         except ValueError as error:
-            if use_logger:
-                LOGGER.error('Error: ' + str(error))
-                LOGGER.error('Request: \"%s\"' % (query))
-                LOGGER.error('HTTP data: \"%s\"' % (http_data))
-            raise
+            self.logger.error('Error: ' + str(error))
+            self.logger.error('Request: \"%s\"' % (query))
+            self.logger.error('HTTP data: \"%s\"' % (http_data))
+            raise ValueError from error
 
-        if use_logger:
-            LOGGER.debug(json.dumps(data, indent=2))
+        self.logger.debug(json.dumps(data, indent=2))
         if 'result' in data:
             if data['result'] != 'success':
-                raise TransmissionError(
-                    'Query failed with result \"%s\".' % (data['result']))
+                raise TransmissionError('Query failed with result \"%s\".' % (data['result']))
         else:
             raise TransmissionError('Query failed without result.')
 
@@ -382,8 +326,9 @@ class Client(object):
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
         if self.rpc_version < version:
-            LOGGER.warning('Using feature not supported by server. RPC version for server %d, feature introduced in %d.'
-                           % (self.rpc_version, version))
+            self.logger.warning(
+                'Using feature not supported by server. RPC version for server %d, feature introduced in %d.'
+                % (self.rpc_version, version))
 
     def add_torrent(self, torrent, timeout=None, **kwargs):
         """
@@ -410,42 +355,49 @@ class Client(object):
         if torrent is None:
             raise ValueError('add_torrent requires data or a URI.')
         torrent_data = None
-        parsed_uri = urlparse(torrent)
-        if parsed_uri.scheme in ['file']:
-            filepath = torrent
-            # uri decoded different on linux / windows ?
-            if len(parsed_uri.path) > 0:
-                filepath = parsed_uri.path
-            elif len(parsed_uri.netloc) > 0:
-                filepath = parsed_uri.netloc
-            with open(filepath, 'rb') as torrent_file:
-                torrent_data = torrent_file.read()
-                torrent_data = base64.b64encode(torrent_data).decode('utf-8')
-        if not torrent_data:
-            if torrent.endswith('.torrent') or torrent.startswith('magnet:'):
-                torrent_data = None
-            else:
-                might_be_base64 = False
-                try:
-                    # check if this is base64 data
-                    if PY3:
+
+        # torrent is a str, may be a url
+        if isinstance(torrent, str):
+            parsed_uri = urlparse(torrent)
+            # torrent starts with file, read from local disk and encode it to base64 url.
+            if parsed_uri.scheme in ['file']:
+                filepath = torrent
+                # uri decoded different on linux / windows ?
+                if len(parsed_uri.path) > 0:
+                    filepath = parsed_uri.path
+                elif len(parsed_uri.netloc) > 0:
+                    filepath = parsed_uri.netloc
+                with open(filepath, 'rb') as torrent_file:
+                    torrent_data = torrent_file.read()
+                    torrent_data = base64.b64encode(torrent_data).decode('utf-8')
+            if not torrent_data:
+                # normal url
+                if torrent.endswith('.torrent') or torrent.startswith('magnet:'):
+                    torrent_data = None
+                # base64 encoded file content
+                else:
+                    might_be_base64 = False
+                    try:
+                        # check if this is base64 data
                         base64.b64decode(torrent.encode('utf-8'))
-                    else:
-                        base64.b64decode(torrent)
-                    might_be_base64 = True
-                except Exception:
-                    pass
-                if might_be_base64:
-                    torrent_data = torrent
-        args = {}
+                        might_be_base64 = True
+                    except Exception:
+                        pass
+                    if might_be_base64:
+                        torrent_data = torrent
+
+        # maybe a file, try read content and encode it.
+        elif hasattr(torrent, 'read'):
+            torrent_data = base64.b64encode(torrent.read()).decode('utf-8')
+
         if torrent_data:
             args = {'metainfo': torrent_data}
         else:
             args = {'filename': torrent}
-        for key, value in iteritems(kwargs):
+
+        for key, value in kwargs.items():
             argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert(
-                'torrent-add', argument, value, self.rpc_version)
+            (arg, val) = argument_value_convert('torrent-add', argument, value, self.rpc_version)
             args[arg] = val
         return list(self._request('torrent-add', args, timeout=timeout).values())[0]
 
@@ -553,7 +505,7 @@ class Client(object):
         request_result = self._request(
             'torrent-get', {'fields': fields}, ids, timeout=timeout)
         result = {}
-        for tid, torrent in iteritems(request_result):
+        for tid, torrent in request_result.items():
             result[tid] = torrent.files()
         return result
 
@@ -579,7 +531,7 @@ class Client(object):
         """
         if not isinstance(items, dict):
             raise ValueError('Invalid file description')
-        for tid, files in iteritems(items):
+        for tid, files in items.items():
             if not isinstance(files, dict):
                 continue
             wanted = []
@@ -587,7 +539,7 @@ class Client(object):
             high = []
             normal = []
             low = []
-            for fid, file_desc in iteritems(files):
+            for fid, file_desc in files.items():
                 if not isinstance(file_desc, dict):
                     continue
                 if 'selected' in file_desc and file_desc['selected']:
@@ -659,7 +611,7 @@ class Client(object):
            transmission_rpc will try to automatically fix argument errors.
         """
         args = {}
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             argument = make_rpc_name(key)
             (arg, val) = argument_value_convert(
                 'torrent-set', argument, value, self.rpc_version)
@@ -794,7 +746,7 @@ class Client(object):
        transmission_rpc will try to automatically fix argument errors.
         """
         args = {}
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             if key == 'encryption' and value not in ['required', 'preferred', 'tolerated']:
                 raise ValueError('Invalid encryption value')
             argument = make_rpc_name(key)

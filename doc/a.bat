@@ -1,1 +1,1 @@
- watchmedo shell-command --patterns="*.md" --ignore-pattern='build/*' --recursive --command='.\\make html'
+ watchmedo shell-command --patterns="*.rst;*.py" --ignore-pattern='build/*' --recursive --command='sphinx-build.exe -M html source build'
