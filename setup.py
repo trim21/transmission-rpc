@@ -7,8 +7,8 @@ from setuptools import setup
 
 setup(
     use_scm_version={
-        "write_to": "transmission_rpc/__init__.py",
-        "write_to_template": '\n__version__ = {version!r}',
+        "write_to": "transmission_rpc/version.py",
+        "write_to_template": 'version = {version!r}',
     },
     test_suite="test",
 )
