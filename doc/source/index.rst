@@ -82,7 +82,7 @@ For example, transmission 2.94 is rpc version 15, so just call :code:`print(get_
 rpc method and class method are not same, but reversed
 
 you can find rpc version by transmission version from transmission official rpc spec
-or mirror `here <https://github.com/Trim21/transmission-rpc/blob/master/rpc-spec.txt#L624>`_
+or mirror `here <https://github.com/Trim21/transmission-rpc/blob/master/doc/rpc-spec.txt#L624>`_
 
 
 .. toctree::

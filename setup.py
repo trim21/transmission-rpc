@@ -3,11 +3,9 @@
 # Copyright (c) 2018 Trim21 <trim21me@hotmail.com>
 # Licensed under the MIT license.
 
-from setuptools import setup
-from transmission_rpc import __version__, __author__, __author_email__
+import textwrap
 
-required = ['requests']
-setup_requires = ['setuptools>=38.6.0']
+from setuptools import setup
 
 
 def long_description():
@@ -16,29 +14,15 @@ def long_description():
 
 
 setup(
-    name='transmission_rpc',
-    version=__version__,
-    author=__author__,
-    author_email=__author_email__,
-    description='Python module that implements the Transmission bittorent client RPC protocol.',
-    url='https://github.com/Trim21/transmission-rpc',
-    keywords='transmission rpc',
-    packages=['transmission_rpc'],
-    install_requires=required,
-    long_description=long_description(),
-    long_description_content_type='text/x-rst',
+    use_scm_version={
+        "write_to": "transmission_rpc/__init__.py",
+        "write_to_template": textwrap.dedent(
+            """
+             # coding: utf-8
+             __version__ = {version!r}
+             """
+        ).lstrip(),
+    },
+
     test_suite="test",
-    setup_requires=setup_requires,
-    zip_safe=True,
-    classifiers=[
-        'Intended Audience :: Developers',
-        'Development Status :: 2 - Pre-Alpha',
-        'License :: OSI Approved :: MIT License',
-        'Topic :: Communications :: File Sharing',
-        'Topic :: Internet',
-        'Topic :: Software Development :: Version Control :: Git',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-    ],
 )
