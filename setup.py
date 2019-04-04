@@ -31,5 +31,6 @@ def _get_version():
 
 setup(
     version=_get_version(),
+    pbr=True,
     test_suite="test",
 )
