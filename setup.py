@@ -29,8 +29,9 @@ def _get_version():
             raise RuntimeError('Unable to determine version.')
 
 
+os.environ['PBR_VERSION'] = _get_version()
+
 setup(
-    version=_get_version(),
     pbr=True,
     test_suite="test",
 )
