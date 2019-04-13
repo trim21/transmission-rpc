@@ -33,5 +33,4 @@ os.environ['PBR_VERSION'] = _get_version()
 
 setup(
     pbr=True,
-    test_suite="test",
 )

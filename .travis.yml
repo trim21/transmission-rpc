@@ -15,12 +15,13 @@ deploy:
   distributions: "sdist" # Your distributions here
 
 cache:
-  - pip
-  - "$HOME/virtualenv"
+  pip: true
+  directories:
+    - "$HOME/virtualenv"
 
 python:
-  - 2.7
   - 3.4
+  - 3.5
   - 3.6
 
 install:

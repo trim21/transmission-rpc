@@ -15,6 +15,6 @@ __all__ = [
 
 __author__ = 'Trim21 <trim21me@hotmail.com>'
 __author_email__ = 'trim21me@hotmail.com'
-__copyright__ = 'Copyright (c) 2018 Trim21'
+__copyright__ = 'Copyright (c) 2018-2019 Trim21'
 __license__ = 'MIT'
-__version__ = '1.0.6'
+__version__ = '1.0.7'
