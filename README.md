@@ -35,6 +35,8 @@ NOTE: You might need administrator privileges to install python modules.
 
 <https://transmission-rpc.readthedocs.io/en/latest/>
 
+## Break change
+
 ## Developer
 
 transmission-rpc is hosted by GitHub at [github.com/Trim21/transmission-rpc](https://github.com/Trim21/transmission-rpc)

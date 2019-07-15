@@ -25,10 +25,10 @@ quick start
 
     ########
 
-    from transmission_rpc import Client, DEFAULT_PORT
+    from transmission_rpc import Client
 
     c = Client(port=DEFAULT_PORT,
-               user='transmission', password='password')
+               username='transmission', password='password')
 
     torrent_url = 'magnet:?xt=urn:btih:e84213a794f3ccd890382a54' + \
                   'a64ca68b7e925433&dn=ubuntu-18.04.1-desktop-amd64.iso'
@@ -44,7 +44,7 @@ quick start
     r = requests.get(torrent_url)
     with open('a', 'wb') as f:
         f.write(r.content)
-    c = Client(user='trim21', password='123456')
+    c = Client(username='trim21', password='123456')
     with open('a', 'rb') as f:
         c.add_torrent(f)
 

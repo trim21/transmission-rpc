@@ -11,16 +11,27 @@ import os
 import re
 import time
 from urllib.parse import urlparse
+import warnings
 
 import requests
-from requests.auth import HTTPBasicAuth
-
-from transmission_rpc.constants import DEFAULT_PORT, DEFAULT_TIMEOUT
+import requests.auth
+from transmission_rpc.constants import (
+    DEFAULT_PORT,
+    DEFAULT_TIMEOUT,
+    DEFAULT_PROTOCOL,
+    DEFAULT_HOST,
+    DEFAULT_PATH,
+)
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.utils import (LOGGER, get_arguments, make_rpc_name,
-                                    argument_value_convert, rpc_bool, )
+from transmission_rpc.utils import (
+    LOGGER,
+    get_arguments,
+    make_rpc_name,
+    argument_value_convert,
+    rpc_bool,
+)
 
 
 def parse_torrent_id(arg):
@@ -36,7 +47,7 @@ def parse_torrent_id(arg):
     elif isinstance(arg, str):
         try:
             torrent_id = int(arg)
-            if torrent_id >= 2 ** 31:
+            if torrent_id >= 2**31:
                 torrent_id = None
         except (ValueError, TypeError):
             pass
@@ -70,7 +81,7 @@ def parse_torrent_ids(args):
                 addition = [torrent_id]
             if not addition:
                 # handle index ranges i.e. 5:10
-                match = re.match('^(\d+):(\d+)$', item)
+                match = re.match(r'^(\d+):(\d+)$', item)
                 if match:
                     try:
                         idx_from = int(match.group(1))
@@ -112,50 +123,68 @@ class Client(object):
     """
     Client is the class handling the Transmission JSON-RPC client protocol.
     """
-
-    def __init__(self, address='localhost', port=DEFAULT_PORT, user=None,
-                 password=None, timeout=None, logger=LOGGER):
+    def __init__(
+        self,
+        address=DEFAULT_HOST,
+        host=DEFAULT_HOST,
+        port=DEFAULT_PORT,
+        protocol=DEFAULT_PROTOCOL,
+        user=None,
+        username=None,
+        password=None,
+        path=DEFAULT_PATH,
+        timeout=None,
+        logger=LOGGER
+    ):
         if isinstance(logger, logging.Logger):
             self.logger = logger
         else:
-            raise TypeError('logger must be instance of `logging.Logger`, '
-                            'default: logging.getLogger(\'transmission-rpc\')')
+            raise TypeError(
+                'logger must be instance of `logging.Logger`, '
+                'default: logging.getLogger(\'transmission-rpc\')'
+            )
         if isinstance(timeout, (int, float)):
             self._query_timeout = float(timeout)
         else:
             self._query_timeout = DEFAULT_TIMEOUT
-        url_object = urlparse(address)
-        if url_object.scheme == '':
-            base_url = 'http://' + address + ':' + str(port)
-            self.url = base_url + '/transmission/rpc'
-        else:
-            if url_object.port:
-                self.url = url_object.scheme + '://' + url_object.hostname + \
-                           ':' + str(url_object.port) + url_object.path
-            else:
-                self.url = url_object.scheme + '://' + url_object.hostname + url_object.path
-            self.logger.info('Using custom URL "' + self.url + '".')
-            if url_object.username and url_object.password:
-                user = url_object.username
-                password = url_object.password
-            elif url_object.username or url_object.password:
-                self.logger.warning(
-                    'Either user or password missing, not using authentication.')
 
-        self.auth = None
-        if user and password:
-            self.auth = HTTPBasicAuth(user, password)
-        elif user or password:
-            self.logger.warning(
-                'Either user or password missing, not using authentication.')
+        # self.auth = None
+        if address:
+            warnings.warn(
+                '`address` argument is deprecated, user `host` instead',
+                DeprecationWarning,
+            )
+            host = address
+
+        if user:
+            warnings.warn(
+                '`user` argument is deprecated, user `username` instead',
+                DeprecationWarning,
+            )
+            username = user
+
+        auth = ''
+        if username and password:
+            # self.auth = requests.auth.HTTPBasicAuth(username, password)
+            auth = '{}:{}@'.format(username, password)
+
+        self.url = '{protocol}://{auth}{host}:{port}{path}'.format(
+            protocol=protocol,
+            host=host,
+            auth=auth,
+            port=port,
+            path=path,
+        )
+
         self._sequence = 0
         self.session = None
         self.session_id = 0
         self.server_version = None
         self.protocol_version = None
         self.get_session()
-        self.torrent_get_arguments = get_arguments('torrent-get',
-                                                   self.rpc_version)
+        self.torrent_get_arguments = get_arguments(
+            'torrent-get', self.rpc_version
+        )
 
     def _get_timeout(self):
         """
@@ -175,8 +204,9 @@ class Client(object):
         """
         self._query_timeout = DEFAULT_TIMEOUT
 
-    timeout = property(_get_timeout, _set_timeout,
-                       _del_timeout, doc="HTTP query timeout.")
+    timeout = property(
+        _get_timeout, _set_timeout, _del_timeout, doc="HTTP query timeout."
+    )
 
     @property
     def _http_header(self):
@@ -192,29 +222,39 @@ class Client(object):
         while True:
             if request_count >= 10:
                 raise TransmissionError(
-                    'too much request, try enable logger to see what happened')
-            self.logger.debug({'url': self.url,
-                               'headers': self._http_header,
-                               'data': json.loads(query),
-                               'timeout': timeout})
+                    'too much request, try enable logger to see what happened'
+                )
+            self.logger.debug({
+                'url': self.url,
+                'headers': self._http_header,
+                'data': json.loads(query),
+                'timeout': timeout,
+            })
             request_count += 1
-            r = requests.post(self.url, headers=self._http_header,
-                              auth=self.auth,
-                              json=json.loads(query), timeout=timeout)
+            r = requests.post(
+                self.url,
+                headers=self._http_header,
+                json=json.loads(query),
+                timeout=timeout
+            )
             self.session_id = r.headers.get('X-Transmission-Session-Id', 0)
             self.logger.debug(r.text)
             if r.status_code == 401:
-                if not self.auth:
-                    raise TransmissionError(
-                        'Transmission daemon need a username and password')
-                else:
-                    raise TransmissionError(
-                        'username and password are incorrect')
+                print(r.request.headers)
+                raise TransmissionError(
+                    'transmission daemon require auth', original=r
+                )
             if r.status_code != 409:
                 return r.text
 
-    def _request(self, method, arguments=None, ids=None, require_ids=False,
-                 timeout=None):
+    def _request(
+        self,
+        method,
+        arguments=None,
+        ids=None,
+        require_ids=False,
+        timeout=None
+    ):
         """
         Send json-rpc request to Transmission using http POST
         :type arguments: object
@@ -232,8 +272,9 @@ class Client(object):
         elif require_ids:
             raise ValueError('request require ids')
 
-        query = json.dumps(
-            {'tag': self._sequence, 'method': method, 'arguments': arguments})
+        query = json.dumps({
+            'tag': self._sequence, 'method': method, 'arguments': arguments
+        })
         self._sequence += 1
         start = time.time()
         http_data = self._http_query(query, timeout)
@@ -252,7 +293,8 @@ class Client(object):
         if 'result' in data:
             if data['result'] != 'success':
                 raise TransmissionError(
-                    'Query failed with result \"%s\".' % (data['result']))
+                    'Query failed with result \"%s\".' % (data['result'])
+                )
         else:
             raise TransmissionError('Query failed without result.')
 
@@ -281,7 +323,9 @@ class Client(object):
             else:
                 self._update_session(data['arguments'])
         elif method in (
-        'port-test', 'blocklist-update', 'free-space', 'torrent-rename-path'):
+            'port-test', 'blocklist-update', 'free-space',
+            'torrent-rename-path'
+        ):
             results = data['arguments']
         else:
             return None
@@ -303,7 +347,7 @@ class Client(object):
             version_major = 1
             version_minor = 30
             version_changeset = 0
-            version_parser = re.compile('(\d).(\d+) \((\d+)\)')
+            version_parser = re.compile(r'(\d).(\d+) \((\d+)\)')
             if hasattr(self.session, 'version'):
                 match = version_parser.match(self.session.version)
                 if match:
@@ -311,7 +355,8 @@ class Client(object):
                     version_minor = int(match.group(2))
                     version_changeset = match.group(3)
             self.server_version = (
-                version_major, version_minor, version_changeset)
+                version_major, version_minor, version_changeset
+            )
 
     @property
     def rpc_version(self):
@@ -321,13 +366,14 @@ class Client(object):
         if self.protocol_version is None:
             # Ugly fix for 2.20 - 2.22 reporting rpc-version 11, but having new arguments
             if self.server_version and (
-                    self.server_version[0] == 2 and self.server_version[1] in [
-                20, 21, 22]):
+                self.server_version[0] == 2
+                and self.server_version[1] in [20, 21, 22]
+            ):
                 self.protocol_version = 12
             # Ugly fix for 2.12 reporting rpc-version 10, but having new arguments
             elif self.server_version and (
-                    self.server_version[0] == 2 and self.server_version[
-                1] == 12):
+                self.server_version[0] == 2 and self.server_version[1] == 12
+            ):
                 self.protocol_version = 11
             elif hasattr(self.session, 'rpc_version'):
                 self.protocol_version = self.session.rpc_version
@@ -344,7 +390,8 @@ class Client(object):
         if self.rpc_version < version:
             self.logger.warning(
                 'Using feature not supported by server. RPC version for server %d, feature introduced in %d.'
-                % (self.rpc_version, version))
+                % (self.rpc_version, version)
+            )
 
     def add_torrent(self, torrent, timeout=None, **kwargs):
         """
@@ -385,12 +432,12 @@ class Client(object):
                     filepath = parsed_uri.netloc
                 with open(filepath, 'rb') as torrent_file:
                     torrent_data = torrent_file.read()
-                    torrent_data = base64.b64encode(torrent_data).decode(
-                        'utf-8')
+                    torrent_data = base64.b64encode(torrent_data
+                                                    ).decode('utf-8')
             if not torrent_data:
                 # normal url
-                if torrent.endswith('.torrent') or torrent.startswith(
-                        'magnet:'):
+                if torrent.endswith('.torrent'
+                                    ) or torrent.startswith('magnet:'):
                     torrent_data = None
                 # base64 encoded file content
                 else:
@@ -415,8 +462,9 @@ class Client(object):
 
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert('torrent-add', argument, value,
-                                                self.rpc_version)
+            (arg, val) = argument_value_convert(
+                'torrent-add', argument, value, self.rpc_version
+            )
             args[arg] = val
         return \
         list(self._request('torrent-add', args, timeout=timeout).values())[0]
@@ -427,9 +475,12 @@ class Client(object):
         delete_data is True, otherwise not.
         """
         self._rpc_version_warning(3)
-        self._request('torrent-remove',
-                      {'delete-local-data': rpc_bool(delete_data)}, ids, True,
-                      timeout=timeout)
+        self._request(
+            'torrent-remove', {'delete-local-data': rpc_bool(delete_data)},
+            ids,
+            True,
+            timeout=timeout
+        )
 
     def start_torrent(self, ids, bypass_queue=False, timeout=None):
         """Start torrent(s) with provided id(s)"""
@@ -446,7 +497,8 @@ class Client(object):
             if bypass_queue:
                 method = 'torrent-start-now'
             torrent_list = sorted(
-                torrent_list, key=operator.attrgetter('queuePosition'))
+                torrent_list, key=operator.attrgetter('queuePosition')
+            )
         ids = [x.id for x in torrent_list]
         self._request(method, {}, ids, True, timeout=timeout)
 
@@ -477,8 +529,11 @@ class Client(object):
         if torrent_id is None:
             raise ValueError("Invalid id")
         result = self._request(
-            'torrent-get', {'fields': arguments}, torrent_id, require_ids=True,
-            timeout=timeout)
+            'torrent-get', {'fields': arguments},
+            torrent_id,
+            require_ids=True,
+            timeout=timeout
+        )
         if torrent_id in result:
             return result[torrent_id]
         else:
@@ -497,8 +552,11 @@ class Client(object):
         """
         if not arguments:
             arguments = self.torrent_get_arguments
-        return list(self._request('torrent-get', {'fields': arguments}, ids,
-                                  timeout=timeout).values())
+        return list(
+            self._request(
+                'torrent-get', {'fields': arguments}, ids, timeout=timeout
+            ).values()
+        )
 
     def get_files(self, ids=None, timeout=None):
         """
@@ -526,7 +584,8 @@ class Client(object):
         """
         fields = ['id', 'name', 'hashString', 'files', 'priorities', 'wanted']
         request_result = self._request(
-            'torrent-get', {'fields': fields}, ids, timeout=timeout)
+            'torrent-get', {'fields': fields}, ids, timeout=timeout
+        )
         result = {}
         for tid, torrent in request_result.items():
             result[tid] = torrent.files()
@@ -576,9 +635,7 @@ class Client(object):
                         normal.append(fid)
                     elif file_desc['priority'] == 'low':
                         low.append(fid)
-            args = {
-                'timeout': timeout
-            }
+            args = {'timeout': timeout}
             if len(high) > 0:
                 args['priority_high'] = high
             if len(normal) > 0:
@@ -637,7 +694,8 @@ class Client(object):
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
             (arg, val) = argument_value_convert(
-                'torrent-set', argument, value, self.rpc_version)
+                'torrent-set', argument, value, self.rpc_version
+            )
             args[arg] = val
 
         if len(args) > 0:
@@ -670,33 +728,38 @@ class Client(object):
         if len(dirname) > 0:
             raise ValueError("Target name cannot contain a path delimiter")
         args = {'path': location, 'name': name}
-        result = self._request('torrent-rename-path',
-                               args, torrent_id, True, timeout=timeout)
+        result = self._request(
+            'torrent-rename-path', args, torrent_id, True, timeout=timeout
+        )
         return (result['path'], result['name'])
 
     def queue_top(self, ids, timeout=None):
         """Move transfer to the top of the queue."""
         self._rpc_version_warning(14)
-        self._request('queue-move-top', ids=ids,
-                      require_ids=True, timeout=timeout)
+        self._request(
+            'queue-move-top', ids=ids, require_ids=True, timeout=timeout
+        )
 
     def queue_bottom(self, ids, timeout=None):
         """Move transfer to the bottom of the queue."""
         self._rpc_version_warning(14)
-        self._request('queue-move-bottom', ids=ids,
-                      require_ids=True, timeout=timeout)
+        self._request(
+            'queue-move-bottom', ids=ids, require_ids=True, timeout=timeout
+        )
 
     def queue_up(self, ids, timeout=None):
         """Move transfer up in the queue."""
         self._rpc_version_warning(14)
-        self._request('queue-move-up', ids=ids,
-                      require_ids=True, timeout=timeout)
+        self._request(
+            'queue-move-up', ids=ids, require_ids=True, timeout=timeout
+        )
 
     def queue_down(self, ids, timeout=None):
         """Move transfer down in the queue."""
         self._rpc_version_warning(14)
-        self._request('queue-move-down', ids=ids,
-                      require_ids=True, timeout=timeout)
+        self._request(
+            'queue-move-down', ids=ids, require_ids=True, timeout=timeout
+        )
 
     def get_session(self, timeout=None):
         """
@@ -771,12 +834,14 @@ class Client(object):
         """
         args = {}
         for key, value in kwargs.items():
-            if key == 'encryption' and value not in ['required', 'preferred',
-                                                     'tolerated']:
+            if key == 'encryption' and value not in [
+                'required', 'preferred', 'tolerated'
+            ]:
                 raise ValueError('Invalid encryption value')
             argument = make_rpc_name(key)
             (arg, val) = argument_value_convert(
-                'session-set', argument, value, self.rpc_version)
+                'session-set', argument, value, self.rpc_version
+            )
             args[arg] = val
         if len(args) > 0:
             self._request('session-set', args, timeout=timeout)
