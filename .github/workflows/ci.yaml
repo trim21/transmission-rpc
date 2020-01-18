@@ -31,16 +31,14 @@ jobs:
           echo "::add-path::$HOME/.local/bin"
           echo "::add-path::$HOME/.poetry/bin"
           $HOME/.poetry/bin/poetry --version && exit 0
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version 1.0.0
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${{ steps.get-version.outputs.poetry }}
 
       - uses: actions/cache@v1
-        id: cache
         with:
           path: ~/.local
           key: poetry-1-${{ matrix.python }}-${{ hashFiles('**/poetry.lock') }}
 
       - uses: actions/cache@v1
-        id: cache
         with:
           path: ~/.cache/pre-commit
           key: precommit-1-${{ matrix.python }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
