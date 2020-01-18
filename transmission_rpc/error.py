@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
@@ -16,7 +15,7 @@ class TransmissionError(Exception):
     def __str__(self):
         if self.original:
             original_name = type(self.original).__name__
-            return '%s Original exception: %s, "%s"' % (
+            return '{} Original exception: {}, "{}"'.format(
                 self.message, original_name, str(self.original)
             )
         else:

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
 from transmission_rpc.utils import Field
 
 
-class Session(object):
+class Session:
     """
     Session is a class holding the session data for a Transmission daemon.
 
@@ -14,7 +13,6 @@ class Session(object):
     Transmission RPC specification, but with underscore instead of hyphen.
     ``download-dir`` -> ``download_dir``.
     """
-
     def __init__(self, client=None, fields=None):
         self._client = client
         self._fields = {}
@@ -30,7 +28,7 @@ class Session(object):
     def __str__(self):
         text = ''
         for key in sorted(self._fields.keys()):
-            text += "% 32s: %s\n" % (key[-32:], self._fields[key].value)
+            text += '{: 32}: {}\n'.format(key[-32:], self._fields[key].value)
         return text
 
     def _update_fields(self, other):
@@ -91,9 +89,11 @@ class Session(object):
             self._fields['peer_port'] = Field(port, True)
             self._push()
         else:
-            raise ValueError("Not a valid limit")
+            raise ValueError('Not a valid limit')
 
-    peer_port = property(_get_peer_port, _set_peer_port, None, "Peer port. This is a mutator.")
+    peer_port = property(
+        _get_peer_port, _set_peer_port, None, 'Peer port. This is a mutator.'
+    )
 
     def _get_pex_enabled(self):
         """Is peer exchange enabled?"""
@@ -105,6 +105,9 @@ class Session(object):
             self._fields['pex_enabled'] = Field(enabled, True)
             self._push()
         else:
-            raise TypeError("Not a valid type")
+            raise TypeError('Not a valid type')
 
-    pex_enabled = property(_get_pex_enabled, _set_pex_enabled, None, "Enable peer exchange. This is a mutator.")
+    pex_enabled = property(
+        _get_pex_enabled, _set_pex_enabled, None,
+        'Enable peer exchange. This is a mutator.'
+    )

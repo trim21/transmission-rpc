@@ -1,36 +1,28 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018 Trim21 <erik.public@gmail.com>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-import base64
-import json
-import logging
-import operator
 import os
 import re
+import json
 import time
-from urllib.parse import urlparse
+import base64
+import logging
+import operator
 import warnings
+from urllib.parse import urlparse
 
 import requests
 import requests.auth
-from transmission_rpc.constants import (
-    DEFAULT_PORT,
-    DEFAULT_TIMEOUT,
-    DEFAULT_PROTOCOL,
-    DEFAULT_HOST,
-    DEFAULT_PATH,
-)
+
 from transmission_rpc.error import TransmissionError
+from transmission_rpc.utils import (
+    LOGGER, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
+)
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.utils import (
-    LOGGER,
-    get_arguments,
-    make_rpc_name,
-    argument_value_convert,
-    rpc_bool,
+from transmission_rpc.constants import (
+    DEFAULT_HOST, DEFAULT_PATH, DEFAULT_PORT, DEFAULT_TIMEOUT, DEFAULT_PROTOCOL
 )
 
 
@@ -70,7 +62,7 @@ def parse_torrent_ids(args):
     if args is None:
         pass
     elif isinstance(args, str):
-        if args == "recently-active":
+        if args == 'recently-active':
             return args
         for item in re.split('[ ,]+', args):
             if len(item) == 0:
@@ -104,24 +96,21 @@ def parse_torrent_ids(args):
     return ids
 
 
-"""
-Torrent ids
-
-Many functions in Client takes torrent id. A torrent id can either be id or
-hashString. When supplying multiple id's it is possible to use a list mixed
-with both id and hashString.
-
-Timeouts
-
-Since most methods results in HTTP requests against Transmission, it is
-possible to provide a argument called ``timeout``. Timeout is only effective
-when using Python 2.6 or later and the default timeout is 30 seconds.
-"""
-
-
-class Client(object):
+class Client:
     """
     Client is the class handling the Transmission JSON-RPC client protocol.
+
+    Torrent ids
+
+    Many functions in Client takes torrent id. A torrent id can either be id or
+    hashString. When supplying multiple id's it is possible to use a list mixed
+    with both id and hashString.
+
+    Timeouts
+
+    Since most methods results in HTTP requests against Transmission, it is
+    possible to provide a argument called ``timeout``. Timeout is only effective
+    when using Python 2.6 or later and the default timeout is 30 seconds.
     """
     def __init__(
         self,
@@ -205,7 +194,7 @@ class Client(object):
         self._query_timeout = DEFAULT_TIMEOUT
 
     timeout = property(
-        _get_timeout, _set_timeout, _del_timeout, doc="HTTP query timeout."
+        _get_timeout, _set_timeout, _del_timeout, doc='HTTP query timeout.'
     )
 
     @property
@@ -323,8 +312,7 @@ class Client(object):
             else:
                 self._update_session(data['arguments'])
         elif method in (
-            'port-test', 'blocklist-update', 'free-space',
-            'torrent-rename-path'
+            'port-test', 'blocklist-update', 'free-space', 'torrent-rename-path'
         ):
             results = data['arguments']
         else:
@@ -466,8 +454,9 @@ class Client(object):
                 'torrent-add', argument, value, self.rpc_version
             )
             args[arg] = val
-        return \
-        list(self._request('torrent-add', args, timeout=timeout).values())[0]
+        return list(
+            self._request('torrent-add', args, timeout=timeout).values()
+        )[0]
 
     def remove_torrent(self, ids, delete_data=False, timeout=None):
         """
@@ -527,7 +516,7 @@ class Client(object):
             arguments = self.torrent_get_arguments
         torrent_id = parse_torrent_id(torrent_id)
         if torrent_id is None:
-            raise ValueError("Invalid id")
+            raise ValueError('Invalid id')
         result = self._request(
             'torrent-get', {'fields': arguments},
             torrent_id,
@@ -540,7 +529,7 @@ class Client(object):
             for torrent in result.values():
                 if torrent.hashString == torrent_id:
                     return torrent
-            raise KeyError("Torrent not found in result")
+            raise KeyError('Torrent not found in result')
 
     def get_torrents(self, ids=None, arguments=None, timeout=None):
         """
@@ -701,7 +690,7 @@ class Client(object):
         if len(args) > 0:
             self._request('torrent-set', args, ids, True, timeout=timeout)
         else:
-            ValueError("No arguments to set")
+            ValueError('No arguments to set')
 
     def move_torrent_data(self, ids, location, timeout=None):
         """Move torrent data to the new location."""
@@ -723,10 +712,10 @@ class Client(object):
         self._rpc_version_warning(15)
         torrent_id = parse_torrent_id(torrent_id)
         if torrent_id is None:
-            raise ValueError("Invalid id")
+            raise ValueError('Invalid id')
         dirname = os.path.dirname(name)
         if len(dirname) > 0:
-            raise ValueError("Target name cannot contain a path delimiter")
+            raise ValueError('Target name cannot contain a path delimiter')
         args = {'path': location, 'name': name}
         result = self._request(
             'torrent-rename-path', args, torrent_id, True, timeout=timeout

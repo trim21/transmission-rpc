@@ -1,6 +1,9 @@
-from transmission_rpc.client import Client
-import pytest
 import os
+
+import pytest
+
+from transmission_rpc.client import Client
+
 TEST_HOST = os.getenv('TRANSMISSION_HOST', '127.0.0.1')
 USERNAME = 'transmission-rpc-username'
 PASSWORD = 'example-rpc-password'

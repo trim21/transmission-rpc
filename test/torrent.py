@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # 2008-12, Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
 import time
 import datetime
 import unittest
+
 import transmission_rpc
-import transmission_rpc.constants
 import transmission_rpc.utils
+import transmission_rpc.constants
 
 
 class torrent(unittest.TestCase):
@@ -21,7 +21,7 @@ class torrent(unittest.TestCase):
 
     def testConstruction(self):
         self.failUnlessRaises(ValueError, transmission_rpc.Torrent, None, {})
-        torrent = transmission_rpc.Torrent(None, {'id': 42})
+        transmission_rpc.Torrent(None, {'id': 42})
 
     def testAttributes(self):
         torrent = transmission_rpc.Torrent(None, {'id': 42})
@@ -61,12 +61,23 @@ class torrent(unittest.TestCase):
         self.assertEqual(torrent.progress, 50.0)
         self.assertEqual(torrent.ratio, 0.5)
         self.assertEqual(torrent.eta, datetime.timedelta(seconds=3600))
-        self.assertEqual(torrent.date_active, datetime.datetime(2008, 12, 11, 11, 15, 30))
-        self.assertEqual(torrent.date_added, datetime.datetime(2008, 12, 11, 8, 5, 10))
-        self.assertEqual(torrent.date_started, datetime.datetime(2008, 12, 11, 9, 10, 5))
-        self.assertEqual(torrent.date_done, datetime.datetime(2008, 12, 11, 10, 0, 15))
+        self.assertEqual(
+            torrent.date_active, datetime.datetime(2008, 12, 11, 11, 15, 30)
+        )
+        self.assertEqual(
+            torrent.date_added, datetime.datetime(2008, 12, 11, 8, 5, 10)
+        )
+        self.assertEqual(
+            torrent.date_started, datetime.datetime(2008, 12, 11, 9, 10, 5)
+        )
+        self.assertEqual(
+            torrent.date_done, datetime.datetime(2008, 12, 11, 10, 0, 15)
+        )
 
-        self.assertEqual(torrent.format_eta(), transmission_rpc.utils.format_timedelta(torrent.eta))
+        self.assertEqual(
+            torrent.format_eta(),
+            transmission_rpc.utils.format_timedelta(torrent.eta)
+        )
 
         torrent = transmission_rpc.Torrent(None, {'id': 42, 'eta': -1})
         self.assertPropertyException(ValueError, torrent, 'eta')

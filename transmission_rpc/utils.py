@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
 import socket
 import datetime
-import logging
 from collections import namedtuple
+
 import transmission_rpc.constants as constants
 from transmission_rpc.constants import LOGGER
 
@@ -59,7 +58,6 @@ class INetAddressError(Exception):
     """
     Error parsing / generating a internet address.
     """
-    pass
 
 
 def inet_address(address, default_port, default_address='localhost'):
@@ -105,12 +103,8 @@ def rpc_bool(arg):
 
 
 TR_TYPE_MAP = {
-    'number' : int,
-    'string' : str,
-    'double' : float,
-    'boolean': rpc_bool,
-    'array'  : list,
-    'object' : dict
+    'number': int, 'string': str, 'double': float, 'boolean': rpc_bool,
+    'array': list, 'object': dict
 }
 
 
@@ -153,18 +147,22 @@ def argument_value_convert(method, argument, value, rpc_version):
             if invalid_version:
                 if replacement:
                     LOGGER.warning(
-                        'Replacing requested argument "%s" with "%s".'
-                        % (argument, replacement))
+                        'Replacing requested argument "%s" with "%s".' %
+                        (argument, replacement)
+                    )
                     argument = replacement
                     info = args[argument]
                 else:
                     raise ValueError(
                         'Method "%s" Argument "%s" does not exist in version %d.'
-                        % (method, argument, rpc_version))
+                        % (method, argument, rpc_version)
+                    )
         return (argument, TR_TYPE_MAP[info[0]](value))
     else:
-        raise ValueError('Argument "%s" does not exists for method "%s".',
-                         (argument, method))
+        raise ValueError(
+            'Argument "%s" does not exists for method "%s".',
+            (argument, method)
+        )
 
 
 def get_arguments(method, rpc_version):

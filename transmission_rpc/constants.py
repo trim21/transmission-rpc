@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
@@ -19,7 +18,7 @@ def mirror_dict(source):
 DEFAULT_PROTOCOL = 'http'
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 9091
-DEFAULT_PATH= '/transmission/rpc'
+DEFAULT_PATH = '/transmission/rpc'
 DEFAULT_TIMEOUT = 30.0
 
 TR_PRI_LOW = -1
@@ -69,8 +68,7 @@ TORRENT_ARGS = {
             'The date when this torrent was first added.'
         ),
         'announceResponse': (
-            'string', 1, 7, None, None,
-            'The announce message from the tracker.'
+            'string', 1, 7, None, None, 'The announce message from the tracker.'
         ),
         'announceURL': ('string', 1, 7, None, None, 'Current announce URL.'),
         'bandwidthPriority': (
@@ -188,9 +186,7 @@ TORRENT_ARGS = {
             'Download progress of metadata. 0.0 to 1.0.'
         ),
         'name': ('string', 1, None, None, None, 'Torrent name.'),
-        'nextAnnounceTime': (
-            'number', 1, 7, None, None, 'Next announce time.'
-        ),
+        'nextAnnounceTime': ('number', 1, 7, None, None, 'Next announce time.'),
         'nextScrapeTime': ('number', 1, 7, None, None, 'Next scrape time.'),
         'peer-limit': (
             'number', 5, None, None, None, 'Maximum number of peers.'
@@ -270,9 +266,7 @@ TORRENT_ARGS = {
             'number', 1, None, None, None,
             'The date when the torrent was last started.'
         ),
-        'status': (
-            'number', 1, None, None, None, 'Current status, see source'
-        ),
+        'status': ('number', 1, None, None, None, 'Current status, see source'),
         'swarmSpeed': (
             'number', 1, 7, None, None, 'Estimated speed in Kbps in the swarm.'
         ),
@@ -280,9 +274,7 @@ TORRENT_ARGS = {
             'number', 1, 7, None, None,
             'Number of successful downloads reported by the tracker.'
         ),
-        'trackers': (
-            'array', 1, None, None, None, 'Array of tracker objects.'
-        ),
+        'trackers': ('array', 1, None, None, None, 'Array of tracker objects.'),
         'trackerStats': (
             'object', 7, None, None, None,
             'Array of object containing tracker statistics.'
@@ -309,9 +301,7 @@ TORRENT_ARGS = {
             'array', 1, None, None, None,
             'Array of booleans indicated wanted files.'
         ),
-        'webseeds': (
-            'array', 1, None, None, None, 'Array of webseeds objects'
-        ),
+        'webseeds': ('array', 1, None, None, None, 'Array of webseeds objects'),
         'webseedsSendingToUs': (
             'number', 1, None, None, None, 'Number of webseeds seeding to us.'
         ),
@@ -337,7 +327,7 @@ TORRENT_ARGS = {
         ),
         'honorsSessionLimits': (
             'boolean', 5, None, None, None,
-            "Enables or disables the transfer to honour the upload limit set in the session."
+            'Enables or disables the transfer to honour the upload limit set in the session.'
         ),
         'location': ('array', 1, None, None, None, 'Local download location.'),
         'peer-limit': (
@@ -392,8 +382,7 @@ TORRENT_ARGS = {
             'Array of string with announce URLs to add.'
         ),
         'trackerRemove': (
-            'array', 10, None, None, None,
-            'Array of ids of trackers to remove.'
+            'array', 10, None, None, None, 'Array of ids of trackers to remove.'
         ),
         'trackerReplace': (
             'array', 10, None, None, None,
@@ -420,7 +409,7 @@ TORRENT_ARGS = {
         ),
         'filename': (
             'string', 1, None, None, None,
-            "A file path or URL to a torrent file or a magnet link."
+            'A file path or URL to a torrent file or a magnet link.'
         ),
         'files-wanted': (
             'array', 1, None, None, None,
@@ -459,180 +448,178 @@ TORRENT_ARGS = {
 # Arguments for session methods
 SESSION_ARGS = {
     'get': {
-        "alt-speed-down": (
+        'alt-speed-down': (
             'number', 5, None, None, None,
             'Alternate session download speed limit (in Kib/s).'
         ),
-        "alt-speed-enabled": (
+        'alt-speed-enabled': (
             'boolean', 5, None, None, None,
             'True if alternate global download speed limiter is enabled.'
         ),
-        "alt-speed-time-begin": (
+        'alt-speed-time-begin': (
             'number', 5, None, None, None,
             'Time when alternate speeds should be enabled. Minutes after midnight.'
         ),
-        "alt-speed-time-enabled": (
+        'alt-speed-time-enabled': (
             'boolean', 5, None, None, None,
             'True if alternate speeds scheduling is enabled.'
         ),
-        "alt-speed-time-end": (
+        'alt-speed-time-end': (
             'number', 5, None, None, None,
             'Time when alternate speeds should be disabled. Minutes after midnight.'
         ),
-        "alt-speed-time-day": (
+        'alt-speed-time-day': (
             'number', 5, None, None, None,
             'Days alternate speeds scheduling is enabled.'
         ),
-        "alt-speed-up": (
+        'alt-speed-up': (
             'number', 5, None, None, None,
             'Alternate session upload speed limit (in Kib/s)'
         ),
-        "blocklist-enabled": (
+        'blocklist-enabled': (
             'boolean', 5, None, None, None, 'True when blocklist is enabled.'
         ),
-        "blocklist-size": (
+        'blocklist-size': (
             'number', 5, None, None, None, 'Number of rules in the blocklist'
         ),
-        "blocklist-url": (
+        'blocklist-url': (
             'string', 11, None, None, None,
             'Location of the block list. Updated with blocklist-update.'
         ),
-        "cache-size-mb": (
+        'cache-size-mb': (
             'number', 10, None, None, None,
             'The maximum size of the disk cache in MB'
         ),
-        "config-dir": (
+        'config-dir': (
             'string', 8, None, None, None,
             'location of transmissions configuration directory'
         ),
-        "dht-enabled": (
-            'boolean', 6, None, None, None, 'True if DHT enabled.'
-        ),
-        "download-dir": (
+        'dht-enabled': ('boolean', 6, None, None, None, 'True if DHT enabled.'),
+        'download-dir': (
             'string', 1, None, None, None, 'The download directory.'
         ),
-        "download-dir-free-space": (
+        'download-dir-free-space': (
             'number', 12, None, None, None,
             'Free space in the download directory, in bytes'
         ),
-        "download-queue-size": (
+        'download-queue-size': (
             'number', 14, None, None, None,
             'Number of slots in the download queue.'
         ),
-        "download-queue-enabled": (
+        'download-queue-enabled': (
             'boolean', 14, None, None, None,
             'True if the download queue is enabled.'
         ),
-        "encryption": (
+        'encryption': (
             'string', 1, None, None, None,
             'Encryption mode, one of ``required``, ``preferred`` or ``tolerated``.'
         ),
-        "idle-seeding-limit": (
+        'idle-seeding-limit': (
             'number', 10, None, None, None, 'Seed inactivity limit in minutes.'
         ),
-        "idle-seeding-limit-enabled": (
+        'idle-seeding-limit-enabled': (
             'boolean', 10, None, None, None,
             'True if the seed activity limit is enabled.'
         ),
-        "incomplete-dir": (
+        'incomplete-dir': (
             'string', 7, None, None, None,
             'The path to the directory for incomplete torrent transfer data.'
         ),
-        "incomplete-dir-enabled": (
+        'incomplete-dir-enabled': (
             'boolean', 7, None, None, None,
             'True if the incomplete dir is enabled.'
         ),
-        "lpd-enabled": (
+        'lpd-enabled': (
             'boolean', 9, None, None, None,
             'True if local peer discovery is enabled.'
         ),
-        "peer-limit": (
+        'peer-limit': (
             'number', 1, 5, None, 'peer-limit-global',
             'Maximum number of peers.'
         ),
-        "peer-limit-global": (
+        'peer-limit-global': (
             'number', 5, None, 'peer-limit', None, 'Maximum number of peers.'
         ),
-        "peer-limit-per-torrent": (
+        'peer-limit-per-torrent': (
             'number', 5, None, None, None,
             'Maximum number of peers per transfer.'
         ),
-        "pex-allowed": (
+        'pex-allowed': (
             'boolean', 1, 5, None, 'pex-enabled', 'True if PEX is allowed.'
         ),
-        "pex-enabled": (
+        'pex-enabled': (
             'boolean', 5, None, 'pex-allowed', None, 'True if PEX is enabled.'
         ),
-        "port": ('number', 1, 5, None, 'peer-port', 'Peer port.'),
-        "peer-port": ('number', 5, None, 'port', None, 'Peer port.'),
-        "peer-port-random-on-start": (
+        'port': ('number', 1, 5, None, 'peer-port', 'Peer port.'),
+        'peer-port': ('number', 5, None, 'port', None, 'Peer port.'),
+        'peer-port-random-on-start': (
             'boolean', 5, None, None, None,
             'Enables randomized peer port on start of Transmission.'
         ),
-        "port-forwarding-enabled": (
+        'port-forwarding-enabled': (
             'boolean', 1, None, None, None,
             'True if port forwarding is enabled.'
         ),
-        "queue-stalled-minutes": (
+        'queue-stalled-minutes': (
             'number', 14, None, None, None,
             'Number of minutes of idle that marks a transfer as stalled.'
         ),
-        "queue-stalled-enabled": (
+        'queue-stalled-enabled': (
             'boolean', 14, None, None, None,
             'True if stalled tracking of transfers is enabled.'
         ),
-        "rename-partial-files": (
+        'rename-partial-files': (
             'boolean', 8, None, None, None,
             'True if ".part" is appended to incomplete files'
         ),
-        "rpc-version": (
+        'rpc-version': (
             'number', 4, None, None, None, 'Transmission RPC API Version.'
         ),
-        "rpc-version-minimum": (
+        'rpc-version-minimum': (
             'number', 4, None, None, None, 'Minimum accepted RPC API Version.'
         ),
-        "script-torrent-done-enabled": (
+        'script-torrent-done-enabled': (
             'boolean', 9, None, None, None,
             'True if the done script is enabled.'
         ),
-        "script-torrent-done-filename": (
+        'script-torrent-done-filename': (
             'string', 9, None, None, None,
             'Filename of the script to run when the transfer is done.'
         ),
-        "seedRatioLimit": (
+        'seedRatioLimit': (
             'double', 5, None, None, None,
             'Seed ratio limit. 1.0 means 1:1 download and upload ratio.'
         ),
-        "seedRatioLimited": (
+        'seedRatioLimited': (
             'boolean', 5, None, None, None,
             'True if seed ration limit is enabled.'
         ),
-        "seed-queue-size": (
+        'seed-queue-size': (
             'number', 14, None, None, None,
             'Number of slots in the upload queue.'
         ),
-        "seed-queue-enabled": (
+        'seed-queue-enabled': (
             'boolean', 14, None, None, None, 'True if upload queue is enabled.'
         ),
-        "speed-limit-down": (
+        'speed-limit-down': (
             'number', 1, None, None, None, 'Download speed limit (in Kib/s).'
         ),
-        "speed-limit-down-enabled": (
+        'speed-limit-down-enabled': (
             'boolean', 1, None, None, None,
             'True if the download speed is limited.'
         ),
-        "speed-limit-up": (
+        'speed-limit-up': (
             'number', 1, None, None, None, 'Upload speed limit (in Kib/s).'
         ),
-        "speed-limit-up-enabled": (
+        'speed-limit-up-enabled': (
             'boolean', 1, None, None, None,
             'True if the upload speed is limited.'
         ),
-        "start-added-torrents": (
+        'start-added-torrents': (
             'boolean', 9, None, None, None,
             'When true uploaded torrents will start right away.'
         ),
-        "trash-original-torrent-files": (
+        'trash-original-torrent-files': (
             'boolean', 9, None, None, None,
             'When true added .torrent files will be deleted.'
         ),
@@ -644,163 +631,162 @@ SESSION_ARGS = {
             'boolean', 13, None, None, None,
             'True if Micro Transport Protocol (UTP) is enabled.'
         ),
-        "version": ('string', 3, None, None, None, 'Transmission version.'),
+        'version': ('string', 3, None, None, None, 'Transmission version.'),
     },
     'set': {
-        "alt-speed-down": (
+        'alt-speed-down': (
             'number', 5, None, None, None,
             'Alternate session download speed limit (in Kib/s).'
         ),
-        "alt-speed-enabled": (
+        'alt-speed-enabled': (
             'boolean', 5, None, None, None,
             'Enables alternate global download speed limiter.'
         ),
-        "alt-speed-time-begin": (
+        'alt-speed-time-begin': (
             'number', 5, None, None, None,
             'Time when alternate speeds should be enabled. Minutes after midnight.'
         ),
-        "alt-speed-time-enabled": (
+        'alt-speed-time-enabled': (
             'boolean', 5, None, None, None,
             'Enables alternate speeds scheduling.'
         ),
-        "alt-speed-time-end": (
+        'alt-speed-time-end': (
             'number', 5, None, None, None,
             'Time when alternate speeds should be disabled. Minutes after midnight.'
         ),
-        "alt-speed-time-day": (
+        'alt-speed-time-day': (
             'number', 5, None, None, None,
             'Enables alternate speeds scheduling these days.'
         ),
-        "alt-speed-up": (
+        'alt-speed-up': (
             'number', 5, None, None, None,
             'Alternate session upload speed limit (in Kib/s).'
         ),
-        "blocklist-enabled": (
+        'blocklist-enabled': (
             'boolean', 5, None, None, None, 'Enables the block list'
         ),
-        "blocklist-url": (
+        'blocklist-url': (
             'string', 11, None, None, None,
             'Location of the block list. Updated with blocklist-update.'
         ),
-        "cache-size-mb": (
+        'cache-size-mb': (
             'number', 10, None, None, None,
             'The maximum size of the disk cache in MB'
         ),
-        "dht-enabled": ('boolean', 6, None, None, None, 'Enables DHT.'),
-        "download-dir": (
-            'string', 1, None, None, None,
-            'Set the session download directory.'
+        'dht-enabled': ('boolean', 6, None, None, None, 'Enables DHT.'),
+        'download-dir': (
+            'string', 1, None, None, None, 'Set the session download directory.'
         ),
-        "download-queue-size": (
+        'download-queue-size': (
             'number', 14, None, None, None,
             'Number of slots in the download queue.'
         ),
-        "download-queue-enabled": (
+        'download-queue-enabled': (
             'boolean', 14, None, None, None, 'Enables download queue.'
         ),
-        "encryption": (
+        'encryption': (
             'string', 1, None, None, None,
             'Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.'
         ),
-        "idle-seeding-limit": (
+        'idle-seeding-limit': (
             'number', 10, None, None, None,
             'The default seed inactivity limit in minutes.'
         ),
-        "idle-seeding-limit-enabled": (
+        'idle-seeding-limit-enabled': (
             'boolean', 10, None, None, None,
             'Enables the default seed inactivity limit'
         ),
-        "incomplete-dir": (
+        'incomplete-dir': (
             'string', 7, None, None, None,
             'The path to the directory of incomplete transfer data.'
         ),
-        "incomplete-dir-enabled": (
+        'incomplete-dir-enabled': (
             'boolean', 7, None, None, None,
             'Enables the incomplete transfer data directory. Otherwise data for incomplete transfers are stored in the download target.'
         ),
-        "lpd-enabled": (
+        'lpd-enabled': (
             'boolean', 9, None, None, None,
             'Enables local peer discovery for public torrents.'
         ),
-        "peer-limit": (
+        'peer-limit': (
             'number', 1, 5, None, 'peer-limit-global',
             'Maximum number of peers.'
         ),
-        "peer-limit-global": (
+        'peer-limit-global': (
             'number', 5, None, 'peer-limit', None, 'Maximum number of peers.'
         ),
-        "peer-limit-per-torrent": (
+        'peer-limit-per-torrent': (
             'number', 5, None, None, None,
             'Maximum number of peers per transfer.'
         ),
-        "pex-allowed": (
+        'pex-allowed': (
             'boolean', 1, 5, None, 'pex-enabled',
             'Allowing PEX in public torrents.'
         ),
-        "pex-enabled": (
+        'pex-enabled': (
             'boolean', 5, None, 'pex-allowed', None,
             'Allowing PEX in public torrents.'
         ),
-        "port": ('number', 1, 5, None, 'peer-port', 'Peer port.'),
-        "peer-port": ('number', 5, None, 'port', None, 'Peer port.'),
-        "peer-port-random-on-start": (
+        'port': ('number', 1, 5, None, 'peer-port', 'Peer port.'),
+        'peer-port': ('number', 5, None, 'port', None, 'Peer port.'),
+        'peer-port-random-on-start': (
             'boolean', 5, None, None, None,
             'Enables randomized peer port on start of Transmission.'
         ),
-        "port-forwarding-enabled": (
+        'port-forwarding-enabled': (
             'boolean', 1, None, None, None, 'Enables port forwarding.'
         ),
-        "rename-partial-files": (
+        'rename-partial-files': (
             'boolean', 8, None, None, None,
             'Appends ".part" to incomplete files'
         ),
-        "queue-stalled-minutes": (
+        'queue-stalled-minutes': (
             'number', 14, None, None, None,
             'Number of minutes of idle that marks a transfer as stalled.'
         ),
-        "queue-stalled-enabled": (
+        'queue-stalled-enabled': (
             'boolean', 14, None, None, None,
             'Enable tracking of stalled transfers.'
         ),
-        "script-torrent-done-enabled": (
+        'script-torrent-done-enabled': (
             'boolean', 9, None, None, None,
             'Whether or not to call the "done" script.'
         ),
-        "script-torrent-done-filename": (
+        'script-torrent-done-filename': (
             'string', 9, None, None, None,
             'Filename of the script to run when the transfer is done.'
         ),
-        "seed-queue-size": (
+        'seed-queue-size': (
             'number', 14, None, None, None,
             'Number of slots in the upload queue.'
         ),
-        "seed-queue-enabled": (
+        'seed-queue-enabled': (
             'boolean', 14, None, None, None, 'Enables upload queue.'
         ),
-        "seedRatioLimit": (
+        'seedRatioLimit': (
             'double', 5, None, None, None,
             'Seed ratio limit. 1.0 means 1:1 download and upload ratio.'
         ),
-        "seedRatioLimited": (
+        'seedRatioLimited': (
             'boolean', 5, None, None, None, 'Enables seed ration limit.'
         ),
-        "speed-limit-down": (
+        'speed-limit-down': (
             'number', 1, None, None, None, 'Download speed limit (in Kib/s).'
         ),
-        "speed-limit-down-enabled": (
+        'speed-limit-down-enabled': (
             'boolean', 1, None, None, None, 'Enables download speed limiting.'
         ),
-        "speed-limit-up": (
+        'speed-limit-up': (
             'number', 1, None, None, None, 'Upload speed limit (in Kib/s).'
         ),
-        "speed-limit-up-enabled": (
+        'speed-limit-up-enabled': (
             'boolean', 1, None, None, None, 'Enables upload speed limiting.'
         ),
-        "start-added-torrents": (
+        'start-added-torrents': (
             'boolean', 9, None, None, None,
             'Added torrents will be started right away.'
         ),
-        "trash-original-torrent-files": (
+        'trash-original-torrent-files': (
             'boolean', 9, None, None, None,
             'The .torrent file of added torrents will be deleted.'
         ),

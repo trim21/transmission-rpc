@@ -29,7 +29,6 @@ install:
   - python setup.py install
   - pip install codecov
 script:
-  - coverage run -a -m unittest test.client
   - coverage run -a -m unittest test.top
   - coverage run -a -m unittest test.torrent
   - coverage run -a -m unittest test.utils
