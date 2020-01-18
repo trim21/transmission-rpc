@@ -1,11 +1,13 @@
 name: ci
 
+on: [push, pull_request]
+
 jobs:
   build:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: [6, 8, 10]
+        python: ['3.5', '3.6', '3.7', '3.8']
 
     steps:
       - uses: actions/checkout@v1
