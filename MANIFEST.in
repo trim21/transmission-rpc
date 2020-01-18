@@ -1,3 +1,0 @@
-recursive-exclude test *
-recursive-exclude transmission_rpc *.pyc *.pyo
-recursive-exclude ci *

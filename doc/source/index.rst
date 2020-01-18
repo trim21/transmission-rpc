@@ -6,7 +6,8 @@
 Welcome to transmission-rpc's documentation!
 ============================================
 
-:code:`transmission-rpc` is a python3 library to help your control your transmission deamon remotely.
+:code:`transmission-rpc` is a python3 library
+to help your control your transmission daemon remotely.
 
 python2 has be deprecated in 1.0.0
 
@@ -48,20 +49,25 @@ quick start
     with open('a', 'rb') as f:
         c.add_torrent(f)
 
-:code:`client.add_torrent` support a url string(could start with :code:`file:`) ,
-file-like object(object with :code:`read()` method) or base64 encoded torrent file content.
+:code:`client.add_torrent` support a url string(could start with :code:`file:`),
+file-like object(object with :code:`read()` method)
+or base64 encoded torrent file content.
 
-if :code:`torrent` starts with :code:`file`, :code:`transmission-rpc` will read it from disk and base64 encode it.
+if :code:`torrent` starts with :code:`file`,
+:code:`transmission-rpc` will read it from disk and base64 encode it.
 
 
 Arguments
 -------------------
 
-Each method has it own arguments. You can pass arguments as kwargs when you call methods.
+Each method has it own arguments.
+You can pass arguments as kwargs when you call methods.
 
-But in python, :code:`-` can't be used in a variable name, so you need to replace :code:`-` with :code:`_`.
+But in python, :code:`-` can't be used in a variable name,
+so you need to replace :code:`-` with :code:`_`.
 
-For example, :code:`torrent-add` method support arguments :code:`download-dir`, you should call method like this.
+For example, :code:`torrent-add` method support arguments :code:`download-dir`,
+you should call method like this.
 
 .. code-block :: python
 
@@ -69,15 +75,18 @@ For example, :code:`torrent-add` method support arguments :code:`download-dir`, 
 
     Client().add_torrent(torrent_url, download_dir='/path/to/download/dir')
 
-:code:`transmission-rpc` will put :code:`{"download-dir": "/path/to/download/dir"}` in arguments.
+:code:`transmission-rpc` will put
+:code:`{"download-dir": "/path/to/download/dir"}` in arguments.
 
 
 helper
 ------------
 
 If you want to know what kwargs you can use for a method,
-you can use :meth:`transmission_rpc.utils.get_arguments` to get support arguments.
-For example, transmission 2.94 is rpc version 15, so just call :code:`print(get_arguments('torrent-add', 15))`
+you can use :meth:`transmission_rpc.utils.get_arguments`
+to get support arguments.
+For example, transmission 2.94 is rpc version 15,
+so just call :code:`print(get_arguments('torrent-add', 15))`
 
 rpc method and class method are not same, but reversed
 
