@@ -255,6 +255,9 @@ class Client:
             arguments = {}
         if not isinstance(arguments, dict):
             raise ValueError('request takes arguments as dict')
+        arguments = {
+            key.replace('_', '-'): value for key, value in arguments.items()
+        }
         ids = parse_torrent_ids(ids)
         if len(ids) > 0:
             arguments['ids'] = ids
@@ -268,14 +271,14 @@ class Client:
         start = time.time()
         http_data = self._http_query(query, timeout)
         elapsed = time.time() - start
-        self.logger.info('http request took %.3f s' % (elapsed))
+        self.logger.info('http request took %.3f s' % elapsed)
 
         try:
             data = json.loads(http_data)
         except ValueError as error:
             self.logger.error('Error: ' + str(error))
-            self.logger.error('Request: \"%s\"' % (query))
-            self.logger.error('HTTP data: \"%s\"' % (http_data))
+            self.logger.error('Request: \"%s\"' % query)
+            self.logger.error('HTTP data: \"%s\"' % http_data)
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
