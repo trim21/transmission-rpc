@@ -10,7 +10,7 @@ this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overv
 
 transmission_rpc requires:
 
-* Python >= 3.4
+* Python >= 3.5
 * requests
 
 ## Install
