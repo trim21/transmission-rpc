@@ -20,7 +20,9 @@ jobs:
         id: get-version
         run: |
           echo "::set-output name=poetry::1.0.0"
-#          echo "::set-output name=poetry::$(curl -sSl https://pypi.org/pypi/poetry/json | jq .info.version -r)"
+          echo "::set-output name=python::$(python -V)"
+
+      #          echo "::set-output name=poetry::$(curl -sSl https://pypi.org/pypi/poetry/json | jq .info.version -r)"
 
       - uses: actions/cache@v1
         with:
@@ -32,22 +34,20 @@ jobs:
           echo "::add-path::$HOME/.local/bin"
           echo "::add-path::$HOME/.poetry/bin"
           $HOME/.poetry/bin/poetry --version && exit 0
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version 1.0.0
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${{ steps.get-version.outputs.poetry }}
 
       - uses: actions/cache@v1
         with:
           path: ~/.local
-          key: poetry-1-${{ matrix.python }}-${{ hashFiles('**/poetry.lock') }}
+          key: poetry-2-${{ steps.get-version.outputs.poetry }}-${{ hashFiles('**/poetry.lock') }}
 
       - uses: actions/cache@v1
         with:
           path: ~/.cache/pre-commit
-          key: precommit-1-${{ matrix.python }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+          key: precommit-2-${{ steps.get-version.outputs.poetry }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
 
       - name: Install Dependencies
-        run: |
-          pip install --no-deps -q -r <(poetry export -f requirements.txt --dev -E docs)
-          poetry install
+        run: poetry install -E docs
         env:
           POETRY_VIRTUALENVS_CREATE: 'false'
           PIP_USER: '1'
