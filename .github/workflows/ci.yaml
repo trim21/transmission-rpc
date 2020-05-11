@@ -48,7 +48,7 @@ jobs:
           key: precommit-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
 
       - name: pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --all-files --show-diff-on-failure
 
       - name: test
         run: pytest --cov=./ --cov-report=xml

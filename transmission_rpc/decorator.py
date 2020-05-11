@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from warnings import warn
 from functools import wraps
 
 from transmission_rpc.error import ServerVersionTooLow
@@ -14,8 +15,29 @@ def arg(kw: str, v: str):
             if kw in kwargs:
                 if self.rpc_version < v:
                     raise ServerVersionTooLow(
-                        'arguments {} require rpc version {}, but current server rpc version is {}'
+                        'argument `{}` require rpc version `{}`, but current server rpc version is {}'
                         .format(kw, v, self.rpc_version)
+                    )
+            return f(self, *args, **kwargs)
+
+        return wrapped
+
+    return wrapper
+
+
+class ArgumentsReplacedWarning(DeprecationWarning):
+    pass
+
+
+def replaced_by(old_kw: str, new_kw: str, new_v: int):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(self: 'Client', *args, **kwargs):
+            if old_kw in kwargs:
+                if self.rpc_version >= new_v:
+                    warn(
+                        f'argument `{old_kw}` is replaced by `{new_kw}`',
+                        ArgumentsReplacedWarning
                     )
             return f(self, *args, **kwargs)
 

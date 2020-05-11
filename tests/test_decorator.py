@@ -2,7 +2,9 @@ import pytest
 
 from transmission_rpc.error import ServerVersionTooLow
 from transmission_rpc.client import Client
-from transmission_rpc.decorator import arg
+from transmission_rpc.decorator import (
+    ArgumentsReplacedWarning, arg, replaced_by
+)
 
 
 class C(Client):
@@ -26,6 +28,10 @@ class C(Client):
     def t(self, **kwargs):
         return kwargs
 
+    @replaced_by('old', 'new', 5)
+    def r(self, **kwargs):
+        return kwargs
+
 
 def test_kwarg_require_rpc_version():
     c = C()
@@ -35,3 +41,10 @@ def test_kwarg_require_rpc_version():
 
     with pytest.raises(ServerVersionTooLow):
         c.t(high=1)
+
+
+def test_kwargs_replace():
+    c = C()
+
+    with pytest.warns(ArgumentsReplacedWarning):
+        c.r(old=1)
