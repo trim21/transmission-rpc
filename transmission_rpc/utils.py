@@ -1,7 +1,6 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 
-import socket
 import datetime
 from collections import namedtuple
 
@@ -52,42 +51,6 @@ def format_timestamp(timestamp, utc=False):
         return dt_timestamp.isoformat(' ')
     else:
         return '-'
-
-
-class INetAddressError(Exception):
-    """
-    Error parsing / generating a internet address.
-    """
-
-
-def inet_address(address, default_port, default_address='localhost'):
-    """
-    Parse internet address.
-    """
-    addr = address.split(':')
-    if len(addr) == 1:
-        try:
-            port = int(addr[0])
-            addr = default_address
-        except ValueError:
-            addr = addr[0]
-            port = default_port
-    elif len(addr) == 2:
-        try:
-            port = int(addr[1])
-        except ValueError:
-            raise INetAddressError('Invalid address "%s".' % address)
-        if len(addr[0]) == 0:
-            addr = default_address
-        else:
-            addr = addr[0]
-    else:
-        raise INetAddressError('Invalid address "%s".' % address)
-    try:
-        socket.getaddrinfo(addr, port, socket.AF_INET, socket.SOCK_STREAM)
-    except socket.gaierror:
-        raise INetAddressError('Cannot look up address "%s".' % address)
-    return addr, port
 
 
 def rpc_bool(arg):
