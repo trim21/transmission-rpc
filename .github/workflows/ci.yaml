@@ -32,7 +32,7 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.local
-          key: poetry-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('**/poetry.lock') }}
+          key: poetry-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('poetry.lock') }}
 
       - name: Install Dependencies
         run: |
@@ -45,7 +45,9 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.cache/pre-commit
-          key: precommit-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+          key: precommit-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            precommit-2-${{ steps.get-version.outputs.python }}-
 
       - name: pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
