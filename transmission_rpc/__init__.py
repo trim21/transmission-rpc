@@ -1,4 +1,5 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
+# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 
 from transmission_rpc.error import TransmissionError
@@ -11,9 +12,3 @@ __all__ = [
     'Client', 'DEFAULT_TIMEOUT', 'PRIORITY', 'RATIO_LIMIT', 'LOGGER', 'TransmissionError',
     'Session', 'Torrent'
 ]
-
-__author__ = 'Trim21 <trim21me@hotmail.com>'
-__author_email__ = 'trim21me@hotmail.com'
-__copyright__ = 'Copyright (c) 2018-2019 Trim21'
-__license__ = 'MIT'
-__version__ = '2.0.0'

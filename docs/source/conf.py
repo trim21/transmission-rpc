@@ -11,18 +11,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import transmission_rpc
 
 # -- Project information -----------------------------------------------------
 
 project = 'transmission-rpc'
 copyright = '2018-2020, Trim21<trim21me@gmail.com>'
 author = 'Trim21<trim21me@gmail.com>'
-
-# The short X.Y version
-version = '.'.join(transmission_rpc.__version__.split('.')[:2])
-# The full version, including alpha/beta/rc tags
-release = transmission_rpc.__version__
 
 # -- General configuration ---------------------------------------------------
 
