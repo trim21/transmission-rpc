@@ -3,11 +3,16 @@
 
 import unittest
 
-from . import top, utils, client, torrent
+from tests import test_utils
+
+from . import torrent
 
 
 def test():
-    tests = unittest.TestSuite([top.suite(), utils.suite(), torrent.suite(), client.suite()])
+    tests = unittest.TestSuite([
+        test_utils.suite(),
+        torrent.suite(),
+    ])
     result = unittest.TestResult()
     tests.run(result, True)
     for e in result.errors:
