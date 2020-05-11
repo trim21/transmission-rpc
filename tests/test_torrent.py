@@ -1,4 +1,5 @@
 # 2008-12, Erik Svensson <erik.public@gmail.com>
+# Copyright (c) 2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 
 import time
@@ -10,7 +11,7 @@ import transmission_rpc.utils
 import transmission_rpc.constants
 
 
-class torrent(unittest.TestCase):
+class TestTorrent(unittest.TestCase):
     def assertPropertyException(self, exception, object, property):
         try:
             getattr(object, property)
@@ -20,7 +21,7 @@ class torrent(unittest.TestCase):
             self.fail()
 
     def testConstruction(self):
-        self.failUnlessRaises(ValueError, transmission_rpc.Torrent, None, {})
+        self.assertRaises(ValueError, transmission_rpc.Torrent, None, {})
         transmission_rpc.Torrent(None, {'id': 42})
 
     def testAttributes(self):
@@ -94,8 +95,3 @@ class torrent(unittest.TestCase):
         self.assertEqual(torrent.id, 42)
         repr(torrent)
         str(torrent)
-
-
-def suite():
-    suite = unittest.TestLoader().loadTestsFromTestCase(torrent)
-    return suite
