@@ -3,14 +3,14 @@ name: ci
 on: [push, pull_request]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: ['3.5', '3.6', '3.7', '3.8']
+        python: ["3.6", "3.7", "3.8"]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v1
         with:
@@ -18,40 +18,34 @@ jobs:
 
       - name: Get Latest tools version
         id: get-version
-        run: |
-          echo "::set-output name=poetry::$(curl -sSl https://pypi.org/pypi/poetry/json | jq .info.version -r)"
-          echo "::set-output name=python::$(python -V)"
-
-      - uses: actions/cache@v1
-        with:
-          path: ~/.poetry
-          key: poetry-bin-${{ steps.get-version.outputs.poetry }}
+        run: echo "::set-output name=python::$(python -V)"
 
       - name: Install Poetry
         run: |
           echo "::add-path::$HOME/.local/bin"
           echo "::add-path::$HOME/.poetry/bin"
-          $HOME/.poetry/bin/poetry --version && exit 0
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - --version ${{ steps.get-version.outputs.poetry }}
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 
       - uses: actions/cache@v1
         with:
           path: ~/.local
-          key: poetry-2-${{ steps.get-version.outputs.poetry }}-${{ hashFiles('**/poetry.lock') }}
-
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache/pre-commit
-          key: precommit-2-${{ steps.get-version.outputs.poetry }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+          key: poetry-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Dependencies
         run: |
           pip install --no-deps -q -r <(poetry export -f requirements.txt --dev -E docs)
           poetry install -E docs
-
         env:
-          POETRY_VIRTUALENVS_CREATE: 'false'
-          PIP_USER: '1'
+          POETRY_VIRTUALENVS_CREATE: "false"
+          PIP_USER: "1"
 
-      - name: check if pre-commit update
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pre-commit
+          key: precommit-2-${{ steps.get-version.outputs.python }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+
+      - name: pre-commit
         run: pre-commit run --all-files
+
+      - name: test
+        run: pytest

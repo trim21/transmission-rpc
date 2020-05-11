@@ -24,14 +24,46 @@ repos:
       - id: fix-encoding-pragma
         args: [--remove]
 
-  - repo: local
+  - repo: https://github.com/timothycrosley/isort
+    rev: 4.3.21
     hooks:
       - id: isort
-        name: isort
-        entry: isort
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.4.1
+    hooks:
+      - id: pyupgrade
+        args: ["--py3-plus"]
+
+  - repo: https://github.com/Trim21/mirrors-autoflake
+    rev: v1.3.1
+    hooks:
+      - id: autoflake
         require_serial: true
+        args:
+          [
+            "--in-place",
+            "--remove-unused-variables",
+            "--remove-all-unused-imports",
+            "--expand-star-imports",
+          ]
+
+  - repo: https://github.com/PyCQA/doc8.git
+    rev: 0.8.1rc3
+    hooks:
+      - id: doc8
+        name: Check rst file
+        args: ["--config", "setup.cfg"]
+        files: \.rst$
+
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        entry: flake8
         language: system
         types: [python]
+        args: ["--config=setup.cfg"]
 
       - id: yapf
         name: yapf
@@ -39,34 +71,3 @@ repos:
         require_serial: true
         language: system
         types: [python]
-
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        args: ['--config=setup.cfg']
-
-      - id: pyupgrade
-        name: pyupgrade
-        entry: pyupgrade
-        require_serial: true
-        language: system
-        types: [python]
-        args: ['--py3-plus',]
-
-      - id: autoflake
-        name: autoflake
-        entry: autoflake
-        require_serial: true
-        language: system
-        types: [python]
-        args: ['--in-place',
-               '--remove-unused-variables',
-               '--remove-all-unused-imports']
-
-      - id: doc8
-        name: Check rst file
-        language: system
-        entry: doc8 --config setup.cfg
-        files: \.rst$

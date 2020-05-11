@@ -15,10 +15,6 @@ def mirror_dict(source):
     return source
 
 
-DEFAULT_PROTOCOL = 'http'
-DEFAULT_HOST = '127.0.0.1'
-DEFAULT_PORT = 9091
-DEFAULT_PATH = '/transmission/rpc'
 DEFAULT_TIMEOUT = 30.0
 
 TR_PRI_LOW = -1
