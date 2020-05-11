@@ -97,6 +97,7 @@ or mirror `here <https://github.com/Trim21/transmission-rpc/blob/master/doc/rpc-
     :caption: Contents:
 
     client.rst
+    torrent.rst
     utils.rst
 
 Indices and tables

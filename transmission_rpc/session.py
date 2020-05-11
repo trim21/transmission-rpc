@@ -75,13 +75,15 @@ class Session:
         """Update the session information."""
         self._update_fields(data)
 
-    def _get_peer_port(self):
+    @property
+    def peer_port(self):
         """
         Get the peer port.
         """
         return self._fields['peer_port'].value
 
-    def _set_peer_port(self, port):
+    @peer_port.setter
+    def peer_port(self, port):
         """
         Set the peer port.
         """
@@ -91,20 +93,16 @@ class Session:
         else:
             raise ValueError('Not a valid limit')
 
-    peer_port = property(_get_peer_port, _set_peer_port, None, 'Peer port. This is a mutator.')
-
-    def _get_pex_enabled(self):
+    @property
+    def pex_enabled(self):
         """Is peer exchange enabled?"""
         return self._fields['pex_enabled'].value
 
-    def _set_pex_enabled(self, enabled):
+    @pex_enabled.setter
+    def pex_enabled(self, enabled):
         """Enable/disable peer exchange."""
         if isinstance(enabled, bool):
             self._fields['pex_enabled'] = Field(enabled, True)
             self._push()
         else:
             raise TypeError('Not a valid type')
-
-    pex_enabled = property(
-        _get_pex_enabled, _set_pex_enabled, None, 'Enable peer exchange. This is a mutator.'
-    )
