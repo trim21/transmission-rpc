@@ -150,25 +150,26 @@ class Client:
         self.get_session()
         self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
-    def _get_timeout(self):
+    @property
+    def timeout(self):
         """
         Get current timeout for HTTP queries.
         """
         return self._query_timeout
 
-    def _set_timeout(self, value):
+    @timeout.setter
+    def timeout(self, value):
         """
         Set timeout for HTTP queries.
         """
         self._query_timeout = float(value)
 
-    def _del_timeout(self):
+    @timeout.deleter
+    def timeout(self):
         """
         Reset the HTTP query timeout to the default.
         """
         self._query_timeout = DEFAULT_TIMEOUT
-
-    timeout = property(_get_timeout, _set_timeout, _del_timeout, doc='HTTP query timeout.')
 
     @property
     def _http_header(self):
