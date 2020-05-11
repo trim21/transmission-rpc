@@ -33,7 +33,7 @@ NOTE: You might need administrator privileges to install python modules.
 
 ## Documents
 
-<https://transmission-rpc.readthedocs.io/en/latest/>
+<https://transmission-rpc.readthedocs.io/>
 
 ## Break change
 
