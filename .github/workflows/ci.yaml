@@ -9,6 +9,9 @@ jobs:
       matrix:
         python: ["3.6", "3.7", "3.8"]
 
+    env:
+      PYTHON: ${{ matrix.python }}
+
     steps:
       - uses: actions/checkout@v2
 
@@ -48,4 +51,11 @@ jobs:
         run: pre-commit run --all-files
 
       - name: test
-        run: pytest
+        run: pytest --cov=./ --cov-report=xml
+
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          env_vars: PYTHON
+          file: ./coverage.xml
+          fail_ci_if_error: true # optional (default = false)

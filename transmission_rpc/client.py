@@ -22,21 +22,22 @@ from transmission_rpc.utils import (
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
+from transmission_rpc.decorator import arg
 
 
-def parse_torrent_id(arg):
+def parse_torrent_id(raw_torrent_id):
     """Parse an torrent id or torrent hashString."""
     torrent_id = None
-    if isinstance(arg, int):
+    if isinstance(raw_torrent_id, int):
         # handle index
-        torrent_id = int(arg)
-    elif isinstance(arg, float):
-        torrent_id = int(arg)
-        if torrent_id != arg:
+        torrent_id = int(raw_torrent_id)
+    elif isinstance(raw_torrent_id, float):
+        torrent_id = int(raw_torrent_id)
+        if torrent_id != raw_torrent_id:
             torrent_id = None
-    elif isinstance(arg, str):
+    elif isinstance(raw_torrent_id, str):
         try:
-            torrent_id = int(arg)
+            torrent_id = int(raw_torrent_id)
             if torrent_id >= 2**31:
                 torrent_id = None
         except (ValueError, TypeError):
@@ -44,8 +45,8 @@ def parse_torrent_id(arg):
         if torrent_id is None:
             # handle hashes
             try:
-                int(arg, 16)
-                torrent_id = arg
+                int(raw_torrent_id, 16)
+                torrent_id = raw_torrent_id
             except (ValueError, TypeError):
                 pass
     return torrent_id
@@ -360,6 +361,8 @@ class Client:
                 % (self.rpc_version, version)
             )
 
+    @arg('bandwidthPriority', 8)
+    @arg('cookies', 13)
     def add_torrent(self, torrent, timeout=None, **kwargs):
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
@@ -616,6 +619,22 @@ class Client:
                 args['files_unwanted'] = unwanted
             self.change_torrent([tid], **args)
 
+    @arg('bandwidthPriority', 5)
+    @arg('downloadLimit', 5)
+    @arg('downloadLimited', 5)
+    @arg('honorsSessionLimits', 5)
+    @arg('queuePosition', 14)
+    @arg('seedIdleLimit', 10)
+    @arg('seedIdleMode', 10)
+    @arg('downloadLimit', 5)
+    @arg('downloadLimited', 5)
+    @arg('uploadLimit', 5)
+    @arg('uploadLimited', 5)
+    @arg('trackerAdd', 10)
+    @arg('trackerRemove', 10)
+    @arg('trackerReplace', 10)
+    @arg('uploadLimit', 5)
+    @arg('uploadLimited', 5)
     def change_torrent(self, ids, timeout=None, **kwargs):
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
@@ -737,6 +756,51 @@ class Client:
         self._update_server_version()
         return self.session
 
+    @arg("alt_speed_down", 5)
+    @arg("alt_speed_enabled", 5)
+    @arg("alt_speed_time_begin", 5)
+    @arg("alt_speed_time_day", 5)
+    @arg("alt_speed_time_enabled", 5)
+    @arg("alt_speed_time_end", 5)
+    @arg("alt_speed_up", 5)
+    @arg("blocklist_enabled", 5)
+    @arg("blocklist_url", 11)
+    @arg("cache_size_mb", 10)
+    @arg("dht_enabled", 6)
+    @arg("download_dir", 1)
+    @arg("download_queue_enabled", 14)
+    @arg("download_queue_size", 14)
+    @arg("encryption", 1)
+    @arg("idle_seeding_limit", 10)
+    @arg("idle_seeding_limit_enabled", 10)
+    @arg("incomplete_dir", 7)
+    @arg("incomplete_dir_enabled", 7)
+    @arg("lpd_enabled", 9)
+    @arg('peer_limit', 1)
+    @arg("peer_limit_global", 5)
+    @arg("peer_limit_per_torrent", 5)
+    @arg("peer_port", 5)
+    @arg("peer_port_random_on_start", 5)
+    @arg("pex_allowed", 1)
+    @arg("pex_enabled", 5)
+    @arg("port", 1)
+    @arg("port_forwarding_enabled", 1)
+    @arg("queue_stalled_enabled", 14)
+    @arg("queue_stalled_minutes", 14)
+    @arg("rename_partial_files", 8)
+    @arg("script_torrent_done_enabled", 9)
+    @arg("script_torrent_done_filename", 9)
+    @arg("seed_queue_enabled", 14)
+    @arg("seed_queue_size", 14)
+    @arg("seedRatioLimit", 5)
+    @arg("seedRatioLimited", 5)
+    @arg("speed_limit_down", 1)
+    @arg("speed_limit_down_enabled", 1)
+    @arg("speed_limit_up", 1)
+    @arg("speed_limit_up_enabled", 1)
+    @arg("start_added_torrents", 9)
+    @arg("trash_original_torrent_files", 9)
+    @arg("utp_enabled", 13)
     def set_session(self, timeout=None, **kwargs):
         """
     Set session parameters. The parameters are:

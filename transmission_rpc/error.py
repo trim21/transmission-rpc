@@ -24,3 +24,7 @@ class TransmissionError(Exception):
 
 class TransmissionAuthError(TransmissionError):
     pass
+
+
+class ServerVersionTooLow(TransmissionError):
+    pass

@@ -20,16 +20,14 @@ quick start
 
     torrent_url = 'http://releases.ubuntu.com/' + \
                   '18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
-    c = Client(host='localhost', port=9091,
-                      user='transmission', password='password')
+    c = Client(host='localhost', port=9091, user='transmission', password='password')
     c.add_torrent(torrent_url)
 
     ########
 
     from transmission_rpc import Client
 
-    c = Client(port=DEFAULT_PORT,
-               username='transmission', password='password')
+    c = Client(username='transmission', password='password')
 
     torrent_url = 'magnet:?xt=urn:btih:e84213a794f3ccd890382a54' + \
                   'a64ca68b7e925433&dn=ubuntu-18.04.1-desktop-amd64.iso'

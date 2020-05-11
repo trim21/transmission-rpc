@@ -56,6 +56,11 @@ repos:
         args: ["--config", "setup.cfg"]
         files: \.rst$
 
+  - repo: https://github.com/Trim21/poetry-check-lock.git
+    rev: v0.0.2
+    hooks:
+      - id: poetry-check-lock
+
   - repo: local
     hooks:
       - id: flake8
