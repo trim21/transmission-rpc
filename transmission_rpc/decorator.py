@@ -35,10 +35,7 @@ def replaced_by(old_kw: str, new_kw: str, new_v: int):
         def wrapped(self: 'Client', *args, **kwargs):
             if old_kw in kwargs:
                 if self.rpc_version >= new_v:
-                    warn(
-                        f'argument `{old_kw}` is replaced by `{new_kw}`',
-                        ArgumentsReplacedWarning
-                    )
+                    warn(f'argument `{old_kw}` is replaced by `{new_kw}`', ArgumentsReplacedWarning)
             return f(self, *args, **kwargs)
 
         return wrapped

@@ -2,20 +2,11 @@ import pytest
 
 from transmission_rpc.error import ServerVersionTooLow
 from transmission_rpc.client import Client
-from transmission_rpc.decorator import (
-    ArgumentsReplacedWarning, arg, replaced_by
-)
+from transmission_rpc.decorator import ArgumentsReplacedWarning, arg, replaced_by
 
 
 class C(Client):
-    def _request(
-        self,
-        method,
-        arguments=None,
-        ids=None,
-        require_ids=False,
-        timeout=None
-    ):
+    def _request(self, *_, **__):
         pass
 
     @property

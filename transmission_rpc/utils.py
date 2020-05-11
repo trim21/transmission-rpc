@@ -103,8 +103,8 @@ def rpc_bool(arg):
 
 
 TR_TYPE_MAP = {
-    'number': int, 'string': str, 'double': float, 'boolean': rpc_bool,
-    'array': list, 'object': dict
+    'number': int, 'string': str, 'double': float, 'boolean': rpc_bool, 'array': list,
+    'object': dict
 }
 
 
@@ -147,22 +147,17 @@ def argument_value_convert(method, argument, value, rpc_version):
             if invalid_version:
                 if replacement:
                     LOGGER.warning(
-                        'Replacing requested argument "%s" with "%s".' %
-                        (argument, replacement)
+                        f'Replacing requested argument "{argument}" with "{replacement}".'
                     )
                     argument = replacement
                     info = args[argument]
                 else:
                     raise ValueError(
-                        'Method "%s" Argument "%s" does not exist in version %d.'
-                        % (method, argument, rpc_version)
+                        f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
                     )
-        return (argument, TR_TYPE_MAP[info[0]](value))
+        return argument, TR_TYPE_MAP[info[0]](value)
     else:
-        raise ValueError(
-            'Argument "%s" does not exists for method "%s".',
-            (argument, method)
-        )
+        raise ValueError('Argument "%s" does not exists for method "%s".', (argument, method))
 
 
 def get_arguments(method, rpc_version):

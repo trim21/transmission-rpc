@@ -99,9 +99,9 @@ class Torrent:
     def _dirty_fields(self):
         """Enumerate changed fields"""
         outgoing_keys = [
-            'bandwidthPriority', 'downloadLimit', 'downloadLimited',
-            'peer_limit', 'queuePosition', 'seedIdleLimit', 'seedIdleMode',
-            'seedRatioLimit', 'seedRatioMode', 'uploadLimit', 'uploadLimited'
+            'bandwidthPriority', 'downloadLimit', 'downloadLimited', 'peer_limit', 'queuePosition',
+            'seedIdleLimit', 'seedIdleMode', 'seedRatioLimit', 'seedRatioMode', 'uploadLimit',
+            'uploadLimited'
         ]
         fields = []
         for key in outgoing_keys:
@@ -170,9 +170,8 @@ class Torrent:
                 selected = True if item[3] else False
                 priority = PRIORITY[item[2]]
                 result[item[0]] = {
-                    'selected': selected, 'priority': priority,
-                    'size': item[1]['length'], 'name': item[1]['name'],
-                    'completed': item[1]['bytesCompleted']
+                    'selected': selected, 'priority': priority, 'size': item[1]['length'],
+                    'name': item[1]['name'], 'completed': item[1]['bytesCompleted']
                 }
         return result
 
@@ -212,9 +211,7 @@ class Torrent:
     @property
     def date_active(self):
         """Get the attribute "activityDate" as datetime.datetime."""
-        return datetime.datetime.fromtimestamp(
-            self._fields['activityDate'].value
-        )
+        return datetime.datetime.fromtimestamp(self._fields['activityDate'].value)
 
     @property
     def date_added(self):
@@ -298,9 +295,7 @@ class Torrent:
         else:
             raise ValueError('Not a valid limit')
 
-    peer_limit = property(
-        _get_peer_limit, _set_peer_limit, None, 'Peer limit. This is a mutator.'
-    )
+    peer_limit = property(_get_peer_limit, _set_peer_limit, None, 'Peer limit. This is a mutator.')
 
     def _get_priority(self):
         """
@@ -469,9 +464,7 @@ class Torrent:
         else:
             pass
 
-    queue_position = property(
-        _get_queue_position, _set_queue_position, None, 'Queue position'
-    )
+    queue_position = property(_get_queue_position, _set_queue_position, None, 'Queue position')
 
     def update(self, timeout=None):
         """Update the torrent information."""
@@ -484,9 +477,7 @@ class Torrent:
         Start the torrent.
         """
         self._incoming_pending = True
-        self._client.start_torrent(
-            self.id, bypass_queue=bypass_queue, timeout=timeout
-        )
+        self._client.start_torrent(self.id, bypass_queue=bypass_queue, timeout=timeout)
 
     def stop(self, timeout=None):
         """Stop the torrent."""
