@@ -9,6 +9,7 @@ import time
 import base64
 import logging
 import operator
+from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -143,10 +144,10 @@ class Client:
         )
         self.url = str(url)
         self._sequence = 0
-        self.session = None
+        self.session: Session = Session()
         self.session_id = 0
         self.server_version = None
-        self.protocol_version = None
+        self.protocol_version: Optional[int] = None
         self.get_session()
         self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
@@ -300,7 +301,7 @@ class Client:
             self.server_version = (version_major, version_minor, version_changeset)
 
     @property
-    def rpc_version(self):
+    def rpc_version(self) -> int:
         """
         Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
         """

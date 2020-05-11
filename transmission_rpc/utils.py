@@ -1,7 +1,9 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
+# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 
 import datetime
+from typing import Any, Tuple
 from collections import namedtuple
 
 import transmission_rpc.constants as constants
@@ -10,27 +12,27 @@ from transmission_rpc.constants import LOGGER
 UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
 
 
-def format_size(size):
+def format_size(size: int) -> Tuple[float, str]:
     """
     Format byte size into IEC prefixes, B, KiB, MiB ...
     """
-    size = float(size)
+    s = float(size)
     i = 0
-    while size >= 1024.0 and i < len(UNITS):
+    while s >= 1024.0 and i < len(UNITS):
         i += 1
-        size /= 1024.0
-    return size, UNITS[i]
+        s /= 1024.0
+    return s, UNITS[i]
 
 
-def format_speed(size):
+def format_speed(size: int) -> Tuple[float, str]:
     """
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
-    (size, unit) = format_size(size)
-    return size, unit + '/s'
+    (s, unit) = format_size(size)
+    return s, unit + '/s'
 
 
-def format_timedelta(delta):
+def format_timedelta(delta: datetime.timedelta) -> str:
     """
     Format datetime.timedelta into <days> <hours>:<minutes>:<seconds>.
     """
@@ -39,7 +41,7 @@ def format_timedelta(delta):
     return '%d %02d:%02d:%02d' % (delta.days, hours, minutes, seconds)
 
 
-def format_timestamp(timestamp, utc=False):
+def format_timestamp(timestamp: int, utc=False) -> str:
     """
     Format unix timestamp into ISO date format.
     """
@@ -53,7 +55,7 @@ def format_timestamp(timestamp, utc=False):
         return '-'
 
 
-def rpc_bool(arg):
+def rpc_bool(arg: Any) -> int:
     """
     Convert between Python boolean and Transmission RPC boolean.
     """
@@ -66,8 +68,12 @@ def rpc_bool(arg):
 
 
 TR_TYPE_MAP = {
-    'number': int, 'string': str, 'double': float, 'boolean': rpc_bool, 'array': list,
-    'object': dict
+    'number': int,
+    'string': str,
+    'double': float,
+    'boolean': rpc_bool,
+    'array': list,
+    'object': dict,
 }
 
 

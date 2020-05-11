@@ -47,6 +47,7 @@ flake8-mutable = "1.2.0"
 doc8 = "0.8.0"
 yapf = "^0.30.0"
 pytest-cov = "^2.8.1"
+mypy = "^0.770"
 
 [build-system]
 requires = ["poetry>=0.12"]

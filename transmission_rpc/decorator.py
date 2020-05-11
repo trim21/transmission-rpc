@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
 
-def arg(kw: str, v: str):
+def arg(kw: str, v: int):
     def wrapper(f):
         @wraps(f)
         def wrapped(self: 'Client', *args, **kwargs):
