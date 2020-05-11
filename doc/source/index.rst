@@ -20,7 +20,7 @@ quick start
 
     torrent_url = 'http://releases.ubuntu.com/' + \
                   '18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
-    c = Client(address='localhost', port=9091,
+    c = Client(host='localhost', port=9091,
                       user='transmission', password='password')
     c.add_torrent(torrent_url)
 

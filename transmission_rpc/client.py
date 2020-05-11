@@ -9,9 +9,9 @@ import time
 import base64
 import logging
 import operator
-import warnings
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
+import yarl
 import requests
 import requests.auth
 
@@ -21,9 +21,7 @@ from transmission_rpc.utils import (
 )
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import (
-    DEFAULT_HOST, DEFAULT_PATH, DEFAULT_PORT, DEFAULT_TIMEOUT, DEFAULT_PROTOCOL
-)
+from transmission_rpc.constants import DEFAULT_TIMEOUT
 
 
 def parse_torrent_id(arg):
@@ -114,15 +112,13 @@ class Client:
     """
     def __init__(
         self,
-        address=DEFAULT_HOST,
-        host=DEFAULT_HOST,
-        port=DEFAULT_PORT,
-        protocol=DEFAULT_PROTOCOL,
-        user=None,
-        username=None,
-        password=None,
-        path=DEFAULT_PATH,
-        timeout=None,
+        protocol: str = 'http',
+        username: str = None,
+        password: str = None,
+        host: str = '127.0.0.1',
+        port: int = 9091,
+        path: str = '/transmission/',
+        timeout: int = None,
         logger=LOGGER
     ):
         if isinstance(logger, logging.Logger):
@@ -136,35 +132,15 @@ class Client:
             self._query_timeout = float(timeout)
         else:
             self._query_timeout = DEFAULT_TIMEOUT
-
-        # self.auth = None
-        if address:
-            warnings.warn(
-                '`address` argument is deprecated, user `host` instead',
-                DeprecationWarning,
-            )
-            host = address
-
-        if user:
-            warnings.warn(
-                '`user` argument is deprecated, user `username` instead',
-                DeprecationWarning,
-            )
-            username = user
-
-        auth = ''
-        if username and password:
-            # self.auth = requests.auth.HTTPBasicAuth(username, password)
-            auth = '{}:{}@'.format(username, password)
-
-        self.url = '{protocol}://{auth}{host}:{port}{path}'.format(
-            protocol=protocol,
+        url = yarl.URL.build(
+            scheme=protocol,
+            user=username,
+            password=password,
             host=host,
-            auth=auth,
             port=port,
-            path=path,
+            path=urljoin(path, 'rpc')
         )
-
+        self.url = str(url)
         self._sequence = 0
         self.session = None
         self.session_id = 0
