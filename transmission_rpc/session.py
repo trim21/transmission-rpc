@@ -91,9 +91,7 @@ class Session:
         else:
             raise ValueError('Not a valid limit')
 
-    peer_port = property(
-        _get_peer_port, _set_peer_port, None, 'Peer port. This is a mutator.'
-    )
+    peer_port = property(_get_peer_port, _set_peer_port, None, 'Peer port. This is a mutator.')
 
     def _get_pex_enabled(self):
         """Is peer exchange enabled?"""
@@ -108,6 +106,5 @@ class Session:
             raise TypeError('Not a valid type')
 
     pex_enabled = property(
-        _get_pex_enabled, _set_pex_enabled, None,
-        'Enable peer exchange. This is a mutator.'
+        _get_pex_enabled, _set_pex_enabled, None, 'Enable peer exchange. This is a mutator.'
     )
