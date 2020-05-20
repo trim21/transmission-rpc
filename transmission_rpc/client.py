@@ -114,7 +114,7 @@ class Client:
     """
     def __init__(
         self,
-        address=DEFAULT_HOST,
+        address=None,
         host=DEFAULT_HOST,
         port=DEFAULT_PORT,
         protocol=DEFAULT_PROTOCOL,
