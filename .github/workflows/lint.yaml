@@ -1,20 +1,16 @@
-name: ci
+name: lint
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        python: ["3.6", "3.7", "3.8", "pypy3"]
-
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.7
 
       - name: Get Latest tools version
         id: get-version
@@ -39,16 +35,12 @@ jobs:
           POETRY_VIRTUALENVS_CREATE: "false"
           PIP_USER: "1"
 
-      - name: setup test env
-        run: docker-compose -f tests/docker-compose.yaml up -d
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pre-commit
+          key: precommit-2-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            precommit-2-${{ env.PY }}-
 
-      - name: test
-        run: coverage run -m pytest
-        env:
-          TR_PORT: 8080
-          TR_USER: admin
-          TR_PASSWORD: mysecretpassword
-
-      - run: bash <(curl -s https://codecov.io/bash) -Z -F ${PYTHON//./}
-        env:
-          PYTHON: ${{ matrix.python }}
+      - name: pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
