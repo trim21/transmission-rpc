@@ -9,7 +9,7 @@ import time
 import base64
 import logging
 import operator
-from typing import Optional
+from typing import Union, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -114,13 +114,14 @@ class Client:
     """
     def __init__(
         self,
+        *,
         protocol: str = 'http',
         username: str = None,
         password: str = None,
         host: str = '127.0.0.1',
         port: int = 9091,
         path: str = '/transmission/',
-        timeout: int = None,
+        timeout: Union[int, float] = DEFAULT_TIMEOUT,
         logger=LOGGER
     ):
         if isinstance(logger, logging.Logger):
@@ -130,10 +131,7 @@ class Client:
                 'logger must be instance of `logging.Logger`, '
                 'default: logging.getLogger(\'transmission-rpc\')'
             )
-        if isinstance(timeout, (int, float)):
-            self._query_timeout = float(timeout)
-        else:
-            self._query_timeout = DEFAULT_TIMEOUT
+        self._query_timeout = timeout
         url = yarl.URL.build(
             scheme=protocol,
             user=username,
