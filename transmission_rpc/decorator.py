@@ -1,3 +1,6 @@
+# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
+# Licensed under the MIT license.
+
 from typing import TYPE_CHECKING
 from warnings import warn
 from functools import wraps
