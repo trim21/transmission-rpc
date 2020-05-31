@@ -7,6 +7,7 @@ import re
 import json
 import time
 import base64
+import string
 import logging
 import operator
 from typing import Union, Optional
@@ -25,93 +26,46 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
 from transmission_rpc.decorator import arg, replaced_by
 
+valid_hash_char = string.digits + string.ascii_letters
 
-def parse_torrent_id(raw_torrent_id):
-    """Parse an torrent id or torrent hashString."""
-    torrent_id = None
+
+def _parse_torrent_id(raw_torrent_id):
     if isinstance(raw_torrent_id, int):
-        # handle index
-        torrent_id = int(raw_torrent_id)
-    elif isinstance(raw_torrent_id, float):
-        torrent_id = int(raw_torrent_id)
-        if torrent_id != raw_torrent_id:
-            torrent_id = None
+        if raw_torrent_id >= 0:
+            return raw_torrent_id
     elif isinstance(raw_torrent_id, str):
-        try:
-            torrent_id = int(raw_torrent_id)
-            if torrent_id >= 2**31:
-                torrent_id = None
-        except (ValueError, TypeError):
-            pass
-        if torrent_id is None:
-            # handle hashes
-            try:
-                int(raw_torrent_id, 16)
-                torrent_id = raw_torrent_id
-            except (ValueError, TypeError):
-                pass
-    return torrent_id
+        if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
+            raise ValueError(f'torrent ids {raw_torrent_id} if not a valid sha1 hash')
+        return raw_torrent_id
+    raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
-def parse_torrent_ids(args):
-    """
-    Take things and make them valid torrent identifiers
-    """
+def _parse_torrent_ids(args):
     ids = []
 
     if args is None:
-        pass
+        return []
+
+    if isinstance(args, int):
+        return _parse_torrent_id(args)
     elif isinstance(args, str):
         if args == 'recently-active':
             return args
-        for item in re.split('[ ,]+', args):
-            if len(item) == 0:
-                continue
-            addition = None
-            torrent_id = parse_torrent_id(item)
-            if torrent_id is not None:
-                addition = [torrent_id]
-            if not addition:
-                # handle index ranges i.e. 5:10
-                match = re.match(r'^(\d+):(\d+)$', item)
-                if match:
-                    try:
-                        idx_from = int(match.group(1))
-                        idx_to = int(match.group(2))
-                        addition = list(range(idx_from, idx_to + 1))
-                    except ValueError:
-                        pass
-            if not addition:
-                raise ValueError('Invalid torrent id, \"%s\"' % item)
-            ids.extend(addition)
+        return [_parse_torrent_id(args)]
     elif isinstance(args, (list, tuple)):
         for item in args:
-            ids.extend(parse_torrent_ids(item))
+            i = _parse_torrent_id(item)
+            ids.append(i)
     else:
-        torrent_id = parse_torrent_id(args)
+        torrent_id = _parse_torrent_id(args)
         if torrent_id is None:
-            raise ValueError('Invalid torrent id')
+            raise ValueError(f'Invalid torrent id {args}')
         else:
             ids = [torrent_id]
     return ids
 
 
 class Client:
-    """
-    Client is the class handling the Transmission JSON-RPC client protocol.
-
-    Torrent ids
-
-    Many functions in Client takes torrent id. A torrent id can either be id or
-    hashString. When supplying multiple id's it is possible to use a list mixed
-    with both id and hashString.
-
-    Timeouts
-
-    Since most methods results in HTTP requests against Transmission, it is
-    possible to provide a argument called ``timeout``. Timeout is only effective
-    when using Python 2.6 or later and the default timeout is 30 seconds.
-    """
     def __init__(
         self,
         *,
@@ -180,7 +134,7 @@ class Client:
         """
         request_count = 0
         if timeout is None:
-            timeout = self._query_timeout
+            timeout = self.timeout
         while True:
             if request_count >= 10:
                 raise TransmissionError('too much request, try enable logger to see what happened')
@@ -215,7 +169,7 @@ class Client:
         if not isinstance(arguments, dict):
             raise ValueError('request takes arguments as dict')
         arguments = {key.replace('_', '-'): value for key, value in arguments.items()}
-        ids = parse_torrent_ids(ids)
+        ids = _parse_torrent_ids(ids)
         if len(ids) > 0:
             arguments['ids'] = ids
         elif require_ids:
@@ -459,7 +413,7 @@ class Client:
         """
         if not arguments:
             arguments = self.torrent_get_arguments
-        torrent_id = parse_torrent_id(torrent_id)
+        torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError('Invalid id')
         result = self._request(
@@ -662,7 +616,7 @@ class Client:
         Remember to use get_torrent or get_torrents to update your file information.
         """
         self._rpc_version_warning(15)
-        torrent_id = parse_torrent_id(torrent_id)
+        torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError('Invalid id')
         dirname = os.path.dirname(name)
