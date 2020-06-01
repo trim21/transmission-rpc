@@ -554,7 +554,7 @@ class Client:
         ``files_unwanted``           1 -                   A list of file id's that shouldn't be downloaded.
         ``files_wanted``             1 -                   A list of file id's that should be downloaded.
         ``honorsSessionLimits``      5 -                   Enables or disables the transfer
-                                                                to honour the upload limit set in the session.
+                                                           to honour the upload limit set in the session.
         ``location``                 1 -                   Local download location.
         ``peer_limit``               1 -                   The peer limit for the torrents.
         ``priority_high``            1 -                   A list of file id's that should have high priority.
@@ -563,10 +563,10 @@ class Client:
         ``queuePosition``            14 -                  Position of this transfer in its queue.
         ``seedIdleLimit``            10 -                  Seed inactivity limit in minutes.
         ``seedIdleMode``             10 -                  Seed inactivity mode. 0 = Use session limit,
-                                                                1 = Use transfer limit, 2 = Disable limit.
+                                                           1 = Use transfer limit, 2 = Disable limit.
         ``seedRatioLimit``           5 -                   Seeding ratio.
         ``seedRatioMode``            5 -                   Which ratio to use. 0 = Use session limit,
-                                                                1 = Use transfer limit, 2 = Disable limit.
+                                                           1 = Use transfer limit, 2 = Disable limit.
         ``speed_limit_down``         1 - 5 downloadLimit   Set the speed limit for download in Kib/s.
         ``speed_limit_down_enabled`` 1 - 5 downloadLimited Enable download speed limiter.
         ``speed_limit_up``           1 - 5 uploadLimit     Set the speed limit for upload in Kib/s.
@@ -574,7 +574,7 @@ class Client:
         ``trackerAdd``               10 -                  Array of string with announce URLs to add.
         ``trackerRemove``            10 -                  Array of ids of trackers to remove.
         ``trackerReplace``           10 -                  Array of (id, url) tuples
-                                                                where the announce URL should be replaced.
+                                                           where the announce URL should be replaced.
         ``uploadLimit``              5 -                   Set the speed limit for upload in Kib/s.
         ``uploadLimited``            5 -                   Enable upload speed limiter.
         ============================ ===== =============== =============================================================
