@@ -1,4 +1,5 @@
 import os
+import base64
 import os.path
 from unittest import mock
 
@@ -34,23 +35,29 @@ def tr_client():
 def test_real_add_magnet(tr_client: Client):
     torrent_url = 'magnet:?xt=urn:btih:e84213a794f3ccd890382a54a64ca68b7e925433'
     tr_client.add_torrent(torrent_url)
-    assert len(tr_client.get_torrents()) > 0, 'transmission should has at least 1 task'
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
 
 
 def test_real_add_torrent_fd(tr_client: Client):
     with open('tests/fixtures/iso.torrent', 'rb') as f:
         tr_client.add_torrent(f)
-    assert len(tr_client.get_torrents()) > 0, 'transmission should has at least 1 task'
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
+
+
+def test_real_add_torrent_base64(tr_client: Client):
+    with open('tests/fixtures/iso.torrent', 'rb') as f:
+        tr_client.add_torrent(base64.b64encode(f.read()).decode())
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
 
 
 def test_real_add_torrent_file_protocol(tr_client: Client):
     fs = os.path.abspath(os.path.join(os.path.dirname(__file__, ), 'fixtures/iso.torrent'))
     tr_client.add_torrent('file://' + fs)
-    assert len(tr_client.get_torrents()) > 0, 'transmission should has at least 1 task'
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
 
 
 def test_real_add_torrent_http(tr_client: Client):
     tr_client.add_torrent(
         'https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent'
     )
-    assert len(tr_client.get_torrents()) > 0, 'transmission should has at least 1 task'
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
