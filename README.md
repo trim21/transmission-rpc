@@ -15,7 +15,7 @@
 ## Install
 
 ```bash
-$ pip install transmission-rpc==3.0.0a1
+$ pip install transmission-rpc==3.0.0a2
 ```
 
 ## Documents
