@@ -3,8 +3,7 @@
 # Licensed under the MIT license.
 
 import datetime
-from typing import Any, Tuple
-from collections import namedtuple
+from typing import Any, Tuple, NamedTuple
 
 import transmission_rpc.constants as constants
 from transmission_rpc.constants import LOGGER
@@ -151,4 +150,6 @@ def get_arguments(method, rpc_version):
     return accessible
 
 
-Field = namedtuple('Field', ['value', 'dirty'])
+class Field(NamedTuple):
+    value: Any
+    dirty: bool

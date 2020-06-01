@@ -50,6 +50,10 @@ class Torrent:
         self._outgoing_pending = False
         self._client = client
 
+    @property
+    def id(self):
+        return self._fields['id'].value
+
     def _get_name_string(self, codec=None):
         """Get the name"""
         if codec is None:

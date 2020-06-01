@@ -10,7 +10,7 @@ import base64
 import string
 import logging
 import operator
-from typing import Union, Optional
+from typing import List, Union, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -19,7 +19,7 @@ import requests.auth
 
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.utils import (
-    LOGGER, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
+    LOGGER, Field, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
 )
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
@@ -37,32 +37,23 @@ def _parse_torrent_id(raw_torrent_id):
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
             raise ValueError(f'torrent ids {raw_torrent_id} if not a valid sha1 hash')
         return raw_torrent_id
+    elif isinstance(raw_torrent_id, Field):
+        return _parse_torrent_ids(raw_torrent_id.value)
     raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
 def _parse_torrent_ids(args):
-    ids = []
-
     if args is None:
         return []
-
     if isinstance(args, int):
-        return _parse_torrent_id(args)
+        return [_parse_torrent_id(args)]
     elif isinstance(args, str):
         if args == 'recently-active':
             return args
         return [_parse_torrent_id(args)]
     elif isinstance(args, (list, tuple)):
-        for item in args:
-            i = _parse_torrent_id(item)
-            ids.append(i)
-    else:
-        torrent_id = _parse_torrent_id(args)
-        if torrent_id is None:
-            raise ValueError(f'Invalid torrent id {args}')
-        else:
-            ids = [torrent_id]
-    return ids
+        return [_parse_torrent_id(item) for item in args]
+    raise ValueError(f'Invalid torrent id {args}')
 
 
 class Client:
@@ -100,6 +91,7 @@ class Client:
         self.session_id = 0
         self.server_version = None
         self.protocol_version: Optional[int] = None
+        self._http_session = requests.Session()
         self.get_session()
         self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
@@ -145,7 +137,7 @@ class Client:
                 'timeout': timeout,
             })
             request_count += 1
-            r = requests.post(
+            r = self._http_session.post(
                 self.url, headers=self._http_header, json=json.loads(query), timeout=timeout
             )
             self.session_id = r.headers.get('X-Transmission-Session-Id', 0)
@@ -291,6 +283,9 @@ class Client:
     def add_torrent(self, torrent, timeout=None, **kwargs):
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
+        You can find examples in test code
+        `tests/test_client.py <https://github.com/Trim21/transmission-rpc/blob/master/tests/test_client.py>`_
+
         Additional arguments are:
 
         ===================== ===== =========== =============================================================
@@ -427,7 +422,7 @@ class Client:
                     return torrent
             raise KeyError('Torrent not found in result')
 
-    def get_torrents(self, ids=None, arguments=None, timeout=None):
+    def get_torrents(self, ids=None, arguments=None, timeout=None) -> List[Torrent]:
         """
         Get information for torrents with provided ids. For more information see get_torrent.
 
@@ -806,3 +801,9 @@ class Client:
         """Get session statistics"""
         self._request('session-stats', timeout=timeout)
         return self.session
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._http_session.close()

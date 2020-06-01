@@ -19,7 +19,7 @@ def test_parse_id_raise(arg):
         ('recently-active', 'recently-active'),
         (example_hash, [example_hash]),
         ((2, example_hash), [2, example_hash]),
-        (3, 3),
+        (3, [3]),
         (None, []),
     ]
 )
@@ -29,12 +29,12 @@ def test_parse_torrent_ids(arg, expected):
 
 @pytest.mark.parametrize(
     'arg', [
-        ('not-recently-active', ),
-        ('non-hash-string', ),
-        (-1, ),
-        (float(1.1), ),
-        ('5:10', ),
-        ('5,6,8,9,10', ),
+        'not-recently-active',
+        'non-hash-string',
+        -1,
+        float(1.1),
+        '5:10',
+        '5,6,8,9,10',
     ]
 )
 def test_parse_torrent_ids_value_error(arg):
