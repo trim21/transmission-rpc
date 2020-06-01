@@ -2,6 +2,19 @@
 ## [Unreleased]
 
 
+<a name="v3.0.0a1"></a>
+## [v3.0.0a1] - 2020-06-01
+### Code Refactoring
+- Client will use yarl to build url
+
+### Features
+- check rpc version for kwargs
+
+### BREAKING CHANGE
+
+Client args `address` and `user` is not avaliable anymore
+
+
 <a name="v2.0.4"></a>
 ## [v2.0.4] - 2020-05-20
 ### Bug Fixes
@@ -15,6 +28,7 @@
 - build error from source
 
 
-[Unreleased]: https://github.com/Trim21/transmission-rpc/compare/v2.0.4...HEAD
+[Unreleased]: https://github.com/Trim21/transmission-rpc/compare/v3.0.0a1...HEAD
+[v3.0.0a1]: https://github.com/Trim21/transmission-rpc/compare/v2.0.4...v3.0.0a1
 [v2.0.4]: https://github.com/Trim21/transmission-rpc/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/Trim21/transmission-rpc/compare/v1.0.4...v2.0.3
