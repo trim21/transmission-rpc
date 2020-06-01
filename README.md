@@ -4,6 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/transmission-rpc/badge/?version=stable)](https://transmission-rpc.readthedocs.io/en/stable/?badge=stable)
 ![ci](https://github.com/Trim21/transmission-rpc/workflows/ci/badge.svg)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transmission-rpc)
+![Codecov branch](https://img.shields.io/codecov/c/github/Trim21/transmission-rpc/master)
 
 `transmission-rpc` is hosted by GitHub at [github.com/Trim21/transmission-rpc](https://github.com/Trim21/transmission-rpc)
 
