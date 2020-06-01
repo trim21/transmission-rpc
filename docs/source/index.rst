@@ -9,8 +9,6 @@ Welcome to transmission-rpc's documentation!
 :code:`transmission-rpc` is a python3 library
 to help your control your transmission daemon remotely.
 
-python2 has be deprecated in 1.0.0
-
 quick start
 -------------------------
 
@@ -20,7 +18,7 @@ quick start
 
     torrent_url = 'http://releases.ubuntu.com/' + \
                   '18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
-    c = Client(host='localhost', port=9091, user='transmission', password='password')
+    c = Client(host='localhost', port=9091, username='transmission', password='password')
     c.add_torrent(torrent_url)
 
     ########
