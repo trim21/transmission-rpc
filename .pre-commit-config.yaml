@@ -1,4 +1,9 @@
 repos:
+  - repo: https://github.com/Trim21/pre-commit-hooks
+    rev: v0.0.1
+    hooks:
+      - id: yamlfmt
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.5.0
     hooks:
@@ -11,14 +16,12 @@ repos:
       - id: check-json
       - id: check-docstring-first
       - id: check-merge-conflict
-      - id: check-added-large-files
+      - id: check-added-large-files  # check for file bigger than 500kb
       - id: debug-statements
       - id: trailing-whitespace
       - id: debug-statements
       - id: mixed-line-ending
         args: [--fix=lf]
-
-      # check for file bigger than 500kb
       - id: end-of-file-fixer
       - id: double-quote-string-fixer
       - id: fix-encoding-pragma
@@ -33,27 +36,21 @@ repos:
     rev: v2.4.1
     hooks:
       - id: pyupgrade
-        args: ["--py36-plus"]
+        args: [--py36-plus]
 
   - repo: https://github.com/Trim21/mirrors-autoflake
     rev: v1.3.1
     hooks:
       - id: autoflake
         require_serial: true
-        args:
-          [
-            "--in-place",
-            "--remove-unused-variables",
-            "--remove-all-unused-imports",
-            "--expand-star-imports",
-          ]
+        args: [--in-place, --remove-unused-variables, --remove-all-unused-imports, --expand-star-imports]
 
   - repo: https://github.com/PyCQA/doc8.git
     rev: 0.8.1rc3
     hooks:
       - id: doc8
         name: Check rst file
-        args: ["--config", "setup.cfg"]
+        args: [--config, setup.cfg]
         files: \.rst$
 
   - repo: https://github.com/Trim21/poetry-check-lock.git
@@ -68,14 +65,14 @@ repos:
         entry: flake8
         language: system
         types: [python]
-        args: ["--config=setup.cfg"]
+        args: [--config=setup.cfg]
 
       - id: mypy
         name: mypy
         entry: mypy
         language: system
         types: [python]
-        files: 'transmission_rpc.*$'
+        files: transmission_rpc.*$
 
       - id: yapf
         name: yapf

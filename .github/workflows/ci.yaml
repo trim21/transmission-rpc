@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: ["3.6", "3.7", "3.8", "pypy3"]
+        python: ['3.6', '3.7', '3.8', pypy3]
 
     steps:
       - uses: actions/checkout@v2
@@ -36,8 +36,8 @@ jobs:
           pip install --no-deps -q -r <(poetry export -f requirements.txt --dev -E docs)
           poetry install -E docs
         env:
-          POETRY_VIRTUALENVS_CREATE: "false"
-          PIP_USER: "1"
+          POETRY_VIRTUALENVS_CREATE: 'false'
+          PIP_USER: '1'
 
       - name: setup test env
         run: docker-compose -f tests/docker-compose.yaml up -d

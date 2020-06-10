@@ -32,15 +32,14 @@ jobs:
           pip install --no-deps -q -r <(poetry export -f requirements.txt --dev -E docs)
           poetry install -E docs
         env:
-          POETRY_VIRTUALENVS_CREATE: "false"
-          PIP_USER: "1"
+          POETRY_VIRTUALENVS_CREATE: 'false'
+          PIP_USER: '1'
 
       - uses: actions/cache@v1
         with:
           path: ~/.cache/pre-commit
           key: precommit-2-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: |
-            precommit-2-${{ env.PY }}-
+          restore-keys: precommit-2-${{ env.PY }}-
 
       - name: pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
