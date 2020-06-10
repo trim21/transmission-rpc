@@ -10,7 +10,7 @@ import base64
 import string
 import logging
 import operator
-from typing import List, Union, Optional
+from typing import TYPE_CHECKING, List, Union, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -27,6 +27,9 @@ from transmission_rpc.constants import DEFAULT_TIMEOUT
 from transmission_rpc.decorator import arg, replaced_by
 
 valid_hash_char = string.digits + string.ascii_letters
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 
 def _parse_torrent_id(raw_torrent_id):
@@ -60,7 +63,7 @@ class Client:
     def __init__(
         self,
         *,
-        protocol: str = 'http',
+        protocol: "Literal['http', 'https']" = 'http',
         username: str = None,
         password: str = None,
         host: str = '127.0.0.1',

@@ -628,7 +628,6 @@ version = "1.4.1"
 [[package]]
 category = "dev"
 description = "Backported and Experimental Type Hints for Python 3.5+"
-marker = "implementation_name != \"pypy\""
 name = "typing-extensions"
 optional = false
 python-versions = "*"
@@ -705,7 +704,7 @@ multidict = ">=4.0"
 [[package]]
 category = "dev"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "implementation_name != \"pypy\" and python_version < \"3.7\" or implementation_name != \"pypy\" and python_version < \"3.8\" or python_version < \"3.8\""
+marker = "implementation_name != \"pypy\" and python_version < \"3.7\" or implementation_name != \"pypy\" and python_version < \"3.8\" or python_version < \"3.8\" or implementation_name != \"pypy\" and python_version < \"3.7\" and (implementation_name != \"pypy\" and python_version < \"3.7\" or implementation_name != \"pypy\" and python_version < \"3.8\" or python_version < \"3.8\") or implementation_name != \"pypy\" and python_version < \"3.8\" and (implementation_name != \"pypy\" and python_version < \"3.7\" or implementation_name != \"pypy\" and python_version < \"3.8\" or python_version < \"3.8\")"
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
@@ -719,7 +718,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 docs = ["sphinx", "sphinx-rtd-theme"]
 
 [metadata]
-content-hash = "dece6cdc35a0161ab019c333961165392873c3543a23787d7628e677db7aa54f"
+content-hash = "30d874ee5a264c81d42b50e62ba7daaf1818ee290946025ba537600f4f115e37"
 python-versions = "^3.6.1"
 
 [metadata.files]
