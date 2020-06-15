@@ -12,6 +12,14 @@
   ],
   "packageRules": [
     {
+      "groupName": "deps-docs",
+      "semanticCommitScope": "docs",
+      "packagePatterns": [
+        "^sphinx"
+      ],
+      "rangeStrategy": "pin"
+    },
+    {
       "depTypeList": [
         "dev-dependencies"
       ],

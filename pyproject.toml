@@ -28,7 +28,7 @@ python = "^3.6.1"
 requests = "^2.23.0"
 yarl = "^1.4.2"
 # build cos
-sphinx = { version = "^2.2", optional = true }
+sphinx = { version = "2.4.4", optional = true }
 sphinx-rtd-theme = { version = "0.5.0rc1", optional = true }
 
 [tool.poetry.extras]
