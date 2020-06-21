@@ -12,28 +12,12 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Get Latest tools version
-        id: get-version
-        run: echo "::set-env name=PY::$(python -VV | md5sum | cut -d' ' -f1)"
+      - uses: Trim21/setup-poetry@v1
 
-      - name: Install Poetry
-        run: |
-          echo "::add-path::$HOME/.local/bin"
-          echo "::add-path::$HOME/.poetry/bin"
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-
-      - uses: actions/cache@v1
+      - uses: Trim21/install-poetry-project@v1
         with:
-          path: ~/.local
-          key: poetry-2-${{ env.PY }}-${{ hashFiles('poetry.lock') }}
-
-      - name: Install Dependencies
-        run: |
-          pip install --no-deps -q -r <(poetry export -f requirements.txt --dev -E docs)
-          poetry install -E docs
-        env:
-          POETRY_VIRTUALENVS_CREATE: 'false'
-          PIP_USER: '1'
+          extras: |
+            docs
 
       - uses: actions/cache@v1
         with:
