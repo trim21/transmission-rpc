@@ -1,10 +1,13 @@
 import os
+import time
 import base64
 import os.path
+import secrets
 from unittest import mock
 
 import pytest
 
+from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
 
 HOST = os.getenv('TR_HOST', '127.0.0.1')
@@ -19,22 +22,34 @@ def test_client_parse_url():
         assert client.url == 'http://127.0.0.1:9091/transmission/rpc'
 
 
+def hash_to_magnet(h):
+    return f'magnet:?xt=urn:btih:{h}'
+
+
 torrent_hash = 'e84213a794f3ccd890382a54a64ca68b7e925433'
+magnet_url = f'magnet:?xt=urn:btih:{torrent_hash}'
+torrent_hash2 = '9fc20b9e98ea98b4a35e6223041a5ef94ea27809'
+magnet_url2 = 'https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent'
 
 
 @pytest.fixture()
 def tr_client():
+    LOGGER.setLevel('INFO')
     with Client(host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
         for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id)
+            c.remove_torrent(torrent.id, delete_data=True)
         yield c
         for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id)
+            c.remove_torrent(torrent.id, delete_data=True)
+
+
+@pytest.fixture()
+def fake_hash_factory():
+    return lambda: secrets.token_hex(20)
 
 
 def test_real_add_magnet(tr_client: Client):
-    torrent_url = 'magnet:?xt=urn:btih:e84213a794f3ccd890382a54a64ca68b7e925433'
-    tr_client.add_torrent(torrent_url)
+    tr_client.add_torrent(magnet_url)
     assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
 
 
@@ -61,3 +76,49 @@ def test_real_add_torrent_http(tr_client: Client):
         'https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent'
     )
     assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
+
+
+def test_real_stop(tr_client: Client, fake_hash_factory):
+    info_hash = fake_hash_factory()
+    url = hash_to_magnet(info_hash)
+    tr_client.add_torrent(url)
+    tr_client.stop_torrent(info_hash)
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has only 1 task'
+    ret = False
+
+    for _ in range(50):
+        time.sleep(0.2)
+        if tr_client.get_torrents()[0].status == 'stopped':
+            ret = True
+            break
+
+    assert ret, 'torrent should be stopped'
+
+
+def test_torrent_start_all(tr_client: Client, fake_hash_factory):
+    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
+    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
+    for torrent in tr_client.get_torrents():
+        assert torrent.status == 'stopped', 'all torrent should be stopped'
+
+    tr_client.start_all()
+    for torrent in tr_client.get_torrents():
+        assert torrent.status == 'downloading', 'all torrent should be downloading'
+
+
+def test_client_session_get(tr_client: Client):
+    tr_client.get_session()
+
+
+def test_client_free_space(tr_client: Client):
+    session = tr_client.get_session()
+    tr_client.free_space(session.download_dir)
+
+
+def test_client_session_stats(tr_client: Client):
+    tr_client.session_stats()
+
+
+def test_wrong_logger():
+    with pytest.raises(TypeError):
+        Client(logger='something')
