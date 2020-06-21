@@ -86,8 +86,9 @@ so just call :code:`print(get_arguments('torrent-add', 15))`
 
 rpc method and class method are not same, but reversed
 
-you can find rpc version by transmission version from transmission official rpc spec
-or mirror `here <https://github.com/Trim21/transmission-rpc/blob/master/doc/rpc-spec.txt#L624>`_
+you can find rpc version by transmission version from
+`transmission wiki <https://github.com/transmission/transmission/wiki/RPC-Protocol-Specification>`_
+
 
 
 .. toctree::
