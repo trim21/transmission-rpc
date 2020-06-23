@@ -22,8 +22,6 @@ $ pip install transmission-rpc==3.0.0a2
 
 <https://transmission-rpc.readthedocs.io/>
 
-## Break change
-
 ## Developer
 
 this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview
