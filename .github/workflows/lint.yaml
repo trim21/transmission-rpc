@@ -19,11 +19,11 @@ jobs:
           extras: |
             docs
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: ~/.cache/pre-commit
           key: precommit-2-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: precommit-2-${{ env.PY }}-
 
       - name: pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: pre-commit run --all-files --show-diff-on-failure && pre-commit gc
