@@ -1,3 +1,4 @@
+# Copyright (c) 2020 littleya <me@littleya.com>
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
@@ -332,7 +333,7 @@ class Client:
                     might_be_base64 = False
                     try:
                         # check if this is base64 data
-                        base64.b64decode(torrent.encode('utf-8'))
+                        base64.b64decode(torrent.encode('utf-8'), validate=True)
                         might_be_base64 = True
                     except Exception:
                         pass
