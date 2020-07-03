@@ -312,7 +312,7 @@ class Client:
         if torrent is None:
             raise ValueError('add_torrent requires data or a URI.')
         torrent_data = None
-
+        is_url = False
         # torrent is a str, may be a url
         if isinstance(torrent, str):
             parsed_uri = urlparse(torrent)
@@ -325,23 +325,20 @@ class Client:
                 elif len(parsed_uri.netloc) > 0:
                     filepath = parsed_uri.netloc
                 with open(filepath, 'rb') as torrent_file:
-                    torrent_data = torrent_file.read()
-                    torrent_data = base64.b64encode(torrent_data).decode('utf-8')
-            if not torrent_data:
-                # normal url
-                if torrent.endswith('.torrent') or torrent.startswith('magnet:'):
-                    torrent_data = None
+                    torrent_data = base64.b64encode(torrent_file.read()).decode('utf-8')
+            elif parsed_uri.scheme in ['https', 'http', 'magnet']:
+                is_url = True
+            if (not is_url) and (not torrent_data):
                 # base64 encoded file content
-                else:
-                    might_be_base64 = False
-                    try:
-                        # check if this is base64 data
-                        base64.b64decode(torrent.encode('utf-8'), validate=True)
-                        might_be_base64 = True
-                    except Exception:
-                        pass
-                    if might_be_base64:
-                        torrent_data = torrent
+                might_be_base64 = False
+                try:
+                    # check if this is base64 data
+                    base64.b64decode(torrent.encode('utf-8'), validate=True)
+                    might_be_base64 = True
+                except Exception:
+                    pass
+                if might_be_base64:
+                    torrent_data = torrent
 
         # maybe a file, try read content and encode it.
         elif hasattr(torrent, 'read'):

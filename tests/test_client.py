@@ -29,7 +29,7 @@ def hash_to_magnet(h):
 torrent_hash = 'e84213a794f3ccd890382a54a64ca68b7e925433'
 magnet_url = f'magnet:?xt=urn:btih:{torrent_hash}'
 torrent_hash2 = '9fc20b9e98ea98b4a35e6223041a5ef94ea27809'
-magnet_url2 = 'https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent'
+torrent_url = 'https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent'
 
 
 @pytest.fixture()
@@ -46,6 +46,29 @@ def tr_client():
 @pytest.fixture()
 def fake_hash_factory():
     return lambda: secrets.token_hex(20)
+
+
+def test_client_add_url():
+    m = mock.Mock(return_value={'hello': 'world'})
+    with mock.patch('transmission_rpc.client.Client._request', m):
+        assert Client().add_torrent(torrent_url) == 'world'
+        m.assert_called_with('torrent-add', {'filename': torrent_url}, timeout=None)
+
+
+def test_client_add_magnet():
+    m = mock.Mock(return_value={'hello': 'world'})
+    with mock.patch('transmission_rpc.client.Client._request', m):
+        assert Client().add_torrent(magnet_url) == 'world'
+        m.assert_called_with('torrent-add', {'filename': magnet_url}, timeout=None)
+
+
+def test_client_add_base64_raw_data():
+    m = mock.Mock(return_value={'hello': 'world'})
+    with mock.patch('transmission_rpc.client.Client._request', m):
+        with open('tests/fixtures/iso.torrent', 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        assert Client().add_torrent(b64) == 'world'
+        m.assert_called_with('torrent-add', {'metainfo': b64}, timeout=None)
 
 
 def test_real_add_magnet(tr_client: Client):
@@ -102,7 +125,7 @@ def test_real_stop(tr_client: Client, fake_hash_factory):
     assert ret, 'torrent should be stopped'
 
 
-def test_torrent_start_all(tr_client: Client, fake_hash_factory):
+def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
     tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
     tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
     for torrent in tr_client.get_torrents():
