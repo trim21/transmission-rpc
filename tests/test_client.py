@@ -136,16 +136,16 @@ def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
         assert torrent.status == 'downloading', 'all torrent should be downloading'
 
 
-def test_client_session_get(tr_client: Client):
+def test_real_session_get(tr_client: Client):
     tr_client.get_session()
 
 
-def test_client_free_space(tr_client: Client):
+def test_real_free_space(tr_client: Client):
     session = tr_client.get_session()
     tr_client.free_space(session.download_dir)
 
 
-def test_client_session_stats(tr_client: Client):
+def test_real_session_stats(tr_client: Client):
     tr_client.session_stats()
 
 
