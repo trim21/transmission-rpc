@@ -1,11 +1,18 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+<a name="v3.0.0a3"></a>
+## [v3.0.0a3] - 2020-07-03
+### Bug Fixes
+- **client:** failed to add url which is http url but not end with 'torrent' ([#16](https://github.com/Trim21/transmission-rpc/issues/16))
+
+<a name="v3.0.0a2"></a>
+## [v3.0.0a2] - 2020-06-01
 
 <a name="v3.0.0a1"></a>
 ## [v3.0.0a1] - 2020-06-01
 ### Code Refactoring
-- Client will use yarl to build url
+- Client will use [`yarl`](https://github.com/aio-libs/yarl) to build url
 
 ### Features
 - check rpc version for kwargs
@@ -29,6 +36,8 @@ Client args `address` and `user` is not avaliable anymore
 
 
 [Unreleased]: https://github.com/Trim21/transmission-rpc/compare/v3.0.0a1...HEAD
+[v3.0.0a3]: https://github.com/Trim21/transmission-rpc/compare/v3.0.0a2...v3.0.0a3
+[v3.0.0a2]: https://github.com/Trim21/transmission-rpc/compare/v3.0.0a1...v3.0.0a2
 [v3.0.0a1]: https://github.com/Trim21/transmission-rpc/compare/v2.0.4...v3.0.0a1
 [v2.0.4]: https://github.com/Trim21/transmission-rpc/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/Trim21/transmission-rpc/compare/v1.0.4...v2.0.3
