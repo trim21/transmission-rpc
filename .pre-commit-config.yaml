@@ -28,12 +28,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 7c29dd9d55161704cfc45998c6f5c2c43d39264b  # frozen: 4.3.21
+    rev: 5325832ef78a98e4a6445a0a68a2d4cdf93d5f5b  # frozen: 5.0.2
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 7187ad61625472088070201708bf5d71d3552fb1  # frozen: v2.6.1
+    rev: b6c20d14667c568c92a4e4ea1e0329743f371a2c  # frozen: v2.6.2
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
