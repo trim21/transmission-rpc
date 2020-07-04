@@ -5,7 +5,7 @@
 import datetime
 from typing import Any, Tuple, NamedTuple
 
-import transmission_rpc.constants as constants
+from transmission_rpc import constants
 from transmission_rpc.constants import LOGGER
 
 UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
