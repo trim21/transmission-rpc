@@ -2,12 +2,16 @@
 # Licensed under the MIT license.
 import sys
 import datetime
+from typing import TYPE_CHECKING, Dict
 
 from transmission_rpc.utils import Field, format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 
+if TYPE_CHECKING:
+    from transmission_rpc.client import Client
 
-def get_status_old(code):
+
+def get_status_old(code: int) -> str:
     """Get the torrent status using old status codes"""
     mapping = {
         (1 << 0): 'check pending',
@@ -19,7 +23,7 @@ def get_status_old(code):
     return mapping[code]
 
 
-def get_status_new(code):
+def get_status_new(code: int) -> str:
     """Get the torrent status using new status codes"""
     mapping = {
         0: 'stopped',
@@ -40,10 +44,10 @@ class Torrent:
     All fetched torrent fields are accessible through this class using attributes.
     This class has a few convenience properties using the torrent data.
     """
-    def __init__(self, client, fields):
+    def __init__(self, client: 'Client', fields: Dict[str, Field]):
         if 'id' not in fields:
             raise ValueError('Torrent requires an id')
-        self._fields = {}
+        self._fields: Dict[str, Field] = {}
         self._update_fields(fields)
         self._incoming_pending = False
         self._outgoing_pending = False
@@ -69,7 +73,7 @@ class Torrent:
                 name = None
         return name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         tid = self._fields['id'].value
         name = self._get_name_string()
         if isinstance(name, str):
@@ -77,7 +81,7 @@ class Torrent:
         else:
             return '<Torrent %d>' % (tid)
 
-    def __str__(self):
+    def __str__(self) -> str:
         name = self._get_name_string()
         if isinstance(name, str):
             return 'Torrent \"%s\"' % (name)

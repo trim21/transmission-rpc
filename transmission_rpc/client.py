@@ -91,7 +91,7 @@ class Client:
         self.url = str(url)
         self._sequence = 0
         self.session: Session = Session()
-        self.session_id = 0
+        self.session_id: Optional[str] = None
         self.server_version = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
@@ -123,7 +123,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {'x-transmission-session-id': str(self.session_id)}
 
-    def _http_query(self, query, timeout=None):
+    def _http_query(self, query: Any, timeout: Optional[Union[int, float]] = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -143,7 +143,7 @@ class Client:
             r = self._http_session.post(
                 self.url, headers=self._http_header, json=json.loads(query), timeout=timeout
             )
-            self.session_id = r.headers.get('X-Transmission-Session-Id', 0)
+            self.session_id = r.headers.get('X-Transmission-Session-Id')
             self.logger.debug(r.text)
             if r.status_code == 401:
                 print(r.request.headers)
