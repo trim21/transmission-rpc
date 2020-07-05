@@ -49,7 +49,7 @@ def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]
     raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
-def _parse_torrent_ids(args: List[Any]) -> Union[List[Union[int, str]], str]:
+def _parse_torrent_ids(args: Any) -> Union[List[Union[int, str]], str]:
     if args is None:
         return []
     if isinstance(args, int):
@@ -155,7 +155,14 @@ class Client:
             if r.status_code != 409:
                 return r.text
 
-    def _request(self, method: str, arguments=None, ids=None, require_ids=False, timeout=None):
+    def _request(
+        self,
+        method: str,
+        arguments: Dict[str, Any] = None,
+        ids: TorrentIDS = None,
+        require_ids: bool = False,
+        timeout: _Timeout = None,
+    ) -> Optional[dict]:
         """
         Send json-rpc request to Transmission using http POST
         :type arguments: object
@@ -371,14 +378,14 @@ class Client:
             timeout=timeout
         )
 
-    def start_torrent(self, ids, bypass_queue=False, timeout=None):
+    def start_torrent(self, ids, bypass_queue: bool = False, timeout=None):
         """Start torrent(s) with provided id(s)"""
         method = 'torrent-start'
         if bypass_queue and self.rpc_version >= 14:
             method = 'torrent-start-now'
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue=False, timeout=None):
+    def start_all(self, bypass_queue: bool = False, timeout=None):
         """Start all torrents respecting the queue order"""
         torrent_list = self.get_torrents()
         method = 'torrent-start'
