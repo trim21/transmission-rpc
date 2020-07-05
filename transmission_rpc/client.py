@@ -10,7 +10,7 @@ import base64
 import string
 import logging
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Union, TextIO, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -286,7 +286,7 @@ class Client:
 
     @arg('bandwidthPriority', 8)
     @arg('cookies', 13)
-    def add_torrent(self, torrent, timeout=None, **kwargs):
+    def add_torrent(self, torrent: Union[str, TextIO], timeout: '_Timeout' = None, **kwargs):
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
         You can find examples in test code
