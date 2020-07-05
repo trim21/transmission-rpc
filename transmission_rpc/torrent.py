@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 import sys
 import datetime
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
 from transmission_rpc.utils import Field, format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
@@ -58,7 +58,7 @@ class Torrent:
     def id(self) -> str:
         return self._fields['id'].value
 
-    def _get_name_string(self, codec=None):
+    def _get_name_string(self, codec: str = None) -> str:
         """Get the name"""
         if codec is None:
             codec = sys.getdefaultencoding()
@@ -89,22 +89,22 @@ class Torrent:
         else:
             return 'Torrent'
 
-    def __copy__(self):
+    def __copy__(self) -> 'Torrent':
         return Torrent(self._client, self._fields)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
         except KeyError:
             raise AttributeError('No attribute %s' % name)
 
-    def _rpc_version(self):
+    def _rpc_version(self) -> int:
         """Get the Transmission RPC API version."""
         if self._client:
             return self._client.rpc_version
         return 2
 
-    def _dirty_fields(self):
+    def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
         outgoing_keys = [
             'bandwidthPriority', 'downloadLimit', 'downloadLimited', 'peer_limit', 'queuePosition',
@@ -127,7 +127,7 @@ class Torrent:
         if len(args) > 0:
             self._client.change_torrent(self.id, **args)
 
-    def _update_fields(self, other):
+    def _update_fields(self, other: Union['Torrent', Dict[str, Any]]) -> None:
         """
         Update the torrent data from a Transmission JSON-RPC arguments dictionary
         """
@@ -141,7 +141,7 @@ class Torrent:
             raise ValueError('Cannot update with supplied data')
         self._incoming_pending = False
 
-    def _status(self):
+    def _status(self) -> str:
         """Get the torrent status"""
         code = self._fields['status'].value
         if self._rpc_version() >= 14:
@@ -149,7 +149,7 @@ class Torrent:
         else:
             return get_status_old(code)
 
-    def files(self):
+    def files(self) -> Dict[int, Dict[str, Any]]:
         """
         Get list of files for this torrent.
 
@@ -178,13 +178,16 @@ class Torrent:
                 selected = True if item[3] else False
                 priority = PRIORITY[item[2]]
                 result[item[0]] = {
-                    'selected': selected, 'priority': priority, 'size': item[1]['length'],
-                    'name': item[1]['name'], 'completed': item[1]['bytesCompleted']
+                    'selected': selected,
+                    'priority': priority,
+                    'size': item[1]['length'],
+                    'name': item[1]['name'],
+                    'completed': item[1]['bytesCompleted'],
                 }
         return result
 
     @property
-    def status(self):
+    def status(self) -> str:
         """
         Returns the torrent status. Is either one of 'check pending', 'checking',
         'downloading', 'seeding' or 'stopped'. The first two is related to
@@ -193,7 +196,7 @@ class Torrent:
         return self._status()
 
     @property
-    def progress(self):
+    def progress(self) -> float:
         """download progress in percent."""
         try:
             size = self._fields['sizeWhenDone'].value
@@ -203,12 +206,12 @@ class Torrent:
             return 0.0
 
     @property
-    def ratio(self):
+    def ratio(self) -> float:
         """upload/download ratio."""
         return float(self._fields['uploadRatio'].value)
 
     @property
-    def eta(self):
+    def eta(self) -> datetime.timedelta:
         """the "eta" as datetime.timedelta."""
         eta = self._fields['eta'].value
         if eta >= 0:
@@ -217,22 +220,22 @@ class Torrent:
             raise ValueError('eta not valid')
 
     @property
-    def date_active(self):
+    def date_active(self) -> datetime.datetime:
         """the attribute "activityDate" as datetime.datetime."""
         return datetime.datetime.fromtimestamp(self._fields['activityDate'].value)
 
     @property
-    def date_added(self):
+    def date_added(self) -> datetime.datetime:
         """the attribute "addedDate" as datetime.datetime."""
         return datetime.datetime.fromtimestamp(self._fields['addedDate'].value)
 
     @property
-    def date_started(self):
+    def date_started(self) -> datetime.datetime:
         """the attribute "startDate" as datetime.datetime."""
         return datetime.datetime.fromtimestamp(self._fields['startDate'].value)
 
     @property
-    def date_done(self):
+    def date_done(self) -> Optional[datetime.datetime]:
         """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self._fields['doneDate'].value
         # Transmission might forget to set doneDate which is initialized to zero, so if doneDate is zero return None
@@ -424,7 +427,7 @@ class Torrent:
             return 0
 
     @queue_position.setter
-    def queue_position(self, position):
+    def queue_position(self, position: str) -> None:
         """Queue position"""
         if self._rpc_version() >= 14:
             if isinstance(position, int):
@@ -435,30 +438,30 @@ class Torrent:
         else:
             pass
 
-    def update(self, timeout: '_Timeout' = None) -> None:
+    def update(self, timeout: _Timeout = None) -> None:
         """Update the torrent information."""
         self._push()
         torrent = self._client.get_torrent(self.id, timeout=timeout)
         self._update_fields(torrent)
 
-    def start(self, bypass_queue: bool = False, timeout: '_Timeout' = None):
+    def start(self, bypass_queue: bool = False, timeout: _Timeout = None):
         """
         Start the torrent.
         """
         self._incoming_pending = True
         self._client.start_torrent(self.id, bypass_queue=bypass_queue, timeout=timeout)
 
-    def stop(self, timeout: '_Timeout' = None):
+    def stop(self, timeout: _Timeout = None):
         """Stop the torrent."""
         self._incoming_pending = True
         self._client.stop_torrent(self.id, timeout=timeout)
 
-    def move_data(self, location: str, timeout: '_Timeout' = None):
+    def move_data(self, location: str, timeout: _Timeout = None):
         """Move torrent data to location."""
         self._incoming_pending = True
         self._client.move_torrent_data(self.id, location, timeout=timeout)
 
-    def locate_data(self, location, timeout: '_Timeout' = None):
+    def locate_data(self, location, timeout: _Timeout = None):
         """Locate torrent data at location."""
         self._incoming_pending = True
         self._client.locate_torrent_data(self.id, location, timeout=timeout)
