@@ -19,6 +19,7 @@ import requests
 import requests.auth
 
 from transmission_rpc.error import TransmissionError
+from transmission_rpc.types import _Timeout
 from transmission_rpc.utils import (
     LOGGER, Field, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
 )
@@ -27,13 +28,11 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
 from transmission_rpc.decorator import arg, replaced_by
 
-valid_hash_char = string.digits + string.ascii_letters
-
 if TYPE_CHECKING:
     from typing_extensions import Literal
     TorrentIDS = Union[Literal['recently-active'], List[Union[str, int]]]
 
-_Timeout = Union[str, int, float]
+valid_hash_char = string.digits + string.ascii_letters
 
 
 def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]:
@@ -159,7 +158,7 @@ class Client:
         self,
         method: str,
         arguments: Dict[str, Any] = None,
-        ids: TorrentIDS = None,
+        ids: 'TorrentIDS' = None,
         require_ids: bool = False,
         timeout: _Timeout = None,
     ) -> Optional[dict]:
