@@ -30,6 +30,9 @@ valid_hash_char = string.digits + string.ascii_letters
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
+    TorrentIDS = Union[Literal['recently-active'], List[Union[str, int]]]
+
+_Timeout = Union[str, int, float]
 
 
 def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]:
@@ -354,7 +357,7 @@ class Client:
             args[arg] = val
         return list(self._request('torrent-add', args, timeout=timeout).values())[0]
 
-    def remove_torrent(self, ids, delete_data=False, timeout=None):
+    def remove_torrent(self, ids: 'TorrentIDS', delete_data: bool = False, timeout=None):
         """
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.

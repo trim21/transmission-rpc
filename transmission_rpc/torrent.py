@@ -8,6 +8,7 @@ from transmission_rpc.utils import Field, format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 
 if TYPE_CHECKING:
+    from transmission_rpc.types import _Timeout
     from transmission_rpc.client import Client
 
 
@@ -54,7 +55,7 @@ class Torrent:
         self._client = client
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._fields['id'].value
 
     def _get_name_string(self, codec=None):
@@ -415,7 +416,7 @@ class Torrent:
             raise ValueError('Not a valid limit')
 
     @property
-    def queue_position(self):
+    def queue_position(self) -> int:
         """queue position for this torrent."""
         if self._rpc_version() >= 14:
             return self._fields['queuePosition'].value
@@ -434,30 +435,30 @@ class Torrent:
         else:
             pass
 
-    def update(self, timeout=None):
+    def update(self, timeout: '_Timeout' = None) -> None:
         """Update the torrent information."""
         self._push()
         torrent = self._client.get_torrent(self.id, timeout=timeout)
         self._update_fields(torrent)
 
-    def start(self, bypass_queue=False, timeout=None):
+    def start(self, bypass_queue: bool = False, timeout: '_Timeout' = None):
         """
         Start the torrent.
         """
         self._incoming_pending = True
         self._client.start_torrent(self.id, bypass_queue=bypass_queue, timeout=timeout)
 
-    def stop(self, timeout=None):
+    def stop(self, timeout: '_Timeout' = None):
         """Stop the torrent."""
         self._incoming_pending = True
         self._client.stop_torrent(self.id, timeout=timeout)
 
-    def move_data(self, location, timeout=None):
+    def move_data(self, location: str, timeout: '_Timeout' = None):
         """Move torrent data to location."""
         self._incoming_pending = True
         self._client.move_torrent_data(self.id, location, timeout=timeout)
 
-    def locate_data(self, location, timeout=None):
+    def locate_data(self, location, timeout: '_Timeout' = None):
         """Locate torrent data at location."""
         self._incoming_pending = True
         self._client.locate_torrent_data(self.id, location, timeout=timeout)
