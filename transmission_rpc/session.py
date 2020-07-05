@@ -1,8 +1,12 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+from typing import TYPE_CHECKING, Any, Dict
 
 from transmission_rpc.utils import Field
+
+if TYPE_CHECKING:
+    from transmission_rpc.client import Client
 
 
 class Session:
@@ -14,22 +18,22 @@ class Session:
     Transmission RPC specification, but with underscore instead of hyphen.
     ``download-dir`` -> ``download_dir``.
     """
-    def __init__(self, client=None, fields=None):
+    def __init__(self, client: 'Client' = None, fields: Dict[str, Field] = None):
         self._client = client
-        self._fields = {}
+        self._fields: Dict[str, Field] = {}
         if fields is not None:
             self._update_fields(fields)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
         except KeyError:
             raise AttributeError('No attribute %s' % name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         text = ''
         for key in sorted(self._fields.keys()):
-            text += '{: 32}: {}\n'.format(key[-32:], self._fields[key].value)
+            text += '{:32}: {}\n'.format(key[-32:], self._fields[key].value)
         return text
 
     def _update_fields(self, other):

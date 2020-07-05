@@ -6,11 +6,12 @@ import os
 import re
 import json
 import time
+import types
 import base64
 import string
 import logging
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Union, TextIO, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Type, Union, TextIO, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -154,7 +155,7 @@ class Client:
             if r.status_code != 409:
                 return r.text
 
-    def _request(self, method, arguments=None, ids=None, require_ids=False, timeout=None):
+    def _request(self, method: str, arguments=None, ids=None, require_ids=False, timeout=None):
         """
         Send json-rpc request to Transmission using http POST
         :type arguments: object
@@ -235,7 +236,7 @@ class Client:
         else:
             self.session = Session(self, data)
 
-    def _update_server_version(self):
+    def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
         if self.server_version is None:
             version_major = 1
@@ -805,8 +806,10 @@ class Client:
         self._request('session-stats', timeout=timeout)
         return self.session
 
-    def __enter__(self):
+    def __enter__(self) -> 'Client':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType
+    ) -> None:
         self._http_session.close()
