@@ -8,7 +8,7 @@ LOGGER = logging.getLogger('transmission-rpc')
 LOGGER.setLevel(logging.ERROR)
 
 
-def mirror_dict(source):
+def mirror_dict(source: dict) -> dict:
     """
     Creates a dictionary with all values as keys and all keys as values.
     """

@@ -112,7 +112,7 @@ class Torrent:
                 fields.append(key)
         return fields
 
-    def _push(self):
+    def _push(self) -> None:
         """Push changed fields to the server"""
         dirty = self._dirty_fields()
         args = {}

@@ -10,7 +10,7 @@ import base64
 import string
 import logging
 import operator
-from typing import TYPE_CHECKING, List, Union, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 
-def _parse_torrent_id(raw_torrent_id):
+def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -41,11 +41,11 @@ def _parse_torrent_id(raw_torrent_id):
             raise ValueError(f'torrent ids {raw_torrent_id} if not a valid sha1 hash')
         return raw_torrent_id
     elif isinstance(raw_torrent_id, Field):
-        return _parse_torrent_ids(raw_torrent_id.value)
+        return _parse_torrent_id(raw_torrent_id.value)
     raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
-def _parse_torrent_ids(args):
+def _parse_torrent_ids(args: List[Any]) -> Union[List[Union[int, str]], str]:
     if args is None:
         return []
     if isinstance(args, int):
@@ -70,7 +70,7 @@ class Client:
         port: int = 9091,
         path: str = '/transmission/',
         timeout: Union[int, float] = DEFAULT_TIMEOUT,
-        logger=LOGGER
+        logger: logging.Logger = LOGGER
     ):
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -99,28 +99,28 @@ class Client:
         self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
     @property
-    def timeout(self):
+    def timeout(self) -> float:
         """
         Get current timeout for HTTP queries.
         """
         return self._query_timeout
 
     @timeout.setter
-    def timeout(self, value):
+    def timeout(self, value: Union[str, int, float]) -> None:
         """
         Set timeout for HTTP queries.
         """
         self._query_timeout = float(value)
 
     @timeout.deleter
-    def timeout(self):
+    def timeout(self) -> None:
         """
         Reset the HTTP query timeout to the default.
         """
         self._query_timeout = DEFAULT_TIMEOUT
 
     @property
-    def _http_header(self):
+    def _http_header(self) -> Dict[str, str]:
         return {'x-transmission-session-id': str(self.session_id)}
 
     def _http_query(self, query, timeout=None):
