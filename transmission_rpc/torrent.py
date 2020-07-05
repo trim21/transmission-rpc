@@ -1,6 +1,5 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-
 import sys
 import datetime
 

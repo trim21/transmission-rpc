@@ -1,7 +1,6 @@
 # 2008-12, Erik Svensson <erik.public@gmail.com>
 # Copyright (c) 2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
-
 import time
 import datetime
 

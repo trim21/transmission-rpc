@@ -1,7 +1,6 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.client import Client
 from transmission_rpc.session import Session
