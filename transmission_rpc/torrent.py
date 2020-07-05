@@ -4,11 +4,11 @@ import sys
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
+from transmission_rpc.types import _Timeout
 from transmission_rpc.utils import Field, format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 
 if TYPE_CHECKING:
-    from transmission_rpc.types import _Timeout
     from transmission_rpc.client import Client
 
 
