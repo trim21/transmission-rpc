@@ -93,7 +93,7 @@ class Client:
         )
         self.url = str(url)
         self._sequence = 0
-        self.session: Session = Session()
+        self.session: Session = Session(self)
         self.session_id: Optional[str] = None
         self.server_version = None
         self.protocol_version: Optional[int] = None
