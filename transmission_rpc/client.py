@@ -12,7 +12,7 @@ import string
 import logging
 import pathlib
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -20,21 +20,22 @@ import requests
 import requests.auth
 
 from transmission_rpc.error import TransmissionError
-from transmission_rpc.types import _Timeout
 from transmission_rpc.utils import (
     LOGGER, Field, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
 )
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
-from transmission_rpc.decorator import arg, replaced_by
+from transmission_rpc.decorator import kwarg, replaced_by
+from transmission_rpc.lib_types import _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
-_TorrentIDs = Union[str, List[Union[int, str]], None]
+_TorrentID = Union[int, str]
+_TorrentIDs = Union[str, _TorrentID, List[_TorrentID], None]
 
 
 def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
@@ -56,7 +57,7 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]
     raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
-def _parse_torrent_ids(args: Any) -> _TorrentIDs:
+def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
     if args is None:
         return []
     if isinstance(args, int):
@@ -103,7 +104,7 @@ class Client:
         self._sequence = 0
         self.session: Session = Session(self)
         self.session_id = '0'
-        self.server_version = None
+        self.server_version: Optional[Tuple[int, int, int]] = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
         self.get_session()
@@ -127,7 +128,7 @@ class Client:
             for v in value:
                 if not isinstance(v, (float, int)):
                     raise ValueError('element of timeout tuple can only be int of float')
-            self._query_timeout = tuple(value)
+            self._query_timeout = (value[0], value[1])  # for type checker
         elif value is None:
             self._query_timeout = DEFAULT_TIMEOUT
         else:
@@ -174,9 +175,9 @@ class Client:
 
     def _request(
         self,
-        method,
-        arguments=None,
-        ids=None,
+        method: str,
+        arguments: Dict[str, Any] = None,
+        ids: _TorrentIDs = None,
         require_ids: bool = False,
         timeout: _Timeout = None
     ) -> dict:
@@ -206,7 +207,7 @@ class Client:
         self.logger.info('http request took %.3f s' % elapsed)
 
         try:
-            data = json.loads(http_data)
+            data: dict = json.loads(http_data)
         except ValueError as error:
             self.logger.error('Error: ' + str(error))
             self.logger.error('Request: \"%s\"' % query)
@@ -247,11 +248,11 @@ class Client:
         elif method in ('port-test', 'blocklist-update', 'free-space', 'torrent-rename-path'):
             results = data['arguments']
         else:
-            return None
+            return data
 
         return results
 
-    def _update_session(self, data):
+    def _update_session(self, data: Dict[str, Any]) -> None:
         """
         Update session data.
         """
@@ -272,7 +273,7 @@ class Client:
                 if match:
                     version_major = int(match.group(1))
                     version_minor = int(match.group(2))
-                    version_changeset = match.group(3)
+                    version_changeset = int(match.group(3))
             self.server_version = (version_major, version_minor, version_changeset)
 
     @property
@@ -309,9 +310,11 @@ class Client:
                 % (self.rpc_version, required_version)
             )
 
-    @arg('bandwidthPriority', 8)
-    @arg('cookies', 13)
-    def add_torrent(self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs):
+    @kwarg('bandwidthPriority', 8)
+    @kwarg('cookies', 13)
+    def add_torrent(
+        self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
+    ) -> str:
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
         You can find examples in test code
@@ -382,7 +385,9 @@ class Client:
             args[arg] = val
         return list(self._request('torrent-add', args, timeout=timeout).values())[0]
 
-    def remove_torrent(self, ids, delete_data: bool = False, timeout: _Timeout = None):
+    def remove_torrent(
+        self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None
+    ) -> None:
         """
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.
@@ -395,14 +400,16 @@ class Client:
             timeout=timeout
         )
 
-    def start_torrent(self, ids, bypass_queue: bool = False, timeout: _Timeout = None):
+    def start_torrent(
+        self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout = None
+    ) -> None:
         """Start torrent(s) with provided id(s)"""
         method = 'torrent-start'
         if bypass_queue and self.rpc_version >= 14:
             method = 'torrent-start-now'
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: _Timeout = None):
+    def start_all(self, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
         """Start all torrents respecting the queue order"""
         torrent_list = self.get_torrents()
         method = 'torrent-start'
@@ -410,8 +417,9 @@ class Client:
             if bypass_queue:
                 method = 'torrent-start-now'
             torrent_list = sorted(torrent_list, key=operator.attrgetter('queuePosition'))
-        ids = [x.id for x in torrent_list]
-        self._request(method, {}, ids, True, timeout=timeout)
+        self._request(
+            method, {}, ids=[x.id for x in torrent_list], require_ids=True, timeout=timeout
+        )
 
     def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """stop torrent(s) with provided id(s)"""
@@ -426,7 +434,12 @@ class Client:
         self._rpc_version_warning(5)
         self._request('torrent-reannounce', {}, ids, True, timeout=timeout)
 
-    def get_torrent(self, torrent_id, arguments=None, timeout: _Timeout = None):
+    def get_torrent(
+        self,
+        torrent_id: _TorrentID,
+        arguments: Sequence[str] = None,
+        timeout: _Timeout = None
+    ) -> Torrent:
         """
         Get information for torrent with provided id.
         ``arguments`` contains a list of field names to be returned, when None
@@ -439,7 +452,7 @@ class Client:
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError('Invalid id')
-        result = self._request(
+        result: Dict[str, Torrent] = self._request(
             'torrent-get', {'fields': arguments}, torrent_id, require_ids=True, timeout=timeout
         )
         if torrent_id in result:
@@ -450,13 +463,16 @@ class Client:
                     return torrent
             raise KeyError('Torrent not found in result')
 
-    def get_torrents(self, ids=None, arguments=None, timeout: _Timeout = None) -> List[Torrent]:
+    def get_torrents(
+        self,
+        ids: _TorrentIDs = None,
+        arguments: Sequence[str] = None,
+        timeout: _Timeout = None,
+    ) -> List[Torrent]:
         """
         Get information for torrents with provided ids. For more information see get_torrent.
 
         Returns a list of Torrent object.
-        :type ids: Union[int, str]
-        :rtype : list[Torrent]
         """
         if not arguments:
             arguments = self.torrent_get_arguments
@@ -497,12 +513,14 @@ class Client:
             result[tid] = torrent.files()
         return result
 
-    def set_files(self, items, timeout: _Timeout = None):
+    def set_files(
+        self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None
+    ) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
-        of `get_files`.
+        of ``get_files``.
 
-        ::
+        .. code-block:: python
 
                 {
                         <torrent id>: {
@@ -541,7 +559,7 @@ class Client:
                         normal.append(fid)
                     elif file_desc['priority'] == 'low':
                         low.append(fid)
-            args = {'timeout': timeout}
+            args = {}
             if len(high) > 0:
                 args['priority_high'] = high
             if len(normal) > 0:
@@ -552,25 +570,25 @@ class Client:
                 args['files_wanted'] = wanted
             if len(unwanted) > 0:
                 args['files_unwanted'] = unwanted
-            self.change_torrent([tid], **args)
+            self.change_torrent([tid], timeout=timeout, **args)
 
-    @arg('bandwidthPriority', 5)
-    @arg('downloadLimit', 5)
-    @arg('downloadLimited', 5)
-    @arg('honorsSessionLimits', 5)
-    @arg('queuePosition', 14)
-    @arg('seedIdleLimit', 10)
-    @arg('seedIdleMode', 10)
-    @arg('downloadLimit', 5)
-    @arg('downloadLimited', 5)
-    @arg('uploadLimit', 5)
-    @arg('uploadLimited', 5)
-    @arg('trackerAdd', 10)
-    @arg('trackerRemove', 10)
-    @arg('trackerReplace', 10)
-    @arg('uploadLimit', 5)
-    @arg('uploadLimited', 5)
-    def change_torrent(self, ids, timeout: _Timeout = None, **kwargs):
+    @kwarg('bandwidthPriority', 5)
+    @kwarg('downloadLimit', 5)
+    @kwarg('downloadLimited', 5)
+    @kwarg('honorsSessionLimits', 5)
+    @kwarg('queuePosition', 14)
+    @kwarg('seedIdleLimit', 10)
+    @kwarg('seedIdleMode', 10)
+    @kwarg('downloadLimit', 5)
+    @kwarg('downloadLimited', 5)
+    @kwarg('uploadLimit', 5)
+    @kwarg('uploadLimited', 5)
+    @kwarg('trackerAdd', 10)
+    @kwarg('trackerRemove', 10)
+    @kwarg('trackerReplace', 10)
+    @kwarg('uploadLimit', 5)
+    @kwarg('uploadLimited', 5)
+    def change_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any) -> None:
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
         parameters are:
@@ -623,10 +641,15 @@ class Client:
         else:
             ValueError('No arguments to set')
 
-    def move_torrent_data(self, ids, location, timeout: _Timeout = None) -> None:
+    def move_torrent_data(
+        self,
+        ids: _TorrentIDs,
+        location: Union[str, pathlib.Path],
+        timeout: _Timeout = None
+    ) -> None:
         """Move torrent data to the new location."""
         self._rpc_version_warning(6)
-        args = {'location': location, 'move': True}
+        args = {'location': ensure_location_str(location), 'move': True}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
     def locate_torrent_data(
@@ -642,9 +665,9 @@ class Client:
 
     def rename_torrent_path(
         self,
-        torrent_id,
+        torrent_id: _TorrentID,
         location: Union[str, pathlib.Path],
-        name,
+        name: str,
         timeout: _Timeout = None,
     ) -> Tuple[str, str]:
         """
@@ -653,8 +676,6 @@ class Client:
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
-        if torrent_id is None:
-            raise ValueError('Invalid id')
         dirname = os.path.dirname(name)
         if len(dirname) > 0:
             raise ValueError('Target name cannot contain a path delimiter')
@@ -690,53 +711,53 @@ class Client:
         self._update_server_version()
         return self.session
 
-    @arg('alt_speed_down', 5)
-    @arg('alt_speed_enabled', 5)
-    @arg('alt_speed_time_begin', 5)
-    @arg('alt_speed_time_day', 5)
-    @arg('alt_speed_time_enabled', 5)
-    @arg('alt_speed_time_end', 5)
-    @arg('alt_speed_up', 5)
-    @arg('blocklist_enabled', 5)
-    @arg('blocklist_url', 11)
-    @arg('cache_size_mb', 10)
-    @arg('dht_enabled', 6)
-    @arg('download_dir', 1)
-    @arg('download_queue_enabled', 14)
-    @arg('download_queue_size', 14)
-    @arg('encryption', 1)
-    @arg('idle_seeding_limit', 10)
-    @arg('idle_seeding_limit_enabled', 10)
-    @arg('incomplete_dir', 7)
-    @arg('incomplete_dir_enabled', 7)
-    @arg('lpd_enabled', 9)
-    @arg('peer_limit', 1)
-    @arg('peer_limit_global', 5)
-    @arg('peer_limit_per_torrent', 5)
-    @arg('peer_port', 5)
-    @arg('peer_port_random_on_start', 5)
-    @arg('pex_allowed', 1)
+    @kwarg('alt_speed_down', 5)
+    @kwarg('alt_speed_enabled', 5)
+    @kwarg('alt_speed_time_begin', 5)
+    @kwarg('alt_speed_time_day', 5)
+    @kwarg('alt_speed_time_enabled', 5)
+    @kwarg('alt_speed_time_end', 5)
+    @kwarg('alt_speed_up', 5)
+    @kwarg('blocklist_enabled', 5)
+    @kwarg('blocklist_url', 11)
+    @kwarg('cache_size_mb', 10)
+    @kwarg('dht_enabled', 6)
+    @kwarg('download_dir', 1)
+    @kwarg('download_queue_enabled', 14)
+    @kwarg('download_queue_size', 14)
+    @kwarg('encryption', 1)
+    @kwarg('idle_seeding_limit', 10)
+    @kwarg('idle_seeding_limit_enabled', 10)
+    @kwarg('incomplete_dir', 7)
+    @kwarg('incomplete_dir_enabled', 7)
+    @kwarg('lpd_enabled', 9)
+    @kwarg('peer_limit', 1)
+    @kwarg('peer_limit_global', 5)
+    @kwarg('peer_limit_per_torrent', 5)
+    @kwarg('peer_port', 5)
+    @kwarg('peer_port_random_on_start', 5)
+    @kwarg('pex_allowed', 1)
     @replaced_by('pex_allowed', 'pex_enabled', 5)
-    @arg('pex_enabled', 5)
-    @arg('port', 1)
-    @arg('port_forwarding_enabled', 1)
-    @arg('queue_stalled_enabled', 14)
-    @arg('queue_stalled_minutes', 14)
-    @arg('rename_partial_files', 8)
-    @arg('script_torrent_done_enabled', 9)
-    @arg('script_torrent_done_filename', 9)
-    @arg('seed_queue_enabled', 14)
-    @arg('seed_queue_size', 14)
-    @arg('seedRatioLimit', 5)
-    @arg('seedRatioLimited', 5)
-    @arg('speed_limit_down', 1)
-    @arg('speed_limit_down_enabled', 1)
-    @arg('speed_limit_up', 1)
-    @arg('speed_limit_up_enabled', 1)
-    @arg('start_added_torrents', 9)
-    @arg('trash_original_torrent_files', 9)
-    @arg('utp_enabled', 13)
-    def set_session(self, timeout: _Timeout = None, **kwargs):
+    @kwarg('pex_enabled', 5)
+    @kwarg('port', 1)
+    @kwarg('port_forwarding_enabled', 1)
+    @kwarg('queue_stalled_enabled', 14)
+    @kwarg('queue_stalled_minutes', 14)
+    @kwarg('rename_partial_files', 8)
+    @kwarg('script_torrent_done_enabled', 9)
+    @kwarg('script_torrent_done_filename', 9)
+    @kwarg('seed_queue_enabled', 14)
+    @kwarg('seed_queue_size', 14)
+    @kwarg('seedRatioLimit', 5)
+    @kwarg('seedRatioLimited', 5)
+    @kwarg('speed_limit_down', 1)
+    @kwarg('speed_limit_down_enabled', 1)
+    @kwarg('speed_limit_up', 1)
+    @kwarg('speed_limit_up_enabled', 1)
+    @kwarg('start_added_torrents', 9)
+    @kwarg('trash_original_torrent_files', 9)
+    @kwarg('utp_enabled', 13)
+    def set_session(self, timeout: _Timeout = None, **kwargs: Any) -> None:
         """
     Set session parameters. The parameters are:
 
@@ -809,13 +830,13 @@ class Client:
         if len(args) > 0:
             self._request('session-set', args, timeout=timeout)
 
-    def blocklist_update(self, timeout: _Timeout = None):
+    def blocklist_update(self, timeout: _Timeout = None) -> Optional[int]:
         """Update block list. Returns the size of the block list."""
         self._rpc_version_warning(5)
         result = self._request('blocklist-update', timeout=timeout)
         return result.get('blocklist-size')
 
-    def port_test(self, timeout: _Timeout = None):
+    def port_test(self, timeout: _Timeout = None) -> Optional[bool]:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
@@ -829,9 +850,8 @@ class Client:
         Get the amount of free space (in bytes) at the provided location.
         """
         self._rpc_version_warning(15)
-        if isinstance(path, pathlib.Path):
-            path = str(path.absolute())
-        result = self._request('free-space', {'path': path}, timeout=timeout)
+        path = ensure_location_str(path)
+        result: Dict[str, Any] = self._request('free-space', {'path': path}, timeout=timeout)
         if result['path'] == path:
             return result['size-bytes']
         return None

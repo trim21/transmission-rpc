@@ -1,12 +1,11 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-import sys
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
-from transmission_rpc.types import _Timeout
 from transmission_rpc.utils import Field, format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
+from transmission_rpc.lib_types import _Timeout
 
 if TYPE_CHECKING:
     from transmission_rpc.client import Client
@@ -45,7 +44,7 @@ class Torrent:
     All fetched torrent fields are accessible through this class using attributes.
     This class has a few convenience properties using the torrent data.
     """
-    def __init__(self, client: 'Client', fields: Dict[str, Field]):
+    def __init__(self, client: 'Client', fields: Dict[str, Any]):
         if 'id' not in fields:
             raise ValueError('Torrent requires an id')
         self._fields: Dict[str, Field] = {}
@@ -58,34 +57,26 @@ class Torrent:
     def id(self) -> str:
         return self._fields['id'].value
 
-    def _get_name_string(self, codec: str = None) -> str:
+    def _get_name_string(self) -> Optional[str]:
         """Get the name"""
-        if codec is None:
-            codec = sys.getdefaultencoding()
         name = None
         # try to find name
         if 'name' in self._fields:
             name = self._fields['name'].value
-        # if name is unicode, try to decode
-        if isinstance(name, str):
-            try:
-                name = name.encode(codec)
-            except UnicodeError:
-                name = None
         return name
 
     def __repr__(self) -> str:
         tid = self._fields['id'].value
         name = self._get_name_string()
         if isinstance(name, str):
-            return '<Torrent %d \"%s\">' % (tid, name)
+            return f'<Torrent {tid} "{name}">'
         else:
-            return '<Torrent %d>' % (tid)
+            return f'<Torrent {tid}>'
 
     def __str__(self) -> str:
         name = self._get_name_string()
         if isinstance(name, str):
-            return 'Torrent \"%s\"' % (name)
+            return f'Torrent "{name}"'
         else:
             return 'Torrent'
 

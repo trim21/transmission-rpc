@@ -3,8 +3,8 @@
 # Licensed under the MIT license.
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
-from transmission_rpc.types import _Timeout
 from transmission_rpc.utils import Field
+from transmission_rpc.lib_types import _Timeout
 
 if TYPE_CHECKING:
     from transmission_rpc.client import Client

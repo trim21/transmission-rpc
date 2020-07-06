@@ -132,7 +132,7 @@ def argument_value_convert(
         raise ValueError('Argument "%s" does not exists for method "%s".', (argument, method))
 
 
-def get_arguments(method: str, rpc_version: int) -> List[Any]:
+def get_arguments(method: str, rpc_version: int) -> List[str]:
     """
     Get arguments for method in specified Transmission RPC version.
     """
