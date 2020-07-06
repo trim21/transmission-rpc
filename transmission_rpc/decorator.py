@@ -24,7 +24,7 @@ def kwarg(kw: str, v: int) -> Callable[[T], T]:
                     )
             return f(self, *args, **kwargs)
 
-        return cast(T, wrapper)
+        return cast(T, wrapped)
 
     return wrapper
 
