@@ -3,9 +3,9 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
-from transmission_rpc.utils import Field, format_timedelta
+from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
-from transmission_rpc.lib_types import _Timeout
+from transmission_rpc.lib_types import File, Field, _Timeout
 
 if TYPE_CHECKING:
     from transmission_rpc.client import Client
@@ -140,26 +140,14 @@ class Torrent:
         else:
             return get_status_old(code)
 
-    def files(self) -> Dict[int, Dict[str, Any]]:
+    def files(self) -> List[File]:
         """
         Get list of files for this torrent.
 
         This function returns a dictionary with file information for each file.
         The file information is has following fields:
-        ::
-
-            {
-                <file id>: {
-                    'name': <file name>,
-                    'size': <file size in bytes>,
-                    'completed': <bytes completed>,
-                    'priority': <priority ('high'|'normal'|'low')>,
-                    'selected': <selected for download>
-                }
-                ...
-            }
         """
-        result = {}
+        result: List[File] = []
         if 'files' in self._fields:
             files = self._fields['files'].value
             indices = range(len(files))
@@ -168,13 +156,15 @@ class Torrent:
             for item in zip(indices, files, priorities, wanted):
                 selected = True if item[3] else False
                 priority = PRIORITY[item[2]]
-                result[item[0]] = {
-                    'selected': selected,
-                    'priority': priority,
-                    'size': item[1]['length'],
-                    'name': item[1]['name'],
-                    'completed': item[1]['bytesCompleted'],
-                }
+                result.append(
+                    File(
+                        selected=selected,
+                        priority=priority,
+                        size=item[1]['length'],
+                        name=item[1]['name'],
+                        completed=item[1]['bytesCompleted'],
+                    )
+                )
         return result
 
     @property
