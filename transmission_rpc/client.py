@@ -11,7 +11,7 @@ import base64
 import string
 import logging
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Type, Union, TextIO, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Type, Union, BinaryIO, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -28,14 +28,15 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
 from transmission_rpc.decorator import arg, replaced_by
 
-if TYPE_CHECKING:
-    from typing_extensions import Literal
-    TorrentIDS = Union[Literal['recently-active'], List[Union[str, int]]]
-
 valid_hash_char = string.digits + string.ascii_letters
 
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
-def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]:
+_TorrentIDs = Union[str, List[Union[int, str]], None]
+
+
+def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -48,7 +49,7 @@ def _parse_torrent_id(raw_torrent_id: Union[Field, int, str]) -> Union[int, str]
     raise ValueError(f'{raw_torrent_id} is not valid torrent id')
 
 
-def _parse_torrent_ids(args: Any) -> Union[List[Union[int, str]], str]:
+def _parse_torrent_ids(args: Any) -> _TorrentIDs:
     if args is None:
         return []
     if isinstance(args, int):
@@ -82,7 +83,7 @@ class Client:
                 'logger must be instance of `logging.Logger`, '
                 'default: logging.getLogger(\'transmission-rpc\')'
             )
-        self._query_timeout = timeout
+        self._query_timeout: _Timeout = timeout
         url = yarl.URL.build(
             scheme=protocol,
             user=username,
@@ -94,7 +95,7 @@ class Client:
         self.url = str(url)
         self._sequence = 0
         self.session: Session = Session(self)
-        self.session_id: Optional[str] = None
+        self.session_id = '0'
         self.server_version = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
@@ -102,18 +103,28 @@ class Client:
         self.torrent_get_arguments = get_arguments('torrent-get', self.rpc_version)
 
     @property
-    def timeout(self) -> float:
+    def timeout(self) -> _Timeout:
         """
         Get current timeout for HTTP queries.
         """
         return self._query_timeout
 
     @timeout.setter
-    def timeout(self, value: Union[str, int, float]) -> None:
+    def timeout(self, value: _Timeout) -> None:
         """
         Set timeout for HTTP queries.
         """
-        self._query_timeout = float(value)
+        if isinstance(value, (tuple, list)):
+            if len(value) != 2:
+                raise ValueError('timeout tuple can only include 2 numbers elements')
+            for v in value:
+                if not isinstance(v, (float, int)):
+                    raise ValueError('element of timeout tuple can only be int of float')
+            self._query_timeout = tuple(value)
+        elif value is None:
+            self._query_timeout = DEFAULT_TIMEOUT
+        else:
+            self._query_timeout = float(value)
 
     @timeout.deleter
     def timeout(self) -> None:
@@ -126,7 +137,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {'x-transmission-session-id': str(self.session_id)}
 
-    def _http_query(self, query: Any, timeout: Optional[Union[int, float]] = None) -> str:
+    def _http_query(self, query, timeout: _Timeout = None):
         """
         Query Transmission through HTTP.
         """
@@ -146,7 +157,7 @@ class Client:
             r = self._http_session.post(
                 self.url, headers=self._http_header, json=json.loads(query), timeout=timeout
             )
-            self.session_id = r.headers.get('X-Transmission-Session-Id')
+            self.session_id = r.headers.get('X-Transmission-Session-Id', '0')
             self.logger.debug(r.text)
             if r.status_code == 401:
                 print(r.request.headers)
@@ -156,12 +167,12 @@ class Client:
 
     def _request(
         self,
-        method: str,
-        arguments: Dict[str, Any] = None,
-        ids: 'TorrentIDS' = None,
+        method,
+        arguments=None,
+        ids=None,
         require_ids: bool = False,
-        timeout: _Timeout = None,
-    ) -> Optional[dict]:
+        timeout: _Timeout = None
+    ) -> dict:
         """
         Send json-rpc request to Transmission using http POST
         :type arguments: object
@@ -281,19 +292,19 @@ class Client:
                 self.protocol_version = 2
         return self.protocol_version
 
-    def _rpc_version_warning(self, version):
+    def _rpc_version_warning(self, required_version: int) -> None:
         """
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
-        if self.rpc_version < version:
+        if self.rpc_version < required_version:
             self.logger.warning(
                 'Using feature not supported by server. RPC version for server %d, feature introduced in %d.'
-                % (self.rpc_version, version)
+                % (self.rpc_version, required_version)
             )
 
     @arg('bandwidthPriority', 8)
     @arg('cookies', 13)
-    def add_torrent(self, torrent: Union[str, TextIO], timeout: '_Timeout' = None, **kwargs):
+    def add_torrent(self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs):
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
         You can find examples in test code
@@ -360,11 +371,11 @@ class Client:
 
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert('torrent-add', argument, value, self.rpc_version)
+            arg, val = argument_value_convert('torrent-add', argument, value, self.rpc_version)
             args[arg] = val
         return list(self._request('torrent-add', args, timeout=timeout).values())[0]
 
-    def remove_torrent(self, ids: 'TorrentIDS', delete_data: bool = False, timeout=None):
+    def remove_torrent(self, ids, delete_data: bool = False, timeout: _Timeout = None):
         """
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.
@@ -377,14 +388,14 @@ class Client:
             timeout=timeout
         )
 
-    def start_torrent(self, ids, bypass_queue: bool = False, timeout=None):
+    def start_torrent(self, ids, bypass_queue: bool = False, timeout: _Timeout = None):
         """Start torrent(s) with provided id(s)"""
         method = 'torrent-start'
         if bypass_queue and self.rpc_version >= 14:
             method = 'torrent-start-now'
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout=None):
+    def start_all(self, bypass_queue: bool = False, timeout: _Timeout = None):
         """Start all torrents respecting the queue order"""
         torrent_list = self.get_torrents()
         method = 'torrent-start'
@@ -395,20 +406,20 @@ class Client:
         ids = [x.id for x in torrent_list]
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def stop_torrent(self, ids, timeout=None):
+    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
         """stop torrent(s) with provided id(s)"""
         self._request('torrent-stop', {}, ids, True, timeout=timeout)
 
-    def verify_torrent(self, ids, timeout=None):
+    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
         """verify torrent(s) with provided id(s)"""
         self._request('torrent-verify', {}, ids, True, timeout=timeout)
 
-    def reannounce_torrent(self, ids, timeout=None):
+    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
         """Reannounce torrent(s) with provided id(s)"""
         self._rpc_version_warning(5)
         self._request('torrent-reannounce', {}, ids, True, timeout=timeout)
 
-    def get_torrent(self, torrent_id, arguments=None, timeout=None):
+    def get_torrent(self, torrent_id, arguments=None, timeout: _Timeout = None):
         """
         Get information for torrent with provided id.
         ``arguments`` contains a list of field names to be returned, when None
@@ -432,7 +443,7 @@ class Client:
                     return torrent
             raise KeyError('Torrent not found in result')
 
-    def get_torrents(self, ids=None, arguments=None, timeout=None) -> List[Torrent]:
+    def get_torrents(self, ids=None, arguments=None, timeout: _Timeout = None) -> List[Torrent]:
         """
         Get information for torrents with provided ids. For more information see get_torrent.
 
@@ -446,7 +457,7 @@ class Client:
             self._request('torrent-get', {'fields': arguments}, ids, timeout=timeout).values()
         )
 
-    def get_files(self, ids=None, timeout=None):
+    def get_files(self, ids=None, timeout: _Timeout = None):
         """
         Get list of files for provided torrent id(s). If ids is empty,
         information for all torrents are fetched. This function returns a dictionary
@@ -477,7 +488,7 @@ class Client:
             result[tid] = torrent.files()
         return result
 
-    def set_files(self, items, timeout=None):
+    def set_files(self, items, timeout: _Timeout = None):
         """
         Set file properties. Takes a dictionary with similar contents as the result
         of `get_files`.
@@ -550,7 +561,7 @@ class Client:
     @arg('trackerReplace', 10)
     @arg('uploadLimit', 5)
     @arg('uploadLimited', 5)
-    def change_torrent(self, ids, timeout=None, **kwargs):
+    def change_torrent(self, ids, timeout: _Timeout = None, **kwargs):
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
         parameters are:
@@ -603,19 +614,19 @@ class Client:
         else:
             ValueError('No arguments to set')
 
-    def move_torrent_data(self, ids, location, timeout=None):
+    def move_torrent_data(self, ids, location, timeout: _Timeout = None):
         """Move torrent data to the new location."""
         self._rpc_version_warning(6)
         args = {'location': location, 'move': True}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
-    def locate_torrent_data(self, ids, location, timeout=None):
+    def locate_torrent_data(self, ids, location, timeout: _Timeout = None):
         """Locate torrent data at the provided location."""
         self._rpc_version_warning(6)
         args = {'location': location, 'move': False}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
-    def rename_torrent_path(self, torrent_id, location, name, timeout=None):
+    def rename_torrent_path(self, torrent_id, location, name, timeout: _Timeout = None):
         """
         Rename directory and/or files for torrent.
         Remember to use get_torrent or get_torrents to update your file information.
@@ -631,27 +642,27 @@ class Client:
         result = self._request('torrent-rename-path', args, torrent_id, True, timeout=timeout)
         return (result['path'], result['name'])
 
-    def queue_top(self, ids, timeout=None):
-        """Move transfer to the top of the queue."""
+    def queue_top(self, ids, timeout: _Timeout = None):
+        """Move transfer to the top of the queue:_Timeout."""
         self._rpc_version_warning(14)
         self._request('queue-move-top', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_bottom(self, ids, timeout=None):
+    def queue_bottom(self, ids, timeout: _Timeout = None):
         """Move transfer to the bottom of the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-bottom', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_up(self, ids, timeout=None):
+    def queue_up(self, ids, timeout: _Timeout = None):
         """Move transfer up in the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-up', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_down(self, ids, timeout=None):
+    def queue_down(self, ids, timeout: _Timeout = None):
         """Move transfer down in the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-down', ids=ids, require_ids=True, timeout=timeout)
 
-    def get_session(self, timeout=None):
+    def get_session(self, timeout: _Timeout = None):
         """
         Get session parameters. See the Session class for more information.
         """
@@ -705,7 +716,7 @@ class Client:
     @arg('start_added_torrents', 9)
     @arg('trash_original_torrent_files', 9)
     @arg('utp_enabled', 13)
-    def set_session(self, timeout=None, **kwargs):
+    def set_session(self, timeout: _Timeout = None, **kwargs):
         """
     Set session parameters. The parameters are:
 
@@ -778,26 +789,22 @@ class Client:
         if len(args) > 0:
             self._request('session-set', args, timeout=timeout)
 
-    def blocklist_update(self, timeout=None):
+    def blocklist_update(self, timeout: _Timeout = None):
         """Update block list. Returns the size of the block list."""
         self._rpc_version_warning(5)
         result = self._request('blocklist-update', timeout=timeout)
-        if 'blocklist-size' in result:
-            return result['blocklist-size']
-        return None
+        return result.get('blocklist-size')
 
-    def port_test(self, timeout=None):
+    def port_test(self, timeout: _Timeout = None):
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
         """
         self._rpc_version_warning(5)
         result = self._request('port-test', timeout=timeout)
-        if 'port-is-open' in result:
-            return result['port-is-open']
-        return None
+        return result.get('port-is-open')
 
-    def free_space(self, path, timeout=None):
+    def free_space(self, path, timeout: _Timeout = None) -> Optional[int]:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
@@ -807,7 +814,7 @@ class Client:
             return result['size-bytes']
         return None
 
-    def session_stats(self, timeout=None):
+    def session_stats(self, timeout: _Timeout = None) -> Session:
         """Get session statistics"""
         self._request('session-stats', timeout=timeout)
         return self.session
@@ -815,7 +822,5 @@ class Client:
     def __enter__(self) -> 'Client':
         return self
 
-    def __exit__(
-        self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType
-    ) -> None:
+    def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType):
         self._http_session.close()

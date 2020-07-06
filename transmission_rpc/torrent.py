@@ -244,7 +244,7 @@ class Torrent:
         else:
             return datetime.datetime.fromtimestamp(done_date)
 
-    def format_eta(self):
+    def format_eta(self) -> str:
         """
         Returns the attribute *eta* formatted as a string.
 
@@ -261,7 +261,7 @@ class Torrent:
             return format_timedelta(self.eta)
 
     @property
-    def download_limit(self):
+    def download_limit(self) -> Optional[int]:
         """The download limit.
 
         Can be a number or None.
@@ -272,7 +272,7 @@ class Torrent:
             return None
 
     @download_limit.setter
-    def download_limit(self, limit):
+    def download_limit(self, limit: int) -> None:
         """Download limit in Kbps or None."""
         if isinstance(limit, int):
             self._fields['downloadLimited'] = Field(True, True)
@@ -285,12 +285,12 @@ class Torrent:
             raise ValueError('Not a valid limit')
 
     @property
-    def peer_limit(self):
+    def peer_limit(self) -> int:
         """the peer limit."""
         return self._fields['peer_limit'].value
 
     @peer_limit.setter
-    def peer_limit(self, limit):
+    def peer_limit(self, limit: int) -> None:
         """
         Set the peer limit.
         """
@@ -301,27 +301,26 @@ class Torrent:
             raise ValueError('Not a valid limit')
 
     @property
-    def priority(self):
-        "Bandwidth priority as string. Can be one of 'low', 'normal', 'high'. This is a mutator."
+    def priority(self) -> str:
+        """Bandwidth priority as string. Can be one of 'low', 'normal', 'high'. This is a mutator."""
 
         return PRIORITY[self._fields['bandwidthPriority'].value]
 
     @priority.setter
-    def priority(self, priority):
-        """Bandwidth priority as string. Can be one of 'low', 'normal', 'high'."""
+    def priority(self, priority: str) -> None:
         if isinstance(priority, str):
             self._fields['bandwidthPriority'] = Field(PRIORITY[priority], True)
             self._push()
 
     @property
-    def seed_idle_limit(self):
+    def seed_idle_limit(self) -> int:
         """
         seed idle limit in minutes.
         """
         return self._fields['seedIdleLimit'].value
 
     @seed_idle_limit.setter
-    def seed_idle_limit(self, limit):
+    def seed_idle_limit(self, limit: int) -> None:
         """
         Set the seed idle limit in minutes.
         """
@@ -332,7 +331,7 @@ class Torrent:
             raise ValueError('Not a valid limit')
 
     @property
-    def seed_idle_mode(self):
+    def seed_idle_mode(self) -> str:
         """
         Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
@@ -343,24 +342,27 @@ class Torrent:
         return IDLE_LIMIT[self._fields['seedIdleMode'].value]
 
     @seed_idle_mode.setter
-    def seed_idle_mode(self, mode):
+    def seed_idle_mode(self, mode: Union[str, int]) -> None:
         """
-        Set the seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
+        Set the seed ratio mode. Can be one of ``global``, ``single`` or ``unlimited``, or ``0``, ``1``, ``2``.
         """
         if isinstance(mode, str):
+            self._fields['seedIdleMode'] = Field(IDLE_LIMIT[mode], True)
+            self._push()
+        elif isinstance(mode, int):
             self._fields['seedIdleMode'] = Field(IDLE_LIMIT[mode], True)
             self._push()
         else:
             raise ValueError('Not a valid limit')
 
     @property
-    def seed_ratio_limit(self):
+    def seed_ratio_limit(self) -> float:
         """Torrent seed ratio limit as float. Also see seed_ratio_mode. This is a mutator."""
 
         return float(self._fields['seedRatioLimit'].value)
 
     @seed_ratio_limit.setter
-    def seed_ratio_limit(self, limit):
+    def seed_ratio_limit(self, limit: Union[int, float]) -> None:
         """
         Set the seed ratio limit as float.
         """
@@ -371,7 +373,7 @@ class Torrent:
             raise ValueError('Not a valid limit')
 
     @property
-    def seed_ratio_mode(self):
+    def seed_ratio_mode(self) -> str:
         """
         Seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
@@ -384,18 +386,22 @@ class Torrent:
         return RATIO_LIMIT[self._fields['seedRatioMode'].value]
 
     @seed_ratio_mode.setter
-    def seed_ratio_mode(self, mode):
+    def seed_ratio_mode(self, mode: Union[str, int]) -> None:
         """
-        Set the seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
+        Set the seed ratio mode.
+        Can be one of ``'global'``, ``'single'`` or ``'unlimited'``, or ``0``, ``1``, ``2``.
         """
         if isinstance(mode, str):
             self._fields['seedRatioMode'] = Field(RATIO_LIMIT[mode], True)
+            self._push()
+        elif isinstance(mode, int):
+            self._fields['seedRatioMode'] = Field(mode, True)
             self._push()
         else:
             raise ValueError('Not a valid limit')
 
     @property
-    def upload_limit(self):
+    def upload_limit(self) -> Optional[int]:
         """
         upload limit.
         Can be a number or None.
@@ -406,7 +412,7 @@ class Torrent:
             return None
 
     @upload_limit.setter
-    def upload_limit(self, limit):
+    def upload_limit(self, limit: Optional[int]) -> None:
         """Upload limit in Kbps or None."""
         if isinstance(limit, int):
             self._fields['uploadLimited'] = Field(True, True)
@@ -444,24 +450,24 @@ class Torrent:
         torrent = self._client.get_torrent(self.id, timeout=timeout)
         self._update_fields(torrent)
 
-    def start(self, bypass_queue: bool = False, timeout: _Timeout = None):
+    def start(self, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
         """
         Start the torrent.
         """
         self._incoming_pending = True
         self._client.start_torrent(self.id, bypass_queue=bypass_queue, timeout=timeout)
 
-    def stop(self, timeout: _Timeout = None):
+    def stop(self, timeout: _Timeout = None) -> None:
         """Stop the torrent."""
         self._incoming_pending = True
         self._client.stop_torrent(self.id, timeout=timeout)
 
-    def move_data(self, location: str, timeout: _Timeout = None):
+    def move_data(self, location: str, timeout: _Timeout = None) -> None:
         """Move torrent data to location."""
         self._incoming_pending = True
         self._client.move_torrent_data(self.id, location, timeout=timeout)
 
-    def locate_data(self, location, timeout: _Timeout = None):
+    def locate_data(self, location: str, timeout: _Timeout = None) -> None:
         """Locate torrent data at location."""
         self._incoming_pending = True
         self._client.locate_torrent_data(self.id, location, timeout=timeout)
