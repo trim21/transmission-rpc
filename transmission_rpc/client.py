@@ -377,7 +377,7 @@ class Client:
         if torrent_data:
             args = {'metainfo': torrent_data}
         else:
-            args = {'filename': torrent}
+            args = {'filename': torrent}  # type: ignore
 
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
@@ -456,7 +456,8 @@ class Client:
             'torrent-get', {'fields': arguments}, torrent_id, require_ids=True, timeout=timeout
         )
         if torrent_id in result:
-            return result[torrent_id]
+            # todo
+            return result[torrent_id]  # type: ignore
         else:
             for torrent in result.values():
                 if torrent.hashString == torrent_id:
