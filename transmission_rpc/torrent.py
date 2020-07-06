@@ -68,14 +68,14 @@ class Torrent:
     def __repr__(self) -> str:
         tid = self._fields['id'].value
         name = self._get_name_string()
-        if isinstance(name, str):
+        if name is not None:
             return f'<Torrent {tid} "{name}">'
         else:
             return f'<Torrent {tid}>'
 
     def __str__(self) -> str:
         name = self._get_name_string()
-        if isinstance(name, str):
+        if name is not None:
             return f'Torrent "{name}"'
         else:
             return 'Torrent'
