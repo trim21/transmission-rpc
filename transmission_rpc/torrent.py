@@ -54,7 +54,7 @@ class Torrent:
         self._client = client
 
     @property
-    def id(self) -> str:
+    def id(self) -> int:
         return self._fields['id'].value
 
     def _get_name_string(self) -> Optional[str]:

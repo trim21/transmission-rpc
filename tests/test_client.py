@@ -152,3 +152,9 @@ def test_real_session_stats(tr_client: Client):
 def test_wrong_logger():
     with pytest.raises(TypeError):
         Client(logger='something')
+
+
+def test_torrent_type(tr_client: Client, fake_hash_factory):
+    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
+    for torrent in tr_client.get_torrents():
+        assert isinstance(torrent.id, int)
