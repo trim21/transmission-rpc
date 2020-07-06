@@ -10,8 +10,9 @@ import types
 import base64
 import string
 import logging
+import pathlib
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Type, Union, BinaryIO, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional
 from urllib.parse import urljoin, urlparse
 
 import yarl
@@ -34,6 +35,12 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 _TorrentIDs = Union[str, List[Union[int, str]], None]
+
+
+def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
+    if isinstance(s, pathlib.Path):
+        return str(s.absolute())
+    return str(s)
 
 
 def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]:
@@ -135,9 +142,9 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {'x-transmission-session-id': str(self.session_id)}
+        return {'x-transmission-session-id': self.session_id}
 
-    def _http_query(self, query, timeout: _Timeout = None):
+    def _http_query(self, query: Any, timeout: _Timeout = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -160,7 +167,7 @@ class Client:
             self.session_id = r.headers.get('X-Transmission-Session-Id', '0')
             self.logger.debug(r.text)
             if r.status_code == 401:
-                print(r.request.headers)
+                self.logger.debug(r.request.headers)
                 raise TransmissionError('transmission daemon require auth', original=r)
             if r.status_code != 409:
                 return r.text
@@ -406,15 +413,15 @@ class Client:
         ids = [x.id for x in torrent_list]
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
+    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """stop torrent(s) with provided id(s)"""
         self._request('torrent-stop', {}, ids, True, timeout=timeout)
 
-    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
+    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """verify torrent(s) with provided id(s)"""
         self._request('torrent-verify', {}, ids, True, timeout=timeout)
 
-    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None):
+    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
         self._rpc_version_warning(5)
         self._request('torrent-reannounce', {}, ids, True, timeout=timeout)
@@ -457,13 +464,17 @@ class Client:
             self._request('torrent-get', {'fields': arguments}, ids, timeout=timeout).values()
         )
 
-    def get_files(self, ids=None, timeout: _Timeout = None):
+    def get_files(
+        self,
+        ids: _TorrentIDs = None,
+        timeout: _Timeout = None,
+    ) -> Dict[str, Dict[str, Dict[str, Any]]]:
         """
         Get list of files for provided torrent id(s). If ids is empty,
         information for all torrents are fetched. This function returns a dictionary
         for each requested torrent id holding the information about the files.
 
-        ::
+        ... code-block:: python
 
                 {
                         <torrent id>: {
@@ -473,11 +484,9 @@ class Client:
                                         'completed': <bytes completed>,
                                         'priority': <priority ('high'|'normal'|'low')>,
                                         'selected': <selected for download (True|False)>
-                                }
-
+                                },
                                 ...
-                        }
-
+                        },
                         ...
                 }
         """
@@ -606,7 +615,7 @@ class Client:
         args = {}
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert('torrent-set', argument, value, self.rpc_version)
+            arg, val = argument_value_convert('torrent-set', argument, value, self.rpc_version)
             args[arg] = val
 
         if len(args) > 0:
@@ -614,19 +623,30 @@ class Client:
         else:
             ValueError('No arguments to set')
 
-    def move_torrent_data(self, ids, location, timeout: _Timeout = None):
+    def move_torrent_data(self, ids, location, timeout: _Timeout = None) -> None:
         """Move torrent data to the new location."""
         self._rpc_version_warning(6)
         args = {'location': location, 'move': True}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
-    def locate_torrent_data(self, ids, location, timeout: _Timeout = None):
+    def locate_torrent_data(
+        self,
+        ids: _TorrentIDs,
+        location: Union[str, pathlib.Path],
+        timeout: _Timeout = None,
+    ) -> None:
         """Locate torrent data at the provided location."""
         self._rpc_version_warning(6)
-        args = {'location': location, 'move': False}
+        args = {'location': ensure_location_str(location), 'move': False}
         self._request('torrent-set-location', args, ids, True, timeout=timeout)
 
-    def rename_torrent_path(self, torrent_id, location, name, timeout: _Timeout = None):
+    def rename_torrent_path(
+        self,
+        torrent_id,
+        location: Union[str, pathlib.Path],
+        name,
+        timeout: _Timeout = None,
+    ) -> Tuple[str, str]:
         """
         Rename directory and/or files for torrent.
         Remember to use get_torrent or get_torrents to update your file information.
@@ -638,31 +658,31 @@ class Client:
         dirname = os.path.dirname(name)
         if len(dirname) > 0:
             raise ValueError('Target name cannot contain a path delimiter')
-        args = {'path': location, 'name': name}
+        args = {'path': ensure_location_str(location), 'name': name}
         result = self._request('torrent-rename-path', args, torrent_id, True, timeout=timeout)
-        return (result['path'], result['name'])
+        return result['path'], result['name']
 
-    def queue_top(self, ids, timeout: _Timeout = None):
+    def queue_top(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer to the top of the queue:_Timeout."""
         self._rpc_version_warning(14)
         self._request('queue-move-top', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_bottom(self, ids, timeout: _Timeout = None):
+    def queue_bottom(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer to the bottom of the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-bottom', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_up(self, ids, timeout: _Timeout = None):
+    def queue_up(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer up in the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-up', ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_down(self, ids, timeout: _Timeout = None):
+    def queue_down(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer down in the queue."""
         self._rpc_version_warning(14)
         self._request('queue-move-down', ids=ids, require_ids=True, timeout=timeout)
 
-    def get_session(self, timeout: _Timeout = None):
+    def get_session(self, timeout: _Timeout = None) -> Session:
         """
         Get session parameters. See the Session class for more information.
         """
@@ -804,11 +824,13 @@ class Client:
         result = self._request('port-test', timeout=timeout)
         return result.get('port-is-open')
 
-    def free_space(self, path, timeout: _Timeout = None) -> Optional[int]:
+    def free_space(self, path: Union[str, pathlib.Path], timeout: _Timeout = None) -> Optional[int]:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
         self._rpc_version_warning(15)
+        if isinstance(path, pathlib.Path):
+            path = str(path.absolute())
         result = self._request('free-space', {'path': path}, timeout=timeout)
         if result['path'] == path:
             return result['size-bytes']
@@ -822,5 +844,10 @@ class Client:
     def __enter__(self) -> 'Client':
         return self
 
-    def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType):
+    def __exit__(
+        self,
+        exc_type: Type[Exception],
+        exc_val: Exception,
+        exc_tb: types.TracebackType,
+    ) -> None:
         self._http_session.close()
