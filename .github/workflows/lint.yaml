@@ -3,6 +3,24 @@ name: lint
 on: [push, pull_request]
 
 jobs:
+  mypy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - uses: Trim21/setup-poetry@v1
+
+      - uses: Trim21/install-poetry-project@v1
+        with:
+          extras: docs
+
+      - name: mypy
+        run: mypy transmission_rpc
+
   lint:
     runs-on: ubuntu-18.04
     steps:
@@ -16,8 +34,7 @@ jobs:
 
       - uses: Trim21/install-poetry-project@v1
         with:
-          extras: |
-            docs
+          extras: docs
 
       - uses: actions/cache@v2
         with:

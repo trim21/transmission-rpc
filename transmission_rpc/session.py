@@ -1,8 +1,13 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from transmission_rpc.utils import Field
+from transmission_rpc.lib_types import _Timeout
+
+if TYPE_CHECKING:
+    from transmission_rpc.client import Client
 
 
 class Session:
@@ -14,25 +19,25 @@ class Session:
     Transmission RPC specification, but with underscore instead of hyphen.
     ``download-dir`` -> ``download_dir``.
     """
-    def __init__(self, client=None, fields=None):
+    def __init__(self, client: 'Client', fields: Dict[str, Field] = None):
         self._client = client
-        self._fields = {}
+        self._fields: Dict[str, Field] = {}
         if fields is not None:
             self._update_fields(fields)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
         except KeyError:
             raise AttributeError('No attribute %s' % name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         text = ''
         for key in sorted(self._fields.keys()):
-            text += '{: 32}: {}\n'.format(key[-32:], self._fields[key].value)
+            text += '{:32}: {}\n'.format(key[-32:], self._fields[key].value)
         return text
 
-    def _update_fields(self, other):
+    def _update_fields(self, other: Union[Dict[str, Field], 'Session']) -> None:
         """
         Update the session data from a Transmission JSON-RPC arguments dictionary
         """
@@ -45,7 +50,7 @@ class Session:
         else:
             raise ValueError('Cannot update with supplied data')
 
-    def _dirty_fields(self):
+    def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
         outgoing_keys = ['peer_port', 'pex_enabled']
         fields = []
@@ -54,7 +59,7 @@ class Session:
                 fields.append(key)
         return fields
 
-    def _push(self):
+    def _push(self) -> None:
         """Push changed fields to the server"""
         dirty = self._dirty_fields()
         args = {}
@@ -64,7 +69,7 @@ class Session:
         if len(args) > 0:
             self._client.set_session(**args)
 
-    def update(self, timeout=None):
+    def update(self, timeout: _Timeout = None) -> None:
         """Update the session information."""
         self._push()
         session = self._client.get_session(timeout=timeout)
@@ -72,19 +77,19 @@ class Session:
         session = self._client.session_stats(timeout=timeout)
         self._update_fields(session)
 
-    def from_request(self, data):
+    def from_request(self, data: dict) -> None:
         """Update the session information."""
         self._update_fields(data)
 
     @property
-    def peer_port(self):
+    def peer_port(self) -> int:
         """
         Get the peer port.
         """
         return self._fields['peer_port'].value
 
     @peer_port.setter
-    def peer_port(self, port):
+    def peer_port(self, port: int) -> None:
         """
         Set the peer port.
         """
@@ -95,12 +100,12 @@ class Session:
             raise ValueError('Not a valid limit')
 
     @property
-    def pex_enabled(self):
+    def pex_enabled(self) -> bool:
         """Is peer exchange enabled?"""
         return self._fields['pex_enabled'].value
 
     @pex_enabled.setter
-    def pex_enabled(self, enabled):
+    def pex_enabled(self, enabled: bool) -> None:
         """Enable/disable peer exchange."""
         if isinstance(enabled, bool):
             self._fields['pex_enabled'] = Field(enabled, True)

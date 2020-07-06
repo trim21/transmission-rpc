@@ -60,23 +60,16 @@ repos:
 
   - repo: local
     hooks:
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        args: [--config=setup.cfg]
-
-      - id: mypy
-        name: mypy
-        entry: mypy
-        language: system
-        types: [python]
-        files: transmission_rpc.*$
-
       - id: yapf
         name: yapf
         entry: yapf -i
         require_serial: true
         language: system
         types: [python]
+
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: system
+        types: [python]
+        args: [--config=setup.cfg]

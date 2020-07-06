@@ -2,7 +2,7 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import datetime
-from typing import Any, Tuple, NamedTuple
+from typing import Any, Dict, List, Tuple, Callable, NamedTuple
 
 from transmission_rpc import constants
 from transmission_rpc.constants import LOGGER
@@ -39,7 +39,7 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return '%d %02d:%02d:%02d' % (delta.days, hours, minutes, seconds)
 
 
-def format_timestamp(timestamp: int, utc=False) -> str:
+def format_timestamp(timestamp: int, utc: bool = False) -> str:
     """
     Format unix timestamp into ISO date format.
     """
@@ -65,7 +65,7 @@ def rpc_bool(arg: Any) -> int:
     return 1 if bool(arg) else 0
 
 
-TR_TYPE_MAP = {
+TR_TYPE_MAP: Dict[str, Callable] = {
     'number': int,
     'string': str,
     'double': float,
@@ -75,21 +75,26 @@ TR_TYPE_MAP = {
 }
 
 
-def make_python_name(name):
+def make_python_name(name: str) -> str:
     """
     Convert Transmission RPC name to python compatible name.
     """
     return name.replace('-', '_')
 
 
-def make_rpc_name(name):
+def make_rpc_name(name: str) -> str:
     """
     Convert python compatible name to Transmission RPC name.
     """
     return name.replace('_', '-')
 
 
-def argument_value_convert(method, argument, value, rpc_version):
+def argument_value_convert(
+    method: str,
+    argument: str,
+    value: Any,
+    rpc_version: int,
+) -> Tuple[str, Any]:
     """
     Check and fix Transmission RPC issues with regards to methods, arguments and values.
     """
@@ -98,7 +103,7 @@ def argument_value_convert(method, argument, value, rpc_version):
     elif method in ('session-get', 'session-set'):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
-        return ValueError('Method "%s" not supported' % (method))
+        raise ValueError('Method "%s" not supported' % (method))
     if argument in args:
         info = args[argument]
         invalid_version = True
@@ -108,7 +113,7 @@ def argument_value_convert(method, argument, value, rpc_version):
             if rpc_version < info[1]:
                 invalid_version = True
                 replacement = info[3]
-            if info[2] and info[2] <= rpc_version:
+            if info[2] is not None and info[2] <= rpc_version:
                 invalid_version = True
                 replacement = info[4]
             if invalid_version:
@@ -127,7 +132,7 @@ def argument_value_convert(method, argument, value, rpc_version):
         raise ValueError('Argument "%s" does not exists for method "%s".', (argument, method))
 
 
-def get_arguments(method, rpc_version):
+def get_arguments(method: str, rpc_version: int) -> List[str]:
     """
     Get arguments for method in specified Transmission RPC version.
     """
@@ -136,13 +141,13 @@ def get_arguments(method, rpc_version):
     elif method in ('session-get', 'session-set'):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
-        return ValueError('Method "%s" not supported' % (method))
+        raise ValueError('Method "%s" not supported' % (method))
     accessible = []
     for argument, info in args.items():
         valid_version = True
         if rpc_version < info[1]:
             valid_version = False
-        if info[2] and info[2] <= rpc_version:
+        if info[2] is not None and info[2] <= rpc_version:
             valid_version = False
         if valid_version:
             accessible.append(argument)

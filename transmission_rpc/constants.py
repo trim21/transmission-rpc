@@ -8,7 +8,7 @@ LOGGER = logging.getLogger('transmission-rpc')
 LOGGER.setLevel(logging.ERROR)
 
 
-def mirror_dict(source):
+def mirror_dict(source: dict) -> dict:
     """
     Creates a dictionary with all values as keys and all keys as values.
     """
@@ -29,8 +29,9 @@ TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certai
 TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
 
 RATIO_LIMIT = mirror_dict({
-    'global': TR_RATIOLIMIT_GLOBAL, 'single': TR_RATIOLIMIT_SINGLE,
-    'unlimited': TR_RATIOLIMIT_UNLIMITED
+    'global': TR_RATIOLIMIT_GLOBAL,
+    'single': TR_RATIOLIMIT_SINGLE,
+    'unlimited': TR_RATIOLIMIT_UNLIMITED,
 })
 
 TR_IDLELIMIT_GLOBAL = 0  # follow the global settings
@@ -38,8 +39,9 @@ TR_IDLELIMIT_SINGLE = 1  # override the global settings, seeding until a certain
 TR_IDLELIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of activity
 
 IDLE_LIMIT = mirror_dict({
-    'global': TR_RATIOLIMIT_GLOBAL, 'single': TR_RATIOLIMIT_SINGLE,
-    'unlimited': TR_RATIOLIMIT_UNLIMITED
+    'global': TR_RATIOLIMIT_GLOBAL,
+    'single': TR_RATIOLIMIT_SINGLE,
+    'unlimited': TR_RATIOLIMIT_UNLIMITED,
 })
 
 
