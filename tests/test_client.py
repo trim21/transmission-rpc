@@ -9,6 +9,7 @@ import pytest
 
 from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
+from transmission_rpc.lib_types import File
 
 HOST = os.getenv('TR_HOST', '127.0.0.1')
 PORT = int(os.getenv('TR_PORT', '9091'))
@@ -158,3 +159,12 @@ def test_torrent_type(tr_client: Client, fake_hash_factory):
     tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
     for torrent in tr_client.get_torrents():
         assert isinstance(torrent.id, int)
+
+
+def test_torrent_get_files(tr_client: Client):
+    with open('tests/fixtures/iso.torrent', 'rb') as f:
+        tr_client.add_torrent(f)
+    assert len(tr_client.get_torrents()) == 1, 'transmission should has at least 1 task'
+    for torrent in tr_client.get_torrents():
+        for file in torrent.files():
+            assert isinstance(file, File)
