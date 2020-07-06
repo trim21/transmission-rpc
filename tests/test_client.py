@@ -155,10 +155,12 @@ def test_wrong_logger():
         Client(logger='something')
 
 
-def test_torrent_type(tr_client: Client, fake_hash_factory):
-    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
+def test_torrent_attr_type(tr_client: Client, fake_hash_factory):
+    with open('tests/fixtures/iso.torrent', 'rb') as f:
+        tr_client.add_torrent(f)
     for torrent in tr_client.get_torrents():
         assert isinstance(torrent.id, int)
+        assert isinstance(torrent.name, str)
 
 
 def test_torrent_get_files(tr_client: Client):
