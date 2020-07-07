@@ -485,7 +485,7 @@ class Client:
         self,
         ids: _TorrentIDs = None,
         timeout: _Timeout = None,
-    ) -> Dict[str, List[File]]:
+    ) -> Dict[int, List[File]]:
         """
         Get list of files for provided torrent id(s). If ids is empty,
         information for all torrents are fetched. This function returns a dictionary
@@ -508,7 +508,7 @@ class Client:
                 }
         """
         fields = ['id', 'name', 'hashString', 'files', 'priorities', 'wanted']
-        request_result: Dict[str, Torrent] = self._request(
+        request_result: Dict[int, Torrent] = self._request(
             'torrent-get', {'fields': fields}, ids, timeout=timeout
         )
         result = {}
