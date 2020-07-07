@@ -12,12 +12,13 @@ import string
 import logging
 import pathlib
 import operator
-from typing import TYPE_CHECKING, Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
+from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import urljoin, urlparse
 
 import yarl
 import requests
 import requests.auth
+from typing_extensions import Literal
 
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.utils import (
@@ -26,13 +27,9 @@ from transmission_rpc.utils import (
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
-from transmission_rpc.decorator import kwarg, replaced_by
 from transmission_rpc.lib_types import File, Field, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[str, _TorrentID, List[_TorrentID], None]
@@ -310,8 +307,6 @@ class Client:
                 % (self.rpc_version, required_version)
             )
 
-    @kwarg('bandwidthPriority', 8)
-    @kwarg('cookies', 13)
     def add_torrent(
         self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
     ) -> str:
@@ -570,22 +565,6 @@ class Client:
                 args['files_unwanted'] = unwanted
             self.change_torrent([tid], timeout=timeout, **args)
 
-    @kwarg('bandwidthPriority', 5)
-    @kwarg('downloadLimit', 5)
-    @kwarg('downloadLimited', 5)
-    @kwarg('honorsSessionLimits', 5)
-    @kwarg('queuePosition', 14)
-    @kwarg('seedIdleLimit', 10)
-    @kwarg('seedIdleMode', 10)
-    @kwarg('downloadLimit', 5)
-    @kwarg('downloadLimited', 5)
-    @kwarg('uploadLimit', 5)
-    @kwarg('uploadLimited', 5)
-    @kwarg('trackerAdd', 10)
-    @kwarg('trackerRemove', 10)
-    @kwarg('trackerReplace', 10)
-    @kwarg('uploadLimit', 5)
-    @kwarg('uploadLimited', 5)
     def change_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any) -> None:
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
@@ -628,6 +607,7 @@ class Client:
         .. NOTE::
            transmission_rpc will try to automatically fix argument errors.
         """
+
         args = {}
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
@@ -709,114 +689,68 @@ class Client:
         self._update_server_version()
         return self.session
 
-    @kwarg('alt_speed_down', 5)
-    @kwarg('alt_speed_enabled', 5)
-    @kwarg('alt_speed_time_begin', 5)
-    @kwarg('alt_speed_time_day', 5)
-    @kwarg('alt_speed_time_enabled', 5)
-    @kwarg('alt_speed_time_end', 5)
-    @kwarg('alt_speed_up', 5)
-    @kwarg('blocklist_enabled', 5)
-    @kwarg('blocklist_url', 11)
-    @kwarg('cache_size_mb', 10)
-    @kwarg('dht_enabled', 6)
-    @kwarg('download_dir', 1)
-    @kwarg('download_queue_enabled', 14)
-    @kwarg('download_queue_size', 14)
-    @kwarg('encryption', 1)
-    @kwarg('idle_seeding_limit', 10)
-    @kwarg('idle_seeding_limit_enabled', 10)
-    @kwarg('incomplete_dir', 7)
-    @kwarg('incomplete_dir_enabled', 7)
-    @kwarg('lpd_enabled', 9)
-    @kwarg('peer_limit', 1)
-    @kwarg('peer_limit_global', 5)
-    @kwarg('peer_limit_per_torrent', 5)
-    @kwarg('peer_port', 5)
-    @kwarg('peer_port_random_on_start', 5)
-    @kwarg('pex_allowed', 1)
-    @replaced_by('pex_allowed', 'pex_enabled', 5)
-    @kwarg('pex_enabled', 5)
-    @kwarg('port', 1)
-    @kwarg('port_forwarding_enabled', 1)
-    @kwarg('queue_stalled_enabled', 14)
-    @kwarg('queue_stalled_minutes', 14)
-    @kwarg('rename_partial_files', 8)
-    @kwarg('script_torrent_done_enabled', 9)
-    @kwarg('script_torrent_done_filename', 9)
-    @kwarg('seed_queue_enabled', 14)
-    @kwarg('seed_queue_size', 14)
-    @kwarg('seedRatioLimit', 5)
-    @kwarg('seedRatioLimited', 5)
-    @kwarg('speed_limit_down', 1)
-    @kwarg('speed_limit_down_enabled', 1)
-    @kwarg('speed_limit_up', 1)
-    @kwarg('speed_limit_up_enabled', 1)
-    @kwarg('start_added_torrents', 9)
-    @kwarg('trash_original_torrent_files', 9)
-    @kwarg('utp_enabled', 13)
     def set_session(self, timeout: _Timeout = None, **kwargs: Any) -> None:
         """
-    Set session parameters. The parameters are:
+        Set session parameters. The parameters are:
 
-    ================================ ===== ================= ===========================================================
-    Argument                         RPC   Replaced by       Description
-    ================================ ===== ================= ===========================================================
-    ``alt_speed_down``               5 -                     Alternate session download speed limit (in Kib/s).
-    ``alt_speed_enabled``            5 -                     Enables alternate global download speed limiter.
-    ``alt_speed_time_begin``         5 -                        Time when alternate speeds should be enabled.
-                                                                Minutes after midnight.
-    ``alt_speed_time_day``           5 -                     Enables alternate speeds scheduling these days.
-    ``alt_speed_time_enabled``       5 -                     Enables alternate speeds scheduling.
-    ``alt_speed_time_end``           5 -                         Time when alternate speeds should be disabled.
-                                                                 Minutes after midnight.
-    ``alt_speed_up``                 5 -                     Alternate session upload speed limit (in Kib/s).
-    ``blocklist_enabled``            5 -                     Enables the block list
-    ``blocklist_url``                11 -                       Location of the block list.
-                                                                Updated with blocklist-update.
-    ``cache_size_mb``                10 -                    The maximum size of the disk cache in MB
-    ``dht_enabled``                  6 -                     Enables DHT.
-    ``download_dir``                 1 -                     Set the session download directory.
-    ``download_queue_enabled``       14 -                    Enables download queue.
-    ``download_queue_size``          14 -                    Number of slots in the download queue.
-    ``encryption``                   1 -                         Set the session encryption mode, one of ``required``,
-                                                                 ``preferred`` or ``tolerated``.
-    ``idle_seeding_limit``           10 -                    The default seed inactivity limit in minutes.
-    ``idle_seeding_limit_enabled``   10 -                    Enables the default seed inactivity limit
-    ``incomplete_dir``               7 -                     The path to the directory of incomplete transfer data.
-    ``incomplete_dir_enabled``       7 -                         Enables the incomplete transfer data directory.
-                                                                 Otherwise data for incomplete transfers are stored in
-                                                                 the download target.
-    ``lpd_enabled``                  9 -                     Enables local peer discovery for public torrents.
-    ``peer_limit``                   1 - 5 peer-limit-global Maximum number of peers.
-    ``peer_limit_global``            5 -                     Maximum number of peers.
-    ``peer_limit_per_torrent``       5 -                     Maximum number of peers per transfer.
-    ``peer_port``                    5 -                     Peer port.
-    ``peer_port_random_on_start``    5 -                     Enables randomized peer port on start of Transmission.
-    ``pex_allowed``                  1 - 5 pex-enabled       Allowing PEX in public torrents.
-    ``pex_enabled``                  5 -                     Allowing PEX in public torrents.
-    ``port``                         1 - 5 peer-port         Peer port.
-    ``port_forwarding_enabled``      1 -                     Enables port forwarding.
-    ``queue_stalled_enabled``        14 -                    Enable tracking of stalled transfers.
-    ``queue_stalled_minutes``        14 -                    Number of minutes of idle that marks a transfer as stalled.
-    ``rename_partial_files``         8 -                     Appends ".part" to incomplete files
-    ``script_torrent_done_enabled``  9 -                     Whether or not to call the "done" script.
-    ``script_torrent_done_filename`` 9 -                     Filename of the script to run when the transfer is done.
-    ``seed_queue_enabled``           14 -                    Enables upload queue.
-    ``seed_queue_size``              14 -                    Number of slots in the upload queue.
-    ``seedRatioLimit``               5 -                     Seed ratio limit. 1.0 means 1:1 download and upload ratio.
-    ``seedRatioLimited``             5 -                     Enables seed ration limit.
-    ``speed_limit_down``             1 -                     Download speed limit (in Kib/s).
-    ``speed_limit_down_enabled``     1 -                     Enables download speed limiting.
-    ``speed_limit_up``               1 -                     Upload speed limit (in Kib/s).
-    ``speed_limit_up_enabled``       1 -                     Enables upload speed limiting.
-    ``start_added_torrents``         9 -                     Added torrents will be started right away.
-    ``trash_original_torrent_files`` 9 -                     The .torrent file of added torrents will be deleted.
-    ``utp_enabled``                  13 -                    Enables Micro Transport Protocol (UTP).
-    ================================ ===== ================= ===========================================================
+        ================================ ===== ================= ===========================================================
+        Argument                         RPC   Replaced by       Description
+        ================================ ===== ================= ===========================================================
+        ``alt_speed_down``               5 -                     Alternate session download speed limit (in Kib/s).
+        ``alt_speed_enabled``            5 -                     Enables alternate global download speed limiter.
+        ``alt_speed_time_begin``         5 -                        Time when alternate speeds should be enabled.
+                                                                    Minutes after midnight.
+        ``alt_speed_time_day``           5 -                     Enables alternate speeds scheduling these days.
+        ``alt_speed_time_enabled``       5 -                     Enables alternate speeds scheduling.
+        ``alt_speed_time_end``           5 -                         Time when alternate speeds should be disabled.
+                                                                     Minutes after midnight.
+        ``alt_speed_up``                 5 -                     Alternate session upload speed limit (in Kib/s).
+        ``blocklist_enabled``            5 -                     Enables the block list
+        ``blocklist_url``                11 -                       Location of the block list.
+                                                                    Updated with blocklist-update.
+        ``cache_size_mb``                10 -                    The maximum size of the disk cache in MB
+        ``dht_enabled``                  6 -                     Enables DHT.
+        ``download_dir``                 1 -                     Set the session download directory.
+        ``download_queue_enabled``       14 -                    Enables download queue.
+        ``download_queue_size``          14 -                    Number of slots in the download queue.
+        ``encryption``                   1 -                         Set the session encryption mode, one of ``required``,
+                                                                     ``preferred`` or ``tolerated``.
+        ``idle_seeding_limit``           10 -                    The default seed inactivity limit in minutes.
+        ``idle_seeding_limit_enabled``   10 -                    Enables the default seed inactivity limit
+        ``incomplete_dir``               7 -                     The path to the directory of incomplete transfer data.
+        ``incomplete_dir_enabled``       7 -                         Enables the incomplete transfer data directory.
+                                                                     Otherwise data for incomplete transfers are stored in
+                                                                     the download target.
+        ``lpd_enabled``                  9 -                     Enables local peer discovery for public torrents.
+        ``peer_limit``                   1 - 5 peer-limit-global Maximum number of peers.
+        ``peer_limit_global``            5 -                     Maximum number of peers.
+        ``peer_limit_per_torrent``       5 -                     Maximum number of peers per transfer.
+        ``peer_port``                    5 -                     Peer port.
+        ``peer_port_random_on_start``    5 -                     Enables randomized peer port on start of Transmission.
+        ``pex_allowed``                  1 - 5 pex-enabled       Allowing PEX in public torrents.
+        ``pex_enabled``                  5 -                     Allowing PEX in public torrents.
+        ``port``                         1 - 5 peer-port         Peer port.
+        ``port_forwarding_enabled``      1 -                     Enables port forwarding.
+        ``queue_stalled_enabled``        14 -                    Enable tracking of stalled transfers.
+        ``queue_stalled_minutes``        14 -                    Number of minutes of idle that marks a transfer as stalled.
+        ``rename_partial_files``         8 -                     Appends ".part" to incomplete files
+        ``script_torrent_done_enabled``  9 -                     Whether or not to call the "done" script.
+        ``script_torrent_done_filename`` 9 -                     Filename of the script to run when the transfer is done.
+        ``seed_queue_enabled``           14 -                    Enables upload queue.
+        ``seed_queue_size``              14 -                    Number of slots in the upload queue.
+        ``seedRatioLimit``               5 -                     Seed ratio limit. 1.0 means 1:1 download and upload ratio.
+        ``seedRatioLimited``             5 -                     Enables seed ration limit.
+        ``speed_limit_down``             1 -                     Download speed limit (in Kib/s).
+        ``speed_limit_down_enabled``     1 -                     Enables download speed limiting.
+        ``speed_limit_up``               1 -                     Upload speed limit (in Kib/s).
+        ``speed_limit_up_enabled``       1 -                     Enables upload speed limiting.
+        ``start_added_torrents``         9 -                     Added torrents will be started right away.
+        ``trash_original_torrent_files`` 9 -                     The .torrent file of added torrents will be deleted.
+        ``utp_enabled``                  13 -                    Enables Micro Transport Protocol (UTP).
+        ================================ ===== ================= ===========================================================
 
-    .. NOTE::
-       transmission_rpc will try to automatically fix argument errors.
+        .. NOTE::
+           transmission_rpc will try to automatically fix argument errors.
         """
         args = {}
         for key, value in kwargs.items():

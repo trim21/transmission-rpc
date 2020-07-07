@@ -181,3 +181,12 @@ def test_torrent_get_files(tr_client: Client):
     for torrent in tr_client.get_torrents():
         for file in torrent.files():
             assert isinstance(file, File)
+
+
+def test_check_rpc_version_for_args():
+    m = mock.Mock(return_value={'hello': 'world'})
+    with mock.patch('transmission_rpc.client.Client._request', m):
+        c = Client()
+        c.protocol_version = 7
+        with pytest.raises(ValueError):
+            c.add_torrent(magnet_url, cookies='')
