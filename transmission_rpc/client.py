@@ -491,21 +491,17 @@ class Client:
         information for all torrents are fetched. This function returns a dictionary
         for each requested torrent id holding the information about the files.
 
-        ... code-block:: python
+        .. code-block:: python
 
-                {
-                        <torrent id>: {
-                                <file id>: {
-                                        'name': <file name>,
-                                        'size': <file size in bytes>,
-                                        'completed': <bytes completed>,
-                                        'priority': <priority ('high'|'normal'|'low')>,
-                                        'selected': <selected for download (True|False)>
-                                },
-                                ...
-                        },
-                        ...
-                }
+            {
+                <torrent id>: [
+                    <File 1>,
+                    <File 2>,
+                    ...
+                },
+                ...
+            }
+
         """
         fields = ['id', 'name', 'hashString', 'files', 'priorities', 'wanted']
         request_result: Dict[int, Torrent] = self._request(
@@ -525,18 +521,17 @@ class Client:
 
         .. code-block:: python
 
-                {
-                        <torrent id>: {
-                                <file id>: {
-                                        'priority': <priority ('high'|'normal'|'low')>,
-                                        'selected': <selected for download (True|False)>
-                                }
-
-                                ...
-                        }
-
-                        ...
+            {
+                <torrent id>: {
+                    <file id>: {
+                        'priority': <priority ('high'|'normal'|'low')>,
+                        'selected': <selected for download (True|False)>
+                    }
+                    ...
                 }
+                ...
+            }
+
         """
         if not isinstance(items, dict):
             raise ValueError('Invalid file description')
