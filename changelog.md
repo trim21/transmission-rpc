@@ -1,5 +1,13 @@
 ## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a3...HEAD)
 
+### Code Refactoring
+- add type hint
+- return File instead of return dict ([#23](https://github.com/Trim21/transmission-rpc/issues/23))
+
+### BREAKING CHANGES
+`Torrent.files()` will return `List[File]`
+`Client.get_files()` will return `Dict[int, List[File]]`
+
 
 ## [v3.0.0a3](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a2...v3.0.0a3) - 2020-07-03
 
