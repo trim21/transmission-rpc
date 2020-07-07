@@ -2,7 +2,7 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import datetime
-from typing import Any, Dict, List, Tuple, Callable, NamedTuple
+from typing import Any, Dict, List, Tuple, Callable
 
 from transmission_rpc import constants
 from transmission_rpc.constants import LOGGER
@@ -152,8 +152,3 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-class Field(NamedTuple):
-    value: Any
-    dirty: bool

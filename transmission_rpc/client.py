@@ -21,13 +21,13 @@ import requests.auth
 
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.utils import (
-    LOGGER, Field, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
+    LOGGER, rpc_bool, get_arguments, make_rpc_name, argument_value_convert
 )
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import DEFAULT_TIMEOUT
 from transmission_rpc.decorator import kwarg, replaced_by
-from transmission_rpc.lib_types import _Timeout
+from transmission_rpc.lib_types import File, Field, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -485,7 +485,7 @@ class Client:
         self,
         ids: _TorrentIDs = None,
         timeout: _Timeout = None,
-    ) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    ) -> Dict[int, List[File]]:
         """
         Get list of files for provided torrent id(s). If ids is empty,
         information for all torrents are fetched. This function returns a dictionary
@@ -508,7 +508,9 @@ class Client:
                 }
         """
         fields = ['id', 'name', 'hashString', 'files', 'priorities', 'wanted']
-        request_result = self._request('torrent-get', {'fields': fields}, ids, timeout=timeout)
+        request_result: Dict[int, Torrent] = self._request(
+            'torrent-get', {'fields': fields}, ids, timeout=timeout
+        )
         result = {}
         for tid, torrent in request_result.items():
             result[tid] = torrent.files()
