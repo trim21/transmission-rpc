@@ -18,7 +18,7 @@ class Session:
     Transmission RPC specification, but with underscore instead of hyphen.
     ``download-dir`` -> ``download_dir``.
     """
-    def __init__(self, client: 'Client', fields: Dict[str, Field] = None):
+    def __init__(self, client: 'Client', fields: Dict[str, Any] = None):
         self._client = client
         self._fields: Dict[str, Field] = {}
         if fields is not None:
@@ -36,7 +36,7 @@ class Session:
             text += '{:32}: {}\n'.format(key[-32:], self._fields[key].value)
         return text
 
-    def _update_fields(self, other: Union[Dict[str, Field], 'Session']) -> None:
+    def _update_fields(self, other: Union[Dict[str, Any], 'Session']) -> None:
         """
         Update the session data from a Transmission JSON-RPC arguments dictionary
         """
