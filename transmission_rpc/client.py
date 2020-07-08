@@ -315,6 +315,10 @@ class Client:
         You can find examples in test code
         `tests/test_client.py <https://github.com/Trim21/transmission-rpc/blob/master/tests/test_client.py>`_
 
+        .. NOTE::
+
+            url starts with ``file://`` will be load by this package instead of transmission daemon
+
         Additional arguments are:
 
         ===================== ===== =========== =============================================================
