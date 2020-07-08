@@ -723,6 +723,7 @@ class Client:
         ``idle_seeding_limit_enabled``   10 -                    Enables the default seed inactivity limit
         ``incomplete_dir``               7 -                     The path to the directory of incomplete transfer data.
         ``incomplete_dir_enabled``       7 -                         Enables the incomplete transfer data directory.
+
                                                                      Otherwise data for incomplete transfers are stored in
                                                                      the download target.
         ``lpd_enabled``                  9 -                     Enables local peer discovery for public torrents.
