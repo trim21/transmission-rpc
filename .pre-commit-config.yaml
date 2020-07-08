@@ -19,7 +19,6 @@ repos:
       - id: check-added-large-files  # check for file bigger than 500kb
       - id: debug-statements
       - id: trailing-whitespace
-      - id: debug-statements
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: end-of-file-fixer
