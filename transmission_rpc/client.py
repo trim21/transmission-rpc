@@ -180,8 +180,6 @@ class Client:
     ) -> dict:
         """
         Send json-rpc request to Transmission using http POST
-        :type arguments: object
-        :type method: str
         """
         if not isinstance(method, str):
             raise ValueError('request takes method as string')
@@ -497,7 +495,7 @@ class Client:
                     <File 1>,
                     <File 2>,
                     ...
-                },
+                ],
                 ...
             }
 
@@ -525,9 +523,9 @@ class Client:
                     <file id>: {
                         'priority': <priority ('high'|'normal'|'low')>,
                         'selected': <selected for download (True|False)>
-                    }
+                    },
                     ...
-                }
+                },
                 ...
             }
 
@@ -609,7 +607,9 @@ class Client:
         ============================ ===== =============== =============================================================
 
         .. NOTE::
+
            transmission_rpc will try to automatically fix argument errors.
+
         """
 
         args = {}
@@ -754,7 +754,9 @@ class Client:
         ================================ ===== ================= ===========================================================
 
         .. NOTE::
+
            transmission_rpc will try to automatically fix argument errors.
+
         """
         args = {}
         for key, value in kwargs.items():
