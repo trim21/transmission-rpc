@@ -37,12 +37,15 @@ repos:
       - id: pyupgrade
         args: [--py36-plus]
 
-  - repo: https://github.com/Trim21/mirrors-autoflake
-    rev: b8c878d1121dc5160be52479e8d0790fc116fb6a  # frozen: v1.3.1
+  - repo: https://github.com/myint/autoflake
+    rev: b330072a26bb13aea8843f8083cee5332d71f78f
     hooks:
       - id: autoflake
-        require_serial: true
-        args: [--in-place, --remove-unused-variables, --remove-all-unused-imports, --expand-star-imports]
+        args:
+          - --in-place
+          - --remove-unused-variables
+          - --remove-all-unused-imports
+          - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
     rev: 0ef8e5665926edac4f9f86a98891b963c33a702a  # frozen: 0.8.1rc3
