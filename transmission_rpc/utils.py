@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple, Callable
 from transmission_rpc import constants
 from transmission_rpc.constants import LOGGER
 
-UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
+UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
 
 def format_size(size: int) -> Tuple[float, str]:
@@ -27,7 +27,7 @@ def format_speed(size: int) -> Tuple[float, str]:
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
     (s, unit) = format_size(size)
-    return s, unit + '/s'
+    return s, unit + "/s"
 
 
 def format_timedelta(delta: datetime.timedelta) -> str:
@@ -36,7 +36,7 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     """
     minutes, seconds = divmod(delta.seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return '%d %02d:%02d:%02d' % (delta.days, hours, minutes, seconds)
+    return "%d %02d:%02d:%02d" % (delta.days, hours, minutes, seconds)
 
 
 def format_timestamp(timestamp: int, utc: bool = False) -> str:
@@ -48,9 +48,9 @@ def format_timestamp(timestamp: int, utc: bool = False) -> str:
             dt_timestamp = datetime.datetime.utcfromtimestamp(timestamp)
         else:
             dt_timestamp = datetime.datetime.fromtimestamp(timestamp)
-        return dt_timestamp.isoformat(' ')
+        return dt_timestamp.isoformat(" ")
     else:
-        return '-'
+        return "-"
 
 
 def rpc_bool(arg: Any) -> int:
@@ -61,17 +61,17 @@ def rpc_bool(arg: Any) -> int:
         try:
             arg = bool(int(arg))
         except ValueError:
-            arg = arg.lower() in ['true', 'yes']
+            arg = arg.lower() in ["true", "yes"]
     return 1 if bool(arg) else 0
 
 
 TR_TYPE_MAP: Dict[str, Callable] = {
-    'number': int,
-    'string': str,
-    'double': float,
-    'boolean': rpc_bool,
-    'array': list,
-    'object': dict,
+    "number": int,
+    "string": str,
+    "double": float,
+    "boolean": rpc_bool,
+    "array": list,
+    "object": dict,
 }
 
 
@@ -79,28 +79,25 @@ def make_python_name(name: str) -> str:
     """
     Convert Transmission RPC name to python compatible name.
     """
-    return name.replace('-', '_')
+    return name.replace("-", "_")
 
 
 def make_rpc_name(name: str) -> str:
     """
     Convert python compatible name to Transmission RPC name.
     """
-    return name.replace('_', '-')
+    return name.replace("_", "-")
 
 
 def argument_value_convert(
-    method: str,
-    argument: str,
-    value: Any,
-    rpc_version: int,
+    method: str, argument: str, value: Any, rpc_version: int,
 ) -> Tuple[str, Any]:
     """
     Check and fix Transmission RPC issues with regards to methods, arguments and values.
     """
-    if method in ('torrent-add', 'torrent-get', 'torrent-set'):
+    if method in ("torrent-add", "torrent-get", "torrent-set"):
         args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ('session-get', 'session-set'):
+    elif method in ("session-get", "session-set"):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
         raise ValueError('Method "%s" not supported' % (method))
@@ -129,16 +126,18 @@ def argument_value_convert(
                     )
         return argument, TR_TYPE_MAP[info[0]](value)
     else:
-        raise ValueError('Argument "%s" does not exists for method "%s".', (argument, method))
+        raise ValueError(
+            'Argument "%s" does not exists for method "%s".', (argument, method)
+        )
 
 
 def get_arguments(method: str, rpc_version: int) -> List[str]:
     """
     Get arguments for method in specified Transmission RPC version.
     """
-    if method in ('torrent-add', 'torrent-get', 'torrent-set'):
+    if method in ("torrent-add", "torrent-get", "torrent-set"):
         args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ('session-get', 'session-set'):
+    elif method in ("session-get", "session-set"):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
         raise ValueError('Method "%s" not supported' % (method))

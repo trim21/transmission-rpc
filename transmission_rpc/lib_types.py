@@ -10,7 +10,7 @@ class File(NamedTuple):
     name: str  # file name
     size: int  # file size in bytes
     completed: int  # bytes completed
-    priority: Literal['high', 'normal', 'low']
+    priority: Literal["high", "normal", "low"]
     selected: bool  # if selected for download
 
 

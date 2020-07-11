@@ -18,7 +18,8 @@ class Session:
     Transmission RPC specification, but with underscore instead of hyphen.
     ``download-dir`` -> ``download_dir``.
     """
-    def __init__(self, client: 'Client', fields: Dict[str, Any] = None):
+
+    def __init__(self, client: "Client", fields: Dict[str, Any] = None):
         self._client = client
         self._fields: Dict[str, Field] = {}
         if fields is not None:
@@ -28,30 +29,30 @@ class Session:
         try:
             return self._fields[name].value
         except KeyError:
-            raise AttributeError('No attribute %s' % name)
+            raise AttributeError("No attribute %s" % name)
 
     def __str__(self) -> str:
-        text = ''
+        text = ""
         for key in sorted(self._fields.keys()):
-            text += '{:32}: {}\n'.format(key[-32:], self._fields[key].value)
+            text += "{:32}: {}\n".format(key[-32:], self._fields[key].value)
         return text
 
-    def _update_fields(self, other: Union[Dict[str, Any], 'Session']) -> None:
+    def _update_fields(self, other: Union[Dict[str, Any], "Session"]) -> None:
         """
         Update the session data from a Transmission JSON-RPC arguments dictionary
         """
         if isinstance(other, dict):
             for key, value in other.items():
-                self._fields[key.replace('-', '_')] = Field(value, False)
+                self._fields[key.replace("-", "_")] = Field(value, False)
         elif isinstance(other, Session):
             for key in list(other._fields.keys()):
                 self._fields[key] = Field(other._fields[key].value, False)
         else:
-            raise ValueError('Cannot update with supplied data')
+            raise ValueError("Cannot update with supplied data")
 
     def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
-        outgoing_keys = ['peer_port', 'pex_enabled']
+        outgoing_keys = ["peer_port", "pex_enabled"]
         fields = []
         for key in outgoing_keys:
             if key in self._fields and self._fields[key].dirty:
@@ -85,7 +86,7 @@ class Session:
         """
         Get the peer port.
         """
-        return self._fields['peer_port'].value
+        return self._fields["peer_port"].value
 
     @peer_port.setter
     def peer_port(self, port: int) -> None:
@@ -93,21 +94,21 @@ class Session:
         Set the peer port.
         """
         if isinstance(port, int):
-            self._fields['peer_port'] = Field(port, True)
+            self._fields["peer_port"] = Field(port, True)
             self._push()
         else:
-            raise ValueError('Not a valid limit')
+            raise ValueError("Not a valid limit")
 
     @property
     def pex_enabled(self) -> bool:
         """Is peer exchange enabled?"""
-        return self._fields['pex_enabled'].value
+        return self._fields["pex_enabled"].value
 
     @pex_enabled.setter
     def pex_enabled(self, enabled: bool) -> None:
         """Enable/disable peer exchange."""
         if isinstance(enabled, bool):
-            self._fields['pex_enabled'] = Field(enabled, True)
+            self._fields["pex_enabled"] = Field(enabled, True)
             self._push()
         else:
-            raise TypeError('Not a valid type')
+            raise TypeError("Not a valid type")

@@ -12,7 +12,8 @@ class TransmissionError(Exception):
         This exception is raised when there has occurred an error related to
         communication with Transmission. It is a subclass of Exception.
     """
-    def __init__(self, message: str = '', original: Optional[Response] = None):
+
+    def __init__(self, message: str = "", original: Optional[Response] = None):
         Exception.__init__(self)
         self.message = message
         self.original = original
