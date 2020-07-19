@@ -707,7 +707,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 docs = ["sphinx", "sphinx-rtd-theme"]
 
 [metadata]
-content-hash = "d44a29f21256fe41ca8947a12209887ebd347b953120ff9c6311129be43f65f9"
+content-hash = "c7de98092a544ca52d92f1973cf7e916ace186f304b0f03ef2e6b60ff5a62602"
 python-versions = "^3.6.1"
 
 [metadata.files]
