@@ -42,7 +42,7 @@ coverage = "==5.2"
 # linter and formatter
 pre-commit = { version = "==2.6.0", markers = "implementation_name != 'pypy'" }
 mypy = { version = "^0.770", markers = "implementation_name != 'pypy'" }
-flake8 = "^3.8.3"
+flake8 = "3.8.3"
 flake8-comprehensions = "==3.2.3"
 flake8-bugbear = "==20.1.4"
 flake8-mutable = "1.2.0"
