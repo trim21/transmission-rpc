@@ -99,7 +99,7 @@ def test_real_add_torrent_file_protocol(tr_client: Client):
 
 def test_real_add_torrent_http(tr_client: Client):
     tr_client.add_torrent(
-        "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
+        "https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent"
     )
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
