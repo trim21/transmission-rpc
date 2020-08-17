@@ -1,5 +1,22 @@
-## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a4...HEAD)
+## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.0...HEAD)
 
+## [v3.0.0](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a4...v3.0.0) - 2020-08-17
+
+### Bug Fixes
+- **client:** failed to add url which is http url but not end with 'torrent' ([#16](https://github.com/Trim21/transmission-rpc/issues/16))
+
+### Code Refactoring
+- return File instead of return dict ([#23](https://github.com/Trim21/transmission-rpc/issues/23))
+- Client will use [`yarl`](https://github.com/aio-libs/yarl) to build url
+
+### BREAKING CHANGES
+
+`Torrent.files()` will return `List[File]`
+`Client.get_files()` will return `Dict[int, List[File]]`
+Client args `address` and `user` is not available anymore
+
+### Features
+- check rpc version for kwargs
 
 ## [v3.0.0a4](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a3...v3.0.0a4) - 2020-08-17
 
