@@ -1,4 +1,8 @@
-## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.0...HEAD)
+## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.1...HEAD)
+
+## [v3.0.1](https://github.com/Trim21/transmission-rpc/compare/v3.0.0...v3.0.1) - 2020-08-18
+
+Can't publish `3.0.0` on pypi, so releasing a new version.
 
 ## [v3.0.0](https://github.com/Trim21/transmission-rpc/compare/v3.0.0a4...v3.0.0) - 2020-08-17
 
