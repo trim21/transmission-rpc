@@ -1,3 +1,4 @@
+# Copyright (c) 2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import datetime
@@ -177,6 +178,14 @@ class Torrent:
         return result
 
     @property
+    def name(self) -> str:
+        """Returns the name of this torrent.
+
+        Raise AttributeError if server don't return this field
+        """
+        return self.__getattr__("name")
+
+    @property
     def status(self) -> str:
         """
         Returns the torrent status. Is either one of 'check pending', 'checking',
@@ -184,6 +193,14 @@ class Torrent:
         verification.
         """
         return self._status()
+
+    @property
+    def hashString(self) -> str:
+        """Returns the info hash of this torrent.
+
+        Raise AttributeError if server don't return this field
+        """
+        return self.__getattr__("hashString")
 
     @property
     def progress(self) -> float:
