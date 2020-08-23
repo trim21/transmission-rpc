@@ -5,7 +5,7 @@ repos:
       - id: yamlfmt
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: ebc15addedad713c86ef18ae9632c88e187dd0af  # frozen: v3.1.0
+    rev: e1668fe86af3810fbca72b8653fe478e66a0afdc  # frozen: v3.2.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -26,12 +26,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5325832ef78a98e4a6445a0a68a2d4cdf93d5f5b  # frozen: 5.0.2
+    rev: 377d260ffa6f746693f97b46d95025afc4bd8275  # frozen: 5.4.2
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: b6c20d14667c568c92a4e4ea1e0329743f371a2c  # frozen: v2.6.2
+    rev: f766c29ec4bb6cf2674b81959871e59d5400380a  # frozen: v2.7.2
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -47,7 +47,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: 0ef8e5665926edac4f9f86a98891b963c33a702a  # frozen: 0.8.1rc3
+    rev: db40a1a30521b00e0c47b5095d9dcef39412919d  # frozen: 0.9.0a0
     hooks:
       - id: doc8
         name: Check rst file
