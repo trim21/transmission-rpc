@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transmission-rpc"
-version = "3.0.1"
+version = "3.1.0"
 description = "Python module that implements the Transmission bittorent client RPC protocol"
 authors = ["Trim21 <i@trim21.me>"]
 readme = 'README.md'

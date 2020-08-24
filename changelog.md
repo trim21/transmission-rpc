@@ -1,4 +1,10 @@
-## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.0.1...HEAD)
+## [Unreleased](https://github.com/Trim21/transmission-rpc/compare/v3.1.0...HEAD)
+
+## [v3.1.0](https://github.com/Trim21/transmission-rpc/compare/v3.0.1...v3.1.0) - 2020-08-24
+
+### Features
+- add rpc version 16 support
+- **torrent:** add some common used attrs
 
 ## [v3.0.1](https://github.com/Trim21/transmission-rpc/compare/v3.0.0...v3.0.1) - 2020-08-18
 
