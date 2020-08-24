@@ -368,6 +368,8 @@ TORRENT_ARGS = {
         "webseedsSendingToUs": Args(
             "number", 1, None, None, None, "Number of webseeds seeding to us."
         ),
+        "labels": Args("array", 16, None, None, None, "array of string labels"),
+        "editDate": Args("number", 16, None, None, None, "editDate"),
     },
     "set": {
         "bandwidthPriority": Args(
@@ -516,6 +518,7 @@ TORRENT_ARGS = {
             None,
             "Enable upload speed limiter.",
         ),
+        "labels": Args("array", 16, None, None, None, "array of string labels"),
     },
     "add": {
         "bandwidthPriority": Args(
@@ -864,6 +867,8 @@ SESSION_ARGS = {
             "True if Micro Transport Protocol (UTP) is enabled.",
         ),
         "version": Args("string", 3, None, None, None, "Transmission version."),
+        "fields": Args("array", 16, None, None, None, "array of keys"),
+        "session-id": Args("string", 16, None, None, None, "session-id"),
     },
     "set": {
         "alt-speed-down": Args(

@@ -473,6 +473,9 @@ class Client:
         ``arguments`` contains a list of field names to be returned, when None
         all fields are requested. See the Torrent class for more information.
 
+        new argument ``format`` in rpc_version 16 is unnecessarily
+        and this lib can't handle table response, So it's unsupported.
+
         Returns a Torrent object with the requested fields.
         """
         if not arguments:
@@ -503,7 +506,7 @@ class Client:
         timeout: _Timeout = None,
     ) -> List[Torrent]:
         """
-        Get information for torrents with provided ids. For more information see get_torrent.
+        Get information for torrents with provided ids. For more information see ``get_torrent``.
 
         Returns a list of Torrent object.
         """
