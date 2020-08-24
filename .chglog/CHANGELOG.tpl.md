@@ -1,9 +1,7 @@
 {{ if .Versions -}}
-## [Unreleased]({{ .Info.RepositoryURL }}/compare/{{ $latest := index .Versions 0 }}{{ $latest.Tag.Name }}...HEAD)
-
 {{ if .Unreleased.CommitGroups -}}
-{{ range .Unreleased.CommitGroups -}}
-
+## [Unreleased]({{ .Info.RepositoryURL }}/compare/{{ $latest := index .Versions 0 }}{{ $latest.Tag.Name }}...HEAD)
+{{ range .Unreleased.CommitGroups }}
 ### {{ .Title }}
 {{ range .Commits -}}
 - {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}

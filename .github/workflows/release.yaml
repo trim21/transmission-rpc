@@ -6,7 +6,8 @@ on:
       - v*
 
 jobs:
-  deploy:
+  pypi:
+    name: Upload To Pypi
     runs-on: ubuntu-latest
 
     steps:
@@ -21,3 +22,31 @@ jobs:
       - run: poetry publish --build
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+  github:
+    name: Create Github Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+      - run: echo "::add-path::$(go env GOPATH)/bin"
+
+      - run: go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
+
+      - run: git-chglog "${TAG#refs/tags/}" | node -p "require('fs').readFileSync('/dev/stdin').toString().trim()" > chglog
+        env:
+          TAG: ${{ github.ref }}
+
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body_path: chglog
+          draft: false
+          prerelease: false
