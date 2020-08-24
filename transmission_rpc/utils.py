@@ -5,7 +5,7 @@ import datetime
 from typing import Any, Dict, List, Tuple, Callable
 
 from transmission_rpc import constants
-from transmission_rpc.constants import LOGGER
+from transmission_rpc.constants import LOGGER, BaseType
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
@@ -66,12 +66,12 @@ def rpc_bool(arg: Any) -> int:
 
 
 TR_TYPE_MAP: Dict[str, Callable] = {
-    "number": int,
-    "string": str,
-    "double": float,
-    "boolean": rpc_bool,
-    "array": list,
-    "object": dict,
+    BaseType.number: int,
+    BaseType.string: str,
+    BaseType.double: float,
+    BaseType.boolean: rpc_bool,
+    BaseType.array: list,
+    BaseType.object: dict,
 }
 
 
