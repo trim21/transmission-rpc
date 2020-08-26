@@ -37,7 +37,7 @@ repos:
         args: [--py36-plus]
 
   - repo: https://github.com/myint/autoflake
-    rev: b330072a26bb13aea8843f8083cee5332d71f78f
+    rev: 7a53fdafc82c33f446915b60fcac947c51279260  # frozen: v1.4
     hooks:
       - id: autoflake
         args:
@@ -60,7 +60,7 @@ repos:
       - id: poetry-check-lock
 
   - repo: https://github.com/psf/black
-    rev: 6bedb5c58a7d8c25aa9509f8217bc24e9797e90d  # frozen: 19.10b0
+    rev: d70121d8f4dc31296b5ed8dd3c6d06cb10f5a8a7  # frozen: 20.8b0
     hooks:
       - id: black
 

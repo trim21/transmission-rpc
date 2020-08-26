@@ -91,7 +91,12 @@ def test_real_add_torrent_base64(tr_client: Client):
 
 def test_real_add_torrent_file_protocol(tr_client: Client):
     fs = os.path.abspath(
-        os.path.join(os.path.dirname(__file__,), "fixtures/iso.torrent")
+        os.path.join(
+            os.path.dirname(
+                __file__,
+            ),
+            "fixtures/iso.torrent",
+        )
     )
     tr_client.add_torrent("file://" + fs)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"

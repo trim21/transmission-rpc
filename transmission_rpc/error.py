@@ -9,8 +9,8 @@ from requests.models import Response
 
 class TransmissionError(Exception):
     """
-        This exception is raised when there has occurred an error related to
-        communication with Transmission. It is a subclass of Exception.
+    This exception is raised when there has occurred an error related to
+    communication with Transmission. It is a subclass of Exception.
     """
 
     def __init__(self, message: str = "", original: Optional[Response] = None):

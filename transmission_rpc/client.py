@@ -519,7 +519,9 @@ class Client:
         )
 
     def get_files(
-        self, ids: _TorrentIDs = None, timeout: _Timeout = None,
+        self,
+        ids: _TorrentIDs = None,
+        timeout: _Timeout = None,
     ) -> Dict[int, List[File]]:
         """
         Get list of files for provided torrent id(s). If ids is empty,

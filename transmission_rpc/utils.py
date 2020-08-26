@@ -90,7 +90,10 @@ def make_rpc_name(name: str) -> str:
 
 
 def argument_value_convert(
-    method: str, argument: str, value: Any, rpc_version: int,
+    method: str,
+    argument: str,
+    value: Any,
+    rpc_version: int,
 ) -> Tuple[str, Any]:
     """
     Check and fix Transmission RPC issues with regards to methods, arguments and values.
