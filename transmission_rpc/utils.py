@@ -110,12 +110,12 @@ def argument_value_convert(
         while invalid_version:
             invalid_version = False
             replacement = None
-            if rpc_version < info[1]:
+            if rpc_version < info.added_version:
                 invalid_version = True
-                replacement = info[3]
-            if info[2] is not None and info[2] <= rpc_version:
+                replacement = info.previous_argument_name
+            if info.removed_version is not None and info.removed_version <= rpc_version:
                 invalid_version = True
-                replacement = info[4]
+                replacement = info.next_argument_name
             if invalid_version:
                 if replacement:
                     LOGGER.warning(
@@ -127,7 +127,7 @@ def argument_value_convert(
                     raise ValueError(
                         f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
                     )
-        return argument, TR_TYPE_MAP[info[0]](value)
+        return argument, TR_TYPE_MAP[info.type](value)
     else:
         raise ValueError(
             'Argument "%s" does not exists for method "%s".', (argument, method)
@@ -147,9 +147,9 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
     accessible = []
     for argument, info in args.items():
         valid_version = True
-        if rpc_version < info[1]:
+        if rpc_version < info.added_version:
             valid_version = False
-        if info[2] is not None and info[2] <= rpc_version:
+        if info.removed_version is not None and info.removed_version <= rpc_version:
             valid_version = False
         if valid_version:
             accessible.append(argument)
