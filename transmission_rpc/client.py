@@ -12,6 +12,7 @@ import string
 import logging
 import pathlib
 import operator
+import warnings
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import urljoin, urlparse
 
@@ -315,6 +316,13 @@ class Client:
                 self.protocol_version = 3
             else:
                 self.protocol_version = 2
+        if self.server_version and (
+            self.server_version[0] <= 2 and self.server_version[1] < 30
+        ):
+            warnings.warn(
+                "support for transmission version lower than 2.30 (rpc version 13) will be removed in the future",
+                PendingDeprecationWarning,
+            )
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:

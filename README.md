@@ -12,6 +12,8 @@
 
 `transmission-rpc` is a python module implementing the json-rpc client protocol for the BitTorrent client Transmission.
 
+Support transmission <= 3.00
+
 ## Install
 
 ```bash
