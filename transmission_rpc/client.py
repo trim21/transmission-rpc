@@ -400,7 +400,6 @@ class Client:
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.
         """
-        self._rpc_version_warning(3)
         self._request(
             "torrent-remove",
             {"delete-local-data": rpc_bool(delete_data)},
@@ -446,7 +445,6 @@ class Client:
 
     def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
-        self._rpc_version_warning(5)
         self._request("torrent-reannounce", {}, ids, True, timeout=timeout)
 
     def get_torrent(
@@ -663,7 +661,6 @@ class Client:
         timeout: _Timeout = None,
     ) -> None:
         """Move torrent data to the new location."""
-        self._rpc_version_warning(6)
         args = {"location": ensure_location_str(location), "move": True}
         self._request("torrent-set-location", args, ids, True, timeout=timeout)
 
@@ -674,7 +671,6 @@ class Client:
         timeout: _Timeout = None,
     ) -> None:
         """Locate torrent data at the provided location."""
-        self._rpc_version_warning(6)
         args = {"location": ensure_location_str(location), "move": False}
         self._request("torrent-set-location", args, ids, True, timeout=timeout)
 
@@ -812,7 +808,6 @@ class Client:
 
     def blocklist_update(self, timeout: _Timeout = None) -> Optional[int]:
         """Update block list. Returns the size of the block list."""
-        self._rpc_version_warning(5)
         result = self._request("blocklist-update", timeout=timeout)
         return result.get("blocklist-size")
 
@@ -821,7 +816,6 @@ class Client:
         Tests to see if your incoming peer port is accessible from the
         outside world.
         """
-        self._rpc_version_warning(5)
         result = self._request("port-test", timeout=timeout)
         return result.get("port-is-open")
 
