@@ -16,8 +16,8 @@ Support transmission <= 3.00
 
 ## Install
 
-```bash
-$ pip install transmission-rpc>=3.0.0
+```console
+pip install transmission-rpc -U
 ```
 
 ## Documents
