@@ -60,7 +60,7 @@ repos:
       - id: poetry-check-lock
 
   - repo: https://github.com/psf/black
-    rev: d70121d8f4dc31296b5ed8dd3c6d06cb10f5a8a7  # frozen: 20.8b0
+    rev: e66be67b9b6811913470f70c28b4d50f94d05b22  # frozen: 20.8b1
     hooks:
       - id: black
 
