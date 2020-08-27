@@ -528,12 +528,14 @@ class Client:
         information for all torrents are fetched. This function returns a dictionary
         for each requested torrent id holding the information about the files.
 
+        See more detail in :py:meth:`transmission_rpc.torrent.Torrent.files`
+
         .. code-block:: python
 
             {
                 <torrent id>: [
+                    <File 0>,
                     <File 1>,
-                    <File 2>,
                     ...
                 ],
                 ...
@@ -554,7 +556,7 @@ class Client:
     ) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
-        of ``get_files``.
+        of :py:meth:`transmission_rpc.client.Client.get_files`.
 
         .. code-block:: python
 

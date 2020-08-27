@@ -154,8 +154,21 @@ class Torrent:
         """
         Get list of files for this torrent.
 
-        This function returns a dictionary with file information for each file.
-        The file information is has following fields:
+        .. note ::
+
+
+            The order of the files is guaranteed. The index of file object is the id of the file
+            when calling :py:meth:`transmission_rpc.client.Client.set_files`.
+
+        .. code-block:: python
+
+            from transmission_rpc import Client
+
+            torrent = Client().get_torrent(0)
+
+            for file_id, file in enumerate(torrent.files()):
+                print(file_id, file)
+
         """
         result: List[File] = []
         if "files" in self._fields:
