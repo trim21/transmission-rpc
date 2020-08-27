@@ -13,15 +13,15 @@ license = 'MIT'
 packages = [{ include = 'transmission_rpc' }]
 classifiers = [
   'Intended Audience :: Developers',
-  'Development Status :: 2 - Pre-Alpha',
+  'Development Status :: 4 - Beta',
   'License :: OSI Approved :: MIT License',
-  'Topic :: Communications :: File Sharing',
   'Topic :: Internet',
   'Topic :: Software Development :: Version Control :: Git',
   'Programming Language :: Python :: 3 :: Only',
   'Programming Language :: Python :: 3.6',
   'Programming Language :: Python :: 3.7',
   'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
   'Programming Language :: Python :: Implementation :: CPython',
   'Programming Language :: Python :: Implementation :: PyPy',
 ]
