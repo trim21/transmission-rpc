@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import base64
 import os.path
@@ -197,3 +198,17 @@ def test_check_rpc_version_for_args():
         c.protocol_version = 7
         with pytest.raises(ValueError):
             c.add_torrent(magnet_url, cookies="")
+
+
+def test_parse_server_version():
+    m = mock.Mock(
+        return_value=json.dumps(
+            {
+                "arguments": {"version": "2.80 (hello)", "rpc-version": 14},
+                "result": "success",
+            }
+        )
+    )
+    with mock.patch("transmission_rpc.client.Client._http_query", m):
+        c = Client()
+        assert c.server_version == (2, 80, "hello")

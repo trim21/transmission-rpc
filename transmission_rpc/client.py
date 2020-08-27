@@ -105,7 +105,7 @@ class Client:
         self._sequence = 0
         self.session: Session = Session(self)
         self.session_id = "0"
-        self.server_version: Optional[Tuple[int, int, int]] = None
+        self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
         self.get_session()
@@ -283,15 +283,15 @@ class Client:
         if self.server_version is None:
             version_major = 1
             version_minor = 30
-            version_changeset = 0
-            version_parser = re.compile(r"(\d).(\d+) \((\d+)\)")
+            version_change_set: Optional[str] = None
+            version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
             if hasattr(self.session, "version"):
                 match = version_parser.match(self.session.version)
                 if match:
                     version_major = int(match.group(1))
                     version_minor = int(match.group(2))
-                    version_changeset = int(match.group(3))
-            self.server_version = (version_major, version_minor, version_changeset)
+                    version_change_set = str(match.group(3))
+            self.server_version = (version_major, version_minor, version_change_set)
 
     @property
     def rpc_version(self) -> int:
