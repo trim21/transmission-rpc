@@ -282,8 +282,8 @@ class Client:
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
         if self.server_version is None:
-            version_major = 1
-            version_minor = 30
+            version_major = 2
+            version_minor = 40
             version_change_set: Optional[str] = None
             version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
             if hasattr(self.session, "version"):
