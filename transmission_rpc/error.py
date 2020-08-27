@@ -32,5 +32,5 @@ class TransmissionAuthError(TransmissionError):
     pass
 
 
-class ServerVersionTooLow(TransmissionError):
+class ServerVersionTooLowError(TransmissionError):
     pass

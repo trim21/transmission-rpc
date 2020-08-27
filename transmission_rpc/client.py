@@ -12,7 +12,6 @@ import string
 import logging
 import pathlib
 import operator
-import warnings
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import urljoin, urlparse
 
@@ -21,7 +20,7 @@ import requests
 import requests.auth
 from typing_extensions import Literal
 
-from transmission_rpc.error import TransmissionError
+from transmission_rpc.error import TransmissionError, ServerVersionTooLowError
 from transmission_rpc.utils import (
     LOGGER,
     rpc_bool,
@@ -286,43 +285,23 @@ class Client:
             version_minor = 40
             version_change_set: Optional[str] = None
             version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
-            if hasattr(self.session, "version"):
-                match = version_parser.match(self.session.version)
-                if match:
-                    version_major = int(match.group(1))
-                    version_minor = int(match.group(2))
-                    version_change_set = str(match.group(3))
+            match = version_parser.match(self.session.version)
+            if match:
+                version_major = int(match.group(1))
+                version_minor = int(match.group(2))
+                version_change_set = str(match.group(3))
             self.server_version = (version_major, version_minor, version_change_set)
 
     @property
     def rpc_version(self) -> int:
-        """
-        Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
-        """
+        """Get the Transmission RPC version."""
         if self.protocol_version is None:
-            # Ugly fix for 2.20 - 2.22 reporting rpc-version 11, but having new arguments
-            if self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] in [20, 21, 22]
-            ):
-                self.protocol_version = 12
-            # Ugly fix for 2.12 reporting rpc-version 10, but having new arguments
-            elif self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] == 12
-            ):
-                self.protocol_version = 11
-            elif hasattr(self.session, "rpc_version"):
+            try:
                 self.protocol_version = self.session.rpc_version
-            elif hasattr(self.session, "version"):
-                self.protocol_version = 3
-            else:
-                self.protocol_version = 2
-        if self.server_version and (
-            self.server_version[0] <= 2 and self.server_version[1] < 30
-        ):
-            warnings.warn(
-                "support for transmission version lower than 2.30 (rpc version 13) will be removed in the future",
-                PendingDeprecationWarning,
-            )
+            except AttributeError:
+                raise ServerVersionTooLowError(
+                    "support current server version is deprecated, please install transmission-rpc<4.0.0"
+                )
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:

@@ -82,6 +82,14 @@ class Session:
         self._update_fields(data)
 
     @property
+    def version(self) -> str:
+        return self.__getattr__("version")
+
+    @property
+    def rpc_version(self) -> int:
+        return self.__getattr__("rpc-version")
+
+    @property
     def peer_port(self) -> int:
         """
         Get the peer port.

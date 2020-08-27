@@ -18,7 +18,7 @@ USER = os.getenv("TR_USER", "admin")
 PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
-def test_client_parse_url():
+def test_client_parse_url(mock_version):
     with mock.patch("transmission_rpc.client.Client._request"):
         client = Client()
         assert client.url == "http://127.0.0.1:9091/transmission/rpc"
@@ -32,6 +32,16 @@ torrent_hash = "e84213a794f3ccd890382a54a64ca68b7e925433"
 magnet_url = f"magnet:?xt=urn:btih:{torrent_hash}"
 torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
+
+
+@pytest.fixture()
+def mock_version():
+    v = property(lambda x: "2.80 (hello)")
+    rpc_v = property(lambda x: 14)
+    with mock.patch("transmission_rpc.session.Session.version", v), mock.patch(
+        "transmission_rpc.session.Session.rpc_version", rpc_v
+    ):
+        yield
 
 
 @pytest.fixture()
@@ -50,21 +60,21 @@ def fake_hash_factory():
     return lambda: secrets.token_hex(20)
 
 
-def test_client_add_url():
+def test_client_add_url(mock_version):
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         assert Client().add_torrent(torrent_url) == "world"
         m.assert_called_with("torrent-add", {"filename": torrent_url}, timeout=None)
 
 
-def test_client_add_magnet():
+def test_client_add_magnet(mock_version):
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         assert Client().add_torrent(magnet_url) == "world"
         m.assert_called_with("torrent-add", {"filename": magnet_url}, timeout=None)
 
 
-def test_client_add_base64_raw_data():
+def test_client_add_base64_raw_data(mock_version):
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         with open("tests/fixtures/iso.torrent", "rb") as f:
@@ -174,7 +184,7 @@ def test_wrong_logger():
         Client(logger="something")
 
 
-def test_torrent_attr_type(tr_client: Client, fake_hash_factory):
+def test_real_torrent_attr_type(tr_client: Client, fake_hash_factory):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     for torrent in tr_client.get_torrents():
@@ -182,7 +192,7 @@ def test_torrent_attr_type(tr_client: Client, fake_hash_factory):
         assert isinstance(torrent.name, str)
 
 
-def test_torrent_get_files(tr_client: Client):
+def test_real_torrent_get_files(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
@@ -191,7 +201,7 @@ def test_torrent_get_files(tr_client: Client):
             assert isinstance(file, File)
 
 
-def test_check_rpc_version_for_args():
+def test_check_rpc_version_for_args(mock_version):
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
@@ -212,17 +222,3 @@ def test_parse_server_version():
     with mock.patch("transmission_rpc.client.Client._http_query", m):
         c = Client()
         assert c.server_version == (2, 80, "hello")
-
-
-def test_warn_deprecated():
-    m = mock.Mock(
-        return_value=json.dumps(
-            {
-                "arguments": {"version": "2.10 (hello)", "rpc-version": 10},
-                "result": "success",
-            }
-        )
-    )
-    with mock.patch("transmission_rpc.client.Client._http_query", m):
-        with pytest.warns(PendingDeprecationWarning):
-            Client()
