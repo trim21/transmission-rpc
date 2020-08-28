@@ -1,3 +1,5 @@
+default_stages: [commit]
+
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
     rev: c37e29c1e823c5ce25cac879a0aa7fd63d387c25  # frozen: v0.0.1
@@ -63,6 +65,12 @@ repos:
     rev: e66be67b9b6811913470f70c28b4d50f94d05b22  # frozen: 20.8b1
     hooks:
       - id: black
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: debe2cede5b9515024c1184059c6aac811ea3adc  # frozen: v2.1.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
 
   - repo: local
     hooks:
