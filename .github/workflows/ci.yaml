@@ -33,6 +33,6 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: mysecretpassword
 
-      - run: bash <(curl -s https://codecov.io/bash) -F ${PYTHON//./}
+      - run: bash <(curl -s https://codecov.io/bash) -F py_${PYTHON//./}
         env:
           PYTHON: ${{ matrix.python }}
