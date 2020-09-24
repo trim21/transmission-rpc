@@ -6,47 +6,40 @@ on:
       - v*
 
 jobs:
-  pypi:
-    name: Upload To Pypi
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
       - uses: Trim21/setup-poetry@dist/v1
 
       - run: poetry publish --build
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
 
-  github:
-    name: Create Github Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+# create github release
+
+      - name: Get Tag Name
+        run: echo ::set-env name=TAG::${GITHUB_REF##*/}
 
       - name: Set up Go
         uses: actions/setup-go@v2
-      - run: echo "::add-path::$(go env GOPATH)/bin"
 
-      - run: go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
+      - name: Install git-chglog3
+        run: |
+          echo "::add-path::$(go env GOPATH)/bin"
+          go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
 
-      - run: git-chglog "${TAG#refs/tags/}" | node -p "require('fs').readFileSync('/dev/stdin').toString().trim()" > chglog
-        env:
-          TAG: ${{ github.ref }}
+      - name: Generate Changlog
+        run: |
+          git-chglog "$TAG" | node -p 'require("fs").readFileSync(0).toString().trim()
+            .split("\n").slice(1).join("\n").trim()' > chglog.md
 
-      - uses: actions/create-release@v1
+      - name: Upload Github Release
+        run: gh release create "$TAG" -F chglog.md ./dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body_path: chglog
-          draft: false
-          prerelease: false
