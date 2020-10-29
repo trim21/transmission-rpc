@@ -41,16 +41,16 @@ docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.dev-dependencies]
 # tests
-pytest = "==6.0.1"
-coverage = "==5.2.1"
+pytest = "==6.1.2"
+coverage = "==5.3"
 # linter and formatter
-pre-commit = { version = "==2.7.1", markers = "implementation_name != 'pypy'" }
+pre-commit = { version = "==2.8.1", markers = "implementation_name != 'pypy'" }
 mypy = { version = "^0.770", markers = "implementation_name != 'pypy'" }
-flake8 = "3.8.3"
-flake8-comprehensions = "==3.2.3"
+flake8 = "==3.8.4"
+flake8-comprehensions = "==3.3.0"
 flake8-bugbear = "==20.1.4"
 flake8-mutable = "1.2.0"
-pytest-github-actions-annotate-failures = "==0.1.0"
+pytest-github-actions-annotate-failures = "==0.1.1"
 
 [tool.isort]
 default_section = 'THIRDPARTY'
