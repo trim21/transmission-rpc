@@ -44,7 +44,7 @@ docs = ['sphinx', 'sphinx-rtd-theme']
 pytest = "==6.1.2"
 coverage = "==5.3"
 # linter and formatter
-pre-commit = { version = "==2.8.1", markers = "implementation_name != 'pypy'" }
+pre-commit = { version = "==2.8.2", markers = "implementation_name != 'pypy'" }
 mypy = { version = "^0.770", markers = "implementation_name != 'pypy'" }
 flake8 = "==3.8.4"
 flake8-comprehensions = "==3.3.0"
