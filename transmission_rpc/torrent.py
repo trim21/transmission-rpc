@@ -208,6 +208,20 @@ class Torrent:
         return self._status()
 
     @property
+    def rateDownload(self) -> int:
+        """
+        Returns download rate in B/s
+        """
+        return self._fields["rateDownload"].value
+    
+    @property
+    def rateUpload(self) -> int:
+        """
+        Returns upload rate in B/s
+        """
+        return self._fields["rateUpload"].value
+
+    @property
     def hashString(self) -> str:
         """Returns the info hash of this torrent.
 
