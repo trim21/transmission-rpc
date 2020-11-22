@@ -57,6 +57,7 @@ class Torrent:
 
     @property
     def id(self) -> int:
+        """Returns the id for this torrent"""
         return self._fields["id"].value
 
     def _get_name_string(self) -> Optional[str]:
