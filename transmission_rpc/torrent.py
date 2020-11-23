@@ -214,7 +214,7 @@ class Torrent:
         Returns download rate in B/s
         """
         return self._fields["rateDownload"].value
-    
+
     @property
     def rateUpload(self) -> int:
         """
