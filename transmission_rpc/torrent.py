@@ -57,6 +57,7 @@ class Torrent:
 
     @property
     def id(self) -> int:
+        """Returns the id for this torrent"""
         return self._fields["id"].value
 
     def _get_name_string(self) -> Optional[str]:
@@ -206,6 +207,20 @@ class Torrent:
         verification.
         """
         return self._status()
+
+    @property
+    def rateDownload(self) -> int:
+        """
+        Returns download rate in B/s
+        """
+        return self._fields["rateDownload"].value
+
+    @property
+    def rateUpload(self) -> int:
+        """
+        Returns upload rate in B/s
+        """
+        return self._fields["rateUpload"].value
 
     @property
     def hashString(self) -> str:
