@@ -233,12 +233,8 @@ class Torrent:
     @property
     def progress(self) -> float:
         """download progress in percent."""
-        try:
-            size = self._fields["sizeWhenDone"].value
-            left = self._fields["leftUntilDone"].value
-            return 100.0 * (size - left) / float(size)
-        except ZeroDivisionError:
-            return 0.0
+        # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
+        return round((100.0 * self._fields["percentDone"].value), 2)
 
     @property
     def ratio(self) -> float:
