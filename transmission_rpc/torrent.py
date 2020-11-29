@@ -231,6 +231,20 @@ class Torrent:
         return self.__getattr__("hashString")
 
     @property
+    def totalSize(self) -> int:
+        """
+        Returns total size of this torrent.
+        """
+        return self._fields["totalSize"].value
+
+    @property
+    def sizeWhenDone(self) -> int:
+        """
+        Returns the size of the files selected for download of this torrent.
+        """
+        return self._fields["sizeWhenDone"].value
+
+    @property
     def progress(self) -> float:
         """download progress in percent."""
         # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
