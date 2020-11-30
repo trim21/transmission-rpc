@@ -54,6 +54,7 @@ def test_attributes():
         "downloadedEver": 2000,
         "uploadRatio": 0.5,
         "eta": 3600,
+        "percentDone": 0.5,
         "activityDate": time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
         "addedDate": time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
         "startDate": time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
