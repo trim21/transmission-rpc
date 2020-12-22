@@ -24,14 +24,14 @@ jobs:
 # create github release
 
       - name: Get Tag Name
-        run: echo ::set-env name=TAG::${GITHUB_REF##*/}
+        run: echo "TAG::${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
 
       - name: Install git-chglog3
         run: |
-          echo "::add-path::$(go env GOPATH)/bin"
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           go get -u github.com/git-chglog/git-chglog/cmd/git-chglog
 
       - name: Generate Changlog
