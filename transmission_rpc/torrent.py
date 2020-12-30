@@ -371,22 +371,27 @@ class Torrent:
 
     @property
     def is_finished(self) -> bool:
+        """Returns true if the torrent is finished (available from rpc version 2.0)"""
         return self._fields["isFinished"].value
 
     @property
     def is_stalled(self) -> bool:
+        """Returns true if the torrent is stalled (available from rpc version 2.4)"""
         return self._fields["isStalled"].value
 
     @property
     def size_when_done(self) -> int:
+        """Size in bytes when the torrent is done"""
         return self._fields["sizeWhenDone"].value
 
     @property
     def total_size(self) -> int:
+        """Total size in bytes"""
         return self._fields["totalSize"].value
 
     @property
     def left_until_done(self) -> int:
+        """Bytes left until done"""
         return self._fields["leftUntilDone"].value
 
     @property
