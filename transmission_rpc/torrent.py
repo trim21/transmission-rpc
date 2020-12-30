@@ -370,6 +370,39 @@ class Torrent:
             raise ValueError("Not a valid limit")
 
     @property
+    def is_finished(self) -> bool:
+        return self._fields['isFinished'].value
+
+    @property
+    def is_stalled(self) -> bool:
+        return self._fields['isStalled'].value
+
+    @property
+    def size_when_done(self) -> int:
+        return self._fields['sizeWhenDone'].value
+
+    @property
+    def total_size(self) -> int:
+        return self._fields['totalSize'].value
+
+    @property
+    def left_until_done(self) -> int:
+        return self._fields['leftUntilDone'].value
+
+    @property
+    def desired_available(self) -> int:
+        """Bytes that are left to download and available"""
+        return self._fields['desiredAvailable'].value
+    
+    @property
+    def available(self) -> float:
+        """Availability in percent"""
+        bytes_all = self.total_size
+        bytes_done = sum(map(lambda x: x['bytesCompleted'], self._fields['fileStats'].value))
+        bytes_avail = self.desired_available + bytes_done
+        return (bytes_avail / bytes_all) * 100 if bytes_all else 0
+    
+    @property
     def seed_idle_mode(self) -> str:
         """
         Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
