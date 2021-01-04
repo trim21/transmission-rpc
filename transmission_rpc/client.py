@@ -21,7 +21,7 @@ import requests
 import requests.auth
 from typing_extensions import Literal
 
-from transmission_rpc.error import TransmissionError
+from transmission_rpc.error import TransmissionError, TransmissionAuthError
 from transmission_rpc.utils import (
     LOGGER,
     rpc_bool,
@@ -180,7 +180,9 @@ class Client:
             self.logger.debug(r.text)
             if r.status_code == 401:
                 self.logger.debug(r.request.headers)
-                raise TransmissionError("transmission daemon require auth", original=r)
+                raise TransmissionAuthError(
+                    "transmission daemon require auth", original=r
+                )
             if r.status_code != 409:
                 return r.text
 
