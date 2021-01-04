@@ -97,6 +97,7 @@ you can find rpc version by transmission version from
 
     client.rst
     torrent.rst
+    errors.rst
     utils.rst
 
 Indices and tables
