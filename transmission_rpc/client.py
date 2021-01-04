@@ -19,9 +19,15 @@ from urllib.parse import urljoin, urlparse
 import yarl
 import requests
 import requests.auth
+import requests.exceptions
 from typing_extensions import Literal
 
-from transmission_rpc.error import TransmissionError, TransmissionAuthError
+from transmission_rpc.error import (
+    TransmissionError,
+    TransmissionAuthError,
+    TransmissionConnectError,
+    TransmissionTimeoutError,
+)
 from transmission_rpc.utils import (
     LOGGER,
     rpc_bool,
@@ -170,12 +176,22 @@ class Client:
                 }
             )
             request_count += 1
-            r = self._http_session.post(
-                self.url,
-                headers=self._http_header,
-                json=json.loads(query),
-                timeout=timeout,
-            )
+            try:
+                r = self._http_session.post(
+                    self.url,
+                    headers=self._http_header,
+                    json=json.loads(query),
+                    timeout=timeout,
+                )
+            except requests.exceptions.Timeout:
+                raise TransmissionTimeoutError(
+                    "timeout when connection to transmission daemon"
+                )
+            except requests.exceptions.ConnectionError as e:
+                raise TransmissionConnectError(
+                    "can't connect to transmission daemon" + str(e)
+                )
+
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
             if r.status_code == 401:
