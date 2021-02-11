@@ -2,14 +2,14 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: 5685ac183889dcafd0ea6c9dc3df211274554ec2  # frozen: v0.2.2
+    rev: c7a95cc4bd7861446be192a3b83c7a2ca1d6d910  # frozen: v0.2.3
     hooks:
       - id: yamlfmt
       - id: poetry-check-lock
       - id: find-trailing-comma
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: e1668fe86af3810fbca72b8653fe478e66a0afdc  # frozen: v3.2.0
+    rev: 6e2418c5521b7d606e72914dced3253f9ace1205  # frozen: v3.4.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -30,12 +30,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 2e02c195afdb499be9068ca0d08c9d7d45912d4d  # frozen: 5.5.4
+    rev: 473d150c1db60f4614a574e30993e9e0d3ca0cce  # frozen: 5.7.0
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: f766c29ec4bb6cf2674b81959871e59d5400380a  # frozen: v2.7.2
+    rev: d94dd3486f99af99b5779e38e60a69bf97522051  # frozen: v2.10.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -64,7 +64,7 @@ repos:
       - id: black
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: 86a6c50edae12eca8adbf9435e9e9edeb7e55bb0  # frozen: v2.4.0
+    rev: 8fabcff9a3de5a5f76c6fbe9e08745b10dac0c61  # frozen: v2.14.2
     hooks:
       - id: commitizen
         stages: [commit-msg]
