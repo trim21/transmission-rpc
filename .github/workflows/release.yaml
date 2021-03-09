@@ -24,7 +24,7 @@ jobs:
 # create github release
 
       - name: Get Tag Name
-        run: echo "TAG::${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
