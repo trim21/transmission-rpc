@@ -1,6 +1,10 @@
 name: lint
 
-on: [push, pull_request]
+on:
+  push:
+    ignore-branches:
+      - renovate/**
+  pull_request: {}
 
 jobs:
   mypy:
