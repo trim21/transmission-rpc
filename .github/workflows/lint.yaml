@@ -2,7 +2,7 @@ name: lint
 
 on:
   push:
-    ignore-branches:
+    branches-ignore:
       - renovate/**
   pull_request: {}
 
