@@ -1,6 +1,10 @@
 name: lint
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - renovate/**
+  pull_request: {}
 
 jobs:
   mypy:
@@ -50,8 +54,8 @@ jobs:
         run: |
           flake8 \
             --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501 \
-            --max-line-length=88
-
+            --max-line-length=88 \
+            --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist
 
   lint:
     runs-on: ubuntu-latest

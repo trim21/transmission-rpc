@@ -63,7 +63,7 @@ class Args(NamedTuple):
     next_argument_name: Optional[str]
     description: str
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Args({self.type!r},"
             f" {self.added_version!r},"
@@ -73,7 +73,7 @@ class Args(NamedTuple):
             f" {self.description!r})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Args<type={self.type}, added_version={self.added_version}, description={self.description!r})"
 
 
