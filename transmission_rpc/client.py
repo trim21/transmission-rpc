@@ -362,7 +362,7 @@ class Client:
 
     def add_torrent(
         self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
-    ) -> str:
+    ) -> Torrent:
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
         You can find examples in test code
