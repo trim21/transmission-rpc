@@ -10,7 +10,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - uses: Trim21/setup-poetry@dist/v1
 
@@ -18,17 +18,49 @@ jobs:
         with:
           extras: docs
 
-      - name: mypy
-        run: mypy transmission_rpc
+      - uses: liskin/gh-problem-matcher-wrap@v1
+        with:
+          action: add
+          linters: mypy
 
-  lint:
-    runs-on: ubuntu-18.04
+      - name: mypy
+        run: mypy --show-column-numbers transmission_rpc
+
+  flake8:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+        with:
+          extras: docs
+
+      - uses: liskin/gh-problem-matcher-wrap@v1
+        with:
+          action: add
+          linters: flake8
+
+      - name: flake8
+        run: |
+          flake8 \
+            --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501 \
+            --max-line-length=88
+
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: Trim21/setup-poetry@dist/v1
 

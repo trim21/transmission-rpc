@@ -68,14 +68,3 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
-
-  - repo: local
-    hooks:
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        args:
-          - --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501
-          - --max-line-length=88
