@@ -39,7 +39,7 @@ sphinx-rtd-theme = { version = "==0.5.1", optional = true }
 docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.dev-dependencies]
-yarl = "^1.4.2"
+yarl = "1.6.3"
 # tests
 pytest = "==6.2.2"
 coverage = "==5.5"
