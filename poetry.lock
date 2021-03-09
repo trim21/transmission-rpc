@@ -470,7 +470,7 @@ python-versions = "*"
 
 [[package]]
 name = "sphinx"
-version = "3.5.0"
+version = "3.5.2"
 description = "Python documentation generator"
 category = "main"
 optional = true
@@ -495,9 +495,9 @@ sphinxcontrib-qthelp = "*"
 sphinxcontrib-serializinghtml = "*"
 
 [package.extras]
-lint = ["docutils-stubs", "flake8 (>=3.5.0)", "isort", "mypy (>=0.800)"]
-test = ["pytest", "pytest-cov", "html5lib", "cython", "typed-ast"]
 docs = ["sphinxcontrib-websupport"]
+lint = ["flake8 (>=3.5.0)", "isort", "mypy (>=0.800)", "docutils-stubs"]
+test = ["pytest", "pytest-cov", "html5lib", "cython", "typed-ast"]
 
 [[package]]
 name = "sphinx-rtd-theme"
@@ -672,7 +672,7 @@ docs = ["sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "28ab13501109eaa10f0a3319760904a4cf414e4629bafd8cfa579ba580b2a1bf"
+content-hash = "0a1c1f4c5e9899115cfbf4883a0e9d3835fee930a3c87c3af3659ad7ac08f0f3"
 
 [metadata.files]
 alabaster = [
@@ -1038,8 +1038,8 @@ snowballstemmer = [
     {file = "snowballstemmer-2.1.0.tar.gz", hash = "sha256:e997baa4f2e9139951b6f4c631bad912dfd3c792467e2f03d7239464af90e914"},
 ]
 sphinx = [
-    {file = "Sphinx-3.5.0-py3-none-any.whl", hash = "sha256:68da66ca3d6b35b22bea5c53d938d5f8988663dca042f0a46429a1eba1010051"},
-    {file = "Sphinx-3.5.0.tar.gz", hash = "sha256:deb468efb3abaa70d790add4147d18782d86fdeacf648d6e8afb7a99807f1546"},
+    {file = "Sphinx-3.5.2-py3-none-any.whl", hash = "sha256:ef64a814576f46ec7de06adf11b433a0d6049be007fefe7fd0d183d28b581fac"},
+    {file = "Sphinx-3.5.2.tar.gz", hash = "sha256:672cfcc24b6b69235c97c750cb190a44ecd72696b4452acaf75c2d9cc78ca5ff"},
 ]
 sphinx-rtd-theme = [
     {file = "sphinx_rtd_theme-0.5.1-py2.py3-none-any.whl", hash = "sha256:fa6bebd5ab9a73da8e102509a86f3fcc36dec04a0b52ea80e5a033b2aba00113"},
