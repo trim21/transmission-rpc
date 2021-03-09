@@ -5,8 +5,11 @@ import base64
 import os.path
 import secrets
 from unittest import mock
+from urllib.parse import urljoin
 
+import yarl
 import pytest
+from typing_extensions import Literal
 
 from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
@@ -18,10 +21,51 @@ USER = os.getenv("TR_USER", "admin")
 PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
-def test_client_parse_url():
+@pytest.mark.parametrize(
+    ("protocol", "username", "password", "host", "port", "path"),
+    (
+        [
+            "https",
+            "a+2da/s a?s=d$",
+            "a@as +@45/:&*^",
+            "127.0.0.1",
+            2333,
+            "/transmission/",
+        ],
+        [
+            "http",
+            "/",
+            None,
+            "127.0.0.1",
+            2333,
+            "/transmission/",
+        ],
+    ),
+)
+def test_client_parse_url(
+    protocol: "Literal['http', 'https']", username, password, host, port, path
+):
     with mock.patch("transmission_rpc.client.Client._request"):
-        client = Client()
-        assert client.url == "http://127.0.0.1:9091/transmission/rpc"
+        client = Client(
+            protocol=protocol,
+            username=username,
+            password=password,
+            host=host,
+            port=port,
+            path=path,
+        )
+        u = str(
+            yarl.URL.build(
+                scheme=protocol,
+                user=username,
+                password=password,
+                host=host,
+                port=port,
+                path=urljoin(path, "rpc"),
+            )
+        )
+
+        assert client.url == u
 
 
 def hash_to_magnet(h):
@@ -174,7 +218,7 @@ def test_wrong_logger():
         Client(logger="something")
 
 
-def test_torrent_attr_type(tr_client: Client, fake_hash_factory):
+def test_real_torrent_attr_type(tr_client: Client, fake_hash_factory):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     for torrent in tr_client.get_torrents():
@@ -182,7 +226,7 @@ def test_torrent_attr_type(tr_client: Client, fake_hash_factory):
         assert isinstance(torrent.name, str)
 
 
-def test_torrent_get_files(tr_client: Client):
+def test_real_torrent_get_files(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"

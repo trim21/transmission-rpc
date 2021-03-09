@@ -14,9 +14,8 @@ import pathlib
 import operator
 import warnings
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse
 
-import yarl
 import requests
 import requests.auth
 import requests.exceptions
@@ -100,13 +99,21 @@ class Client:
                 "default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
-        url = yarl.URL.build(
-            scheme=protocol,
-            user=username,
-            password=password,
-            host=host,
-            port=port,
-            path=urljoin(path, "rpc"),
+        import urllib.parse
+
+        username = (
+            quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8")
+            if username
+            else ""
+        )
+        password = (
+            ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8")
+            if password
+            else ""
+        )
+        auth = f"{username}{password}@" if (username or password) else ""
+        url = urllib.parse.urlunparse(
+            (protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None)
         )
         self.url = str(url)
         self._sequence = 0

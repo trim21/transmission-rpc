@@ -30,7 +30,6 @@ classifiers = [
 python = "^3.6.1"
 # dependencies
 requests = "^2.23.0"
-yarl = "^1.4.2"
 typing_extensions = ">=3.7.4.2,<4.0.0.0"
 # build document
 sphinx = { version = "==3.5.0", optional = true }
@@ -40,6 +39,7 @@ sphinx-rtd-theme = { version = "==0.5.1", optional = true }
 docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.dev-dependencies]
+yarl = "^1.4.2"
 # tests
 pytest = "==6.2.2"
 coverage = "==5.4"
