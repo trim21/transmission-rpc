@@ -300,6 +300,11 @@ class Torrent:
             return format_timedelta(self.eta)
 
     @property
+    def download_dir(self) -> Optional[int]:
+        """The download directory."""
+        return self._fields["downloadDir"].value
+
+    @property
     def download_limit(self) -> Optional[int]:
         """The download limit.
 
