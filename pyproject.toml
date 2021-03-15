@@ -44,9 +44,9 @@ yarl = "1.6.3"
 pytest = "==6.2.2"
 coverage = "==5.5"
 # linter and formatter
-pre-commit = { version = "==2.11.0", markers = "implementation_name != 'pypy'" }
+pre-commit = { version = "==2.11.1", markers = "implementation_name != 'pypy'" }
 mypy = { version = "0.812", markers = "implementation_name != 'pypy'" }
-flake8 = "==3.8.4"
+flake8 = "==3.9.0"
 flake8-comprehensions = "==3.3.1"
 flake8-bugbear = "==21.3.2"
 flake8-mutable = "1.2.0"
