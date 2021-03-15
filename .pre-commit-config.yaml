@@ -64,7 +64,7 @@ repos:
       - id: black
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: 8fabcff9a3de5a5f76c6fbe9e08745b10dac0c61  # frozen: v2.14.2
+    rev: 3b591f02c8c0008adb57775a17ece7a9b0d6f230  # frozen: v2.16.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
