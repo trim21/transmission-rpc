@@ -302,7 +302,7 @@ class Torrent:
     @property
     def download_dir(self) -> Optional[int]:
         """The download directory.
-        
+
         available from transmission version 1.5.
         """
         return self._fields["downloadDir"].value
