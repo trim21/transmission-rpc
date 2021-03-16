@@ -304,6 +304,7 @@ class Torrent:
         """The download directory.
 
         available from transmission version 1.5.
+        available from RPC version 4.
         """
         return self._fields["downloadDir"].value
 
