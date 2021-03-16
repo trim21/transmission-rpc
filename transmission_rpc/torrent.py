@@ -300,6 +300,15 @@ class Torrent:
             return format_timedelta(self.eta)
 
     @property
+    def download_dir(self) -> Optional[int]:
+        """The download directory.
+
+        available from transmission version 1.5.
+        available from RPC version 4.
+        """
+        return self._fields["downloadDir"].value
+
+    @property
     def download_limit(self) -> Optional[int]:
         """The download limit.
 
