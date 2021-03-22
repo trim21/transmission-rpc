@@ -4,6 +4,7 @@ info:
   title: CHANGELOG
   repository_url: https://github.com/Trim21/transmission-rpc
 options:
+  sort: semver
   commits:
     filters:
       Type:
