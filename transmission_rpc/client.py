@@ -240,14 +240,14 @@ class Client:
         start = time.time()
         http_data = self._http_query(query, timeout)
         elapsed = time.time() - start
-        self.logger.info("http request took %.3f s" % elapsed)
+        self.logger.info("http request took %.3f s", elapsed)
 
         try:
             data: dict = json.loads(http_data)
         except ValueError as error:
             self.logger.error("Error: " + str(error))
-            self.logger.error('Request: "%s"' % query)
-            self.logger.error('HTTP data: "%s"' % http_data)
+            self.logger.error('Request: "%s"', query)
+            self.logger.error('HTTP data: "%s"', http_data)
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
@@ -356,9 +356,7 @@ class Client:
         """
         if self.rpc_version < required_version:
             self.logger.warning(
-                "Using feature not supported by server. RPC version for server %d, feature introduced in %d."
-                % (self.rpc_version, required_version)
-            )
+                "Using feature not supported by server. RPC version for server %d, feature introduced in %d.", self.rpc_version, required_version)
 
     def add_torrent(
         self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
