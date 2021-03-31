@@ -53,6 +53,7 @@ flake8-mutable = "1.2.0"
 pytest-github-actions-annotate-failures = "==0.1.2"
 flake8-pytest-style = "1.4.0"
 pylint = "2.7.4"
+sphinx-autobuild = "2021.3.14"
 
 [tool.isort]
 default_section = 'THIRDPARTY'

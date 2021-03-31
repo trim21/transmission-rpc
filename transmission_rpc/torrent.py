@@ -42,7 +42,10 @@ def get_status_new(code: int) -> str:
 
 
 class Status(str):
-    """A class wrap torrent status."""
+    """A class wrap torrent status.
+
+    returned by :py:attr:`.Torrent.status`
+    """
 
     stopped: bool
     check_pending: bool
@@ -220,14 +223,19 @@ class Torrent:
     @property
     def status(self) -> Status:
         """
+        :rtype: Status
+
         Returns the torrent status. Is either one of 'check pending', 'checking',
         'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'.
         The first two is related to verification.
 
         Examples:
+
         .. code-block:: python
 
-            >>> torrent.status.downloading
+            torrent = Torrent()
+            torrent.status.downloading
+            torrent.status == 'downloading'
 
         """
         return Status(self._status())
@@ -236,6 +244,8 @@ class Torrent:
     def rateDownload(self) -> int:
         """
         Returns download rate in B/s
+
+        :rtype: int
         """
         return self._fields["rateDownload"].value
 
@@ -243,6 +253,8 @@ class Torrent:
     def rateUpload(self) -> int:
         """
         Returns upload rate in B/s
+
+        :rtype: int
         """
         return self._fields["rateUpload"].value
 
@@ -250,13 +262,18 @@ class Torrent:
     def hashString(self) -> str:
         """Returns the info hash of this torrent.
 
-        Raise AttributeError if server don't return this field
+        :raise: AttributeError -- if server don't return this field
+        :rtype: int
         """
         return self.__getattr__("hashString")
 
     @property
     def progress(self) -> float:
-        """download progress in percent."""
+        """
+        download progress in percent.
+
+        :rtype: float
+        """
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
             return round((100.0 * self._fields["percentDone"].value), 2)
@@ -270,12 +287,20 @@ class Torrent:
 
     @property
     def ratio(self) -> float:
-        """upload/download ratio."""
+        """
+        upload/download ratio.
+
+        :rtype: float
+        """
         return float(self._fields["uploadRatio"].value)
 
     @property
     def eta(self) -> datetime.timedelta:
-        """the "eta" as datetime.timedelta."""
+        """
+        the "eta" as datetime.timedelta.
+
+        :rtype: datetime.timedelta
+        """
         eta = self._fields["eta"].value
         if eta >= 0:
             return datetime.timedelta(seconds=eta)
@@ -283,17 +308,29 @@ class Torrent:
 
     @property
     def date_active(self) -> datetime.datetime:
-        """the attribute "activityDate" as datetime.datetime."""
+        """
+        the attribute "activityDate",
+
+        :rtype: datetime.timedelta
+        """
         return datetime.datetime.fromtimestamp(self._fields["activityDate"].value)
 
     @property
     def date_added(self) -> datetime.datetime:
-        """the attribute "addedDate" as datetime.datetime."""
+        """
+        the attribute "addedDate"
+
+        :rtype: datetime.timedelta
+        """
         return datetime.datetime.fromtimestamp(self._fields["addedDate"].value)
 
     @property
     def date_started(self) -> datetime.datetime:
-        """the attribute "startDate" as datetime.datetime."""
+        """
+        the attribute "startDate"
+
+        :rtype: datetime.timedelta
+        """
         return datetime.datetime.fromtimestamp(self._fields["startDate"].value)
 
     @property
@@ -322,11 +359,11 @@ class Torrent:
         return format_timedelta(self.eta)
 
     @property
-    def download_dir(self) -> Optional[int]:
+    def download_dir(self) -> Optional[str]:
         """The download directory.
 
-        available from transmission version 1.5.
-        available from RPC version 4.
+        :available: transmission version 1.5.
+        :available: RPC version 4.
         """
         return self._fields["downloadDir"].value
 
@@ -470,7 +507,12 @@ class Torrent:
 
     @property
     def seed_ratio_limit(self) -> float:
-        """Torrent seed ratio limit as float. Also see seed_ratio_mode. This is a mutator."""
+        """
+        Torrent seed ratio limit as float. Also see seed_ratio_mode.
+        This is a mutator.
+
+        :rtype: float
+        """
 
         return float(self._fields["seedRatioLimit"].value)
 
