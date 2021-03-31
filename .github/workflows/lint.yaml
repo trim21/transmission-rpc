@@ -46,13 +46,14 @@ jobs:
         with:
           extras: docs
 
+      - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
+
       - name: flake8
         run: |
           flake8 \
             --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501 \
             --max-line-length=88 \
-            --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist \
-            --format='::error file=%(path)s,line=%(row)d,col=%(col)d::%(code)s::%(text)s'
+            --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist
 
   lint:
     runs-on: ubuntu-latest
