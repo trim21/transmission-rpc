@@ -13,6 +13,7 @@ import logging
 import pathlib
 import operator
 import warnings
+import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import quote, urljoin, urlparse
 
@@ -99,7 +100,6 @@ class Client:
                 "default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
-        import urllib.parse
 
         username = (
             quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8")
