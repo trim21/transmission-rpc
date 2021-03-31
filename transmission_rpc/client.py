@@ -69,11 +69,11 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
         return []
     if isinstance(args, int):
         return [_parse_torrent_id(args)]
-    elif isinstance(args, str):
+    if isinstance(args, str):
         if args == "recently-active":
             return args
         return [_parse_torrent_id(args)]
-    elif isinstance(args, (list, tuple)):
+    if isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
     raise ValueError(f"Invalid torrent id {args}")
 
@@ -418,7 +418,7 @@ class Client:
                     # check if this is base64 data
                     base64.b64decode(torrent.encode("utf-8"), validate=True)
                     might_be_base64 = True
-                except Exception:
+                except (TypeError, ValueError):
                     pass
                 if might_be_base64:
                     torrent_data = torrent

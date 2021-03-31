@@ -9,7 +9,7 @@ from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 from transmission_rpc.lib_types import File, Field, _Timeout
 
-if TYPE_CHECKING:  # pylint: disable=R0401
+if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
 

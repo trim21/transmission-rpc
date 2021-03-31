@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from transmission_rpc.lib_types import Field, _Timeout
 
-if TYPE_CHECKING:  # pylint: disable=R0401
+if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
 
