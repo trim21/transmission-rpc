@@ -70,7 +70,7 @@ jobs:
         with:
           extras: docs
 
-      - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
+      - run: echo "::add-matcher::.github/workflows/matcher/pylint.json"
 
       - name: pylint
         run: pylint ./**/*.py
