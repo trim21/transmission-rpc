@@ -225,6 +225,7 @@ class Torrent:
         The first two is related to verification.
 
         Examples:
+        .. code-block:: python
 
             >>> torrent.status.downloading
 
