@@ -73,7 +73,7 @@ jobs:
       - run: echo "::add-matcher::.github/workflows/matcher/pylint.json"
 
       - name: pylint
-        run: pylint ./**/*.py
+        run: pylint transmission_rpc tests
 
   lint:
     runs-on: ubuntu-latest
