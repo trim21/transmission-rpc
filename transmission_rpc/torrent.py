@@ -1,6 +1,7 @@
 # Copyright (c) 2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+# pylint: disable=C0103
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
@@ -8,7 +9,7 @@ from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 from transmission_rpc.lib_types import File, Field, _Timeout
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pylint: disable=R0401
     from transmission_rpc.client import Client
 
 

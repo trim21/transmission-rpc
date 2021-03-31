@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from transmission_rpc.lib_types import Field, _Timeout
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pylint: disable=R0401
     from transmission_rpc.client import Client
 
 
@@ -28,8 +28,8 @@ class Session:
     def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
-        except KeyError:
-            raise AttributeError("No attribute %s" % name)
+        except KeyError as e:
+            raise AttributeError(f"No attribute {name}") from e
 
     def __str__(self) -> str:
         text = ""

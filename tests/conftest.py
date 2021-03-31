@@ -1,4 +1,5 @@
 import os
+import secrets
 
 import pytest
 
@@ -20,3 +21,8 @@ def tr_client():
         yield c
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
+
+
+@pytest.fixture()
+def fake_hash_factory():
+    return lambda: secrets.token_hex(20)

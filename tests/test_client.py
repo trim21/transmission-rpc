@@ -3,7 +3,6 @@ import json
 import time
 import base64
 import os.path
-import secrets
 from unittest import mock
 from urllib.parse import urljoin
 
@@ -37,7 +36,7 @@ from transmission_rpc.lib_types import File
     ],
 )
 def test_client_parse_url(
-    protocol: "Literal['http', 'https']", username, password, host, port, path
+    protocol: Literal["http", "https"], username, password, host, port, path
 ):
     with mock.patch("transmission_rpc.client.Client._request"):
         client = Client(
@@ -70,11 +69,6 @@ torrent_hash = "e84213a794f3ccd890382a54a64ca68b7e925433"
 magnet_url = f"magnet:?xt=urn:btih:{torrent_hash}"
 torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
-
-
-@pytest.fixture()
-def fake_hash_factory():
-    return lambda: secrets.token_hex(20)
 
 
 def test_client_add_url():
@@ -201,7 +195,7 @@ def test_wrong_logger():
         Client(logger="something")
 
 
-def test_real_torrent_attr_type(tr_client: Client, fake_hash_factory):
+def test_real_torrent_attr_type(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     for torrent in tr_client.get_torrents():

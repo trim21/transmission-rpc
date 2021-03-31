@@ -69,11 +69,11 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
         return []
     if isinstance(args, int):
         return [_parse_torrent_id(args)]
-    if isinstance(args, str):
+    elif isinstance(args, str):
         if args == "recently-active":
             return args
         return [_parse_torrent_id(args)]
-    if isinstance(args, (list, tuple)):
+    elif isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
     raise ValueError(f"Invalid torrent id {args}")
 
@@ -517,7 +517,7 @@ class Client:
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
-        result: Dict[str, Torrent] = self._request(
+        result: Dict[Union[str, int], Torrent] = self._request(
             "torrent-get",
             {"fields": arguments},
             torrent_id,
@@ -525,8 +525,7 @@ class Client:
             timeout=timeout,
         )
         if torrent_id in result:
-            # todo
-            return result[torrent_id]  # type: ignore
+            return result[torrent_id]
         for torrent in result.values():
             if torrent.hashString == torrent_id:
                 return torrent
