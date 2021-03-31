@@ -487,12 +487,15 @@ TORRENT_ARGS = {
             None,
             None,
             None,
-            "Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.",
+            "Estimated number of seconds left until the idle time limit is reached. "
+            "-1 means not available and -2 means unknown.",
         ),
         "secondsDownloading": Args(BaseType.number, 15, None, None, None, ""),
         "secondsSeeding": Args(BaseType.number, 15, None, None, None, ""),
         "labels": Args(BaseType.array, 16, None, None, None, "array of string labels"),
         "editDate": Args(BaseType.number, 16, None, None, None, "editDate"),
+        "file-count": Args(BaseType.number, 17, None, None, None, "editDate"),
+        "primary-mime-type": Args(BaseType.string, 17, None, None, None, "editDate"),
     },
     "set": {
         "files-wanted": Args(
