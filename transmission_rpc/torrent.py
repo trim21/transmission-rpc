@@ -309,7 +309,7 @@ class Torrent:
     @property
     def date_active(self) -> datetime.datetime:
         """
-        the attribute "activityDate",
+        the attribute ``activityDate``.
 
         :rtype: datetime.timedelta
         """
@@ -318,7 +318,7 @@ class Torrent:
     @property
     def date_added(self) -> datetime.datetime:
         """
-        the attribute "addedDate"
+        the attribute ``addedDate``.
 
         :rtype: datetime.timedelta
         """
@@ -327,7 +327,7 @@ class Torrent:
     @property
     def date_started(self) -> datetime.datetime:
         """
-        the attribute "startDate"
+        the attribute ``startDate``.
 
         :rtype: datetime.timedelta
         """
