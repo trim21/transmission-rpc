@@ -38,12 +38,11 @@ _STATUS_NEW_MAPPING = {
 
 def get_status_new(code: int) -> str:
     """Get the torrent status using new status codes"""
-
     return _STATUS_NEW_MAPPING[code]
 
 
 class Status(str):
-    """A class wrap torrent status"""
+    """A class wrap torrent status."""
 
     stopped: bool
     check_pending: bool
@@ -222,8 +221,8 @@ class Torrent:
     def status(self) -> Status:
         """
         Returns the torrent status. Is either one of 'check pending', 'checking',
-        'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'. The first two is related to
-        verification.
+        'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'.
+        The first two is related to verification.
 
         Examples:
 
