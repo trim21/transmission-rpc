@@ -1,6 +1,10 @@
 version = 1
 test_patterns = ["tests/**", "test_*.py"]
 exclude_patterns = ['docs/source/conf.py']
+transformers = [
+  { name = "black", enabled = true },
+  { name = 'isort', enabled = true },
+]
 
 [[analyzers]]
 name = "python"

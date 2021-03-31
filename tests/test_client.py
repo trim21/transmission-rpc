@@ -23,24 +23,24 @@ PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 @pytest.mark.parametrize(
     ("protocol", "username", "password", "host", "port", "path"),
-    (
-        [
+    [
+        (
             "https",
             "a+2da/s a?s=d$",
             "a@as +@45/:&*^",
             "127.0.0.1",
             2333,
             "/transmission/",
-        ],
-        [
+        ),
+        (
             "http",
             "/",
             None,
             "127.0.0.1",
             2333,
             "/transmission/",
-        ],
-    ),
+        ),
+    ],
 )
 def test_client_parse_url(
     protocol: "Literal['http', 'https']", username, password, host, port, path
@@ -240,7 +240,10 @@ def test_check_rpc_version_for_args():
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 7
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
+        ):
             c.add_torrent(magnet_url, cookies="")
 
 

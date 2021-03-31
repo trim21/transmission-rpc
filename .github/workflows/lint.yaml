@@ -46,10 +46,7 @@ jobs:
         with:
           extras: docs
 
-      - uses: liskin/gh-problem-matcher-wrap@v1
-        with:
-          action: add
-          linters: flake8
+      - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
 
       - name: flake8
         run: |

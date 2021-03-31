@@ -277,7 +277,8 @@ class Torrent:
     def date_done(self) -> Optional[datetime.datetime]:
         """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self._fields["doneDate"].value
-        # Transmission might forget to set doneDate which is initialized to zero, so if doneDate is zero return None
+        # Transmission might forget to set doneDate which is initialized to zero,
+        # so if doneDate is zero return None
         if done_date == 0:
             return None
         else:
@@ -350,7 +351,10 @@ class Torrent:
 
     @property
     def priority(self) -> str:
-        """Bandwidth priority as string. Can be one of 'low', 'normal', 'high'. This is a mutator."""
+        """
+        Bandwidth priority as string.
+        Can be one of 'low', 'normal', 'high'. This is a mutator.
+        """
 
         return PRIORITY[self._fields["bandwidthPriority"].value]
 
@@ -432,7 +436,8 @@ class Torrent:
     @seed_idle_mode.setter
     def seed_idle_mode(self, mode: Union[str, int]) -> None:
         """
-        Set the seed ratio mode. Can be one of ``global``, ``single`` or ``unlimited``, or ``0``, ``1``, ``2``.
+        Set the seed ratio mode.
+        Can be one of ``global``, ``single`` or ``unlimited``, or ``0``, ``1``, ``2``.
         """
         if isinstance(mode, str):
             self._fields["seedIdleMode"] = Field(IDLE_LIMIT[mode], True)
