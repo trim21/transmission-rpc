@@ -484,8 +484,10 @@ TORRENT_ARGS = {
         "etaIdle": Args(
             BaseType.number,
             15,
-            description="Estimated number of seconds left until the idle time limit is reached. "
-            "-1 means not available and -2 means unknown.",
+            description=(
+                "Estimated number of seconds left until the idle time limit is reached. "
+                "-1 means not available and -2 means unknown."
+            ),
         ),
         "secondsDownloading": Args(BaseType.number, 15, None, None, None, ""),
         "secondsSeeding": Args(BaseType.number, 15, None, None, None, ""),
