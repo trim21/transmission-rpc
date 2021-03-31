@@ -11,14 +11,8 @@ import yarl
 import pytest
 from typing_extensions import Literal
 
-from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
 from transmission_rpc.lib_types import File
-
-HOST = os.getenv("TR_HOST", "127.0.0.1")
-PORT = int(os.getenv("TR_PORT", "9091"))
-USER = os.getenv("TR_USER", "admin")
-PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
 @pytest.mark.parametrize(
@@ -76,17 +70,6 @@ torrent_hash = "e84213a794f3ccd890382a54a64ca68b7e925433"
 magnet_url = f"magnet:?xt=urn:btih:{torrent_hash}"
 torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
-
-
-@pytest.fixture()
-def tr_client():
-    LOGGER.setLevel("INFO")
-    with Client(host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
-        for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id, delete_data=True)
-        yield c
-        for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id, delete_data=True)
 
 
 @pytest.fixture()
