@@ -6,13 +6,13 @@
         "relative",
         "${workspaceFolder}"
       ],
+      "severity": "error",
       "pattern": [
         {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(W|E).+:\\s+(.*)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+[RCWE].+:\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
-          "severity": 4,
           "message": 5
         }
       ]
