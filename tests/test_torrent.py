@@ -24,7 +24,7 @@ def assert_property_exception(exception, ob, prop):
 
 def test_get_name_string():
     torrent = transmission_rpc.Torrent(None, {"id": 42, "name": "we"})
-    name = torrent._get_name_string()
+    name = torrent._get_name_string()  # pylint: disable=W0212
     assert isinstance(name, str)
 
 
