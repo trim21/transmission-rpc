@@ -58,10 +58,10 @@ IDLE_LIMIT = mirror_dict(
 class Args(NamedTuple):
     type: str
     added_version: int
-    removed_version: Optional[int]
-    previous_argument_name: Optional[str]
-    next_argument_name: Optional[str]
-    description: str
+    removed_version: Optional[int] = None
+    previous_argument_name: Optional[str] = None
+    next_argument_name: Optional[str] = None
+    description: str = ""
 
     def __repr__(self) -> str:
         return (
@@ -484,15 +484,17 @@ TORRENT_ARGS = {
         "etaIdle": Args(
             BaseType.number,
             15,
-            None,
-            None,
-            None,
-            "Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.",
+            description=(
+                "Estimated number of seconds left until the idle time limit is reached."
+                " -1 means not available and -2 means unknown."
+            ),
         ),
         "secondsDownloading": Args(BaseType.number, 15, None, None, None, ""),
         "secondsSeeding": Args(BaseType.number, 15, None, None, None, ""),
         "labels": Args(BaseType.array, 16, None, None, None, "array of string labels"),
-        "editDate": Args(BaseType.number, 16, None, None, None, "editDate"),
+        "editDate": Args(BaseType.number, 16),
+        "file-count": Args(BaseType.number, 17),
+        "primary-mime-type": Args(BaseType.string, 17),
     },
     "set": {
         "files-wanted": Args(
