@@ -73,15 +73,13 @@ class Torrent:
         name = self._get_name_string()
         if name is not None:
             return f'<Torrent {tid} "{name}">'
-        else:
-            return f"<Torrent {tid}>"
+        return f"<Torrent {tid}>"
 
     def __str__(self) -> str:
         name = self._get_name_string()
         if name is not None:
             return f'Torrent "{name}"'
-        else:
-            return "Torrent"
+        return "Torrent"
 
     def __copy__(self) -> "Torrent":
         return Torrent(self._client, self._fields)
@@ -148,8 +146,7 @@ class Torrent:
         code = self._fields["status"].value
         if self._rpc_version() >= 14:
             return get_status_new(code)
-        else:
-            return get_status_old(code)
+        return get_status_old(code)
 
     def files(self) -> List[File]:
         """
@@ -255,8 +252,7 @@ class Torrent:
         eta = self._fields["eta"].value
         if eta >= 0:
             return datetime.timedelta(seconds=eta)
-        else:
-            raise ValueError("eta not valid")
+        raise ValueError("eta not valid")
 
     @property
     def date_active(self) -> datetime.datetime:
@@ -281,8 +277,7 @@ class Torrent:
         # so if doneDate is zero return None
         if done_date == 0:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(done_date)
+        return datetime.datetime.fromtimestamp(done_date)
 
     def format_eta(self) -> str:
         """
@@ -295,10 +290,9 @@ class Torrent:
         eta = self._fields["eta"].value
         if eta == -1:
             return "not available"
-        elif eta == -2:
+        if eta == -2:
             return "unknown"
-        else:
-            return format_timedelta(self.eta)
+        return format_timedelta(self.eta)
 
     @property
     def download_dir(self) -> Optional[int]:
@@ -317,8 +311,7 @@ class Torrent:
         """
         if self._fields["downloadLimited"].value:
             return self._fields["downloadLimit"].value
-        else:
-            return None
+        return None
 
     @download_limit.setter
     def download_limit(self, limit: int) -> None:
@@ -501,8 +494,7 @@ class Torrent:
         """
         if self._fields["uploadLimited"].value:
             return self._fields["uploadLimit"].value
-        else:
-            return None
+        return None
 
     @upload_limit.setter
     def upload_limit(self, limit: Optional[int]) -> None:
@@ -522,8 +514,7 @@ class Torrent:
         """queue position for this torrent."""
         if self._rpc_version() >= 14:
             return self._fields["queuePosition"].value
-        else:
-            return 0
+        return 0
 
     @queue_position.setter
     def queue_position(self, position: str) -> None:
