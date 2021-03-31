@@ -158,7 +158,7 @@ dev = ["coverage", "black", "hypothesis", "hypothesmith"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.3.1"
+version = "3.4.0"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
@@ -480,7 +480,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pytest-github-actions-annotate-failures"
-version = "0.1.1"
+version = "0.1.2"
 description = "pytest plugin to annotate failed tests with a workflow command for GitHub Actions"
 category = "dev"
 optional = false
@@ -751,7 +751,7 @@ docs = ["sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "768d2290cda763a90442fc14796e6b2d259a9cff3fb428949d25e892406ad757"
+content-hash = "54014781198727d97cc10b25a3f3890eaab7d18690c32fee2d749dff81a69fac"
 
 [metadata.files]
 alabaster = [
@@ -869,8 +869,8 @@ flake8-bugbear = [
     {file = "flake8_bugbear-21.3.2-py36.py37.py38-none-any.whl", hash = "sha256:5d6ccb0c0676c738a6e066b4d50589c408dcc1c5bf1d73b464b18b73cd6c05c2"},
 ]
 flake8-comprehensions = [
-    {file = "flake8-comprehensions-3.3.1.tar.gz", hash = "sha256:e734bf03806bb562886d9bf635d23a65a1a995c251b67d7e007a7b608af9bd22"},
-    {file = "flake8_comprehensions-3.3.1-py3-none-any.whl", hash = "sha256:6d80dfafda0d85633f88ea5bc7de949485f71f1e28db7af7719563fe5f62dcb1"},
+    {file = "flake8-comprehensions-3.4.0.tar.gz", hash = "sha256:c00039be9f3959a26a98da3024f0fe809859bf1753ccb90e228cc40f3ac31ca7"},
+    {file = "flake8_comprehensions-3.4.0-py3-none-any.whl", hash = "sha256:7258a28e229fb9a8d16370b9c47a7d66396ba0201abb06c9d11df41b18ed64c4"},
 ]
 flake8-mutable = [
     {file = "flake8-mutable-1.2.0.tar.gz", hash = "sha256:ee9b77111b867d845177bbc289d87d541445ffcc6029a0c5c65865b42b18c6a6"},
@@ -1110,8 +1110,8 @@ pytest = [
     {file = "pytest-6.2.2.tar.gz", hash = "sha256:9d1edf9e7d0b84d72ea3dbcdfd22b35fb543a5e8f2a60092dd578936bf63d7f9"},
 ]
 pytest-github-actions-annotate-failures = [
-    {file = "pytest-github-actions-annotate-failures-0.1.1.tar.gz", hash = "sha256:66445649ac8c0e1a05475faeda1679f0609a77861f9c620f68429cf6daf4ddc2"},
-    {file = "pytest_github_actions_annotate_failures-0.1.1-py2.py3-none-any.whl", hash = "sha256:e997068fff4909331c3b5f4e2c7868535aa4c62cb71b96b9d9724733f80bba26"},
+    {file = "pytest-github-actions-annotate-failures-0.1.2.tar.gz", hash = "sha256:9eb6ee2943ecde2078fe620af7dbf32646c0267f538435cd805fe2e8d735ca3a"},
+    {file = "pytest_github_actions_annotate_failures-0.1.2-py2.py3-none-any.whl", hash = "sha256:e0c4bd8720450fc37c4ee63465023101301980c2d24f14f8ab25358ba1fa68d4"},
 ]
 pytz = [
     {file = "pytz-2021.1-py2.py3-none-any.whl", hash = "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"},
