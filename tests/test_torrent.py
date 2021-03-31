@@ -12,7 +12,7 @@ import transmission_rpc.constants
 
 
 def test_initial():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Torrent requires an id"):
         transmission_rpc.Torrent(None, {})
     transmission_rpc.Torrent(None, {"id": 42})
 

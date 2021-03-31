@@ -57,7 +57,7 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]
             return raw_torrent_id
     elif isinstance(raw_torrent_id, str):
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
-            raise ValueError(f"torrent ids {raw_torrent_id} if not a valid sha1 hash")
+            raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
     elif isinstance(raw_torrent_id, Field):
         return _parse_torrent_id(raw_torrent_id.value)
