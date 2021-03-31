@@ -1,6 +1,7 @@
 # Copyright (c) 2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+# pylint: disable=C0103
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
@@ -88,7 +89,7 @@ class Torrent:
         try:
             return self._fields[name].value
         except KeyError:
-            raise AttributeError("No attribute %s" % name)
+            raise AttributeError("No attribute %s" % name) from None
 
     def _rpc_version(self) -> int:
         """Get the Transmission RPC API version."""

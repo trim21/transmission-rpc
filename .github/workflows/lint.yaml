@@ -55,6 +55,26 @@ jobs:
             --max-line-length=88 \
             --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist
 
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+        with:
+          extras: docs
+
+      - run: echo "::add-matcher::.github/workflows/matcher/pylint.json"
+
+      - name: pylint
+        run: pylint transmission_rpc tests
+
   lint:
     runs-on: ubuntu-latest
     steps:

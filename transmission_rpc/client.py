@@ -13,6 +13,7 @@ import logging
 import pathlib
 import operator
 import warnings
+import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
 from urllib.parse import quote, urljoin, urlparse
 
@@ -82,7 +83,7 @@ class Client:
     def __init__(
         self,
         *,
-        protocol: "Literal['http', 'https']" = "http",
+        protocol: Literal["http", "https"] = "http",
         username: str = None,
         password: str = None,
         host: str = "127.0.0.1",
@@ -99,7 +100,6 @@ class Client:
                 "default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
-        import urllib.parse
 
         username = (
             quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8")
@@ -190,14 +190,14 @@ class Client:
                     json=json.loads(query),
                     timeout=timeout,
                 )
-            except requests.exceptions.Timeout:
+            except requests.exceptions.Timeout as e:
                 raise TransmissionTimeoutError(
                     "timeout when connection to transmission daemon"
-                )
+                ) from e
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(
-                    "can't connect to transmission daemon" + str(e)
-                )
+                    f"can't connect to transmission daemon: {str(e)}"
+                ) from e
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
@@ -245,7 +245,7 @@ class Client:
         try:
             data: dict = json.loads(http_data)
         except ValueError as error:
-            self.logger.error("Error: " + str(error))
+            self.logger.error("Error: %s", str(error))
             self.logger.error('Request: "%s"', query)
             self.logger.error('HTTP data: "%s"', http_data)
             raise ValueError from error
@@ -418,7 +418,7 @@ class Client:
                     # check if this is base64 data
                     base64.b64decode(torrent.encode("utf-8"), validate=True)
                     might_be_base64 = True
-                except Exception:
+                except (TypeError, ValueError):
                     pass
                 if might_be_base64:
                     torrent_data = torrent
@@ -517,7 +517,7 @@ class Client:
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
-        result: Dict[str, Torrent] = self._request(
+        result: Dict[Union[str, int], Torrent] = self._request(
             "torrent-get",
             {"fields": arguments},
             torrent_id,
@@ -525,8 +525,7 @@ class Client:
             timeout=timeout,
         )
         if torrent_id in result:
-            # todo
-            return result[torrent_id]  # type: ignore
+            return result[torrent_id]
         for torrent in result.values():
             if torrent.hashString == torrent_id:
                 return torrent

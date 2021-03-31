@@ -28,8 +28,8 @@ class Session:
     def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
-        except KeyError:
-            raise AttributeError("No attribute %s" % name)
+        except KeyError as e:
+            raise AttributeError(f"No attribute {name}") from e
 
     def __str__(self) -> str:
         text = ""
