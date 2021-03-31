@@ -680,6 +680,7 @@ class Client:
                                                            where the announce URL should be replaced.
         ``uploadLimit``              5 -                   Set the speed limit for upload in Kib/s.
         ``uploadLimited``            5 -                   Enable upload speed limiter.
+        ``labels``                   16 -                  Array of string labels.
         ============================ ===== =============== =============================================================
 
         .. NOTE::
