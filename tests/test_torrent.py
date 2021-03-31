@@ -9,6 +9,7 @@ import pytest
 import transmission_rpc
 import transmission_rpc.utils
 import transmission_rpc.constants
+from transmission_rpc.torrent import Status
 
 
 def test_initial():
@@ -95,3 +96,10 @@ def test_attributes():
 
     torrent = transmission_rpc.Torrent(None, data)
     assert torrent.date_done is None
+
+
+def test_status():
+    assert Status("downloading").downloading
+    assert not Status("downloading").download_pending
+    assert Status("download pending").download_pending
+    assert Status("some thing") == "some thing"
