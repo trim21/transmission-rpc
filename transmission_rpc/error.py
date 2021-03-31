@@ -27,8 +27,7 @@ class TransmissionError(Exception):
             return '{} Original exception: {}, "{}"'.format(
                 self.message, original_name, str(self.original)
             )
-        else:
-            return self.message
+        return self.message
 
 
 class TransmissionAuthError(TransmissionError):

@@ -49,8 +49,7 @@ def format_timestamp(timestamp: int, utc: bool = False) -> str:
         else:
             dt_timestamp = datetime.datetime.fromtimestamp(timestamp)
         return dt_timestamp.isoformat(" ")
-    else:
-        return "-"
+    return "-"
 
 
 def rpc_bool(arg: Any) -> int:
@@ -128,10 +127,9 @@ def argument_value_convert(
                         f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
                     )
         return argument, TR_TYPE_MAP[info[0]](value)
-    else:
-        raise ValueError(
-            'Argument "%s" does not exists for method "%s".', (argument, method)
-        )
+    raise ValueError(
+        'Argument "%s" does not exists for method "%s".', (argument, method)
+    )
 
 
 def get_arguments(method: str, rpc_version: int) -> List[str]:
