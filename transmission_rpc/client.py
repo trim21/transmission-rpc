@@ -190,14 +190,14 @@ class Client:
                     json=json.loads(query),
                     timeout=timeout,
                 )
-            except requests.exceptions.Timeout:
+            except requests.exceptions.Timeout as e:
                 raise TransmissionTimeoutError(
                     "timeout when connection to transmission daemon"
-                )
+                ) from e
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(
-                    "can't connect to transmission daemon" + str(e)
-                )
+                    f"can't connect to transmission daemon: {str(e)}"
+                ) from e
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
