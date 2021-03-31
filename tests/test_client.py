@@ -240,7 +240,10 @@ def test_check_rpc_version_for_args():
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 7
-        with pytest.raises(ValueError, match="rpc version"):
+        with pytest.raises(
+            ValueError,
+            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
+        ):
             c.add_torrent(magnet_url, cookies="")
 
 
