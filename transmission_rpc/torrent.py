@@ -25,18 +25,39 @@ def get_status_old(code: int) -> str:
     return mapping[code]
 
 
+_STATUS_NEW_MAPPING = {
+    0: "stopped",
+    1: "check pending",
+    2: "checking",
+    3: "download pending",
+    4: "downloading",
+    5: "seed pending",
+    6: "seeding",
+}
+
+
 def get_status_new(code: int) -> str:
     """Get the torrent status using new status codes"""
-    mapping = {
-        0: "stopped",
-        1: "check pending",
-        2: "checking",
-        3: "download pending",
-        4: "downloading",
-        5: "seed pending",
-        6: "seeding",
-    }
-    return mapping[code]
+
+    return _STATUS_NEW_MAPPING[code]
+
+
+class Status(str):
+    """A class wrap torrent status"""
+
+    stopped: bool
+    check_pending: bool
+    checking: bool
+    download_pending: bool
+    downloading: bool
+    seed_pending: bool
+    seeding: bool
+
+    def __new__(cls, raw: str) -> "Status":
+        obj = super().__new__(cls, raw)
+        for status in _STATUS_NEW_MAPPING.values():
+            setattr(obj, status.replace(" ", "_"), raw == status)
+        return obj
 
 
 class Torrent:
@@ -198,13 +219,18 @@ class Torrent:
         return self.__getattr__("name")
 
     @property
-    def status(self) -> str:
+    def status(self) -> Status:
         """
         Returns the torrent status. Is either one of 'check pending', 'checking',
-        'downloading', 'seeding' or 'stopped'. The first two is related to
+        'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'. The first two is related to
         verification.
+
+        Examples:
+
+            >>> torrent.status.downloading
+
         """
-        return self._status()
+        return Status(self._status())
 
     @property
     def rateDownload(self) -> int:

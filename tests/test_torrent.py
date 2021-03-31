@@ -95,3 +95,12 @@ def test_attributes():
 
     torrent = transmission_rpc.Torrent(None, data)
     assert torrent.date_done is None
+
+
+from transmission_rpc.torrent import Status
+
+
+def test_status():
+    assert Status("downloading").downloading
+    assert not Status("downloading").download_pending
+    assert Status("some thing") == "some thing"
