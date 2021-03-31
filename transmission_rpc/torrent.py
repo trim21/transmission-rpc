@@ -178,7 +178,7 @@ class Torrent:
             priorities = self._fields["priorities"].value
             wanted = self._fields["wanted"].value
             for item in zip(indices, files, priorities, wanted):
-                selected = True if item[3] else False
+                selected = bool(item[3])
                 priority = PRIORITY[item[2]]
                 result.append(
                     File(
