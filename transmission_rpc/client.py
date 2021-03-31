@@ -83,7 +83,7 @@ class Client:
     def __init__(
         self,
         *,
-        protocol: "Literal['http', 'https']" = "http",
+        protocol: Literal["http", "https"] = "http",
         username: str = None,
         password: str = None,
         host: str = "127.0.0.1",
@@ -245,7 +245,7 @@ class Client:
         try:
             data: dict = json.loads(http_data)
         except ValueError as error:
-            self.logger.error("Error: " + str(error))
+            self.logger.error("Error: %s", str(error))
             self.logger.error('Request: "%s"', query)
             self.logger.error('HTTP data: "%s"', http_data)
             raise ValueError from error
