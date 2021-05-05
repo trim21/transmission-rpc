@@ -33,8 +33,9 @@ class Session:
 
     def __str__(self) -> str:
         text = ""
-        for key in sorted(self._fields.keys()):
-            text += "{:32}: {}\n".format(key[-32:], self._fields[key].value)
+        max_length = max(len(x) for x in self._fields.keys()) + 1
+        for key, value in sorted(self._fields.items(), key=lambda x: x[0]):
+            text += f"{key.ljust(max_length)}: {value.value!r}\n"
         return text
 
     def _update_fields(self, other: Union[Dict[str, Any], "Session"]) -> None:
