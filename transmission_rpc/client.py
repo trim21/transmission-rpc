@@ -162,7 +162,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {"x-transmission-session-id": self.session_id}
 
-    def _http_query(self, query: Any, timeout: _Timeout = None) -> str:
+    def _http_query(self, query: dict, timeout: _Timeout = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -178,7 +178,7 @@ class Client:
                 {
                     "url": self.url,
                     "headers": self._http_header,
-                    "data": json.loads(query),
+                    "data": query,
                     "timeout": timeout,
                 }
             )
@@ -187,7 +187,7 @@ class Client:
                 r = self._http_session.post(
                     self.url,
                     headers=self._http_header,
-                    json=json.loads(query),
+                    json=query,
                     timeout=timeout,
                 )
             except requests.exceptions.Timeout as e:
@@ -233,9 +233,8 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = json.dumps(
-            {"tag": self._sequence, "method": method, "arguments": arguments}
-        )
+        query = {"tag": self._sequence, "method": method, "arguments": arguments}
+
         self._sequence += 1
         start = time.time()
         http_data = self._http_query(query, timeout)
