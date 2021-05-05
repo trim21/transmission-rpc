@@ -15,7 +15,7 @@ class File(NamedTuple):
     priority: Literal["high", "normal", "low"]
     selected: bool  # if selected for download
 
-    def __str__(self):
+    def __str__(self) -> str:
         size = format_size(self.size)
         human_size = f"{round(size[0],1)} {size[1]}"
         return (
@@ -23,7 +23,8 @@ class File(NamedTuple):
             f"priority={self.priority}, selected={self.selected})"
         )
 
-    __repr__ = __str__
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Field(NamedTuple):

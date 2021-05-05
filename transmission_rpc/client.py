@@ -206,7 +206,7 @@ class Client:
                 raise TransmissionAuthError(
                     "transmission daemon require auth", original=r
                 )
-            elif r.status_code == 403:
+            if r.status_code == 403:
                 self.logger.debug(r.request.headers)
                 raise TransmissionAuthError(
                     "transmission daemon require auth", original=r
