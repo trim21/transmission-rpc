@@ -103,3 +103,5 @@ def test_status():
     assert not Status("downloading").download_pending
     assert Status("download pending").download_pending
     assert Status("some thing") == "some thing"
+    assert {"some thing": ...}.get(Status("some thing")) is ...
+    assert Status("some thing") in {"some thing", "o"}
