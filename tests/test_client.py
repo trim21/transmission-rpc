@@ -10,6 +10,7 @@ import yarl
 import pytest
 from typing_extensions import Literal
 
+from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.client import Client
 from transmission_rpc.lib_types import File
 
@@ -249,4 +250,15 @@ def test_warn_deprecated():
     )
     with mock.patch("transmission_rpc.client.Client._http_query", m):
         with pytest.warns(PendingDeprecationWarning):
+            Client()
+
+
+@pytest.mark.parametrize(
+    "status_code",
+    [401, 403],
+)
+def test_raise_unauthorized(status_code):
+    m = mock.Mock(return_value=mock.Mock(status_code=status_code))
+    with mock.patch("requests.Session.post", m):
+        with pytest.raises(TransmissionAuthError):
             Client()
