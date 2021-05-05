@@ -201,12 +201,7 @@ class Client:
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
-            if r.status_code == 401:
-                self.logger.debug(r.request.headers)
-                raise TransmissionAuthError(
-                    "transmission daemon require auth", original=r
-                )
-            if r.status_code == 403:
+            if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
                 raise TransmissionAuthError(
                     "transmission daemon require auth", original=r
