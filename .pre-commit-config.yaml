@@ -62,9 +62,3 @@ repos:
     rev: e66be67b9b6811913470f70c28b4d50f94d05b22  # frozen: 20.8b1
     hooks:
       - id: black
-
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: 3b591f02c8c0008adb57775a17ece7a9b0d6f230  # frozen: v2.16.0
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
