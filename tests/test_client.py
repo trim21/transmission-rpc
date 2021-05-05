@@ -259,6 +259,5 @@ def test_warn_deprecated():
 )
 def test_raise_unauthorized(status_code):
     m = mock.Mock(return_value=mock.Mock(status_code=status_code))
-    with mock.patch("requests.Session.post", m):
-        with pytest.raises(TransmissionAuthError):
-            Client()
+    with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
+        Client()
