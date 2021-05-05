@@ -35,7 +35,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 0397ec8ba931ee05c1665042c097ac0c69ef0c10  # frozen: v2.11.0
+    rev: 24f855af7650827d000ca287b8fab133914ff6a3  # frozen: v2.14.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -59,6 +59,6 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: e66be67b9b6811913470f70c28b4d50f94d05b22  # frozen: 20.8b1
+    rev: 14c76e89716b5b53c97ece80bb935ea956b7dd89  # frozen: 21.5b0
     hooks:
       - id: black

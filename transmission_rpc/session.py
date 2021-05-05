@@ -34,7 +34,7 @@ class Session:
     def __str__(self) -> str:
         text = ""
         for key in sorted(self._fields.keys()):
-            text += "{:32}: {}\n".format(key[-32:], self._fields[key].value)
+            text += f"{key[-32:]:32}: {self._fields[key].value}\n"
         return text
 
     def _update_fields(self, other: Union[Dict[str, Any], "Session"]) -> None:
