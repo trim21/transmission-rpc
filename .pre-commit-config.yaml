@@ -2,11 +2,13 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: c7a95cc4bd7861446be192a3b83c7a2ca1d6d910  # frozen: v0.2.3
+    rev: 1586f0d19e5685e59cbe827988f5360df0f334b5  # frozen: v0.3.0
     hooks:
       - id: yamlfmt
       - id: poetry-check-lock
       - id: find-trailing-comma
+      - id: force-yaml-file-ext
+        exclude: ^\.chglog/config\.yml$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 6e2418c5521b7d606e72914dced3253f9ace1205  # frozen: v3.4.0
