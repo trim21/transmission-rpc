@@ -27,7 +27,7 @@ jobs:
       - name: Generate Changlog
         run: |
           docker pull quay.io/git-chglog/git-chglog:latest
-          docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog:latest "$TAG" | \
+          docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog "$TAG" | \
           python -c 'import sys;print("".join(sys.stdin.readlines()[3:]).strip())' > chglog.md
 
       - name: Upload Github Release
