@@ -42,6 +42,12 @@ jobs:
           TR_PASSWORD: mysecretpassword
 
       - uses: codecov/codecov-action@v1
+        if: ${{ startsWith(matrix.python, 'py') }}
+        with:
+          flags: ${{ matrix.python }}
+
+      - uses: codecov/codecov-action@v1
+        if: ${{ !startsWith(matrix.python, 'py') }}
         with:
           flags: py${{ matrix.python }}
 
