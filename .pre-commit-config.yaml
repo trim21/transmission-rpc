@@ -37,7 +37,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: c2e71d194a5991d8f6a2e37813c8d206eb19e3d1  # frozen: v2.16.0
+    rev: d2a47a33a246c166a7f299fe5fe43c7a8fbc6af4  # frozen: v2.17.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
