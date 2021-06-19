@@ -2,7 +2,7 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: 1586f0d19e5685e59cbe827988f5360df0f334b5  # frozen: v0.3.0
+    rev: e4bd622f56f4cb289b7c15f6e9f03698afbc55d2  # frozen: v0.4.1
     hooks:
       - id: yamlfmt
       - id: poetry-check-lock
@@ -37,7 +37,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: c2e71d194a5991d8f6a2e37813c8d206eb19e3d1  # frozen: v2.16.0
+    rev: b844b43552d913dbd48025b0a4ac64612c3374f2  # frozen: v2.19.4
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -61,6 +61,6 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: 2f52e4b4929370ec503ee272bcc10d3176db8e89  # frozen: 21.5b1
+    rev: 93c10bf9ebccf8d7cc686b0b9579f2e5e41c5328  # frozen: 21.6b0
     hooks:
       - id: black
