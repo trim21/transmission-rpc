@@ -23,8 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         language: [python]
-# Override automatic language detection by changing the below list
-# Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
+      # Override automatic language detection by changing the below list
+      # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
 
     steps:
       - name: Checkout repository
