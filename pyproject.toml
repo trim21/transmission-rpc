@@ -44,15 +44,15 @@ yarl = "1.6.3"
 pytest = "==6.2.4"
 coverage = "==5.5"
 # linter and formatter
-pre-commit = { version = "==2.12.1", markers = "implementation_name != 'pypy'" }
-mypy = { version = "0.812", markers = "implementation_name != 'pypy'" }
+pre-commit = { version = "==2.13.0", markers = "implementation_name != 'pypy'" }
+mypy = { version = "==0.910", markers = "implementation_name != 'pypy'" }
 flake8 = "==3.9.2"
 flake8-comprehensions = "==3.5.0"
 flake8-bugbear = "==21.4.3"
 flake8-mutable = "1.2.0"
 pytest-github-actions-annotate-failures = "==0.1.2"
-flake8-pytest-style = "==1.4.1"
-pylint = "==2.8.2"
+flake8-pytest-style = "==1.5.0"
+pylint = "==2.8.3"
 sphinx-autobuild = "2021.3.14"
 
 [tool.isort]
