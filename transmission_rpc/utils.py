@@ -39,19 +39,6 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return "%d %02d:%02d:%02d" % (delta.days, hours, minutes, seconds)
 
 
-def format_timestamp(timestamp: int, utc: bool = False) -> str:
-    """
-    Format unix timestamp into ISO date format.
-    """
-    if timestamp > 0:
-        if utc:
-            dt_timestamp = datetime.datetime.utcfromtimestamp(timestamp)
-        else:
-            dt_timestamp = datetime.datetime.fromtimestamp(timestamp)
-        return dt_timestamp.isoformat(" ")
-    return "-"
-
-
 def rpc_bool(arg: Any) -> int:
     """
     Convert between Python boolean and Transmission RPC boolean.
