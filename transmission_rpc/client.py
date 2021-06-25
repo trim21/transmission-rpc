@@ -541,7 +541,9 @@ class Client:
 
         Returns a list of Torrent object.
         """
-        if not arguments:
+        if arguments:
+            arguments = list(set(arguments) | {"id"})
+        else:
             arguments = self.torrent_get_arguments
         return list(
             self._request(
