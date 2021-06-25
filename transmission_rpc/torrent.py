@@ -313,7 +313,9 @@ class Torrent:
 
         :rtype: datetime.timedelta
         """
-        return datetime.datetime.fromtimestamp(self._fields["activityDate"].value)
+        return datetime.datetime.fromtimestamp(
+            self._fields["activityDate"].value
+        ).astimezone()
 
     @property
     def date_added(self) -> datetime.datetime:
@@ -322,7 +324,9 @@ class Torrent:
 
         :rtype: datetime.timedelta
         """
-        return datetime.datetime.fromtimestamp(self._fields["addedDate"].value)
+        return datetime.datetime.fromtimestamp(
+            self._fields["addedDate"].value
+        ).astimezone()
 
     @property
     def date_started(self) -> datetime.datetime:
@@ -331,7 +335,9 @@ class Torrent:
 
         :rtype: datetime.timedelta
         """
-        return datetime.datetime.fromtimestamp(self._fields["startDate"].value)
+        return datetime.datetime.fromtimestamp(
+            self._fields["startDate"].value
+        ).astimezone()
 
     @property
     def date_done(self) -> Optional[datetime.datetime]:
@@ -341,7 +347,7 @@ class Torrent:
         # so if doneDate is zero return None
         if done_date == 0:
             return None
-        return datetime.datetime.fromtimestamp(done_date)
+        return datetime.datetime.fromtimestamp(done_date).astimezone()
 
     def format_eta(self) -> str:
         """

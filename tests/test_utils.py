@@ -67,18 +67,6 @@ def test_format_timedelta(delta, expected):
 
 
 @pytest.mark.parametrize(
-    ("timestamp", "expected"),
-    [
-        (0, "-"),
-        (1, "1970-01-01 00:00:01"),
-        (1129135532, "2005-10-12 16:45:32"),
-    ],
-)
-def test_format_timestamp(timestamp, expected):
-    assert utils.format_timestamp(timestamp, utc=True) == expected
-
-
-@pytest.mark.parametrize(
     ("value", "expected"),
     [
         (0, 0),
