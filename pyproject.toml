@@ -55,7 +55,7 @@ flake8-pytest-style = "==1.5.0"
 pylint = "==2.8.3"
 sphinx-autobuild = "2021.3.14"
 # stubs
-types-requests = "^2.25.0"
+types-requests = "2.25.0"
 
 [tool.isort]
 default_section = 'THIRDPARTY'
