@@ -32,12 +32,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
-    rev: a6222a8a125ec719724e628a5d3d0d5c60923281  # frozen: 5.8.0
+    rev: 6e4281f018ff848226d8993596765b2285e1624f  # frozen: 5.9.2
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: b844b43552d913dbd48025b0a4ac64612c3374f2  # frozen: v2.19.4
+    rev: 4eba9f38c5becebec4e3ebfdc94a3db11d6829c6  # frozen: v2.21.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
