@@ -41,12 +41,12 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: mysecretpassword
 
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v2
         if: ${{ startsWith(matrix.python, 'py') }}
         with:
           flags: ${{ matrix.python }}
 
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v2
         if: ${{ !startsWith(matrix.python, 'py') }}
         with:
           flags: py${{ matrix.python }}
