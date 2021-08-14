@@ -31,6 +31,16 @@ def test_get_name_string():
     assert isinstance(name, str)
 
 
+def test_non_active():
+    data = {
+        "id": 1,
+        "activityDate": 0,
+    }
+
+    torrent = transmission_rpc.Torrent(None, data)
+    assert torrent.date_active
+
+
 def test_attributes():
     torrent = transmission_rpc.Torrent(None, {"id": 42})
     assert hasattr(torrent, "id")

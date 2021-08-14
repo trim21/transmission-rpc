@@ -308,21 +308,25 @@ class Torrent:
 
     @property
     def date_active(self) -> datetime.datetime:
-        """
-        the attribute ``activityDate``.
+        """the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
 
-        :rtype: datetime.timedelta
+        .. note::
+
+            raw ``activityDate`` value could be ``0`` for never activated torrent,
+            therefore it can't always be converted to local timezone.
+
+
+        :rtype: datetime.datetime
         """
         return datetime.datetime.fromtimestamp(
-            self._fields["activityDate"].value
-        ).astimezone()
+            self._fields["activityDate"].value, datetime.timezone.utc
+        )
 
     @property
     def date_added(self) -> datetime.datetime:
-        """
-        the attribute ``addedDate``.
+        """raw field ``addedDate`` as ``datetime.datetime`` in **local timezone**.
 
-        :rtype: datetime.timedelta
+        :rtype: datetime.datetime
         """
         return datetime.datetime.fromtimestamp(
             self._fields["addedDate"].value
@@ -330,10 +334,9 @@ class Torrent:
 
     @property
     def date_started(self) -> datetime.datetime:
-        """
-        the attribute ``startDate``.
+        """raw field ``startDate`` as ``datetime.datetime`` in **local timezone**.
 
-        :rtype: datetime.timedelta
+        :rtype: datetime.datetime
         """
         return datetime.datetime.fromtimestamp(
             self._fields["startDate"].value
