@@ -41,10 +41,11 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: mysecretpassword
 
+      - run: coverage xml
+
       - uses: codecov/codecov-action@v2
         with:
           flags: ${{ matrix.python }}
-          files: .coverage
 
   dist-files:
     runs-on: ubuntu-latest
