@@ -42,7 +42,7 @@ def get_status_new(code: int) -> str:
 
 
 class Status(str):
-    """A class wrap torrent status.
+    """A wrapped ``str`` for torrent status.
 
     returned by :py:attr:`.Torrent.status`
     """
