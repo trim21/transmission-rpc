@@ -122,6 +122,7 @@ class Client:
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
+        self._http_session.trust_env = False
         self.get_session()
         self.torrent_get_arguments = get_arguments("torrent-get", self.rpc_version)
 
