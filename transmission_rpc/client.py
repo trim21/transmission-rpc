@@ -364,7 +364,7 @@ class Client:
 
     def add_torrent(
         self,
-        torrent: Union[BinaryIO, str],
+        torrent: Union[BinaryIO, str, bytes],
         timeout: _Timeout = None,
         *,
         download_dir: str = None,
@@ -380,8 +380,13 @@ class Client:
     ) -> Torrent:
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
-        You can find examples in test code
-        `tests/test_client.py <https://github.com/Trim21/transmission-rpc/blob/master/tests/test_client.py>`_
+        ``torrent`` can be:
+
+        - ``http://``, ``https://`` or  ``magnet:`` URL
+        - torrent content in bytes
+        - torrent file-like object in binary mode
+        - base64 encoded torrent file content
+        - ``file://`` URL
 
         .. NOTE::
 
