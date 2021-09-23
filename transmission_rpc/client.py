@@ -382,9 +382,9 @@ class Client:
         Add torrent to transfers list. ``torrent`` can be:
 
         - ``http://``, ``https://`` or  ``magnet:`` URL
-        - torrent content in bytes
         - torrent file-like object in binary mode
-        - base64 encoded torrent file content
+        - bytes of torrent content
+        - str of base64 encoded torrent file content
         - ``file://`` URL
 
         .. NOTE::

@@ -166,12 +166,13 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
     """
     if torrent should be encoded with base64, return a non-None value.
     """
-    torrent_data = None
-    is_url = False
     # torrent is a str, may be a url
     if isinstance(torrent, str):
         parsed_uri = urlparse(torrent)
         # torrent starts with file, read from local disk and encode it to base64 url.
+        if parsed_uri.scheme in ["https", "http", "magnet"]:
+            return
+
         if parsed_uri.scheme in ["file"]:
             filepath = torrent
             # uri decoded different on linux / windows ?
@@ -180,24 +181,20 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
             elif len(parsed_uri.netloc) > 0:
                 filepath = parsed_uri.netloc
             with open(filepath, "rb") as torrent_file:
-                torrent_data = base64.b64encode(torrent_file.read()).decode("utf-8")
-        elif parsed_uri.scheme in ["https", "http", "magnet"]:
-            is_url = True
-        if (not is_url) and (not torrent_data):
-            # base64 encoded file content
-            might_be_base64 = False
-            try:
-                # check if this is base64 data
-                base64.b64decode(torrent.encode("utf-8"), validate=True)
-                might_be_base64 = True
-            except (TypeError, ValueError):
-                pass
-            if might_be_base64:
-                torrent_data = torrent
+                return base64.b64encode(torrent_file.read()).decode("utf-8")
+
+        # maybe it's base64 encoded file content
+        try:
+            # check if this is base64 data
+            base64.b64decode(torrent.encode("utf-8"), validate=True)
+            return torrent
+        except (TypeError, ValueError):
+            pass
+
     elif isinstance(torrent, bytes):
-        torrent_data = base64.b64encode(torrent).decode("utf-8")
+        return base64.b64encode(torrent).decode("utf-8")
     # maybe a file, try read content and encode it.
     elif hasattr(torrent, "read"):
-        torrent_data = base64.b64encode(torrent.read()).decode("utf-8")
+        return base64.b64encode(torrent.read()).decode("utf-8")
 
-    return torrent_data
+    raise ValueError(f"can't handle torrent with type {type(torrent)}")
