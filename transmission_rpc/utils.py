@@ -3,6 +3,7 @@
 # Licensed under the MIT license.
 import base64
 import datetime
+import warnings
 from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
 from urllib.parse import urlparse
 
@@ -174,6 +175,9 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
             return None
 
         if parsed_uri.scheme in ["file"]:
+            warnings.warn(
+                "support for `file://` URL is deprecated.", DeprecationWarning
+            )
             filepath = torrent
             # uri decoded different on linux / windows ?
             if len(parsed_uri.path) > 0:
