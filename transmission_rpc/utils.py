@@ -171,7 +171,7 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
         parsed_uri = urlparse(torrent)
         # torrent starts with file, read from local disk and encode it to base64 url.
         if parsed_uri.scheme in ["https", "http", "magnet"]:
-            return
+            return None
 
         if parsed_uri.scheme in ["file"]:
             filepath = torrent
