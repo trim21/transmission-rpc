@@ -196,3 +196,5 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
     # maybe a file, try read content and encode it.
     elif hasattr(torrent, "read"):
         return base64.b64encode(torrent.read()).decode("utf-8")
+
+    return None
