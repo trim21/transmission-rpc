@@ -385,7 +385,7 @@ class Client:
         - torrent file-like object in binary mode
         - bytes of torrent content
         - str of base64 encoded torrent file content
-        - ``file://`` URL
+        - ``file://`` URL (``file://C:/path/to/torrent``)
 
         .. NOTE::
 

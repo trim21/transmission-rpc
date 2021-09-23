@@ -3,6 +3,7 @@ import json
 import time
 import base64
 import os.path
+import pathlib
 from unittest import mock
 from urllib.parse import urljoin
 
@@ -85,6 +86,13 @@ def test_client_add_base64_raw_data():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
     assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
+
+
+def test_client_add_file_protocol():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
+    assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
 
 
 def test_client_add_read_file_in_base64():
