@@ -1,7 +1,7 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, Generator
 
 from transmission_rpc.lib_types import Field, _Timeout
 
@@ -69,6 +69,13 @@ class Session:
             self._fields[key] = self._fields[key]._replace(dirty=False)
         if len(args) > 0:
             self._client.set_session(**args)
+
+    def items(self) -> Generator[Tuple[str, Any], None, None]:
+        for (
+            key,
+            field,
+        ) in self._fields.items():
+            yield key, field.value
 
     def update(self, timeout: _Timeout = None) -> None:
         """Update the session information."""
