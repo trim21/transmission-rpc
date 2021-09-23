@@ -11,6 +11,7 @@ import pytest
 from typing_extensions import Literal
 
 from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
+from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client
 from transmission_rpc.lib_types import File
 
@@ -73,26 +74,28 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 
 
 def test_client_add_url():
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        assert Client().add_torrent(torrent_url) == "world"
-        m.assert_called_with("torrent-add", {"filename": torrent_url}, timeout=None)
+    assert _try_read_torrent(torrent_url) is None, "handle http URL with daemon"
 
 
 def test_client_add_magnet():
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        assert Client().add_torrent(magnet_url) == "world"
-        m.assert_called_with("torrent-add", {"filename": magnet_url}, timeout=None)
+    assert _try_read_torrent(magnet_url) is None, "handle magnet URL with daemon"
 
 
 def test_client_add_base64_raw_data():
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        with open("tests/fixtures/iso.torrent", "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        assert Client().add_torrent(b64) == "world"
-        m.assert_called_with("torrent-add", {"metainfo": b64}, timeout=None)
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
+
+
+def test_client_add_read_file_in_base64():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        content = f.read()
+        f.seek(0)
+        data = _try_read_torrent(f)
+
+    assert (
+        base64.b64encode(content).decode() == data
+    ), "should base64 encode torrent file"
 
 
 def test_real_add_magnet(tr_client: Client):
