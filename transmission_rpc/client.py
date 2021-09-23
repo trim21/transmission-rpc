@@ -1,5 +1,5 @@
+# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2020 littleya <me@littleya.com>
-# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import os
@@ -379,8 +379,7 @@ class Client:
         bandwidthPriority: int = None,
     ) -> Torrent:
         """
-        Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
-        ``torrent`` can be:
+        Add torrent to transfers list. ``torrent`` can be:
 
         - ``http://``, ``https://`` or  ``magnet:`` URL
         - torrent content in bytes
