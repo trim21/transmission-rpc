@@ -362,7 +362,18 @@ class Client:
             )
 
     def add_torrent(
-        self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
+        self,
+        torrent: Union[BinaryIO, str],
+        timeout: _Timeout = None,
+        download_dir: str = None,
+        files_unwanted: List[int] = None,
+        files_wanted: List[int] = None,
+        paused: bool = None,
+        peer_limit: int = None,
+        priority_high: List[int] = None,
+        priority_low: List[int] = None,
+        priority_normal: List[int] = None,
+        **kwargs: Any,
     ) -> Torrent:
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
@@ -431,6 +442,23 @@ class Client:
             args = {"metainfo": torrent_data}
         else:
             args = {"filename": torrent}  # type: ignore
+
+        if download_dir is not None:
+            kwargs["download_dir"] = download_dir
+        if files_unwanted is not None:
+            kwargs["files_unwanted"] = files_unwanted
+        if files_wanted is not None:
+            kwargs["files_wanted"] = files_wanted
+        if paused is not None:
+            kwargs["paused"] = paused
+        if peer_limit is not None:
+            kwargs["peer_limit"] = peer_limit
+        if priority_high is not None:
+            kwargs["priority_high"] = priority_high
+        if priority_low is not None:
+            kwargs["priority_low"] = priority_low
+        if priority_normal is not None:
+            kwargs["priority_normal"] = priority_normal
 
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
