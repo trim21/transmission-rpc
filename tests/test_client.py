@@ -10,7 +10,7 @@ import yarl
 import pytest
 from typing_extensions import Literal
 
-from transmission_rpc.error import TransmissionAuthError
+from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
 from transmission_rpc.client import Client
 from transmission_rpc.lib_types import File
 
@@ -219,7 +219,7 @@ def test_check_rpc_version_for_args():
         c = Client()
         c.protocol_version = 7
         with pytest.raises(
-            ValueError,
+            TransmissionVersionError,
             match='Method "torrent-add" Argument "cookies" does not exist in version 7',
         ):
             c.add_torrent(magnet_url, cookies="")

@@ -7,7 +7,6 @@ import re
 import json
 import time
 import types
-import base64
 import string
 import logging
 import pathlib
@@ -15,7 +14,7 @@ import operator
 import warnings
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urljoin
 
 import requests
 import requests.auth
@@ -33,6 +32,8 @@ from transmission_rpc.utils import (
     rpc_bool,
     get_arguments,
     make_rpc_name,
+    _try_read_torrent,
+    _rpc_version_check,
     argument_value_convert,
 )
 from transmission_rpc.session import Session
@@ -365,6 +366,7 @@ class Client:
         self,
         torrent: Union[BinaryIO, str],
         timeout: _Timeout = None,
+        *,
         download_dir: str = None,
         files_unwanted: List[int] = None,
         files_wanted: List[int] = None,
@@ -373,7 +375,8 @@ class Client:
         priority_high: List[int] = None,
         priority_low: List[int] = None,
         priority_normal: List[int] = None,
-        **kwargs: Any,
+        cookies: str = None,
+        bandwidthPriority: int = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
@@ -405,68 +408,48 @@ class Client:
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
-        torrent_data = None
-        is_url = False
-        # torrent is a str, may be a url
-        if isinstance(torrent, str):
-            parsed_uri = urlparse(torrent)
-            # torrent starts with file, read from local disk and encode it to base64 url.
-            if parsed_uri.scheme in ["file"]:
-                filepath = torrent
-                # uri decoded different on linux / windows ?
-                if len(parsed_uri.path) > 0:
-                    filepath = parsed_uri.path
-                elif len(parsed_uri.netloc) > 0:
-                    filepath = parsed_uri.netloc
-                with open(filepath, "rb") as torrent_file:
-                    torrent_data = base64.b64encode(torrent_file.read()).decode("utf-8")
-            elif parsed_uri.scheme in ["https", "http", "magnet"]:
-                is_url = True
-            if (not is_url) and (not torrent_data):
-                # base64 encoded file content
-                might_be_base64 = False
-                try:
-                    # check if this is base64 data
-                    base64.b64decode(torrent.encode("utf-8"), validate=True)
-                    might_be_base64 = True
-                except (TypeError, ValueError):
-                    pass
-                if might_be_base64:
-                    torrent_data = torrent
 
-        # maybe a file, try read content and encode it.
-        elif hasattr(torrent, "read"):
-            torrent_data = base64.b64encode(torrent.read()).decode("utf-8")
-
-        if torrent_data:
-            args = {"metainfo": torrent_data}
-        else:
-            args = {"filename": torrent}  # type: ignore
-
+        kwargs: Dict[str, Any] = {}
         if download_dir is not None:
-            kwargs["download_dir"] = download_dir
+            kwargs["download-dir"] = download_dir
+
         if files_unwanted is not None:
-            kwargs["files_unwanted"] = files_unwanted
+            kwargs["files-unwanted"] = files_unwanted
+
         if files_wanted is not None:
-            kwargs["files_wanted"] = files_wanted
+            kwargs["files-wanted"] = files_wanted
+
         if paused is not None:
             kwargs["paused"] = paused
-        if peer_limit is not None:
-            kwargs["peer_limit"] = peer_limit
-        if priority_high is not None:
-            kwargs["priority_high"] = priority_high
-        if priority_low is not None:
-            kwargs["priority_low"] = priority_low
-        if priority_normal is not None:
-            kwargs["priority_normal"] = priority_normal
 
-        for key, value in kwargs.items():
-            argument = make_rpc_name(key)
-            arg, val = argument_value_convert(
-                "torrent-add", argument, value, self.rpc_version
-            )
-            args[arg] = val
-        return list(self._request("torrent-add", args, timeout=timeout).values())[0]
+        if peer_limit is not None:
+            kwargs["peer-limit"] = peer_limit
+
+        if priority_high is not None:
+            kwargs["priority-high"] = priority_high
+
+        if priority_low is not None:
+            kwargs["priority-low"] = priority_low
+
+        if priority_normal is not None:
+            kwargs["priority-normal"] = priority_normal
+
+        if bandwidthPriority is not None:
+            kwargs["bandwidthPriority"] = bandwidthPriority
+
+        if cookies is not None:
+            kwargs["cookies"] = cookies
+
+        torrent_data = _try_read_torrent(torrent)
+
+        if torrent_data:
+            kwargs["metainfo"] = torrent_data
+        else:
+            kwargs["filename"] = torrent
+
+        _rpc_version_check("torrent-add", kwargs, self.rpc_version)
+
+        return list(self._request("torrent-add", kwargs, timeout=timeout).values())[0]
 
     def remove_torrent(
         self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None
