@@ -147,7 +147,7 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
 _Fn = TypeVar("_Fn")
 
 
-def _rpc_version_check(method: str, kwargs, rpc_version: int) -> None:
+def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
     if method in ("torrent-add", "torrent-get", "torrent-set"):
         rpc_args = constants.TORRENT_ARGS[method[-3:]]
     elif method in ("session-get", "session-set"):
