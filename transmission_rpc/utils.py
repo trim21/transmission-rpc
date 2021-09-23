@@ -162,7 +162,7 @@ def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) ->
             )
 
 
-def _try_read_torrent(torrent: Union[BinaryIO, str]) -> Optional[str]:
+def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
     """
     if torrent should be encoded with base64, return a non-None value.
     """
@@ -194,7 +194,8 @@ def _try_read_torrent(torrent: Union[BinaryIO, str]) -> Optional[str]:
                 pass
             if might_be_base64:
                 torrent_data = torrent
-
+    elif isinstance(torrent, bytes):
+        torrent_data = base64.b64encode(torrent).decode("utf-8")
     # maybe a file, try read content and encode it.
     elif hasattr(torrent, "read"):
         torrent_data = base64.b64encode(torrent.read()).decode("utf-8")

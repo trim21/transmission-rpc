@@ -98,6 +98,13 @@ def test_client_add_read_file_in_base64():
     ), "should base64 encode torrent file"
 
 
+def test_client_add_torrent_bytes():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        content = f.read()
+    data = _try_read_torrent(content)
+    assert base64.b64encode(content).decode() == data, "should base64 bytes"
+
+
 def test_real_add_magnet(tr_client: Client):
     tr_client.add_torrent(magnet_url)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
