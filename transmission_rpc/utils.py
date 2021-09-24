@@ -159,7 +159,7 @@ def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) ->
     for key, arg in rpc_args.items():
         if key in kwargs and arg.added_version > rpc_version:
             raise TransmissionVersionError(
-                f'Method "{method}" Argument "{key}" does not exist in version 7 {rpc_version}'
+                f'Method "{method}" Argument "{key}" does not exist in version {rpc_version}'
             )
 
 

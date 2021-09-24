@@ -77,7 +77,9 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 def test_client_add_kwargs():
     m = mock.Mock(return_value=lambda a, b, c: b)
     with mock.patch("transmission_rpc.client.Client._request", m):
-        assert Client().add_torrent(
+        c = Client()
+        c.protocol_version = 15
+        assert c.add_torrent(
             torrent_url,
             download_dir="dd",
             files_unwanted=[1, 2],
