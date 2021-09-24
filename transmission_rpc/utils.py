@@ -1,10 +1,14 @@
-# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
+# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+import base64
 import datetime
-from typing import Any, Dict, List, Tuple, Callable
+import warnings
+from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
+from urllib.parse import urlparse
 
 from transmission_rpc import constants
+from transmission_rpc.error import TransmissionVersionError
 from transmission_rpc.constants import LOGGER, BaseType
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
@@ -139,3 +143,62 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
         if valid_version:
             accessible.append(argument)
     return accessible
+
+
+_Fn = TypeVar("_Fn")
+
+
+def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
+    if method in ("torrent-add", "torrent-get", "torrent-set"):
+        rpc_args = constants.TORRENT_ARGS[method[-3:]]
+    elif method in ("session-get", "session-set"):
+        rpc_args = constants.SESSION_ARGS[method[-3:]]
+    else:
+        raise ValueError(f'Method "{method}" not supported')
+
+    for key, arg in rpc_args.items():
+        if key in kwargs and arg.added_version > rpc_version:
+            raise TransmissionVersionError(
+                f'Method "{method}" Argument "{key}" does not exist in version {rpc_version}'
+            )
+
+
+def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
+    """
+    if torrent should be encoded with base64, return a non-None value.
+    """
+    # torrent is a str, may be a url
+    if isinstance(torrent, str):
+        parsed_uri = urlparse(torrent)
+        # torrent starts with file, read from local disk and encode it to base64 url.
+        if parsed_uri.scheme in ["https", "http", "magnet"]:
+            return None
+
+        if parsed_uri.scheme in ["file"]:
+            warnings.warn(
+                "support for `file://` URL is deprecated.", DeprecationWarning
+            )
+            filepath = torrent
+            # uri decoded different on linux / windows ?
+            if len(parsed_uri.path) > 0:
+                filepath = parsed_uri.path
+            elif len(parsed_uri.netloc) > 0:
+                filepath = parsed_uri.netloc
+            with open(filepath, "rb") as torrent_file:
+                return base64.b64encode(torrent_file.read()).decode("utf-8")
+
+        # maybe it's base64 encoded file content
+        try:
+            # check if this is base64 data
+            base64.b64decode(torrent.encode("utf-8"), validate=True)
+            return torrent
+        except (TypeError, ValueError):
+            pass
+
+    elif isinstance(torrent, bytes):
+        return base64.b64encode(torrent).decode("utf-8")
+    # maybe a file, try read content and encode it.
+    elif hasattr(torrent, "read"):
+        return base64.b64encode(torrent.read()).decode("utf-8")
+
+    return None
