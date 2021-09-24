@@ -75,11 +75,11 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 
 
 def test_client_add_kwargs():
-    m = mock.Mock(return_value=lambda a, b, c: b)
+    m = mock.Mock(return_value={"hello": "workd"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 15
-        assert c.add_torrent(
+        c.add_torrent(
             torrent_url,
             download_dir="dd",
             files_unwanted=[1, 2],
@@ -91,7 +91,11 @@ def test_client_add_kwargs():
             priority_normal=[8],
             cookies="coo",
             bandwidthPriority=4,
-        ) == {
+        )
+    m.assert_called_with(
+        "torrent-add",
+        {
+            "filename": torrent_url,
             "download-dir": "dd",
             "files-unwanted": [1, 2],
             "files-wanted": [3, 4],
@@ -102,8 +106,9 @@ def test_client_add_kwargs():
             "priority-normal": [8],
             "cookies": "coo",
             "bandwidthPriority": 4,
-        }
-        m.assert_called_with("torrent-add", {"filename": torrent_url}, timeout=None)
+        },
+        timeout=None,
+    )
 
 
 def test_client_add_url():
