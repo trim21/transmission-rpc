@@ -13,7 +13,7 @@
 `transmission-rpc` is a python module implementing the json-rpc client protocol for the BitTorrent client Transmission.
 
 Support rpc version <= 16 (transmission <= 3.00),
-may work with new rpc version but some new feature may not working as expected.
+should works fine with newer rpc version but some new feature may be missing.
 
 ## Install
 
