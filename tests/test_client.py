@@ -74,6 +74,36 @@ torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
 
 
+def test_client_add_kwargs():
+    m = mock.Mock(return_value=lambda a, b, c: b)
+    with mock.patch("transmission_rpc.client.Client._request", m):
+        assert Client().add_torrent(
+            torrent_url,
+            download_dir="dd",
+            files_unwanted=[1, 2],
+            files_wanted=[3, 4],
+            paused=False,
+            peer_limit=5,
+            priority_high=[6],
+            priority_low=[7],
+            priority_normal=[8],
+            cookies="coo",
+            bandwidthPriority=4,
+        ) == {
+            "download-dir": "dd",
+            "files-unwanted": [1, 2],
+            "files-wanted": [3, 4],
+            "paused": False,
+            "peer-limit": 5,
+            "priority-high": [6],
+            "priority-low": [7],
+            "priority-normal": [8],
+            "cookies": "coo",
+            "bandwidthPriority": 4,
+        }
+        m.assert_called_with("torrent-add", {"filename": torrent_url}, timeout=None)
+
+
 def test_client_add_url():
     assert _try_read_torrent(torrent_url) is None, "handle http URL with daemon"
 
