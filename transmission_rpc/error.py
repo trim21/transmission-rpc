@@ -17,7 +17,7 @@ class TransmissionError(Exception):
     """
 
     def __init__(self, message: str = "", original: Optional[Response] = None):
-        Exception.__init__(self)
+        super().__init__()
         self.message = message
         self.original = original
 
