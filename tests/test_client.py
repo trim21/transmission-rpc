@@ -13,7 +13,7 @@ from typing_extensions import Literal
 
 from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
 from transmission_rpc.utils import _try_read_torrent
-from transmission_rpc.client import Client
+from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
@@ -122,7 +122,8 @@ def test_client_add_magnet():
 def test_client_add_base64_raw_data():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
-    assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
+    with pytest.warns(DeprecationWarning):
+        assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
 
 
 def test_client_add_pathlib_path():
@@ -135,7 +136,10 @@ def test_client_add_file_protocol():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
     p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
-    assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
+    with pytest.warns(DeprecationWarning):
+        assert (
+            _try_read_torrent(f"file://{p}") == b64
+        ), "should skip handle base64 content"
 
 
 def test_client_add_read_file_in_base64():
@@ -169,7 +173,8 @@ def test_real_add_torrent_fd(tr_client: Client):
 
 def test_real_add_torrent_base64(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
-        tr_client.add_torrent(base64.b64encode(f.read()).decode())
+        with pytest.warns(DeprecationWarning, match="base64"):
+            tr_client.add_torrent(base64.b64encode(f.read()).decode())
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
@@ -182,7 +187,8 @@ def test_real_add_torrent_file_protocol(tr_client: Client):
             "fixtures/iso.torrent",
         )
     )
-    tr_client.add_torrent("file://" + fs)
+    with pytest.warns(DeprecationWarning):
+        tr_client.add_torrent("file://" + fs)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
@@ -322,3 +328,12 @@ def test_raise_unauthorized(status_code):
     m = mock.Mock(return_value=mock.Mock(status_code=status_code))
     with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
         Client()
+
+
+def test_ensure_location_str_relative():
+    with pytest.warns(DeprecationWarning, match="absolute"):
+        ensure_location_str(pathlib.Path("."))
+
+
+def test_ensure_location_str_absolute():
+    ensure_location_str(pathlib.Path(".").absolute())

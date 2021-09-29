@@ -49,7 +49,17 @@ _TorrentIDs = Union[str, _TorrentID, List[_TorrentID], None]
 
 def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
     if isinstance(s, pathlib.Path):
+        if s.is_absolute():
+            return str(s)
+
+        warnings.warn(
+            "`pathlib.Path` will be convert to absolute path automatically, "
+            "please using a str or absolute Path to avoid unexpected path normalization\n"
+            "This warning will become error in v4",
+            DeprecationWarning,
+        )
         return str(s.absolute())
+
     return str(s)
 
 

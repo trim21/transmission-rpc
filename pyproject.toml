@@ -71,4 +71,4 @@ use_parentheses = true
 include_trailing_comma = true
 
 [tool.pytest.ini_options]
-addopts = '-rav'
+addopts = '-rav -Werror'
