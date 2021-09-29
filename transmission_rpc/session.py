@@ -138,8 +138,8 @@ class Session:
     def download_dir(self) -> str:
         """default download location
 
-        rpc version 12
-        transmission version 2.20
+        - rpc version 12
+        - transmission version 2.20
         :return:
         """
         return self.__getattr__("download_dir")
@@ -155,16 +155,16 @@ class Session:
     @property
     def version(self) -> str:
         """
-        rpc version 3
-        transmission version 1.41
+        - rpc version 3
+        - transmission version 1.41
         """
         return self.__getattr__("version")
 
     @property
     def rpc_version(self) -> int:
         """
-        rpc version 4
-        transmission version 1.50
+        - rpc version 4
+        - transmission version 1.50
         """
         return self.__getattr__("rpc_version")
 
@@ -172,8 +172,8 @@ class Session:
     def peer_port(self) -> int:
         """Get the peer port.
 
-        rpc version 5
-        transmission version 1.60
+        - rpc version 5
+        - transmission version 1.60
         """
         return self.__getattr__("peer_port")
 
@@ -181,8 +181,8 @@ class Session:
     def peer_port(self, port: int) -> None:
         """Set the peer port.
 
-        rpc version 5
-        transmission version 1.60
+        - rpc version 5
+        - transmission version 1.60
         """
         if isinstance(port, int):
             self._set("peer_port", port, True)
@@ -193,8 +193,8 @@ class Session:
     def pex_enabled(self) -> bool:
         """Is peer exchange enabled
 
-        rpc version 5
-        transmission version 1.60"""
+        - rpc version 5
+        - transmission version 1.60"""
         return self.__getattr__("pex_enabled")
 
     @pex_enabled.setter
