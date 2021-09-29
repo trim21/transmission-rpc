@@ -254,9 +254,7 @@ class Client:
         self.logger.debug(json.dumps(data, indent=2))
         if "result" in data:
             if data["result"] != "success":
-                raise TransmissionError(
-                    'Query failed with result "%s".' % (data["result"])
-                )
+                raise TransmissionError(f'Query failed with result "{data["result"]}".')
         else:
             raise TransmissionError("Query failed without result.")
 

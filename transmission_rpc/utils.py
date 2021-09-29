@@ -40,7 +40,7 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     """
     minutes, seconds = divmod(delta.seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return "%d %02d:%02d:%02d" % (delta.days, hours, minutes, seconds)
+    return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
 def rpc_bool(arg: Any) -> int:
@@ -93,7 +93,7 @@ def argument_value_convert(
     elif method in ("session-get", "session-set"):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
-        raise ValueError('Method "%s" not supported' % (method))
+        raise ValueError(f'Method "{method}" not supported')
     if argument in args:
         info = args[argument]
         invalid_version = True
@@ -132,7 +132,7 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
     elif method in ("session-get", "session-set"):
         args = constants.SESSION_ARGS[method[-3:]]
     else:
-        raise ValueError('Method "%s" not supported' % (method))
+        raise ValueError(f'Method "{method}" not supported')
     accessible = []
     for argument, info in args.items():
         valid_version = True

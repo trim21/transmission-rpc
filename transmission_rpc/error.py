@@ -24,8 +24,8 @@ class TransmissionError(Exception):
     def __str__(self) -> str:
         if self.original:
             original_name = type(self.original).__name__
-            return '{} Original exception: {}, "{}"'.format(
-                self.message, original_name, str(self.original)
+            return (
+                f'{self.message} Original exception: {original_name}, "{self.original}"'
             )
         return self.message
 
