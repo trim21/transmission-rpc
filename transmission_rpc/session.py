@@ -1,7 +1,7 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Iterator, Generator
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Generator
 
 from typing_extensions import Literal
 
@@ -101,9 +101,6 @@ class Session:
         elif isinstance(other, Session):
             for key, value in other._fields.items():
                 self._set(key, value.value)
-        elif isinstance(other, Iterator):
-            for key, value in other:
-                self._set(key, value)
         else:
             raise ValueError("Cannot update with supplied data")
 
@@ -115,6 +112,9 @@ class Session:
         self._commit()
 
     def keys(self) -> Generator[str, None, None]:
+        """
+        session keys with ``_``
+        """
         yield from self._fields.keys()
 
     def values(self) -> Generator[Any, None, None]:
@@ -122,6 +122,17 @@ class Session:
             yield value.value
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
+        """
+        iter key,value pair
+
+        ``-`` is replace by ``_`` in key
+
+        .. code-block:: python
+
+            for key,value in session.items()
+                print(key, repr(value)) # download_dir "/path/to/download/dir"
+
+        """
         for key, field in self._fields.items():
             yield key, field.value
 

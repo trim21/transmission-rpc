@@ -25,7 +25,7 @@ def test_session_set_attribute():
     m.set_session.assert_called_once_with(download_dir=download_dir)
 
 
-def test_session_update():
+def test_session_update_dict():
     m = mock.Mock()
     s = Session(m)
     assert dict(s.items()) == {}
