@@ -51,7 +51,7 @@ class Session:
     key is also stored with ``_`` like ``download_dir``
     """
 
-    def __init__(self, client: "Client" = None, fields: Dict[str, Any] = None):
+    def __init__(self, client: "Client", fields: Dict[str, Any] = None):
         self._client = client
         self._fields: Dict[str, Field] = {}
         if fields is not None:
@@ -63,7 +63,7 @@ class Session:
         except KeyError as e:
             raise AttributeError(f"No attribute {name}") from e
 
-    def _set(self, key: str, value: Any, commit=False):
+    def _set(self, key: str, value: Any, commit: bool = False) -> None:
         key = key.replace("-", "_")
         current_field = self._fields.get(key)
         if current_field is None:
@@ -81,7 +81,7 @@ class Session:
             text += f"{key.ljust(max_length)}: {value.value!r}\n"
         return text
 
-    def _commit(self, key: str = None, value=None):
+    def _commit(self, key: str = None, value: Any = None) -> None:
         """submit all dirty field to client"""
         dirty = {}
 
@@ -205,7 +205,7 @@ class Session:
         return self.__getattr__("encryption")
 
     @encryption.setter
-    def encryption(self, value: Literal["required", "preferred", "tolerated"]):
+    def encryption(self, value: Literal["required", "preferred", "tolerated"]) -> None:
         if value in {"required", "preferred", "tolerated"}:
             self._set("encryption", value, commit=True)
         else:
