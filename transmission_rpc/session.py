@@ -20,7 +20,7 @@ class Session:
     Transmission RPC specification, but with underscore instead of hyphen.
 
 
-    get ``download-dir`` with ``session.download_dir``.
+    get ``'download-dir'`` with ``session.download_dir``.
 
     .. code-block:: python
 
@@ -29,7 +29,7 @@ class Session:
         current = session.download_dir
 
 
-    there are also setter like ``Session().download_dir = '/path/to/download'
+    there are also setter like ``Session().download_dir = '/path/to/download'``
 
     .. code-block:: python
 
@@ -48,7 +48,7 @@ class Session:
 
 
     if you have to access to the private ``Session()._fields``,
-    key is also stored with ``_`` like ``download_dir``
+    keys are stored with underscore.
     """
 
     def __init__(self, client: "Client", fields: Dict[str, Any] = None):
@@ -113,7 +113,7 @@ class Session:
 
     def keys(self) -> Generator[str, None, None]:
         """
-        session keys with ``_``
+        session keys with underscore (eg: ``download_dir``)
         """
         yield from self._fields.keys()
 
@@ -125,13 +125,7 @@ class Session:
         """
         iter key,value pair
 
-        ``-`` is replace by ``_`` in key
-
-        .. code-block:: python
-
-            for key,value in session.items()
-                print(key, repr(value)) # download_dir "/path/to/download/dir"
-
+        hyphen in key is replace by underscore. (eg: ``'download_dir'``)
         """
         for key, field in self._fields.items():
             yield key, field.value
