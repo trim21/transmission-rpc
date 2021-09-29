@@ -112,7 +112,7 @@ class Torrent:
         try:
             return self._fields[name].value
         except KeyError:
-            raise AttributeError("No attribute %s" % name) from None
+            raise AttributeError(f"No attribute {name}") from None
 
     def _rpc_version(self) -> int:
         """Get the Transmission RPC API version."""
