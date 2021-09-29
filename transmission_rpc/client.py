@@ -299,7 +299,7 @@ class Client:
         Update session data.
         """
         if self.session:
-            self.session.from_request(data)
+            self.session._update(data)
         else:
             self.session = Session(self, data)
 

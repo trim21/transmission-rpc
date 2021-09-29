@@ -130,10 +130,6 @@ class Session:
         for key, field in self._fields.items():
             yield key, field.value
 
-    def from_request(self, data: dict) -> None:
-        """Update the session information."""
-        self._update(data)
-
     @property
     def download_dir(self) -> str:
         """default download location
