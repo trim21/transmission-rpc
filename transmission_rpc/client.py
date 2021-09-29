@@ -262,8 +262,6 @@ class Client:
         if method == "torrent-get":
             for item in data["arguments"]["torrents"]:
                 results[item["id"]] = Torrent(self, item)
-                if self.protocol_version == 2 and "peers" not in item:
-                    self.protocol_version = 1
         elif method == "torrent-add":
             item = None
             if "torrent-added" in data["arguments"]:
@@ -274,8 +272,6 @@ class Client:
                 results[item["id"]] = Torrent(self, item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
-        elif method == "session-get":
-            self._update_session(data["arguments"])
         elif method == "session-stats":
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
@@ -289,6 +285,8 @@ class Client:
             "torrent-rename-path",
         ):
             results = data["arguments"]
+        elif method == "session-get":
+            return data["arguments"]
         else:
             return data
 
@@ -310,7 +308,7 @@ class Client:
             version_minor = 40
             version_change_set: Optional[str] = None
             version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
-            match = version_parser.match(self.session.version)
+            match = version_parser.match(getattr(self.session, "version", ""))
             if match:
                 version_major = int(match.group(1))
                 version_minor = int(match.group(2))
@@ -763,7 +761,7 @@ class Client:
         """
         Get session parameters. See the Session class for more information.
         """
-        self._request("session-get", timeout=timeout)
+        self._update_session(self._request("session-get", timeout=timeout))
         self._update_server_version()
         return self.session
 

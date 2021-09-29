@@ -1,5 +1,7 @@
 import os
 import secrets
+import contextlib
+from unittest import mock
 
 import pytest
 
@@ -21,6 +23,24 @@ def tr_client():
         yield c
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
+
+
+@pytest.fixture()
+def mock_client_factor():
+    @contextlib.contextmanager
+    def patch(data=None):
+        LOGGER.setLevel("ERROR")
+
+        def side_effect(method, *args, **kwargs):
+            if method == "session-get":
+                return {"version": "2.80 (hello)", "rpc-version": 14}
+            return data or {}
+
+        m = mock.Mock(side_effect=side_effect)
+        with mock.patch("transmission_rpc.client.Client._request", m):
+            yield m
+
+    return patch
 
 
 @pytest.fixture()

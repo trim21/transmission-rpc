@@ -39,9 +39,15 @@ from transmission_rpc.lib_types import File
     ],
 )
 def test_client_parse_url(
-    protocol: Literal["http", "https"], username, password, host, port, path
+    protocol: Literal["http", "https"],
+    username,
+    password,
+    host,
+    port,
+    path,
+    mock_client_factor,
 ):
-    with mock.patch("transmission_rpc.client.Client._request"):
+    with mock_client_factor():
         client = Client(
             protocol=protocol,
             username=username,
@@ -74,9 +80,8 @@ torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
 
 
-def test_client_add_kwargs():
-    m = mock.Mock(return_value={"hello": "workd"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
+def test_client_add_kwargs(mock_client_factor):
+    with mock_client_factor({"hello": "workd"}) as m:
         c = Client()
         c.protocol_version = 15
         c.add_torrent(
@@ -271,13 +276,8 @@ def test_real_torrent_get_files(tr_client: Client):
 def test_check_rpc_version_for_args():
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
-        c = Client()
-        c.protocol_version = 7
-        with pytest.raises(
-            TransmissionVersionError,
-            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
-        ):
-            c.add_torrent(magnet_url, cookies="")
+        with pytest.raises(TransmissionVersionError):
+            Client()
 
 
 def test_parse_server_version():
@@ -292,20 +292,6 @@ def test_parse_server_version():
     with mock.patch("transmission_rpc.client.Client._http_query", m):
         c = Client()
         assert c.server_version == (2, 80, "hello")
-
-
-def test_warn_deprecated():
-    m = mock.Mock(
-        return_value=json.dumps(
-            {
-                "arguments": {"version": "2.10 (hello)", "rpc-version": 10},
-                "result": "success",
-            }
-        )
-    )
-    with mock.patch("transmission_rpc.client.Client._http_query", m):
-        with pytest.warns(PendingDeprecationWarning):
-            Client()
 
 
 @pytest.mark.parametrize(
