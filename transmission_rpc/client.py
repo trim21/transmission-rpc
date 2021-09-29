@@ -308,7 +308,7 @@ class Client:
             version_minor = 40
             version_change_set: Optional[str] = None
             version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
-            match = version_parser.match(getattr(self.session, "version", ""))
+            match = version_parser.match(self.session.version)
             if match:
                 version_major = int(match.group(1))
                 version_minor = int(match.group(2))
@@ -762,7 +762,12 @@ class Client:
         Get session parameters. See the Session class for more information.
         """
         self._update_session(self._request("session-get", timeout=timeout))
-        self._update_server_version()
+        try:
+            self._update_server_version()
+        except AttributeError:
+            raise TransmissionVersionError(
+                "support current server version is deprecated, please install transmission-rpc<4.0.0"
+            ) from None
         return self.session
 
     def set_session(self, timeout: _Timeout = None, **kwargs: Any) -> None:
