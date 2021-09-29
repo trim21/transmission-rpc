@@ -173,7 +173,8 @@ def test_real_add_torrent_fd(tr_client: Client):
 
 def test_real_add_torrent_base64(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
-        tr_client.add_torrent(base64.b64encode(f.read()).decode())
+        with pytest.warns(DeprecationWarning, match="base64"):
+            tr_client.add_torrent(base64.b64encode(f.read()).decode())
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
