@@ -125,6 +125,12 @@ def test_client_add_base64_raw_data():
     assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
 
 
+def test_client_add_pathlib_path():
+    p = pathlib.Path("tests/fixtures/iso.torrent")
+    b64 = base64.b64encode(p.read_bytes()).decode()
+    assert _try_read_torrent(p) == b64, "should skip handle base64 content"
+
+
 def test_client_add_file_protocol():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()

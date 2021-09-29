@@ -2,6 +2,7 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import base64
+import pathlib
 import datetime
 import warnings
 from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
@@ -163,7 +164,9 @@ def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) ->
             )
 
 
-def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
+def _try_read_torrent(
+    torrent: Union[BinaryIO, str, bytes, pathlib.Path]
+) -> Optional[str]:
     """
     if torrent should be encoded with base64, return a non-None value.
     """
@@ -191,10 +194,15 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
         try:
             # check if this is base64 data
             base64.b64decode(torrent.encode("utf-8"), validate=True)
+            warnings.warn(
+                "support for base64 encoded torrent content str is deprecated.",
+                DeprecationWarning,
+            )
             return torrent
         except (TypeError, ValueError):
             pass
-
+    elif isinstance(torrent, pathlib.Path):
+        return base64.b64encode(torrent.read_bytes()).decode("utf-8")
     elif isinstance(torrent, bytes):
         return base64.b64encode(torrent).decode("utf-8")
     # maybe a file, try read content and encode it.
