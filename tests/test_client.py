@@ -13,7 +13,7 @@ from typing_extensions import Literal
 
 from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
 from transmission_rpc.utils import _try_read_torrent
-from transmission_rpc.client import Client
+from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
@@ -322,3 +322,12 @@ def test_raise_unauthorized(status_code):
     m = mock.Mock(return_value=mock.Mock(status_code=status_code))
     with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
         Client()
+
+
+def test_ensure_location_str_relative():
+    with pytest.warns(DeprecationWarning, match="absolute"):
+        ensure_location_str(pathlib.Path("."))
+
+
+def test_ensure_location_str_absolute():
+    ensure_location_str(pathlib.Path(".").absolute())
