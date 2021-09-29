@@ -3,7 +3,6 @@
 # Licensed under the MIT license.
 import base64
 import datetime
-import warnings
 from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
 from urllib.parse import urlparse
 
@@ -176,19 +175,6 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
         # torrent starts with file, read from local disk and encode it to base64 url.
         if parsed_uri.scheme in ["https", "http", "magnet"]:
             return None
-
-        if parsed_uri.scheme in ["file"]:
-            warnings.warn(
-                "support for `file://` URL is deprecated.", DeprecationWarning
-            )
-            filepath = torrent
-            # uri decoded different on linux / windows ?
-            if len(parsed_uri.path) > 0:
-                filepath = parsed_uri.path
-            elif len(parsed_uri.netloc) > 0:
-                filepath = parsed_uri.netloc
-            with open(filepath, "rb") as torrent_file:
-                return base64.b64encode(torrent_file.read()).decode("utf-8")
 
         # maybe it's base64 encoded file content
         try:

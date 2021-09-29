@@ -1,8 +1,6 @@
-import os
 import json
 import time
 import base64
-import os.path
 import pathlib
 from unittest import mock
 from urllib.parse import urljoin
@@ -131,10 +129,8 @@ def test_client_add_base64_raw_data():
 
 
 def test_client_add_file_protocol():
-    with open("tests/fixtures/iso.torrent", "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
     p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
-    assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
+    assert _try_read_torrent(f"file://{p}") is None, "file protocol is removed"
 
 
 def test_client_add_read_file_in_base64():
@@ -169,19 +165,6 @@ def test_real_add_torrent_fd(tr_client: Client):
 def test_real_add_torrent_base64(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(base64.b64encode(f.read()).decode())
-    assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
-
-
-def test_real_add_torrent_file_protocol(tr_client: Client):
-    fs = os.path.abspath(
-        os.path.join(
-            os.path.dirname(
-                __file__,
-            ),
-            "fixtures/iso.torrent",
-        )
-    )
-    tr_client.add_torrent("file://" + fs)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
