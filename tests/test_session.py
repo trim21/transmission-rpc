@@ -19,9 +19,10 @@ def test_session_get_attribute():
 def test_session_set_attribute():
     m = mock.Mock()
     s = Session(m)
-    s.download_dir = "download - dir"
-    assert s.download_dir == "download - dir"
-    m.set_session.assert_called_with(download_dir="download - dir")
+    download_dir = "download - dir"
+    s.download_dir = download_dir
+    assert s.download_dir == download_dir
+    m.set_session.assert_called_with(download_dir=download_dir)
 
 
 def test_session_update():
@@ -33,3 +34,4 @@ def test_session_update():
     s.update(data)
     m.set_session.assert_called_with(**data)
     assert dict(s.items()) == data
+    assert set(s.keys()) == set(data.keys())
