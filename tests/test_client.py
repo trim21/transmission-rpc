@@ -122,7 +122,8 @@ def test_client_add_magnet():
 def test_client_add_base64_raw_data():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
-    assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
+    with pytest.warns(DeprecationWarning):
+        assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
 
 
 def test_client_add_pathlib_path():
@@ -135,7 +136,10 @@ def test_client_add_file_protocol():
     with open("tests/fixtures/iso.torrent", "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
     p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
-    assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
+    with pytest.warns(DeprecationWarning):
+        assert (
+            _try_read_torrent(f"file://{p}") == b64
+        ), "should skip handle base64 content"
 
 
 def test_client_add_read_file_in_base64():
@@ -182,7 +186,8 @@ def test_real_add_torrent_file_protocol(tr_client: Client):
             "fixtures/iso.torrent",
         )
     )
-    tr_client.add_torrent("file://" + fs)
+    with pytest.warns(DeprecationWarning):
+        tr_client.add_torrent("file://" + fs)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
