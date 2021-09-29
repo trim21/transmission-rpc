@@ -3,25 +3,65 @@ import json
 import time
 import base64
 import os.path
-import secrets
+import pathlib
 from unittest import mock
+from urllib.parse import urljoin
 
+import yarl
 import pytest
+from typing_extensions import Literal
 
-from transmission_rpc import LOGGER
+from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
+from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client
 from transmission_rpc.lib_types import File
 
-HOST = os.getenv("TR_HOST", "127.0.0.1")
-PORT = int(os.getenv("TR_PORT", "9091"))
-USER = os.getenv("TR_USER", "admin")
-PASSWORD = os.getenv("TR_PASSWORD", "password")
 
-
-def test_client_parse_url(mock_version):
+@pytest.mark.parametrize(
+    ("protocol", "username", "password", "host", "port", "path"),
+    [
+        (
+            "https",
+            "a+2da/s a?s=d$",
+            "a@as +@45/:&*^",
+            "127.0.0.1",
+            2333,
+            "/transmission/",
+        ),
+        (
+            "http",
+            "/",
+            None,
+            "127.0.0.1",
+            2333,
+            "/transmission/",
+        ),
+    ],
+)
+def test_client_parse_url(
+    protocol: Literal["http", "https"], username, password, host, port, path
+):
     with mock.patch("transmission_rpc.client.Client._request"):
-        client = Client()
-        assert client.url == "http://127.0.0.1:9091/transmission/rpc"
+        client = Client(
+            protocol=protocol,
+            username=username,
+            password=password,
+            host=host,
+            port=port,
+            path=path,
+        )
+        u = str(
+            yarl.URL.build(
+                scheme=protocol,
+                user=username,
+                password=password,
+                host=host,
+                port=port,
+                path=urljoin(path, "rpc"),
+            )
+        )
+
+        assert client.url == u
 
 
 def hash_to_magnet(h):
@@ -34,53 +74,80 @@ torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
 torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
 
 
-@pytest.fixture()
-def mock_version():
-    v = property(lambda x: "2.80 (hello)")
-    rpc_v = property(lambda x: 14)
-    with mock.patch("transmission_rpc.session.Session.version", v), mock.patch(
-        "transmission_rpc.session.Session.rpc_version", rpc_v
-    ):
-        yield
-
-
-@pytest.fixture()
-def tr_client():
-    LOGGER.setLevel("INFO")
-    with Client(host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
-        for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id, delete_data=True)
-        yield c
-        for torrent in c.get_torrents():
-            c.remove_torrent(torrent.id, delete_data=True)
-
-
-@pytest.fixture()
-def fake_hash_factory():
-    return lambda: secrets.token_hex(20)
-
-
-def test_client_add_url(mock_version):
-    m = mock.Mock(return_value={"hello": "world"})
+def test_client_add_kwargs():
+    m = mock.Mock(return_value={"hello": "workd"})
     with mock.patch("transmission_rpc.client.Client._request", m):
-        assert Client().add_torrent(torrent_url) == "world"
-        m.assert_called_with("torrent-add", {"filename": torrent_url}, timeout=None)
+        c = Client()
+        c.protocol_version = 15
+        c.add_torrent(
+            torrent_url,
+            download_dir="dd",
+            files_unwanted=[1, 2],
+            files_wanted=[3, 4],
+            paused=False,
+            peer_limit=5,
+            priority_high=[6],
+            priority_low=[7],
+            priority_normal=[8],
+            cookies="coo",
+            bandwidthPriority=4,
+        )
+    m.assert_called_with(
+        "torrent-add",
+        {
+            "filename": torrent_url,
+            "download-dir": "dd",
+            "files-unwanted": [1, 2],
+            "files-wanted": [3, 4],
+            "paused": False,
+            "peer-limit": 5,
+            "priority-high": [6],
+            "priority-low": [7],
+            "priority-normal": [8],
+            "cookies": "coo",
+            "bandwidthPriority": 4,
+        },
+        timeout=None,
+    )
 
 
-def test_client_add_magnet(mock_version):
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        assert Client().add_torrent(magnet_url) == "world"
-        m.assert_called_with("torrent-add", {"filename": magnet_url}, timeout=None)
+def test_client_add_url():
+    assert _try_read_torrent(torrent_url) is None, "handle http URL with daemon"
 
 
-def test_client_add_base64_raw_data(mock_version):
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        with open("tests/fixtures/iso.torrent", "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        assert Client().add_torrent(b64) == "world"
-        m.assert_called_with("torrent-add", {"metainfo": b64}, timeout=None)
+def test_client_add_magnet():
+    assert _try_read_torrent(magnet_url) is None, "handle magnet URL with daemon"
+
+
+def test_client_add_base64_raw_data():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
+
+
+def test_client_add_file_protocol():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
+    assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
+
+
+def test_client_add_read_file_in_base64():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        content = f.read()
+        f.seek(0)
+        data = _try_read_torrent(f)
+
+    assert (
+        base64.b64encode(content).decode() == data
+    ), "should base64 encode torrent file"
+
+
+def test_client_add_torrent_bytes():
+    with open("tests/fixtures/iso.torrent", "rb") as f:
+        content = f.read()
+    data = _try_read_torrent(content)
+    assert base64.b64encode(content).decode() == data, "should base64 bytes"
 
 
 def test_real_add_magnet(tr_client: Client):
@@ -184,7 +251,7 @@ def test_wrong_logger():
         Client(logger="something")
 
 
-def test_real_torrent_attr_type(tr_client: Client, fake_hash_factory):
+def test_real_torrent_attr_type(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
     for torrent in tr_client.get_torrents():
@@ -201,12 +268,15 @@ def test_real_torrent_get_files(tr_client: Client):
             assert isinstance(file, File)
 
 
-def test_check_rpc_version_for_args(mock_version):
+def test_check_rpc_version_for_args():
     m = mock.Mock(return_value={"hello": "world"})
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 7
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            TransmissionVersionError,
+            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
+        ):
             c.add_torrent(magnet_url, cookies="")
 
 
@@ -222,3 +292,27 @@ def test_parse_server_version():
     with mock.patch("transmission_rpc.client.Client._http_query", m):
         c = Client()
         assert c.server_version == (2, 80, "hello")
+
+
+def test_warn_deprecated():
+    m = mock.Mock(
+        return_value=json.dumps(
+            {
+                "arguments": {"version": "2.10 (hello)", "rpc-version": 10},
+                "result": "success",
+            }
+        )
+    )
+    with mock.patch("transmission_rpc.client.Client._http_query", m):
+        with pytest.warns(PendingDeprecationWarning):
+            Client()
+
+
+@pytest.mark.parametrize(
+    "status_code",
+    [401, 403],
+)
+def test_raise_unauthorized(status_code):
+    m = mock.Mock(return_value=mock.Mock(status_code=status_code))
+    with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
+        Client()

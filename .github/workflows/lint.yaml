@@ -1,16 +1,21 @@
 name: lint
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - renovate/**
+      - deepsource-fix-*
+  pull_request: {}
 
 jobs:
   mypy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - uses: Trim21/setup-poetry@dist/v1
 
@@ -18,17 +23,66 @@ jobs:
         with:
           extras: docs
 
-      - name: mypy
-        run: mypy transmission_rpc
+      - uses: liskin/gh-problem-matcher-wrap@v1
+        with:
+          action: add
+          linters: mypy
 
-  lint:
-    runs-on: ubuntu-18.04
+      - name: mypy
+        run: mypy --show-column-numbers transmission_rpc
+
+  flake8:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+        with:
+          extras: docs
+
+      - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
+
+      - name: flake8
+        run: |
+          flake8 \
+            --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501 \
+            --max-line-length=88 \
+            --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist
+
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+        with:
+          extras: docs
+
+      - run: echo "::add-matcher::.github/workflows/matcher/pylint.json"
+
+      - name: pylint
+        run: pylint transmission_rpc tests
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - uses: Trim21/setup-poetry@dist/v1
 

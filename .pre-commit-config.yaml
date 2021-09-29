@@ -1,11 +1,17 @@
+default_stages: [commit]
+
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: c37e29c1e823c5ce25cac879a0aa7fd63d387c25  # frozen: v0.0.1
+    rev: e4bd622f56f4cb289b7c15f6e9f03698afbc55d2  # frozen: v0.4.1
     hooks:
       - id: yamlfmt
+      - id: poetry-check-lock
+      - id: find-trailing-comma
+      - id: force-yaml-file-ext
+        exclude: ^\.chglog/config\.yml$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: e1668fe86af3810fbca72b8653fe478e66a0afdc  # frozen: v3.2.0
+    rev: 38b88246ccc552bffaaf54259d064beeee434539  # frozen: v4.0.1
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -25,13 +31,13 @@ repos:
       - id: fix-encoding-pragma
         args: [--remove]
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 377d260ffa6f746693f97b46d95025afc4bd8275  # frozen: 5.4.2
+  - repo: https://github.com/PyCQA/isort
+    rev: fd5ba70665a37ec301a1f714ed09336048b3be63  # frozen: 5.9.3
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: f766c29ec4bb6cf2674b81959871e59d5400380a  # frozen: v2.7.2
+    rev: a2f517f0103c1f74bffbc06be510bcec4cd181ec  # frozen: v2.28.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -47,30 +53,14 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: db40a1a30521b00e0c47b5095d9dcef39412919d  # frozen: 0.9.0a0
+    rev: b308cb12bc0a6db3e7f0e338020c0c4e4314e28a  # frozen: 0.9.0
     hooks:
       - id: doc8
         name: Check rst file
         args: [--max-line-length=88]
         files: \.rst$
 
-  - repo: https://github.com/Trim21/poetry-check-lock.git
-    rev: 63621580c70f106fd07748c262b6e08fef886ecc  # frozen: v0.0.3
-    hooks:
-      - id: poetry-check-lock
-
   - repo: https://github.com/psf/black
-    rev: e66be67b9b6811913470f70c28b4d50f94d05b22  # frozen: 20.8b1
+    rev: 911470a610e47d9da5ea938b0887c3df62819b85  # frozen: 21.9b0
     hooks:
       - id: black
-
-  - repo: local
-    hooks:
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        args:
-          - --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501
-          - --max-line-length=88

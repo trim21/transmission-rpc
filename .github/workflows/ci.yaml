@@ -1,18 +1,26 @@
 name: ci
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - renovate/**
+      - deepsource-fix-*
+  pull_request: {}
+
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['3.6', '3.7', '3.8', pypy3]
+        python: ['3.6', '3.7', '3.8', '3.9', pypy3]
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
 
@@ -33,6 +41,20 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: mysecretpassword
 
-      - run: bash <(curl -s https://codecov.io/bash) -F ${PYTHON//./}
-        env:
-          PYTHON: ${{ matrix.python }}
+      - run: bash <(curl -s https://codecov.io/bash) -F ${{ matrix.python }}
+
+  dist-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - run: poetry build
+
+      - name: Install twine
+        run: pip install twine
+
+      - name: Check Files
+        run: twine check dist/*

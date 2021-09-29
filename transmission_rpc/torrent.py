@@ -1,6 +1,7 @@
-# Copyright (c) 2020 Trim21 <i@trim21.me>
+# Copyright (c) 2020-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+# pylint: disable=C0103
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
@@ -24,18 +25,41 @@ def get_status_old(code: int) -> str:
     return mapping[code]
 
 
+_STATUS_NEW_MAPPING = {
+    0: "stopped",
+    1: "check pending",
+    2: "checking",
+    3: "download pending",
+    4: "downloading",
+    5: "seed pending",
+    6: "seeding",
+}
+
+
 def get_status_new(code: int) -> str:
     """Get the torrent status using new status codes"""
-    mapping = {
-        0: "stopped",
-        1: "check pending",
-        2: "checking",
-        3: "download pending",
-        4: "downloading",
-        5: "seed pending",
-        6: "seeding",
-    }
-    return mapping[code]
+    return _STATUS_NEW_MAPPING[code]
+
+
+class Status(str):
+    """A wrapped ``str`` for torrent status.
+
+    returned by :py:attr:`.Torrent.status`
+    """
+
+    stopped: bool
+    check_pending: bool
+    checking: bool
+    download_pending: bool
+    downloading: bool
+    seed_pending: bool
+    seeding: bool
+
+    def __new__(cls, raw: str) -> "Status":
+        obj = super().__new__(cls, raw)
+        for status in _STATUS_NEW_MAPPING.values():
+            setattr(obj, status.replace(" ", "_"), raw == status)
+        return obj
 
 
 class Torrent:
@@ -57,6 +81,7 @@ class Torrent:
 
     @property
     def id(self) -> int:
+        """Returns the id for this torrent"""
         return self._fields["id"].value
 
     def _get_name_string(self) -> Optional[str]:
@@ -72,15 +97,13 @@ class Torrent:
         name = self._get_name_string()
         if name is not None:
             return f'<Torrent {tid} "{name}">'
-        else:
-            return f"<Torrent {tid}>"
+        return f"<Torrent {tid}>"
 
     def __str__(self) -> str:
         name = self._get_name_string()
         if name is not None:
             return f'Torrent "{name}"'
-        else:
-            return "Torrent"
+        return "Torrent"
 
     def __copy__(self) -> "Torrent":
         return Torrent(self._client, self._fields)
@@ -89,7 +112,7 @@ class Torrent:
         try:
             return self._fields[name].value
         except KeyError:
-            raise AttributeError("No attribute %s" % name)
+            raise AttributeError(f"No attribute {name}") from None
 
     def _rpc_version(self) -> int:
         """Get the Transmission RPC API version."""
@@ -147,8 +170,7 @@ class Torrent:
         code = self._fields["status"].value
         if self._rpc_version() >= 14:
             return get_status_new(code)
-        else:
-            return get_status_old(code)
+        return get_status_old(code)
 
     def files(self) -> List[File]:
         """
@@ -177,7 +199,7 @@ class Torrent:
             priorities = self._fields["priorities"].value
             wanted = self._fields["wanted"].value
             for item in zip(indices, files, priorities, wanted):
-                selected = True if item[3] else False
+                selected = bool(item[3])
                 priority = PRIORITY[item[2]]
                 result.append(
                     File(
@@ -199,70 +221,136 @@ class Torrent:
         return self.__getattr__("name")
 
     @property
-    def status(self) -> str:
+    def status(self) -> Status:
         """
+        :rtype: Status
+
         Returns the torrent status. Is either one of 'check pending', 'checking',
-        'downloading', 'seeding' or 'stopped'. The first two is related to
-        verification.
+        'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'.
+        The first two is related to verification.
+
+        Examples:
+
+        .. code-block:: python
+
+            torrent = Torrent()
+            torrent.status.downloading
+            torrent.status == 'downloading'
+
         """
-        return self._status()
+        return Status(self._status())
+
+    @property
+    def rateDownload(self) -> int:
+        """
+        Returns download rate in B/s
+
+        :rtype: int
+        """
+        return self._fields["rateDownload"].value
+
+    @property
+    def rateUpload(self) -> int:
+        """
+        Returns upload rate in B/s
+
+        :rtype: int
+        """
+        return self._fields["rateUpload"].value
 
     @property
     def hashString(self) -> str:
         """Returns the info hash of this torrent.
 
-        Raise AttributeError if server don't return this field
+        :raise: AttributeError -- if server don't return this field
+        :rtype: int
         """
         return self.__getattr__("hashString")
 
     @property
     def progress(self) -> float:
-        """download progress in percent."""
+        """
+        download progress in percent.
+
+        :rtype: float
+        """
         try:
-            size = self._fields["sizeWhenDone"].value
-            left = self._fields["leftUntilDone"].value
-            return 100.0 * (size - left) / float(size)
-        except ZeroDivisionError:
-            return 0.0
+            # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
+            return round((100.0 * self._fields["percentDone"].value), 2)
+        except KeyError:
+            try:
+                size = self._fields["sizeWhenDone"].value
+                left = self._fields["leftUntilDone"].value
+                return round((100.0 * (size - left) / float(size)), 2)
+            except ZeroDivisionError:
+                return 0.0
 
     @property
     def ratio(self) -> float:
-        """upload/download ratio."""
+        """
+        upload/download ratio.
+
+        :rtype: float
+        """
         return float(self._fields["uploadRatio"].value)
 
     @property
     def eta(self) -> datetime.timedelta:
-        """the "eta" as datetime.timedelta."""
+        """
+        the "eta" as datetime.timedelta.
+
+        :rtype: datetime.timedelta
+        """
         eta = self._fields["eta"].value
         if eta >= 0:
             return datetime.timedelta(seconds=eta)
-        else:
-            raise ValueError("eta not valid")
+        raise ValueError("eta not valid")
 
     @property
     def date_active(self) -> datetime.datetime:
-        """the attribute "activityDate" as datetime.datetime."""
-        return datetime.datetime.fromtimestamp(self._fields["activityDate"].value)
+        """the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
+
+        .. note::
+
+            raw ``activityDate`` value could be ``0`` for never activated torrent,
+            therefore it can't always be converted to local timezone.
+
+
+        :rtype: datetime.datetime
+        """
+        return datetime.datetime.fromtimestamp(
+            self._fields["activityDate"].value, datetime.timezone.utc
+        )
 
     @property
     def date_added(self) -> datetime.datetime:
-        """the attribute "addedDate" as datetime.datetime."""
-        return datetime.datetime.fromtimestamp(self._fields["addedDate"].value)
+        """raw field ``addedDate`` as ``datetime.datetime`` in **local timezone**.
+
+        :rtype: datetime.datetime
+        """
+        return datetime.datetime.fromtimestamp(
+            self._fields["addedDate"].value
+        ).astimezone()
 
     @property
     def date_started(self) -> datetime.datetime:
-        """the attribute "startDate" as datetime.datetime."""
-        return datetime.datetime.fromtimestamp(self._fields["startDate"].value)
+        """raw field ``startDate`` as ``datetime.datetime`` in **local timezone**.
+
+        :rtype: datetime.datetime
+        """
+        return datetime.datetime.fromtimestamp(
+            self._fields["startDate"].value
+        ).astimezone()
 
     @property
     def date_done(self) -> Optional[datetime.datetime]:
         """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self._fields["doneDate"].value
-        # Transmission might forget to set doneDate which is initialized to zero, so if doneDate is zero return None
+        # Transmission might forget to set doneDate which is initialized to zero,
+        # so if doneDate is zero return None
         if done_date == 0:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(done_date)
+        return datetime.datetime.fromtimestamp(done_date).astimezone()
 
     def format_eta(self) -> str:
         """
@@ -275,10 +363,18 @@ class Torrent:
         eta = self._fields["eta"].value
         if eta == -1:
             return "not available"
-        elif eta == -2:
+        if eta == -2:
             return "unknown"
-        else:
-            return format_timedelta(self.eta)
+        return format_timedelta(self.eta)
+
+    @property
+    def download_dir(self) -> Optional[str]:
+        """The download directory.
+
+        :available: transmission version 1.5.
+        :available: RPC version 4.
+        """
+        return self._fields["downloadDir"].value
 
     @property
     def download_limit(self) -> Optional[int]:
@@ -288,8 +384,7 @@ class Torrent:
         """
         if self._fields["downloadLimited"].value:
             return self._fields["downloadLimit"].value
-        else:
-            return None
+        return None
 
     @download_limit.setter
     def download_limit(self, limit: int) -> None:
@@ -322,7 +417,10 @@ class Torrent:
 
     @property
     def priority(self) -> str:
-        """Bandwidth priority as string. Can be one of 'low', 'normal', 'high'. This is a mutator."""
+        """
+        Bandwidth priority as string.
+        Can be one of 'low', 'normal', 'high'. This is a mutator.
+        """
 
         return PRIORITY[self._fields["bandwidthPriority"].value]
 
@@ -351,6 +449,46 @@ class Torrent:
             raise ValueError("Not a valid limit")
 
     @property
+    def is_finished(self) -> bool:
+        """Returns true if the torrent is finished (available from rpc version 2.0)"""
+        return self._fields["isFinished"].value
+
+    @property
+    def is_stalled(self) -> bool:
+        """Returns true if the torrent is stalled (available from rpc version 2.4)"""
+        return self._fields["isStalled"].value
+
+    @property
+    def size_when_done(self) -> int:
+        """Size in bytes when the torrent is done"""
+        return self._fields["sizeWhenDone"].value
+
+    @property
+    def total_size(self) -> int:
+        """Total size in bytes"""
+        return self._fields["totalSize"].value
+
+    @property
+    def left_until_done(self) -> int:
+        """Bytes left until done"""
+        return self._fields["leftUntilDone"].value
+
+    @property
+    def desired_available(self) -> int:
+        """Bytes that are left to download and available"""
+        return self._fields["desiredAvailable"].value
+
+    @property
+    def available(self) -> float:
+        """Availability in percent"""
+        bytes_all = self.total_size
+        bytes_done = sum(
+            map(lambda x: x["bytesCompleted"], self._fields["fileStats"].value)
+        )
+        bytes_avail = self.desired_available + bytes_done
+        return (bytes_avail / bytes_all) * 100 if bytes_all else 0
+
+    @property
     def seed_idle_mode(self) -> str:
         """
         Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
@@ -364,7 +502,8 @@ class Torrent:
     @seed_idle_mode.setter
     def seed_idle_mode(self, mode: Union[str, int]) -> None:
         """
-        Set the seed ratio mode. Can be one of ``global``, ``single`` or ``unlimited``, or ``0``, ``1``, ``2``.
+        Set the seed ratio mode.
+        Can be one of ``global``, ``single`` or ``unlimited``, or ``0``, ``1``, ``2``.
         """
         if isinstance(mode, str):
             self._fields["seedIdleMode"] = Field(IDLE_LIMIT[mode], True)
@@ -377,7 +516,12 @@ class Torrent:
 
     @property
     def seed_ratio_limit(self) -> float:
-        """Torrent seed ratio limit as float. Also see seed_ratio_mode. This is a mutator."""
+        """
+        Torrent seed ratio limit as float. Also see seed_ratio_mode.
+        This is a mutator.
+
+        :rtype: float
+        """
 
         return float(self._fields["seedRatioLimit"].value)
 
@@ -428,8 +572,7 @@ class Torrent:
         """
         if self._fields["uploadLimited"].value:
             return self._fields["uploadLimit"].value
-        else:
-            return None
+        return None
 
     @upload_limit.setter
     def upload_limit(self, limit: Optional[int]) -> None:
@@ -449,8 +592,7 @@ class Torrent:
         """queue position for this torrent."""
         if self._rpc_version() >= 14:
             return self._fields["queuePosition"].value
-        else:
-            return 0
+        return 0
 
     @queue_position.setter
     def queue_position(self, position: str) -> None:

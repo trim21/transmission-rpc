@@ -4,6 +4,7 @@ info:
   title: CHANGELOG
   repository_url: https://github.com/Trim21/transmission-rpc
 options:
+  sort: date
   commits:
     filters:
       Type:
@@ -12,6 +13,12 @@ options:
         - perf
         - refactor
   commit_groups:
+    sort_by: Custom
+    title_order:
+      - feat
+      - fix
+      - perf
+      - refactor
     title_maps:
       feat: Features
       fix: Bug Fixes

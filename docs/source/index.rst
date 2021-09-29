@@ -36,21 +36,24 @@ quick start
     from transmission_rpc import Client
     import requests
 
+    c = Client(username='trim21', password='123456')
+
     torrent_url = 'http://releases.ubuntu.com/' + \
                   '18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
     r = requests.get(torrent_url)
+
+    # client will base64 the torrent content for you.
+    c.add_torrent(r.content)
+
+    # or use a file-like object
     with open('a', 'wb') as f:
         f.write(r.content)
-    c = Client(username='trim21', password='123456')
     with open('a', 'rb') as f:
         c.add_torrent(f)
 
-:code:`client.add_torrent` support a url string(could start with :code:`file:`),
+:code:`client.add_torrent` support a url string,
 file-like object(object with :code:`read()` method)
 or base64 encoded torrent file content.
-
-if :code:`torrent` starts with :code:`file`,
-:code:`transmission-rpc` will read it from disk and base64 encode it.
 
 
 Arguments
@@ -97,6 +100,7 @@ you can find rpc version by transmission version from
 
     client.rst
     torrent.rst
+    errors.rst
     utils.rst
 
 Indices and tables

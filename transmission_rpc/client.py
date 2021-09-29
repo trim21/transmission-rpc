@@ -1,5 +1,5 @@
+# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2020 littleya <me@littleya.com>
-# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import os
@@ -7,25 +7,33 @@ import re
 import json
 import time
 import types
-import base64
 import string
 import logging
 import pathlib
 import operator
+import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin
 
-import yarl
 import requests
 import requests.auth
+import requests.exceptions
 from typing_extensions import Literal
 
-from transmission_rpc.error import TransmissionError, ServerVersionTooLowError
+from transmission_rpc.error import (
+    TransmissionError,
+    TransmissionAuthError,
+    TransmissionConnectError,
+    TransmissionTimeoutError,
+    TransmissionVersionError,
+)
 from transmission_rpc.utils import (
     LOGGER,
     rpc_bool,
     get_arguments,
     make_rpc_name,
+    _try_read_torrent,
+    _rpc_version_check,
     argument_value_convert,
 )
 from transmission_rpc.session import Session
@@ -51,7 +59,7 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]
             return raw_torrent_id
     elif isinstance(raw_torrent_id, str):
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
-            raise ValueError(f"torrent ids {raw_torrent_id} if not a valid sha1 hash")
+            raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
     elif isinstance(raw_torrent_id, Field):
         return _parse_torrent_id(raw_torrent_id.value)
@@ -63,11 +71,11 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
         return []
     if isinstance(args, int):
         return [_parse_torrent_id(args)]
-    elif isinstance(args, str):
+    if isinstance(args, str):
         if args == "recently-active":
             return args
         return [_parse_torrent_id(args)]
-    elif isinstance(args, (list, tuple)):
+    if isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
     raise ValueError(f"Invalid torrent id {args}")
 
@@ -76,7 +84,7 @@ class Client:
     def __init__(
         self,
         *,
-        protocol: "Literal['http', 'https']" = "http",
+        protocol: Literal["http", "https"] = "http",
         username: str = None,
         password: str = None,
         host: str = "127.0.0.1",
@@ -93,13 +101,20 @@ class Client:
                 "default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
-        url = yarl.URL.build(
-            scheme=protocol,
-            user=username,
-            password=password,
-            host=host,
-            port=port,
-            path=urljoin(path, "rpc"),
+
+        username = (
+            quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8")
+            if username
+            else ""
+        )
+        password = (
+            ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8")
+            if password
+            else ""
+        )
+        auth = f"{username}{password}@" if (username or password) else ""
+        url = urllib.parse.urlunparse(
+            (protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None)
         )
         self.url = str(url)
         self._sequence = 0
@@ -108,6 +123,7 @@ class Client:
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
+        self._http_session.trust_env = False
         self.get_session()
         self.torrent_get_arguments = get_arguments("torrent-get", self.rpc_version)
 
@@ -148,7 +164,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {"x-transmission-session-id": self.session_id}
 
-    def _http_query(self, query: Any, timeout: _Timeout = None) -> str:
+    def _http_query(self, query: dict, timeout: _Timeout = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -164,22 +180,34 @@ class Client:
                 {
                     "url": self.url,
                     "headers": self._http_header,
-                    "data": json.loads(query),
+                    "data": query,
                     "timeout": timeout,
                 }
             )
             request_count += 1
-            r = self._http_session.post(
-                self.url,
-                headers=self._http_header,
-                json=json.loads(query),
-                timeout=timeout,
-            )
+            try:
+                r = self._http_session.post(
+                    self.url,
+                    headers=self._http_header,
+                    json=query,
+                    timeout=timeout,
+                )
+            except requests.exceptions.Timeout as e:
+                raise TransmissionTimeoutError(
+                    "timeout when connection to transmission daemon"
+                ) from e
+            except requests.exceptions.ConnectionError as e:
+                raise TransmissionConnectError(
+                    f"can't connect to transmission daemon: {str(e)}"
+                ) from e
+
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
-            if r.status_code == 401:
+            if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
-                raise TransmissionError("transmission daemon require auth", original=r)
+                raise TransmissionAuthError(
+                    "transmission daemon require auth", original=r
+                )
             if r.status_code != 409:
                 return r.text
 
@@ -207,29 +235,26 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = json.dumps(
-            {"tag": self._sequence, "method": method, "arguments": arguments}
-        )
+        query = {"tag": self._sequence, "method": method, "arguments": arguments}
+
         self._sequence += 1
         start = time.time()
         http_data = self._http_query(query, timeout)
         elapsed = time.time() - start
-        self.logger.info("http request took %.3f s" % elapsed)
+        self.logger.info("http request took %.3f s", elapsed)
 
         try:
             data: dict = json.loads(http_data)
         except ValueError as error:
-            self.logger.error("Error: " + str(error))
-            self.logger.error('Request: "%s"' % query)
-            self.logger.error('HTTP data: "%s"' % http_data)
+            self.logger.error("Error: %s", str(error))
+            self.logger.error('Request: "%s"', query)
+            self.logger.error('HTTP data: "%s"', http_data)
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
         if "result" in data:
             if data["result"] != "success":
-                raise TransmissionError(
-                    'Query failed with result "%s".' % (data["result"])
-                )
+                raise TransmissionError(f'Query failed with result "{data["result"]}".')
         else:
             raise TransmissionError("Query failed without result.")
 
@@ -294,12 +319,14 @@ class Client:
 
     @property
     def rpc_version(self) -> int:
-        """Get the Transmission RPC version."""
+        """
+        Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
+        """
         if self.protocol_version is None:
             try:
                 self.protocol_version = self.session.rpc_version
             except AttributeError:
-                raise ServerVersionTooLowError(
+                raise TransmissionVersionError(
                     "support current server version is deprecated, please install transmission-rpc<4.0.0"
                 )
         return self.protocol_version
@@ -310,17 +337,35 @@ class Client:
         """
         if self.rpc_version < required_version:
             self.logger.warning(
-                "Using feature not supported by server. RPC version for server %d, feature introduced in %d."
-                % (self.rpc_version, required_version)
+                "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
+                self.rpc_version,
+                required_version,
             )
 
     def add_torrent(
-        self, torrent: Union[BinaryIO, str], timeout: _Timeout = None, **kwargs: Any
-    ) -> str:
+        self,
+        torrent: Union[BinaryIO, str, bytes],
+        timeout: _Timeout = None,
+        *,
+        download_dir: str = None,
+        files_unwanted: List[int] = None,
+        files_wanted: List[int] = None,
+        paused: bool = None,
+        peer_limit: int = None,
+        priority_high: List[int] = None,
+        priority_low: List[int] = None,
+        priority_normal: List[int] = None,
+        cookies: str = None,
+        bandwidthPriority: int = None,
+    ) -> Torrent:
         """
-        Add torrent to transfers list. Takes a uri to a torrent or base64 encoded torrent data in ``torrent``.
-        You can find examples in test code
-        `tests/test_client.py <https://github.com/Trim21/transmission-rpc/blob/master/tests/test_client.py>`_
+        Add torrent to transfers list. ``torrent`` can be:
+
+        - ``http://``, ``https://`` or  ``magnet:`` URL
+        - torrent file-like object in binary mode
+        - bytes of torrent content
+        - str of base64 encoded torrent file content
+        - ``file://`` URL, deprecated
 
         .. NOTE::
 
@@ -347,51 +392,48 @@ class Client:
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
-        torrent_data = None
-        is_url = False
-        # torrent is a str, may be a url
-        if isinstance(torrent, str):
-            parsed_uri = urlparse(torrent)
-            # torrent starts with file, read from local disk and encode it to base64 url.
-            if parsed_uri.scheme in ["file"]:
-                filepath = torrent
-                # uri decoded different on linux / windows ?
-                if len(parsed_uri.path) > 0:
-                    filepath = parsed_uri.path
-                elif len(parsed_uri.netloc) > 0:
-                    filepath = parsed_uri.netloc
-                with open(filepath, "rb") as torrent_file:
-                    torrent_data = base64.b64encode(torrent_file.read()).decode("utf-8")
-            elif parsed_uri.scheme in ["https", "http", "magnet"]:
-                is_url = True
-            if (not is_url) and (not torrent_data):
-                # base64 encoded file content
-                might_be_base64 = False
-                try:
-                    # check if this is base64 data
-                    base64.b64decode(torrent.encode("utf-8"), validate=True)
-                    might_be_base64 = True
-                except Exception:
-                    pass
-                if might_be_base64:
-                    torrent_data = torrent
 
-        # maybe a file, try read content and encode it.
-        elif hasattr(torrent, "read"):
-            torrent_data = base64.b64encode(torrent.read()).decode("utf-8")
+        kwargs: Dict[str, Any] = {}
+        if download_dir is not None:
+            kwargs["download-dir"] = download_dir
+
+        if files_unwanted is not None:
+            kwargs["files-unwanted"] = files_unwanted
+
+        if files_wanted is not None:
+            kwargs["files-wanted"] = files_wanted
+
+        if paused is not None:
+            kwargs["paused"] = paused
+
+        if peer_limit is not None:
+            kwargs["peer-limit"] = peer_limit
+
+        if priority_high is not None:
+            kwargs["priority-high"] = priority_high
+
+        if priority_low is not None:
+            kwargs["priority-low"] = priority_low
+
+        if priority_normal is not None:
+            kwargs["priority-normal"] = priority_normal
+
+        if bandwidthPriority is not None:
+            kwargs["bandwidthPriority"] = bandwidthPriority
+
+        if cookies is not None:
+            kwargs["cookies"] = cookies
+
+        torrent_data = _try_read_torrent(torrent)
 
         if torrent_data:
-            args = {"metainfo": torrent_data}
+            kwargs["metainfo"] = torrent_data
         else:
-            args = {"filename": torrent}  # type: ignore
+            kwargs["filename"] = torrent
 
-        for key, value in kwargs.items():
-            argument = make_rpc_name(key)
-            arg, val = argument_value_convert(
-                "torrent-add", argument, value, self.rpc_version
-            )
-            args[arg] = val
-        return list(self._request("torrent-add", args, timeout=timeout).values())[0]
+        _rpc_version_check("torrent-add", kwargs, self.rpc_version)
+
+        return list(self._request("torrent-add", kwargs, timeout=timeout).values())[0]
 
     def remove_torrent(
         self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None
@@ -468,7 +510,7 @@ class Client:
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
-        result: Dict[str, Torrent] = self._request(
+        result: Dict[Union[str, int], Torrent] = self._request(
             "torrent-get",
             {"fields": arguments},
             torrent_id,
@@ -476,13 +518,11 @@ class Client:
             timeout=timeout,
         )
         if torrent_id in result:
-            # todo
-            return result[torrent_id]  # type: ignore
-        else:
-            for torrent in result.values():
-                if torrent.hashString == torrent_id:
-                    return torrent
-            raise KeyError("Torrent not found in result")
+            return result[torrent_id]
+        for torrent in result.values():
+            if torrent.hashString == torrent_id:
+                return torrent
+        raise KeyError("Torrent not found in result")
 
     def get_torrents(
         self,
@@ -495,7 +535,9 @@ class Client:
 
         Returns a list of Torrent object.
         """
-        if not arguments:
+        if arguments:
+            arguments = list(set(arguments) | {"id"})
+        else:
             arguments = self.torrent_get_arguments
         return list(
             self._request(
@@ -633,6 +675,7 @@ class Client:
                                                            where the announce URL should be replaced.
         ``uploadLimit``              5 -                   Set the speed limit for upload in Kib/s.
         ``uploadLimited``            5 -                   Enable upload speed limiter.
+        ``labels``                   16 -                  Array of string labels.
         ============================ ===== =============== =============================================================
 
         .. NOTE::

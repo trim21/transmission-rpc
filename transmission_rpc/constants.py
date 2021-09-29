@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2020 Trim21 <i@trim21.me>
+# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import logging
@@ -63,7 +63,7 @@ class Args(NamedTuple):
     next_argument_name: Optional[str] = None
     description: str = ""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Args({self.type!r},"
             f" {self.added_version!r},"
@@ -73,7 +73,7 @@ class Args(NamedTuple):
             f" {self.description!r})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Args<type={self.type}, added_version={self.added_version}, description={self.description!r})"
 
 
@@ -360,7 +360,10 @@ TORRENT_ARGS = {
         "etaIdle": Args(
             BaseType.number,
             15,
-            description="Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.",
+            description=(
+                "Estimated number of seconds left until the idle time limit is reached."
+                " -1 means not available and -2 means unknown."
+            ),
         ),
         "secondsDownloading": Args(BaseType.number, 15, description=""),
         "secondsSeeding": Args(BaseType.number, 15, description=""),
