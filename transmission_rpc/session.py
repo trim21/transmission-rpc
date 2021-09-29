@@ -27,7 +27,7 @@ class Session:
 
     def __getattr__(self, name: str) -> Any:
         try:
-            return self._fields[name].value
+            return self._fields[name.replace("_", "-")].value
         except KeyError as e:
             raise AttributeError(f"No attribute {name}") from e
 
@@ -44,7 +44,7 @@ class Session:
         """
         if isinstance(other, dict):
             for key, value in other.items():
-                self._fields[key.replace("-", "_")] = Field(value, False)
+                self._fields[key] = Field(value, False)
         elif isinstance(other, Session):
             for key in list(other._fields.keys()):
                 self._fields[key] = Field(other._fields[key].value, False)
@@ -53,7 +53,7 @@ class Session:
 
     def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
-        outgoing_keys = ["peer_port", "pex_enabled"]
+        outgoing_keys = ["peer-port", "pex-enabled"]
         fields = []
         for key in outgoing_keys:
             if key in self._fields and self._fields[key].dirty:
@@ -71,10 +71,7 @@ class Session:
             self._client.set_session(**args)
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
-        for (
-            key,
-            field,
-        ) in self._fields.items():
+        for key, field in self._fields.items():
             yield key, field.value
 
     def update(self, timeout: _Timeout = None) -> None:
@@ -90,41 +87,66 @@ class Session:
         self._update_fields(data)
 
     @property
+    def download_dir(self) -> str:
+        """default download location
+
+        rpc version 12
+        transmission version 2.20
+        :return:
+        """
+        return self.__getattr__("version")
+
+    @property
     def version(self) -> str:
+        """
+        rpc version 3
+        transmission version 1.41
+        """
         return self.__getattr__("version")
 
     @property
     def rpc_version(self) -> int:
+        """
+        rpc version 4
+        transmission version 1.50
+        """
         return self.__getattr__("rpc-version")
 
     @property
     def peer_port(self) -> int:
+        """Get the peer port.
+
+        rpc version 5
+        transmission version 1.60
         """
-        Get the peer port.
-        """
-        return self._fields["peer_port"].value
+        return self.__getattr__("peer-port")
 
     @peer_port.setter
     def peer_port(self, port: int) -> None:
-        """
-        Set the peer port.
+        """Set the peer port.
+
+        rpc version 5
+        transmission version 1.60
         """
         if isinstance(port, int):
-            self._fields["peer_port"] = Field(port, True)
+            self._fields["peer-port"] = Field(port, True)
             self._push()
         else:
             raise ValueError("Not a valid limit")
 
     @property
     def pex_enabled(self) -> bool:
-        """Is peer exchange enabled?"""
-        return self._fields["pex_enabled"].value
+        """Is peer exchange enabled
+
+        rpc version 5
+        transmission version 1.60"""
+        return self.__getattr__("pex-enabled")
 
     @pex_enabled.setter
     def pex_enabled(self, enabled: bool) -> None:
         """Enable/disable peer exchange."""
         if isinstance(enabled, bool):
-            self._fields["pex_enabled"] = Field(enabled, True)
+            self._fields["pex-enabled"] = Field(enabled, True)
             self._push()
         else:
             raise TypeError("Not a valid type")
