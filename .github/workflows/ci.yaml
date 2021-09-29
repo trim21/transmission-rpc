@@ -41,11 +41,7 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: mysecretpassword
 
-      - run: coverage xml
-
-      - uses: codecov/codecov-action@v2
-        with:
-          flags: ${{ matrix.python }}
+      - run: bash <(curl -s https://codecov.io/bash) -F ${{ matrix.python }}
 
   dist-files:
     runs-on: ubuntu-latest
