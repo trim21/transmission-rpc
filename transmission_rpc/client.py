@@ -326,7 +326,7 @@ class Client:
             except AttributeError:
                 raise TransmissionVersionError(
                     "support current server version is deprecated, please install transmission-rpc<4.0.0"
-                )
+                ) from None
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:

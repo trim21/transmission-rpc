@@ -119,10 +119,7 @@ def argument_value_convert(
                         f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
                     )
         return argument, TR_TYPE_MAP[info[0]](value)
-    else:
-        raise ValueError(
-            f'Argument "{argument}" does not exists for method "{method}".'
-        )
+    raise ValueError(f'Argument "{argument}" does not exists for method "{method}".')
 
 
 def get_arguments(method: str, rpc_version: int) -> List[str]:

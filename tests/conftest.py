@@ -31,7 +31,7 @@ def mock_client_factor():
     def patch(data=None):
         LOGGER.setLevel("ERROR")
 
-        def side_effect(method, *args, **kwargs):
+        def side_effect(method, *args, **kwargs):  # pylint: disable=W0613
             if method == "session-get":
                 return {"version": "2.80 (hello)", "rpc-version": 14}
             return data or {}
