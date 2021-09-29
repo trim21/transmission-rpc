@@ -88,9 +88,9 @@ class Session:
         if key is not None and value is not None:
             dirty[key] = value
         else:
-            for key, value in self._fields.items():
-                if value.dirty:
-                    dirty[key] = value.value
+            for k, v in self._fields.items():
+                if v.dirty:
+                    dirty[k] = v.value
 
         self._client.set_session(**dirty)
 
