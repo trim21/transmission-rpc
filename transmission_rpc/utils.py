@@ -164,7 +164,7 @@ def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) ->
             )
 
 
-def _try_read_torrent(
+def _try_read_torrent(  # pylint: disable=R0911
     torrent: Union[BinaryIO, str, bytes, pathlib.Path]
 ) -> Optional[str]:
     """
