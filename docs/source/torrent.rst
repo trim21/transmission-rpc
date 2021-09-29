@@ -3,6 +3,7 @@ Torrent
 
 .. automodule:: transmission_rpc.torrent
 
+
 .. autoclass:: Torrent
     :members:
 
