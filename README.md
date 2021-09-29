@@ -30,7 +30,3 @@ pip install transmission-rpc -U
 this project is forked from https://bitbucket.org/blueluna/transmissionrpc/overview
 
 `transmission-rpc` is licensed under the MIT license.
-
-Copyright (c) 2018-2020 Trim21
-
-Copyright (c) 2008-2014 Erik Svensson
