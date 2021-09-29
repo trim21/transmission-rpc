@@ -137,7 +137,7 @@ class Session:
         transmission version 2.20
         :return:
         """
-        return self.__getattr__("version")
+        return self.__getattr__("download-dir")
 
     @download_dir.setter
     def download_dir(self, location: str) -> None:
