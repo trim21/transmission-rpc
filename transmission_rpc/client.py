@@ -362,7 +362,7 @@ class Client:
 
     def add_torrent(
         self,
-        torrent: Union[BinaryIO, str, bytes],
+        torrent: Union[BinaryIO, str, bytes, pathlib.Path],
         timeout: _Timeout = None,
         *,
         download_dir: str = None,
@@ -382,8 +382,9 @@ class Client:
         - ``http://``, ``https://`` or  ``magnet:`` URL
         - torrent file-like object in binary mode
         - bytes of torrent content
-        - str of base64 encoded torrent file content
-        - ``file://`` URL, deprecated
+        - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
+        - **deprecated** str of base64 encoded torrent file content
+        - **deprecated** ``file://`` URL
 
         .. NOTE::
 
