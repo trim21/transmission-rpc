@@ -3,10 +3,12 @@ name: ci
 on:
   push:
     branches-ignore:
+      - feature/**
+      - fix/**
+      - refactor/**
       - renovate/**
       - deepsource-fix-*
   pull_request: {}
-
 
 jobs:
   test:
