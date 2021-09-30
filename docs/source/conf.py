@@ -80,7 +80,7 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 autodoc_member_order = "bysource"
 autodoc_class_signature = "separated"
-autodoc_typehints = "description"
+# autodoc_typehints = "description"
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
