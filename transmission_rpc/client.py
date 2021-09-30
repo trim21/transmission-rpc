@@ -325,6 +325,21 @@ class Client:
         else:
             self.session = Session(self, data)
 
+    def _update_server_version(self) -> None:
+        """Decode the Transmission version string, if available."""
+        if self.server_version is None:
+            version_major = 2
+            version_minor = 40
+            version_change_set: Optional[str] = None
+            version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
+            if hasattr(self.session, "version"):
+                match = version_parser.match(self.session.version)
+                if match:
+                    version_major = int(match.group(1))
+                    version_minor = int(match.group(2))
+                    version_change_set = str(match.group(3))
+            self.server_version = (version_major, version_minor, version_change_set)
+
     @property
     def rpc_version(self) -> int:
         """
@@ -385,21 +400,6 @@ class Client:
                     f" feature introduced in {required_version:d}."
                 )
             raise TransmissionVersionError(msg)
-
-    def _update_server_version(self) -> None:
-        """Decode the Transmission version string, if available."""
-        if self.server_version is None:
-            version_major = 2
-            version_minor = 40
-            version_change_set: Optional[str] = None
-            version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
-            if hasattr(self.session, "version"):
-                match = version_parser.match(self.session.version)
-                if match:
-                    version_major = int(match.group(1))
-                    version_minor = int(match.group(2))
-                    version_change_set = str(match.group(3))
-            self.server_version = (version_major, version_minor, version_change_set)
 
     def add_torrent(
         self,
