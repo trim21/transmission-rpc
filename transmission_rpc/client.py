@@ -22,6 +22,7 @@ from typing import (
     Union,
     TypeVar,
     BinaryIO,
+    Callable,
     Optional,
     Sequence,
 )
@@ -636,7 +637,7 @@ class Client:
         return result
 
     def set_files(
-        self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None
+        self, items: Dict[str, Dict[int, Dict[str, Any]]], timeout: _Timeout = None
     ) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
@@ -680,18 +681,16 @@ class Client:
                         normal.append(fid)
                     elif file_desc["priority"] == "low":
                         low.append(fid)
-            args = {}
-            if len(high) > 0:
-                args["priority_high"] = high
-            if len(normal) > 0:
-                args["priority_normal"] = normal
-            if len(low) > 0:
-                args["priority_low"] = low
-            if len(wanted) > 0:
-                args["files_wanted"] = wanted
-            if len(unwanted) > 0:
-                args["files_unwanted"] = unwanted
-            self.change_torrent([tid], timeout=timeout, **args)
+
+            self.change_torrent(
+                [tid],
+                timeout=timeout,
+                priority_high=high or None,
+                priority_normal=normal or None,
+                priority_low=low or None,
+                files_wanted=wanted or None,
+                files_unwanted=unwanted or None,
+            )
 
     def change_torrent(
         self,
@@ -1071,12 +1070,12 @@ _T = TypeVar("_T")
 
 
 def _arg_replace(
-    old_value,
-    new_value,
+    old_value: Any,
+    new_value: Any,
     rpc_version: int,
     replaced_rpc_version: int,
-    convert=Type[_T],
-) -> (Optional[_T], bool):
+    convert: Callable[[Any], _T],
+) -> Tuple[Optional[_T], bool]:
     v = None
     if old_value is not None and new_value is not None:
         if old_value != new_value:
@@ -1091,4 +1090,5 @@ def _arg_replace(
         v = convert(old_value)
     elif new_value is not None:
         v = convert(new_value)
+
     return v, rpc_version >= replaced_rpc_version

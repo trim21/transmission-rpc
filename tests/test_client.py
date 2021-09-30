@@ -17,7 +17,7 @@ from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
-def version_mock_request(method, *args, **kwargs):
+def version_mock_request(method, *args, **kwargs):  # pylint: disable=W0613
     if method == "session-get":
         return {"version": "3.00 (hello)", "rpc-version": 16}
     return {
