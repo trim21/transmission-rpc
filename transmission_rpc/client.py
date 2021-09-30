@@ -150,6 +150,39 @@ class Client:
         self.torrent_get_arguments = get_arguments("torrent-get", self.rpc_version)
 
     @property
+    def timeout(self) -> _Timeout:
+        """
+        Get current timeout for HTTP queries.
+        """
+        return self._query_timeout
+
+    @timeout.setter
+    def timeout(self, value: _Timeout) -> None:
+        """
+        Set timeout for HTTP queries.
+        """
+        if isinstance(value, (tuple, list)):
+            if len(value) != 2:
+                raise ValueError("timeout tuple can only include 2 numbers elements")
+            for v in value:
+                if not isinstance(v, (float, int)):
+                    raise ValueError(
+                        "element of timeout tuple can only be int of float"
+                    )
+            self._query_timeout = (value[0], value[1])  # for type checker
+        elif value is None:
+            self._query_timeout = DEFAULT_TIMEOUT
+        else:
+            self._query_timeout = float(value)
+
+    @timeout.deleter
+    def timeout(self) -> None:
+        """
+        Reset the HTTP query timeout to the default.
+        """
+        self._query_timeout = DEFAULT_TIMEOUT
+
+    @property
     def _http_header(self) -> Dict[str, str]:
         return {"x-transmission-session-id": self.session_id}
 
@@ -291,6 +324,67 @@ class Client:
             self.session._update(data)  # pylint: disable=W0212
         else:
             self.session = Session(self, data)
+
+    @property
+    def rpc_version(self) -> int:
+        """
+        Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
+        """
+        if self.protocol_version is None:
+            # Ugly fix for 2.20 - 2.22 reporting rpc-version 11, but having new arguments
+            if self.server_version and (
+                self.server_version[0] == 2 and self.server_version[1] in [20, 21, 22]
+            ):
+                self.protocol_version = 12
+            # Ugly fix for 2.12 reporting rpc-version 10, but having new arguments
+            elif self.server_version and (
+                self.server_version[0] == 2 and self.server_version[1] == 12
+            ):
+                self.protocol_version = 11
+            elif "rpc_version" in self.session:
+                self.protocol_version = self.session.rpc_version
+            elif "version" in self.session:
+                self.protocol_version = 3
+            else:
+                self.protocol_version = 2
+        if self.server_version and (
+            self.server_version[0] <= 2 and self.server_version[1] < 30
+        ):
+            warnings.warn(
+                "support for transmission version lower than 2.30 (rpc version 13) will be removed in the future",
+                PendingDeprecationWarning,
+            )
+        return self.protocol_version
+
+    def _rpc_version_warning(self, required_version: int) -> None:
+        """
+        Add a warning to the log if the Transmission RPC version is lower then the provided version.
+        """
+        if self.rpc_version < required_version:
+            self.logger.warning(
+                "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
+                self.rpc_version,
+                required_version,
+            )
+
+    def _rpc_version_exception(
+        self, required_version: int, argument: str = None
+    ) -> None:
+        """
+        Add a warning to the log if the Transmission RPC version is lower then the provided version.
+        """
+        if self.rpc_version < required_version:
+            if argument:
+                msg = (
+                    f"Arguments '{argument}' is not available at rpc version {self.rpc_version},"
+                    f" argument add in {required_version}"
+                )
+            else:
+                msg = (
+                    f"Using feature not supported by server. RPC version for server {self.rpc_version},"
+                    f" feature introduced in {required_version:d}."
+                )
+            raise TransmissionVersionError(msg)
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
@@ -960,100 +1054,6 @@ class Client:
         """Get session statistics"""
         self._request("session-stats", timeout=timeout)
         return self.session
-
-    @property
-    def rpc_version(self) -> int:
-        """
-        Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
-        """
-        if self.protocol_version is None:
-            # Ugly fix for 2.20 - 2.22 reporting rpc-version 11, but having new arguments
-            if self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] in [20, 21, 22]
-            ):
-                self.protocol_version = 12
-            # Ugly fix for 2.12 reporting rpc-version 10, but having new arguments
-            elif self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] == 12
-            ):
-                self.protocol_version = 11
-            elif "rpc_version" in self.session:
-                self.protocol_version = self.session.rpc_version
-            elif "version" in self.session:
-                self.protocol_version = 3
-            else:
-                self.protocol_version = 2
-        if self.server_version and (
-            self.server_version[0] <= 2 and self.server_version[1] < 30
-        ):
-            warnings.warn(
-                "support for transmission version lower than 2.30 (rpc version 13) will be removed in the future",
-                PendingDeprecationWarning,
-            )
-        return self.protocol_version
-
-    def _rpc_version_warning(self, required_version: int) -> None:
-        """
-        Add a warning to the log if the Transmission RPC version is lower then the provided version.
-        """
-        if self.rpc_version < required_version:
-            self.logger.warning(
-                "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
-                self.rpc_version,
-                required_version,
-            )
-
-    def _rpc_version_exception(
-        self, required_version: int, argument: str = None
-    ) -> None:
-        """
-        Add a warning to the log if the Transmission RPC version is lower then the provided version.
-        """
-        if self.rpc_version < required_version:
-            if argument:
-                msg = (
-                    f"Arguments '{argument}' is not available at rpc version {self.rpc_version},"
-                    f" argument add in {required_version}"
-                )
-            else:
-                msg = (
-                    f"Using feature not supported by server. RPC version for server {self.rpc_version},"
-                    f" feature introduced in {required_version:d}."
-                )
-            raise TransmissionVersionError(msg)
-
-    @property
-    def timeout(self) -> _Timeout:
-        """
-        Get current timeout for HTTP queries.
-        """
-        return self._query_timeout
-
-    @timeout.setter
-    def timeout(self, value: _Timeout) -> None:
-        """
-        Set timeout for HTTP queries.
-        """
-        if isinstance(value, (tuple, list)):
-            if len(value) != 2:
-                raise ValueError("timeout tuple can only include 2 numbers elements")
-            for v in value:
-                if not isinstance(v, (float, int)):
-                    raise ValueError(
-                        "element of timeout tuple can only be int of float"
-                    )
-            self._query_timeout = (value[0], value[1])  # for type checker
-        elif value is None:
-            self._query_timeout = DEFAULT_TIMEOUT
-        else:
-            self._query_timeout = float(value)
-
-    @timeout.deleter
-    def timeout(self) -> None:
-        """
-        Reset the HTTP query timeout to the default.
-        """
-        self._query_timeout = DEFAULT_TIMEOUT
 
     def __enter__(self) -> "Client":
         return self
