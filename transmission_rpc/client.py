@@ -781,43 +781,41 @@ class Client:
         if priority_normal is not None:
             kwargs["priority_normal"] = list(priority_normal)
 
-        (
-            v,
-            r,
-        ) = _arg_replace(speed_limit_down, downloadLimit, self.rpc_version, 5, int)
-        if v is not None:
-            if r:
-                kwargs["downloadLimit"] = v
+        value, replaced = _arg_replace(
+            speed_limit_down, downloadLimit, self.rpc_version, 5, int
+        )
+        if value is not None:
+            if replaced:
+                kwargs["downloadLimit"] = value
             else:
-                kwargs["speed_limit_down"] = v
+                kwargs["speed_limit_down"] = value
 
-        (
-            v,
-            r,
-        ) = _arg_replace(speed_limit_up, uploadLimit, self.rpc_version, 5, int)
-        if v is not None:
-            if r:
-                kwargs["uploadLimit"] = v
+        value, replaced = _arg_replace(
+            speed_limit_up, uploadLimit, self.rpc_version, 5, int
+        )
+        if value is not None:
+            if replaced:
+                kwargs["uploadLimit"] = value
             else:
-                kwargs["speed_limit_up"] = v
+                kwargs["speed_limit_up"] = value
 
-        v, r, = _arg_replace(
+        value, replaced, = _arg_replace(
             speed_limit_down_enabled, downloadLimited, self.rpc_version, 5, bool
         )
-        if v is not None:
-            if r:
-                kwargs["downloadLimited"] = v
+        if value is not None:
+            if replaced:
+                kwargs["downloadLimited"] = value
             else:
-                kwargs["speed_limit_down_enabled"] = v
+                kwargs["speed_limit_down_enabled"] = value
 
-        v, r, = _arg_replace(
+        value, replaced, = _arg_replace(
             speed_limit_up_enabled, uploadLimited, self.rpc_version, 5, bool
         )
-        if v is not None:
-            if r:
-                kwargs["uploadLimited"] = v
+        if value is not None:
+            if replaced:
+                kwargs["uploadLimited"] = value
             else:
-                kwargs["speed_limit_up_enabled"] = v
+                kwargs["speed_limit_up_enabled"] = value
 
         # rpc 5
         if seedRatioLimit is not None:
