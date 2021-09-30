@@ -17,6 +17,15 @@ from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
+def version_mock_request(self, method, *args, **kwargs):
+    if method == "session-get":
+        return {"version": "3.00 (hello)", "rpc-version": 16}
+    return {
+        "arguments": {"hello": "world"},
+        "result": "success",
+    }
+
+
 @pytest.mark.parametrize(
     ("protocol", "username", "password", "host", "port", "path"),
     [
@@ -41,7 +50,7 @@ from transmission_rpc.lib_types import File
 def test_client_parse_url(
     protocol: Literal["http", "https"], username, password, host, port, path
 ):
-    with mock.patch("transmission_rpc.client.Client._request"):
+    with mock.patch("transmission_rpc.client.Client._request", version_mock_request):
         client = Client(
             protocol=protocol,
             username=username,
@@ -75,8 +84,7 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 
 
 def test_client_add_kwargs():
-    m = mock.Mock(return_value={"hello": "workd"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
+    with mock.patch("transmission_rpc.client.Client._request", version_mock_request):
         c = Client()
         c.protocol_version = 15
         c.add_torrent(
