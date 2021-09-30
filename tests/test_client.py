@@ -17,7 +17,7 @@ from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
-def version_mock_request(self, method, *args, **kwargs):
+def version_mock_request(method, *args, **kwargs):
     if method == "session-get":
         return {"version": "3.00 (hello)", "rpc-version": 16}
     return {
@@ -50,7 +50,10 @@ def version_mock_request(self, method, *args, **kwargs):
 def test_client_parse_url(
     protocol: Literal["http", "https"], username, password, host, port, path
 ):
-    with mock.patch("transmission_rpc.client.Client._request", version_mock_request):
+    with mock.patch(
+        "transmission_rpc.client.Client._request",
+        mock.Mock(side_effect=version_mock_request),
+    ):
         client = Client(
             protocol=protocol,
             username=username,
@@ -84,7 +87,8 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 
 
 def test_client_add_kwargs():
-    with mock.patch("transmission_rpc.client.Client._request", version_mock_request):
+    m = mock.Mock(side_effect=version_mock_request)
+    with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 15
         c.add_torrent(
