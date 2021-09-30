@@ -57,8 +57,8 @@ class Session:
         if fields is not None:
             self._update(fields)
 
-    def __contains__(self, item):
-        return self._fields.__contains__(item)
+    def __contains__(self, o: Any) -> bool:
+        return self._fields.__contains__(o)
 
     def __getattr__(self, name: str) -> Any:
         try:
