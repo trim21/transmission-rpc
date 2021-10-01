@@ -719,7 +719,7 @@ class Client:
         speed_limit_up_enabled: bool = None,
         trackerAdd: List[str] = None,
         trackerRemove: List[str] = None,
-        trackerReplace: List[str] = None,
+        trackerReplace: Tuple[int, str] = None,
         uploadLimit: int = None,
         uploadLimited: bool = None,
         labels: List[str] = None,
@@ -758,7 +758,7 @@ class Client:
                                                             1 = Use transfer limit, 2 = Disable limit.
         ``trackerAdd``               10 -                  Array of string with announce URLs to add.
         ``trackerRemove``            10 -                  Array of ids of trackers to remove.
-        ``trackerReplace``           10 -                  Array of (id, url) tuples where the announce URL should be r.
+        ``trackerReplace``           10 -                  Array of (0-based index, url) tuples where the announce URL should be r.
         ``queuePosition``            14 -                  Position of this transfer in its queue.
         ``labels``                   16 -                  Array of string labels.
         ============================ ===== =============== =============================================================
@@ -846,7 +846,8 @@ class Client:
             kwargs["trackerRemove"] = list(trackerRemove)
         if trackerReplace is not None:
             self._rpc_version_exception(10, "trackerReplace")
-            kwargs["trackerReplace"] = list(trackerReplace)
+            index, torrent = trackerReplace
+            kwargs["trackerReplace"] = (int(index), str(torrent))
 
         # rpc 14
         if queuePosition is not None:
@@ -860,8 +861,8 @@ class Client:
 
         if kwargs:
             self._request("torrent-set", kwargs, ids, True, timeout=timeout)
-
-        raise ValueError("No arguments to set")
+        else:
+            raise ValueError("No arguments to set")
 
     def move_torrent_data(
         self,
