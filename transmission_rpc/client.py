@@ -711,7 +711,7 @@ class Client:
         queuePosition: int = None,
         seedIdleLimit: int = None,
         seedIdleMode: int = None,
-        seedRatioLimit: float = None,
+        seedRatioLimit: Union[int, float] = None,
         seedRatioMode: int = None,
         speed_limit_down: int = None,
         speed_limit_down_enabled: bool = None,
@@ -820,7 +820,7 @@ class Client:
         # rpc 5
         if seedRatioLimit is not None:
             self._rpc_version_exception(5, "seedRatioLimit")
-            kwargs["seedRatioLimit"] = float(seedRatioLimit)
+            kwargs["seedRatioLimit"] = seedRatioLimit
         if seedRatioMode is not None:
             self._rpc_version_exception(5, "seedRatioMode")
             kwargs["seedRatioMode"] = int(seedRatioMode)
