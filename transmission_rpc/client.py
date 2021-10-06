@@ -105,9 +105,9 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
 
 
 class LimitMode(enum.IntEnum):
-    session = 0
-    per_torrent = 1
-    disable = 2
+    use_session_limit_value = 0
+    use_torrent_limit_value = 1
+    disabled = 2
 
 
 class Client:
