@@ -19,16 +19,16 @@ classifiers = [
     'Topic :: Internet',
     'Topic :: Software Development :: Version Control :: Git',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: Implementation :: CPython',
     'Programming Language :: Python :: Implementation :: PyPy',
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.7"
 # dependencies
 requests = "^2.23.0"
 typing_extensions = ">=3.7.4.2,<4.0.0.0"
