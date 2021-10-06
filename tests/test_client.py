@@ -368,7 +368,7 @@ def test_client_change_torrent():
         speed_limit_up=1,
         speed_limit_up_enabled=True,
         seedRatioLimit=3.0,
-        seedRatioMode=True,
+        seedRatioMode=2,
         honorsSessionLimits=True,
         bandwidthPriority=True,
         downloadLimit=1,

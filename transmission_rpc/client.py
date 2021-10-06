@@ -4,6 +4,7 @@
 # Licensed under the MIT license.
 import os
 import re
+import enum
 import json
 import time
 import types
@@ -101,6 +102,12 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
     if isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
     raise ValueError(f"Invalid torrent id {args}")
+
+
+class LimitMode(enum.IntEnum):
+    session = 0
+    per_torrent = 1
+    disable = 2
 
 
 class Client:
@@ -697,31 +704,37 @@ class Client:
         ids: _TorrentIDs,
         timeout: _Timeout = None,
         *,
-        bandwidthPriority: int = None,
-        downloadLimit: int = None,
-        downloadLimited: bool = None,
-        files_unwanted: List[int] = None,
-        files_wanted: List[int] = None,
-        honorsSessionLimits: bool = None,
+        # rpc >= 1
         location: str = None,
+        files_wanted: List[int] = None,
+        files_unwanted: List[int] = None,
         peer_limit: int = None,
-        priority_high: List[int] = None,
         priority_low: List[int] = None,
         priority_normal: List[int] = None,
-        queuePosition: int = None,
-        seedIdleLimit: int = None,
-        seedIdleMode: int = None,
-        seedRatioLimit: Union[int, float] = None,
-        seedRatioMode: int = None,
+        priority_high: List[int] = None,
+        # replaced in rpc 5
         speed_limit_down: int = None,
         speed_limit_down_enabled: bool = None,
         speed_limit_up: int = None,
         speed_limit_up_enabled: bool = None,
+        # rpc >= 5
+        honorsSessionLimits: bool = None,
+        bandwidthPriority: int = None,
+        downloadLimit: int = None,
+        downloadLimited: bool = None,
+        uploadLimit: int = None,
+        uploadLimited: bool = None,
+        seedIdleLimit: int = None,
+        seedIdleMode: int = None,
+        # rpc >= 10
+        seedRatioLimit: Union[int, float] = None,
+        seedRatioMode: int = None,
         trackerAdd: List[str] = None,
         trackerRemove: List[str] = None,
         trackerReplace: Tuple[int, str] = None,
-        uploadLimit: int = None,
-        uploadLimited: bool = None,
+        # rpc >= 14
+        queuePosition: int = None,
+        # rpc >= 16
         labels: List[str] = None,
     ) -> None:
         """
@@ -744,8 +757,10 @@ class Client:
         ``speed_limit_up``           1 - 5 uploadLimit     Set the speed limit for upload in Kib/s.
         ``speed_limit_up_enabled``   1 - 5 uploadLimited   Enable upload speed limiter.
         ``seedRatioLimit``           5 -                   Seeding ratio.
-        ``seedRatioMode``            5 -                   Which ratio to use. 0 = Use session limit, 1 = Use transfer
-                                                            limit, 2 = Disable limit.
+        ``seedRatioMode``            5 -                   Which ratio to use.
+                                                            0 = Use session limit,
+                                                            1 = Use per-torrent seed radio limit,
+                                                            2 = Disable limit.
         ``honorsSessionLimits``      5 -                   Enables or disables the transfer to honour the upload limit
                                                             set in the session.
         ``bandwidthPriority``        5 -                   Priority for this transfer.
