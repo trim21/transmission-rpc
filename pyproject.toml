@@ -17,7 +17,6 @@ classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
     'Topic :: Internet',
-    'Topic :: Software Development :: Version Control :: Git',
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
