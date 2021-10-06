@@ -17,6 +17,18 @@ from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
 
 
+def version_side_effect(version: str = "3.00 (hello)", rpc_version: int = 16):
+    def version_mock_request(method, *args, **kwargs):  # pylint: disable=W0613
+        if method == "session-get":
+            return {"version": version, "rpc-version": rpc_version}
+        return {
+            "arguments": {"hello": "world"},
+            "result": "success",
+        }
+
+    return version_mock_request
+
+
 @pytest.mark.parametrize(
     ("protocol", "username", "password", "host", "port", "path"),
     [
@@ -41,7 +53,10 @@ from transmission_rpc.lib_types import File
 def test_client_parse_url(
     protocol: Literal["http", "https"], username, password, host, port, path
 ):
-    with mock.patch("transmission_rpc.client.Client._request"):
+    with mock.patch(
+        "transmission_rpc.client.Client._request",
+        mock.Mock(side_effect=version_side_effect()),
+    ):
         client = Client(
             protocol=protocol,
             username=username,
@@ -75,7 +90,7 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 
 
 def test_client_add_kwargs():
-    m = mock.Mock(return_value={"hello": "workd"})
+    m = mock.Mock(side_effect=version_side_effect())
     with mock.patch("transmission_rpc.client.Client._request", m):
         c = Client()
         c.protocol_version = 15
@@ -337,3 +352,75 @@ def test_ensure_location_str_relative():
 
 def test_ensure_location_str_absolute():
     ensure_location_str(pathlib.Path(".").absolute())
+
+
+def test_client_change_torrent():
+    kwargs = {
+        "files_wanted": [1],
+        "files_unwanted": [2],
+        "location": "True",
+        "peer_limit": 1,
+        "priority_high": [3],
+        "priority_low": [2],
+        "priority_normal": [1],
+        "speed_limit_down": 1,
+        "speed_limit_down_enabled": True,
+        "speed_limit_up": 1,
+        "speed_limit_up_enabled": True,
+        "seedRatioLimit": 3.0,
+        "seedRatioMode": 2,
+        "honorsSessionLimits": True,
+        "bandwidthPriority": True,
+        "downloadLimit": 1,
+        "downloadLimited": True,
+        "uploadLimit": 1,
+        "uploadLimited": True,
+        "seedIdleLimit": True,
+        "seedIdleMode": 0,
+        "trackerAdd": ["True"],
+        "trackerRemove": ["True"],
+        "trackerReplace": (0, "s"),
+        "queuePosition": True,
+        "labels": ["True"],
+    }
+    m = mock.Mock(side_effect=version_side_effect())
+    with mock.patch("transmission_rpc.client.Client._request", m):
+        client = Client()
+        with pytest.warns(UserWarning, match="new argument"):
+            client.change_torrent("ids", **kwargs)
+
+    args = {
+        key: value
+        for key, value in kwargs.items()
+        if key
+        not in {
+            "speed_limit_down",
+            "speed_limit_down_enabled",
+            "speed_limit_up",
+            "speed_limit_up_enabled",
+        }
+    }
+
+    m.assert_called_with(
+        "torrent-set",
+        args,
+        "ids",
+        True,
+        timeout=None,
+    )
+
+
+def test_client_change_torrent_arg_replaced():
+    m = mock.Mock(side_effect=version_side_effect())
+    with mock.patch("transmission_rpc.client.Client._request", m):
+        client = Client()
+        with pytest.warns(UserWarning, match="'speed_limit_up'"):
+            client.change_torrent("ids", speed_limit_up=5)
+
+    m.assert_called_with(
+        "torrent-set",
+        {"uploadLimit": 5},
+        "ids",
+        True,
+        timeout=None,
+    )

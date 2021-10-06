@@ -4,6 +4,7 @@
 # Licensed under the MIT license.
 import os
 import re
+import enum
 import json
 import time
 import types
@@ -13,7 +14,19 @@ import pathlib
 import operator
 import warnings
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
+from typing import (
+    Any,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Union,
+    TypeVar,
+    BinaryIO,
+    Callable,
+    Optional,
+    Sequence,
+)
 from urllib.parse import quote, urljoin
 
 import requests
@@ -26,6 +39,7 @@ from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
     TransmissionTimeoutError,
+    TransmissionVersionError,
 )
 from transmission_rpc.utils import (
     LOGGER,
@@ -88,6 +102,12 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
     if isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
     raise ValueError(f"Invalid torrent id {args}")
+
+
+class LimitMode(enum.IntEnum):
+    use_session_limit_value = 0
+    use_torrent_limit_value = 1
+    disabled = 2
 
 
 class Client:
@@ -285,7 +305,7 @@ class Client:
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == "session-get":
-            self._update_session(data["arguments"])
+            return data["arguments"]
         elif method == "session-stats":
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
@@ -344,9 +364,9 @@ class Client:
                 self.server_version[0] == 2 and self.server_version[1] == 12
             ):
                 self.protocol_version = 11
-            elif hasattr(self.session, "rpc_version"):
+            elif "rpc_version" in self.session:
                 self.protocol_version = self.session.rpc_version
-            elif hasattr(self.session, "version"):
+            elif "version" in self.session:
                 self.protocol_version = 3
             else:
                 self.protocol_version = 2
@@ -369,6 +389,25 @@ class Client:
                 self.rpc_version,
                 required_version,
             )
+
+    def _rpc_version_exception(
+        self, required_version: int, argument: str = None
+    ) -> None:
+        """
+        Add a warning to the log if the Transmission RPC version is lower then the provided version.
+        """
+        if self.rpc_version < required_version:
+            if argument:
+                msg = (
+                    f"Arguments '{argument}' is not available at rpc version {self.rpc_version},"
+                    f" argument add in {required_version}"
+                )
+            else:
+                msg = (
+                    f"Using feature not supported by server. RPC version for server {self.rpc_version},"
+                    f" feature introduced in {required_version:d}."
+                )
+            raise TransmissionVersionError(msg)
 
     def add_torrent(
         self,
@@ -393,31 +432,26 @@ class Client:
         - torrent file-like object in binary mode
         - bytes of torrent content
         - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
-        - **deprecated** str of base64 encoded torrent file content
-        - **deprecated** ``file://`` URL
+        - str of base64 encoded torrent file content - **deprecated**
+        - ``file://`` URL - **deprecated**
 
         .. NOTE::
 
             url starts with ``file://`` will be load by this package instead of transmission daemon
 
-        Additional arguments are:
-
-        ===================== ===== =========== =============================================================
-        Argument              RPC   Replaced by Description
-        ===================== ===== =========== =============================================================
-        ``bandwidthPriority`` 8 -               Priority for this transfer.
-        ``cookies``           13 -              One or more HTTP cookie(s).
-        ``download_dir``      1 -               The directory where the downloaded contents will be saved in.
-        ``files_unwanted``    1 -               A list of file id's that shouldn't be downloaded.
-        ``files_wanted``      1 -               A list of file id's that should be downloaded.
-        ``paused``            1 -               If True, does not start the transfer when added.
-        ``peer_limit``        1 -               Maximum number of peers allowed.
-        ``priority_high``     1 -               A list of file id's that should have high priority.
-        ``priority_low``      1 -               A list of file id's that should have low priority.
-        ``priority_normal``   1 -               A list of file id's that should have normal priority.
-        ===================== ===== =========== =============================================================
-
-        Returns a Torrent object with the fields.
+        :param torrent:
+        :param download_dir: remote download location
+        :param files_unwanted: A list of file id's that shouldn't be downloaded.
+        :param files_wanted: A list of file id's that should be downloaded.
+        :param paused: If True, does not start the transfer when added.
+        :param peer_limit: Maximum number of peers allowed.
+        :param priority_high: A list of file id's that should have high priority.
+        :param priority_low: A list of file id's that should have low priority.
+        :param priority_normal: A list of file id's that should have normal priority.
+        :param bandwidthPriority: Priority for this transfer. (require rpc>=8)
+        :param cookies: One or more HTTP cookie(s) (rpc>=13)
+        :param timeout:
+        :rtype: Torrent
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
@@ -610,7 +644,7 @@ class Client:
         return result
 
     def set_files(
-        self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None
+        self, items: Dict[str, Dict[int, Dict[str, Any]]], timeout: _Timeout = None
     ) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
@@ -654,79 +688,220 @@ class Client:
                         normal.append(fid)
                     elif file_desc["priority"] == "low":
                         low.append(fid)
-            args = {}
-            if len(high) > 0:
-                args["priority_high"] = high
-            if len(normal) > 0:
-                args["priority_normal"] = normal
-            if len(low) > 0:
-                args["priority_low"] = low
-            if len(wanted) > 0:
-                args["files_wanted"] = wanted
-            if len(unwanted) > 0:
-                args["files_unwanted"] = unwanted
-            self.change_torrent([tid], timeout=timeout, **args)
+
+            self.change_torrent(
+                [tid],
+                timeout=timeout,
+                priority_high=high or None,
+                priority_normal=normal or None,
+                priority_low=low or None,
+                files_wanted=wanted or None,
+                files_unwanted=unwanted or None,
+            )
 
     def change_torrent(
-        self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any
+        self,
+        ids: _TorrentIDs,
+        timeout: _Timeout = None,
+        *,
+        # rpc >= 1
+        location: str = None,
+        files_wanted: List[int] = None,
+        files_unwanted: List[int] = None,
+        peer_limit: int = None,
+        priority_low: List[int] = None,
+        priority_normal: List[int] = None,
+        priority_high: List[int] = None,
+        # replaced in rpc 5
+        speed_limit_down: int = None,
+        speed_limit_down_enabled: bool = None,
+        speed_limit_up: int = None,
+        speed_limit_up_enabled: bool = None,
+        # rpc >= 5
+        honorsSessionLimits: bool = None,
+        bandwidthPriority: int = None,
+        downloadLimit: int = None,
+        downloadLimited: bool = None,
+        uploadLimit: int = None,
+        uploadLimited: bool = None,
+        seedIdleLimit: int = None,
+        seedIdleMode: int = None,
+        # rpc >= 10
+        seedRatioLimit: Union[int, float] = None,
+        seedRatioMode: int = None,
+        trackerAdd: List[str] = None,
+        trackerRemove: List[str] = None,
+        trackerReplace: Tuple[int, str] = None,
+        # rpc >= 14
+        queuePosition: int = None,
+        # rpc >= 16
+        labels: List[str] = None,
     ) -> None:
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
+
         parameters are:
 
         ============================ ===== =============== =============================================================
         Argument                     RPC   Replaced by     Description
         ============================ ===== =============== =============================================================
-        ``bandwidthPriority``        5 -                   Priority for this transfer.
-        ``downloadLimit``            5 -                   Set the speed limit for download in Kib/s.
-        ``downloadLimited``          5 -                   Enable download speed limiter.
-        ``files_unwanted``           1 -                   A list of file id's that shouldn't be downloaded.
         ``files_wanted``             1 -                   A list of file id's that should be downloaded.
-        ``honorsSessionLimits``      5 -                   Enables or disables the transfer
-                                                           to honour the upload limit set in the session.
+        ``files_unwanted``           1 -                   A list of file id's that shouldn't be downloaded.
         ``location``                 1 -                   Local download location.
-        ``peer_limit``               1 -                   The peer limit for the torrents.
+        ``peer_limit``               1 -                   Maximum number of peers
         ``priority_high``            1 -                   A list of file id's that should have high priority.
         ``priority_low``             1 -                   A list of file id's that should have normal priority.
         ``priority_normal``          1 -                   A list of file id's that should have low priority.
-        ``queuePosition``            14 -                  Position of this transfer in its queue.
-        ``seedIdleLimit``            10 -                  Seed inactivity limit in minutes.
-        ``seedIdleMode``             10 -                  Seed inactivity mode. 0 = Use session limit,
-                                                           1 = Use transfer limit, 2 = Disable limit.
-        ``seedRatioLimit``           5 -                   Seeding ratio.
-        ``seedRatioMode``            5 -                   Which ratio to use. 0 = Use session limit,
-                                                           1 = Use transfer limit, 2 = Disable limit.
         ``speed_limit_down``         1 - 5 downloadLimit   Set the speed limit for download in Kib/s.
         ``speed_limit_down_enabled`` 1 - 5 downloadLimited Enable download speed limiter.
         ``speed_limit_up``           1 - 5 uploadLimit     Set the speed limit for upload in Kib/s.
         ``speed_limit_up_enabled``   1 - 5 uploadLimited   Enable upload speed limiter.
-        ``trackerAdd``               10 -                  Array of string with announce URLs to add.
-        ``trackerRemove``            10 -                  Array of ids of trackers to remove.
-        ``trackerReplace``           10 -                  Array of (id, url) tuples
-                                                           where the announce URL should be replaced.
+        ``seedRatioLimit``           5 -                   Seeding ratio.
+        ``seedRatioMode``            5 -                   Which ratio to use.
+                                                            0 = Use session limit,
+                                                            1 = Use per-torrent seed radio limit,
+                                                            2 = Disable limit.
+        ``honorsSessionLimits``      5 -                   Enables or disables the transfer to honour the upload limit
+                                                            set in the session.
+        ``bandwidthPriority``        5 -                   Priority for this transfer.
+        ``downloadLimit``            5 -                   Set the speed limit for download in Kib/s.
+        ``downloadLimited``          5 -                   Enable download speed limiter.
         ``uploadLimit``              5 -                   Set the speed limit for upload in Kib/s.
         ``uploadLimited``            5 -                   Enable upload speed limiter.
+        ``seedIdleLimit``            10 -                  Seed inactivity limit in minutes.
+        ``seedIdleMode``             10 -                  Seed inactivity mode. 0 = Use session limit,
+                                                            1 = Use transfer limit, 2 = Disable limit.
+        ``trackerAdd``               10 -                  Array of string with announce URLs to add.
+        ``trackerRemove``            10 -                  Array of ids of trackers to remove.
+        ``trackerReplace``           10 -                  Array of (0-based index, url) tuples where the announce URL should be r.
+        ``queuePosition``            14 -                  Position of this transfer in its queue.
         ``labels``                   16 -                  Array of string labels.
         ============================ ===== =============== =============================================================
-
-        .. NOTE::
-
-           transmission_rpc will try to automatically fix argument errors.
-
         """
 
-        args = {}
-        for key, value in kwargs.items():
-            argument = make_rpc_name(key)
-            arg, val = argument_value_convert(
-                "torrent-set", argument, value, self.rpc_version
-            )
-            args[arg] = val
+        kwargs: Dict[str, Any] = {}
 
-        if len(args) > 0:
-            self._request("torrent-set", args, ids, True, timeout=timeout)
+        if files_wanted is not None:
+            kwargs["files_wanted"] = list(files_wanted)
+        if files_unwanted is not None:
+            kwargs["files_unwanted"] = list(files_unwanted)
+        if location is not None:
+            kwargs["location"] = str(location)
+        if peer_limit is not None:
+            kwargs["peer_limit"] = int(peer_limit)
+        if priority_high is not None:
+            kwargs["priority_high"] = list(priority_high)
+        if priority_low is not None:
+            kwargs["priority_low"] = list(priority_low)
+        if priority_normal is not None:
+            kwargs["priority_normal"] = list(priority_normal)
+
+        value, replaced = _arg_replace(
+            speed_limit_down,
+            downloadLimit,
+            self.rpc_version,
+            5,
+            int,
+            "speed_limit_down",
+            "downloadLimit",
+        )
+        if value is not None:
+            if replaced:
+                kwargs["downloadLimit"] = value
+            else:
+                kwargs["speed_limit_down"] = value
+
+        value, replaced = _arg_replace(
+            speed_limit_up,
+            uploadLimit,
+            self.rpc_version,
+            5,
+            int,
+            "speed_limit_up",
+            "uploadLimit",
+        )
+        if value is not None:
+            if replaced:
+                kwargs["uploadLimit"] = value
+            else:
+                kwargs["speed_limit_up"] = value
+
+        value, replaced, = _arg_replace(
+            speed_limit_down_enabled,
+            downloadLimited,
+            self.rpc_version,
+            5,
+            bool,
+            "speed_limit_down_enabled",
+            "downloadLimited",
+        )
+        if value is not None:
+            if replaced:
+                kwargs["downloadLimited"] = value
+            else:
+                kwargs["speed_limit_down_enabled"] = value
+
+        value, replaced, = _arg_replace(
+            speed_limit_up_enabled,
+            uploadLimited,
+            self.rpc_version,
+            5,
+            bool,
+            "speed_limit_up_enabled",
+            "uploadLimited",
+        )
+        if value is not None:
+            if replaced:
+                kwargs["uploadLimited"] = value
+            else:
+                kwargs["speed_limit_up_enabled"] = value
+
+        # rpc 5
+        if seedRatioLimit is not None:
+            self._rpc_version_exception(5, "seedRatioLimit")
+            kwargs["seedRatioLimit"] = seedRatioLimit
+        if seedRatioMode is not None:
+            self._rpc_version_exception(5, "seedRatioMode")
+            kwargs["seedRatioMode"] = int(seedRatioMode)
+        if honorsSessionLimits is not None:
+            self._rpc_version_exception(5, "honorsSessionLimits")
+            kwargs["honorsSessionLimits"] = bool(honorsSessionLimits)
+        if bandwidthPriority is not None:
+            self._rpc_version_exception(5, "bandwidthPriority")
+            kwargs["bandwidthPriority"] = int(bandwidthPriority)
+
+        # rpc 10
+        if seedIdleLimit is not None:
+            self._rpc_version_exception(10, "seedIdleLimit")
+            kwargs["seedIdleLimit"] = int(seedIdleLimit)
+        if seedIdleMode is not None:
+            self._rpc_version_exception(10, "seedIdleMode")
+            kwargs["seedIdleMode"] = int(seedIdleMode)
+        if trackerAdd is not None:
+            self._rpc_version_exception(10, "trackerAdd")
+            kwargs["trackerAdd"] = list(trackerAdd)
+        if trackerRemove is not None:
+            self._rpc_version_exception(10, "trackerRemove")
+            kwargs["trackerRemove"] = list(trackerRemove)
+        if trackerReplace is not None:
+            self._rpc_version_exception(10, "trackerReplace")
+            index, torrent = trackerReplace
+            kwargs["trackerReplace"] = (int(index), str(torrent))
+
+        # rpc 14
+        if queuePosition is not None:
+            self._rpc_version_exception(14, "queuePosition")
+            kwargs["queuePosition"] = int(queuePosition)
+
+        # rpc 16
+        if labels is not None:
+            self._rpc_version_exception(16, "labels")
+            kwargs["labels"] = list(labels)
+
+        if kwargs:
+            self._request("torrent-set", kwargs, ids, True, timeout=timeout)
         else:
-            ValueError("No arguments to set")
+            raise ValueError("No arguments to set")
 
     def move_torrent_data(
         self,
@@ -796,7 +971,7 @@ class Client:
         """
         Get session parameters. See the Session class for more information.
         """
-        self._request("session-get", timeout=timeout)
+        self._update_session(self._request("session-get", timeout=timeout))
         self._update_server_version()
         return self.session
 
@@ -927,3 +1102,44 @@ class Client:
         exc_tb: types.TracebackType,
     ) -> None:
         self._http_session.close()
+
+
+_T = TypeVar("_T")
+
+
+def _arg_replace(
+    old_value: Any,
+    new_value: Any,
+    rpc_version: int,
+    replaced_rpc_version: int,
+    convert: Callable[[Any], _T],
+    old_name: str,
+    new_name: str,
+) -> Tuple[Optional[_T], bool]:
+    v = None
+    replaced = rpc_version >= replaced_rpc_version
+    if old_value is not None and new_value is not None:
+        if old_value != new_value:
+            raise ValueError(
+                f"old argument '{old_name}' are new argument '{new_name}' set to different value",
+                old_value,
+                new_value,
+            )
+        warnings.warn(
+            f"don't use old argument '{old_name}' and new arguments '{new_name}' together"
+        )
+        v = convert(old_value)
+    elif old_value is not None:
+        if replaced:
+            warnings.warn(
+                f"you are using old argument '{old_name}', it's replaced by '{new_name}'"
+            )
+        v = convert(old_value)
+    elif new_value is not None:
+        if not replaced:
+            warnings.warn(
+                f"you are using argument '{new_name}', it's '{old_name}' in old transmission version"
+            )
+        v = convert(new_value)
+
+    return v, replaced

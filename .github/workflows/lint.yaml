@@ -3,6 +3,9 @@ name: lint
 on:
   push:
     branches-ignore:
+      - feature/**
+      - fix/**
+      - refactor/**
       - renovate/**
       - deepsource-fix-*
   pull_request: {}

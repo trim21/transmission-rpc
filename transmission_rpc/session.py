@@ -57,6 +57,9 @@ class Session:
         if fields is not None:
             self._update(fields)
 
+    def __contains__(self, o: Any) -> bool:
+        return self._fields.__contains__(o)
+
     def __getattr__(self, name: str) -> Any:
         try:
             return self._fields[name].value
@@ -76,9 +79,8 @@ class Session:
 
     def __str__(self) -> str:
         text = ""
-        max_length = max(len(x) for x in self._fields.keys()) + 1
-        for key, value in sorted(self._fields.items(), key=lambda x: x[0]):
-            text += f"{key.ljust(max_length)}: {value.value!r}\n"
+        for key, value in self._fields.items():
+            text += f"{key!r}: {value.value!r}\n"
         return text
 
     def _commit(self, key: str = None, value: Any = None) -> None:
