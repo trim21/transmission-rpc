@@ -748,7 +748,7 @@ class Client:
         ``files_wanted``             1 -                   A list of file id's that should be downloaded.
         ``files_unwanted``           1 -                   A list of file id's that shouldn't be downloaded.
         ``location``                 1 -                   Local download location.
-        ``peer_limit``               1 -                   The peer limit for the torrents.
+        ``peer_limit``               1 -                   Maximum number of peers
         ``priority_high``            1 -                   A list of file id's that should have high priority.
         ``priority_low``             1 -                   A list of file id's that should have normal priority.
         ``priority_normal``          1 -                   A list of file id's that should have low priority.

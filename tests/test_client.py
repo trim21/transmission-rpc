@@ -359,7 +359,7 @@ def test_client_change_torrent():
         files_wanted=[1],
         files_unwanted=[2],
         location="True",
-        peer_limit=True,
+        peer_limit=1,
         priority_high=[3],
         priority_low=[2],
         priority_normal=[1],
