@@ -379,7 +379,7 @@ def test_client_change_torrent():
         "seedIdleMode": 0,
         "trackerAdd": ["True"],
         "trackerRemove": ["True"],
-        "trackerReplace": [0, "s"],
+        "trackerReplace": (0, "s"),
         "queuePosition": True,
         "labels": ["True"],
     }
