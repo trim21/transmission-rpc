@@ -408,3 +408,19 @@ def test_client_change_torrent():
         True,
         timeout=None,
     )
+
+
+def test_client_change_torrent_arg_replaced():
+    m = mock.Mock(side_effect=version_side_effect())
+    with mock.patch("transmission_rpc.client.Client._request", m):
+        client = Client()
+        with pytest.warns(UserWarning, match="'speed_limit_up'"):
+            client.change_torrent("ids", speed_limit_up=5)
+
+    m.assert_called_with(
+        "torrent-set",
+        {"uploadLimit": 5},
+        "ids",
+        True,
+        timeout=None,
+    )

@@ -797,7 +797,13 @@ class Client:
             kwargs["priority_normal"] = list(priority_normal)
 
         value, replaced = _arg_replace(
-            speed_limit_down, downloadLimit, self.rpc_version, 5, int
+            speed_limit_down,
+            downloadLimit,
+            self.rpc_version,
+            5,
+            int,
+            "speed_limit_down",
+            "downloadLimit",
         )
         if value is not None:
             if replaced:
@@ -806,7 +812,13 @@ class Client:
                 kwargs["speed_limit_down"] = value
 
         value, replaced = _arg_replace(
-            speed_limit_up, uploadLimit, self.rpc_version, 5, int
+            speed_limit_up,
+            uploadLimit,
+            self.rpc_version,
+            5,
+            int,
+            "speed_limit_up",
+            "uploadLimit",
         )
         if value is not None:
             if replaced:
@@ -815,7 +827,13 @@ class Client:
                 kwargs["speed_limit_up"] = value
 
         value, replaced, = _arg_replace(
-            speed_limit_down_enabled, downloadLimited, self.rpc_version, 5, bool
+            speed_limit_down_enabled,
+            downloadLimited,
+            self.rpc_version,
+            5,
+            bool,
+            "speed_limit_down_enabled",
+            "downloadLimited",
         )
         if value is not None:
             if replaced:
@@ -824,7 +842,13 @@ class Client:
                 kwargs["speed_limit_down_enabled"] = value
 
         value, replaced, = _arg_replace(
-            speed_limit_up_enabled, uploadLimited, self.rpc_version, 5, bool
+            speed_limit_up_enabled,
+            uploadLimited,
+            self.rpc_version,
+            5,
+            bool,
+            "speed_limit_up_enabled",
+            "uploadLimited",
         )
         if value is not None:
             if replaced:
@@ -1089,20 +1113,33 @@ def _arg_replace(
     rpc_version: int,
     replaced_rpc_version: int,
     convert: Callable[[Any], _T],
+    old_name: str,
+    new_name: str,
 ) -> Tuple[Optional[_T], bool]:
     v = None
+    replaced = rpc_version >= replaced_rpc_version
     if old_value is not None and new_value is not None:
         if old_value != new_value:
             raise ValueError(
-                "old argument and new argument have different value",
+                f"old argument '{old_name}' are new argument '{new_name}' set to different value",
                 old_value,
                 new_value,
             )
-        warnings.warn("don't use new argument and old arguments together")
+        warnings.warn(
+            f"don't use old argument '{old_name}' and new arguments '{new_name}' together"
+        )
         v = convert(old_value)
     elif old_value is not None:
+        if replaced:
+            warnings.warn(
+                f"you are using old argument '{old_name}', it's replaced by '{new_name}'"
+            )
         v = convert(old_value)
     elif new_value is not None:
+        if not replaced:
+            warnings.warn(
+                f"you are using argument '{new_name}', it's '{old_name}' in old transmission version"
+            )
         v = convert(new_value)
 
-    return v, rpc_version >= replaced_rpc_version
+    return v, replaced
