@@ -479,6 +479,16 @@ class Torrent:
         return self._fields["desiredAvailable"].value
 
     @property
+    def error(self) -> int:
+        """``0`` for fine task, non-zero for error torrent"""
+        return self.__getattr__("error")
+
+    @property
+    def error_string(self) -> str:
+        """empty string for fine task"""
+        return self.__getattr__("errorString")
+
+    @property
     def available(self) -> float:
         """Availability in percent"""
         bytes_all = self.total_size
