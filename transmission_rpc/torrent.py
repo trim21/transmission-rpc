@@ -263,7 +263,6 @@ class Torrent:
         """Returns the info hash of this torrent.
 
         :raise: AttributeError -- if server don't return this field
-        :rtype: int
         """
         return self.__getattr__("hashString")
 
@@ -299,7 +298,17 @@ class Torrent:
         """
         the "eta" as datetime.timedelta.
 
+        If downloading, estimated the ``timedelta`` left until the torrent is done.
+        If seeding, estimated the ``timedelta`` left until seed ratio is reached.
+
+        raw `eta` maybe negative:
+        - `-1` for ETA Not Available.
+        - `-2` for ETA Unknown.
+
+        https://github.com/transmission/transmission/blob/3.00/libtransmission/transmission.h#L1748-L1749
+
         :rtype: datetime.timedelta
+        :raise ValueError: non positive ETA.
         """
         eta = self._fields["eta"].value
         if eta >= 0:
