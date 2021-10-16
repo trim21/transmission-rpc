@@ -214,7 +214,6 @@ class Client:
             arguments = {}
         if not isinstance(arguments, dict):
             raise ValueError("request takes arguments as dict")
-        arguments = {key.replace("_", "-"): value for key, value in arguments.items()}
         ids = _parse_torrent_ids(ids)
         if len(ids) > 0:
             arguments["ids"] = ids
@@ -238,11 +237,12 @@ class Client:
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
-        if "result" in data:
+
+        try:
             if data["result"] != "success":
                 raise TransmissionError(f'Query failed with result "{data["result"]}".')
-        else:
-            raise TransmissionError("Query failed without result.")
+        except KeyError:
+            raise TransmissionError("Query failed without result.") from None
 
         results = {}
 
@@ -260,31 +260,6 @@ class Client:
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == "session-stats":
-            # data = {
-            #     "arguments": {
-            #         "activeTorrentCount": 36,
-            #         "cumulative-stats": {
-            #             "downloadedBytes": 8196824973211,
-            #             "filesAdded": 345382,
-            #             "secondsActive": 14105266,
-            #             "sessionCount": 19,
-            #             "uploadedBytes": 1216150293890
-            #         },
-            #         "current-stats": {
-            #             "downloadedBytes": 262700627538,
-            #             "filesAdded": 6419,
-            #             "secondsActive": 374222,
-            #             "sessionCount": 1,
-            #             "uploadedBytes": 319575380176
-            #         },
-            #         "downloadSpeed": 0,
-            #         "pausedTorrentCount": 9,
-            #         "torrentCount": 45,
-            #         "uploadSpeed": 891932
-            #     },
-            #     "result": "success",
-            #     "tag": 1
-            # }
             return data["arguments"]
         elif method in (
             "port-test",

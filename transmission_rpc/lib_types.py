@@ -41,4 +41,5 @@ class _Base:
             raise KeyError(f"Attribute '{name}' not available") from None
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
-        yield from self._fields.items()
+        for key, value in self._fields.items():
+            yield getattr(self, key, value)
