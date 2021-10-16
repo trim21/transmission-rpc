@@ -93,7 +93,7 @@ def test_client_add_kwargs(mock_client_factor):
             priority_low=[7],
             priority_normal=[8],
             cookies="coo",
-            bandwidthPriority=4,
+            bandwidth_priority=4,
         )
     m.assert_called_with(
         "torrent-add",

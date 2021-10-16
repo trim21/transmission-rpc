@@ -1,6 +1,7 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+import enum
 import logging
 from typing import Optional, NamedTuple
 
@@ -17,6 +18,13 @@ def mirror_dict(source: dict) -> dict:
 
 
 DEFAULT_TIMEOUT = 30.0
+
+
+class Priority(enum.IntEnum):
+    low = -1
+    normal = 0
+    high = 1
+
 
 TR_PRI_LOW = -1
 TR_PRI_NORMAL = 0
@@ -561,7 +569,6 @@ TORRENT_ARGS = {
         "cookies": Args(BaseType.string, 13, description="One or more HTTP cookie(s)."),
     },
 }
-
 
 # Arguments for session methods
 SESSION_ARGS = {

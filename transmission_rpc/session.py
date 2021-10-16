@@ -1,12 +1,12 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, Generator
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Generator
 
-from transmission_rpc.lib_types import Field, _Timeout
+from transmission_rpc.lib_types import Field
 
 if TYPE_CHECKING:
-    from transmission_rpc.client import Client
+    pass
 
 
 class Session:
@@ -19,8 +19,7 @@ class Session:
     ``download-dir`` -> ``download_dir``.
     """
 
-    def __init__(self, client: "Client", fields: Dict[str, Any] = None):
-        self._client = client
+    def __init__(self, fields: Dict[str, Any] = None):
         self._fields: Dict[str, Field] = {}
         if fields is not None:
             self._update_fields(fields)
@@ -51,36 +50,9 @@ class Session:
         else:
             raise ValueError("Cannot update with supplied data")
 
-    def _dirty_fields(self) -> List[str]:
-        """Enumerate changed fields"""
-        outgoing_keys = ["peer-port", "pex-enabled"]
-        fields = []
-        for key in outgoing_keys:
-            if key in self._fields and self._fields[key].dirty:
-                fields.append(key)
-        return fields
-
-    def _push(self) -> None:
-        """Push changed fields to the server"""
-        dirty = self._dirty_fields()
-        args = {}
-        for key in dirty:
-            args[key] = self._fields[key].value
-            self._fields[key] = self._fields[key]._replace(dirty=False)
-        if len(args) > 0:
-            self._client.set_session(**args)
-
     def items(self) -> Generator[Tuple[str, Any], None, None]:
         for key, field in self._fields.items():
             yield key, field.value
-
-    def update(self, timeout: _Timeout = None) -> None:
-        """Update the session information."""
-        self._push()
-        session = self._client.get_session(timeout=timeout)
-        self._update_fields(session)
-        session = self._client.session_stats(timeout=timeout)
-        self._update_fields(session)
 
     def from_request(self, data: dict) -> None:
         """Update the session information."""
@@ -121,19 +93,6 @@ class Session:
         """
         return self.__getattr__("peer-port")
 
-    @peer_port.setter
-    def peer_port(self, port: int) -> None:
-        """Set the peer port.
-
-        rpc version 5
-        transmission version 1.60
-        """
-        if isinstance(port, int):
-            self._fields["peer-port"] = Field(port, True)
-            self._push()
-        else:
-            raise ValueError("Not a valid limit")
-
     @property
     def pex_enabled(self) -> bool:
         """Is peer exchange enabled
@@ -141,12 +100,3 @@ class Session:
         rpc version 5
         transmission version 1.60"""
         return self.__getattr__("pex-enabled")
-
-    @pex_enabled.setter
-    def pex_enabled(self, enabled: bool) -> None:
-        """Enable/disable peer exchange."""
-        if isinstance(enabled, bool):
-            self._fields["pex-enabled"] = Field(enabled, True)
-            self._push()
-        else:
-            raise TypeError("Not a valid type")
