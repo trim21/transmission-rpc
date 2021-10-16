@@ -189,12 +189,13 @@ class Torrent(_Base):
     @property
     def progress(self) -> float:
         """
-        download progress in percent.
+        download progress in range [0, 100].
 
         :rtype: float
         """
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
+            # percentDone is added at rpc 5
             return round((100.0 * self._fields["percent_done"]), 2)
         except KeyError:
             try:
