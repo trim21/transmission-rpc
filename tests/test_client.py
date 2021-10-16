@@ -192,7 +192,7 @@ def test_real_stop(tr_client: Client, fake_hash_factory):
 
     for _ in range(50):
         time.sleep(0.2)
-        if tr_client.get_torrents()[0].status == "stopped":
+        if tr_client.get_torrents()[0].stopped:
             ret = True
             break
 
@@ -203,11 +203,11 @@ def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
     tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
     tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
     for torrent in tr_client.get_torrents():
-        assert torrent.status == "stopped", "all torrent should be stopped"
+        assert torrent.stopped, "all torrent should be stopped"
 
     tr_client.start_all()
     for torrent in tr_client.get_torrents():
-        assert torrent.status == "downloading", "all torrent should be downloading"
+        assert torrent.downloading, "all torrent should be downloading"
 
 
 def test_real_get_files(tr_client: Client):
