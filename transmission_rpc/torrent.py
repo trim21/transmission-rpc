@@ -92,11 +92,11 @@ class Torrent(_Base):
         if "files" in self._fields:
             files = self.__getattr__("files")
             indices = range(len(files))
-            priorities = self.__getattr__("priorities")
-            wanted = self.__getattr__("wanted")
+            priorities = self.priorities
+            wanted = self.wanted
             for item in zip(indices, files, priorities, wanted):
                 selected = bool(item[3])
-                priority = Priority[item[2]]
+                priority = item[2]
                 result.append(
                     File(
                         selected=selected,
@@ -577,9 +577,9 @@ class Torrent(_Base):
         return self.__getattr__("pieces")
 
     @property
-    def priorities(self) -> list:
+    def priorities(self) -> List[Priority]:
         """Array of file priorities."""
-        return self.__getattr__("priorities")
+        return [Priority(x) for x in self.__getattr__("priorities")]
 
     @property
     def recheck_progress(self) -> int:
@@ -636,7 +636,7 @@ class Torrent(_Base):
         return self.__getattr__("uploaded_ever")
 
     @property
-    def wanted(self) -> list:
+    def wanted(self) -> List[int]:
         """Array of booleans indicated wanted files."""
         return self.__getattr__("wanted")
 
