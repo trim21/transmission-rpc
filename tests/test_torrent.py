@@ -11,13 +11,12 @@ import pytest
 import transmission_rpc
 import transmission_rpc.utils
 import transmission_rpc.constants
-from transmission_rpc.torrent import Status
 
 
 def test_initial():
     with pytest.raises(ValueError, match="Torrent requires an id"):
-        transmission_rpc.Torrent(None, {})
-    transmission_rpc.Torrent(None, {"id": 42})
+        transmission_rpc.Torrent({})
+    transmission_rpc.Torrent({"id": 42})
 
 
 def assert_property_exception(exception, ob, prop):
@@ -26,7 +25,7 @@ def assert_property_exception(exception, ob, prop):
 
 
 def test_get_name_string():
-    torrent = transmission_rpc.Torrent(None, {"id": 42, "name": "we"})
+    torrent = transmission_rpc.Torrent({"id": 42, "name": "we"})
     name = torrent._get_name_string()  # pylint: disable=W0212
     assert isinstance(name, str)
 
@@ -37,12 +36,12 @@ def test_non_active():
         "activityDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(data)
     assert torrent.date_active
 
 
 def test_attributes():
-    torrent = transmission_rpc.Torrent(None, {"id": 42})
+    torrent = transmission_rpc.Torrent({"id": 42})
     assert hasattr(torrent, "id")
     assert torrent.id == 42
     assert_property_exception(KeyError, torrent, "status")
@@ -96,7 +95,7 @@ def test_attributes():
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 
-    torrent = transmission_rpc.Torrent(None, {"id": 42, "eta": -1})
+    torrent = transmission_rpc.Torrent({"id": 42, "eta": -1})
     assert_property_exception(ValueError, torrent, "eta")
 
     data = {
@@ -114,14 +113,5 @@ def test_attributes():
         "doneDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(data)
     assert torrent.date_done is None
-
-
-def test_status():
-    assert Status("downloading").downloading
-    assert not Status("downloading").download_pending
-    assert Status("download pending").download_pending
-    assert Status("some thing") == "some thing"
-    assert {"some thing": ...}.get(Status("some thing")) is ...
-    assert Status("some thing") in {"some thing", "o"}

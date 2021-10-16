@@ -14,7 +14,7 @@ packages = [{ include = 'transmission_rpc' }]
 keywords = ['transmission', 'rpc']
 classifiers = [
     'Intended Audience :: Developers',
-    'Development Status :: 4 - Beta',
+    'Development TorrentStatus :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
     'Topic :: Internet',
     'Programming Language :: Python :: 3 :: Only',

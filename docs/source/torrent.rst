@@ -6,15 +6,15 @@ Torrent
 .. autoclass:: Torrent
     :members:
 
-.. autoclass:: Status
+.. autoclass:: TorrentStatus
 
-    .. autoattribute:: Status.stopped
-    .. autoattribute:: Status.check_pending
-    .. autoattribute:: Status.checking
-    .. autoattribute:: Status.download_pending
-    .. autoattribute:: Status.downloading
-    .. autoattribute:: Status.seed_pending
-    .. autoattribute:: Status.seeding
+    .. autoattribute:: TorrentStatus.stopped
+    .. autoattribute:: TorrentStatus.check_pending
+    .. autoattribute:: TorrentStatus.checking
+    .. autoattribute:: TorrentStatus.download_pending
+    .. autoattribute:: TorrentStatus.downloading
+    .. autoattribute:: TorrentStatus.seed_pending
+    .. autoattribute:: TorrentStatus.seeding
 
 .. toctree::
    :maxdepth: 2

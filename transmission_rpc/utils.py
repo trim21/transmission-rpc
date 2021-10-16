@@ -3,33 +3,10 @@
 # Licensed under the MIT license.
 import base64
 import datetime
-from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
+from typing import List, Union, TypeVar, BinaryIO, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
-from transmission_rpc.constants import BaseType
-
-UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
-
-
-def format_size(size: int) -> Tuple[float, str]:
-    """
-    Format byte size into IEC prefixes, B, KiB, MiB ...
-    """
-    s = float(size)
-    i = 0
-    while s >= 1024.0 and i < len(UNITS):
-        i += 1
-        s /= 1024.0
-    return s, UNITS[i]
-
-
-def format_speed(size: int) -> Tuple[float, str]:
-    """
-    Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
-    """
-    (s, unit) = format_size(size)
-    return s, unit + "/s"
 
 
 def format_timedelta(delta: datetime.timedelta) -> str:
@@ -39,28 +16,6 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     minutes, seconds = divmod(delta.seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
-
-
-def rpc_bool(arg: Any) -> int:
-    """
-    Convert between Python boolean and Transmission RPC boolean.
-    """
-    if isinstance(arg, str):
-        try:
-            arg = bool(int(arg))
-        except ValueError:
-            arg = arg.lower() in ["true", "yes"]
-    return 1 if bool(arg) else 0
-
-
-TR_TYPE_MAP: Dict[str, Callable] = {
-    BaseType.number: int,
-    BaseType.string: str,
-    BaseType.double: float,
-    BaseType.boolean: rpc_bool,
-    BaseType.array: list,
-    BaseType.object: dict,
-}
 
 
 def get_arguments(method: str, rpc_version: int) -> List[str]:
@@ -117,3 +72,7 @@ def _camel_to_snake(camel):
         else:
             snake.append(c)
     return str.join("", snake)
+
+
+def _to_snake(camel):
+    return _camel_to_snake(camel).replace("-", "_")

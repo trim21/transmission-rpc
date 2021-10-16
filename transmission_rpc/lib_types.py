@@ -1,8 +1,11 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
-from typing import Any, Tuple, Union, Optional, NamedTuple
+from copy import deepcopy
+from typing import Any, Dict, Tuple, Union, Optional, Generator, NamedTuple
 
 from typing_extensions import Literal
+
+from transmission_rpc.utils import _to_snake
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
@@ -16,6 +19,28 @@ class File(NamedTuple):
     selected: bool  # if selected for download
 
 
-class Field(NamedTuple):
-    value: Any
-    dirty: bool
+class _Base:
+    _fields: Dict[str, Any]
+
+    def __init__(self, other=None):
+        self._fields: Dict[str, Any] = {}
+        if isinstance(other, dict):
+            for key, value in other.items():
+                self._fields[_to_snake(key)] = value
+        elif isinstance(other, _Base):
+            for key in list(other._fields.keys()):
+                self._fields[_to_snake(key)] = deepcopy(other._fields[key])
+        elif other is None:
+            pass
+        else:
+            raise ValueError("Cannot update with supplied data")
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self._fields:
+            return self._fields[name]
+        else:
+            raise KeyError(f"Attribute '{name}' not available")
+
+    def items(self) -> Generator[Tuple[str, Any], None, None]:
+        for key, field in self._fields.items():
+            yield _to_snake(key), field

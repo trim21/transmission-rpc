@@ -26,11 +26,11 @@ from transmission_rpc.error import (
     TransmissionTimeoutError,
     TransmissionVersionError,
 )
-from transmission_rpc.utils import LOGGER, get_arguments, _try_read_torrent
-from transmission_rpc.session import Session
+from transmission_rpc.utils import get_arguments, _try_read_torrent
+from transmission_rpc.session import Stat, Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import DEFAULT_TIMEOUT
-from transmission_rpc.lib_types import File, Field, _Timeout
+from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
+from transmission_rpc.lib_types import File, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -44,9 +44,7 @@ def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
     return str(s)
 
 
-def _parse_torrent_id(
-    raw_torrent_id: Union[int, str, Field, Torrent]
-) -> Union[int, str]:
+def _parse_torrent_id(raw_torrent_id: Union[int, str, Torrent]) -> Union[int, str]:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -54,8 +52,6 @@ def _parse_torrent_id(
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
             raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
-    elif isinstance(raw_torrent_id, Field):
-        return _parse_torrent_id(raw_torrent_id.value)
     elif isinstance(raw_torrent_id, Torrent):
         return raw_torrent_id.get("hashString") or raw_torrent_id.id
     raise ValueError(f"{raw_torrent_id} is not valid torrent id")
@@ -138,13 +134,15 @@ class Client:
 
         self.url = str(url)
         self._sequence = 0
-        self.session: Session = Session(self)
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: Optional[int] = None
         self._http_session = requests.Session()
         self._http_session.trust_env = False
+
+        self.session: Session = Session()
         self.get_session()
+
         self.torrent_get_arguments = get_arguments("torrent-get", self.rpc_version)
 
     @property
@@ -246,6 +244,7 @@ class Client:
             raise TransmissionError("Query failed without result.")
 
         results = {}
+
         if method == "torrent-get":
             for item in data["arguments"]["torrents"]:
                 results[item["id"]] = Torrent(item)
@@ -260,19 +259,39 @@ class Client:
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == "session-stats":
-            # older versions of T has the return data in "session-stats"
-            if "session-stats" in data["arguments"]:
-                self._update_session(data["arguments"]["session-stats"])
-            else:
-                self._update_session(data["arguments"])
+            # data = {
+            #     "arguments": {
+            #         "activeTorrentCount": 36,
+            #         "cumulative-stats": {
+            #             "downloadedBytes": 8196824973211,
+            #             "filesAdded": 345382,
+            #             "secondsActive": 14105266,
+            #             "sessionCount": 19,
+            #             "uploadedBytes": 1216150293890
+            #         },
+            #         "current-stats": {
+            #             "downloadedBytes": 262700627538,
+            #             "filesAdded": 6419,
+            #             "secondsActive": 374222,
+            #             "sessionCount": 1,
+            #             "uploadedBytes": 319575380176
+            #         },
+            #         "downloadSpeed": 0,
+            #         "pausedTorrentCount": 9,
+            #         "torrentCount": 45,
+            #         "uploadSpeed": 891932
+            #     },
+            #     "result": "success",
+            #     "tag": 1
+            # }
+            return data["arguments"]
         elif method in (
             "port-test",
             "blocklist-update",
             "free-space",
             "torrent-rename-path",
+            "session-get",
         ):
-            results = data["arguments"]
-        elif method == "session-get":
             return data["arguments"]
         else:
             return data
@@ -286,7 +305,7 @@ class Client:
         if self.session:
             self.session.from_request(data)
         else:
-            self.session = Session(self, data)
+            self.session = Session(data)
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
@@ -811,6 +830,14 @@ class Client:
         """Move transfer down in the queue."""
         self._request("queue-move-down", ids=ids, require_ids=True, timeout=timeout)
 
+    def session_stats(self, timeout: _Timeout = None) -> Stat:
+        """Get session statistics
+
+        :return: global stats, current stats
+        """
+        data = self._request("session-stats", timeout=timeout)
+        return Stat(data)
+
     def get_session(self, timeout: _Timeout = None) -> Session:
         """
         Get session parameters. See the Session class for more information.
@@ -818,7 +845,7 @@ class Client:
         self._update_session(self._request("session-get", timeout=timeout))
         try:
             self._update_server_version()
-        except AttributeError:
+        except KeyError:
             raise TransmissionVersionError(
                 "support current server version is deprecated, please install transmission-rpc<4.0.0"
             ) from None
@@ -1053,11 +1080,6 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: _Timeout = None) -> Session:
-        """Get session statistics"""
-        self._request("session-stats", timeout=timeout)
-        return self.session
-
     @property
     def timeout(self) -> _Timeout:
         """
@@ -1099,9 +1121,9 @@ class Client:
         if self.protocol_version is None:
             try:
                 self.protocol_version = self.session.rpc_version
-            except AttributeError:
+            except KeyError:
                 raise TransmissionVersionError(
-                    "support current server version is deprecated, please install transmission-rpc<4.0.0"
+                    "support current server version is removed, please install transmission-rpc<4.0.0"
                 ) from None
         return self.protocol_version
 
