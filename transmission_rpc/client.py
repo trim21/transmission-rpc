@@ -30,7 +30,7 @@ from transmission_rpc.error import (
 from transmission_rpc.utils import get_arguments, _try_read_torrent
 from transmission_rpc.session import Stat, Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
+from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, Priority
 from transmission_rpc.lib_types import File, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
@@ -366,7 +366,7 @@ class Client:
         priority_low: List[int] = None,
         priority_normal: List[int] = None,
         cookies: str = None,
-        bandwidth_priority: int = None,
+        bandwidth_priority: Priority = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -377,20 +377,20 @@ class Client:
 
         Additional arguments are:
 
-        ===================== ===== =========== =============================================================
-        Argument              RPC   Replaced by Description
-        ===================== ===== =========== =============================================================
-        ``download_dir``      1 -               The directory where the downloaded contents will be saved in.
-        ``files_unwanted``    1 -               A list of file id's that shouldn't be downloaded.
-        ``files_wanted``      1 -               A list of file id's that should be downloaded.
-        ``paused``            1 -               If True, does not start the transfer when added.
-        ``peer_limit``        1 -               Maximum number of peers allowed.
-        ``priority_high``     1 -               A list of file id's that should have high priority.
-        ``priority_low``      1 -               A list of file id's that should have low priority.
-        ``priority_normal``   1 -               A list of file id's that should have normal priority.
-        ``bandwidth_priority`` 8 -               Priority for this transfer.
-        ``cookies``           13 -              One or more HTTP cookie(s).
-        ===================== ===== =========== =============================================================
+        =====================  =====  =============================================================
+        Argument               RPC    Description
+        =====================  =====  =============================================================
+        ``download_dir``       1 -    The directory where the downloaded contents will be saved in.
+        ``files_unwanted``     1 -    A list of file id's that shouldn't be downloaded.
+        ``files_wanted``       1 -    A list of file id's that should be downloaded.
+        ``paused``             1 -    If True, does not start the transfer when added.
+        ``peer_limit``         1 -    Maximum number of peers allowed.
+        ``priority_high``      1 -    A list of file id's that should have high priority.
+        ``priority_low``       1 -    A list of file id's that should have low priority.
+        ``priority_normal``    1 -    A list of file id's that should have normal priority.
+        ``bandwidth_priority`` 8 -    Priority for this transfer.
+        ``cookies``            13 -   One or more HTTP cookie(s).
+        =====================  =====  =============================================================
 
         Returns a Torrent object with the fields.
         """
@@ -399,7 +399,7 @@ class Client:
 
         kwargs: Dict[str, Any] = {}
         if download_dir is not None:
-            kwargs["download-dir"] = download_dir
+            kwargs["download-dir"] = ensure_location_str(download_dir)
 
         if files_unwanted is not None:
             kwargs["files-unwanted"] = files_unwanted

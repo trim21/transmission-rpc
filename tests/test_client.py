@@ -155,12 +155,6 @@ def test_real_add_torrent_fd(tr_client: Client):
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
-def test_real_add_torrent_base64(tr_client: Client):
-    with open("tests/fixtures/iso.torrent", "rb") as f:
-        tr_client.add_torrent(base64.b64encode(f.read()).decode())
-    assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
-
-
 def test_real_add_torrent_http(tr_client: Client):
     tr_client.add_torrent(
         "https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent"

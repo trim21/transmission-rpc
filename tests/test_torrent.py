@@ -96,7 +96,7 @@ def test_attributes():
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 
     torrent = transmission_rpc.Torrent({"id": 42, "eta": -1})
-    assert_property_exception(ValueError, torrent, "eta")
+    assert torrent.eta is None
 
     data = {
         "id": 1,
