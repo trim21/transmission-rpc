@@ -37,8 +37,7 @@ class _Base:
     def __getattr__(self, name: str) -> Any:
         if name in self._fields:
             return self._fields[name]
-        else:
-            raise KeyError(f"Attribute '{name}' not available")
+        raise KeyError(f"Attribute '{name}' not available")
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
         for key, field in self._fields.items():
