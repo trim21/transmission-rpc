@@ -605,7 +605,7 @@ class Client:
         method = "torrent-start"
         if bypass_queue:
             method = "torrent-start-now"
-        torrent_list = sorted(torrent_list, key=operator.attrgetter("queuePosition"))
+        torrent_list = sorted(torrent_list, key=operator.attrgetter("queue_position"))
         self._request(
             method,
             {},
