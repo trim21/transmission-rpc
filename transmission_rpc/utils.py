@@ -101,12 +101,12 @@ def argument_value_convert(
         while invalid_version:
             invalid_version = False
             replacement = None
-            if rpc_version < info.added_version:
+            if rpc_version < info[1]:
                 invalid_version = True
-                replacement = info.previous_argument_name
-            if info.removed_version is not None and info.removed_version <= rpc_version:
+                replacement = info[3]
+            if info[2] is not None and info[2] <= rpc_version:
                 invalid_version = True
-                replacement = info.next_argument_name
+                replacement = info[4]
             if invalid_version:
                 if replacement:
                     LOGGER.warning(
@@ -137,9 +137,9 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
     accessible = []
     for argument, info in args.items():
         valid_version = True
-        if rpc_version < info.added_version:
+        if rpc_version < info[1]:
             valid_version = False
-        if info.removed_version is not None and info.removed_version <= rpc_version:
+        if info[2] is not None and info[2] <= rpc_version:
             valid_version = False
         if valid_version:
             accessible.append(argument)
