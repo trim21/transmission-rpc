@@ -12,6 +12,7 @@ import logging
 import pathlib
 import operator
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
+from pathlib import Path
 from urllib.parse import quote, urlunparse
 
 import requests
@@ -759,18 +760,16 @@ class Client:
                         normal.append(fid)
                     elif file_desc["priority"] == "low":
                         low.append(fid)
-            args = {}
-            if len(high) > 0:
-                args["priority_high"] = high
-            if len(normal) > 0:
-                args["priority_normal"] = normal
-            if len(low) > 0:
-                args["priority_low"] = low
-            if len(wanted) > 0:
-                args["files_wanted"] = wanted
-            if len(unwanted) > 0:
-                args["files_unwanted"] = unwanted
-            self.change_torrent([tid], timeout=timeout, **args)
+
+            self.change_torrent(
+                [tid],
+                timeout=timeout,
+                priority_high=high or None,
+                priority_normal=normal or None,
+                priority_low=low or None,
+                files_wanted=wanted or None,
+                files_unwanted=unwanted or None,
+            )
 
     def move_torrent_data(
         self,
@@ -855,48 +854,48 @@ class Client:
         self,
         timeout: _Timeout = None,
         *,
-        alt_speed_down=None,
-        alt_speed_enabled=None,
-        alt_speed_time_begin=None,
-        alt_speed_time_day=None,
-        alt_speed_time_enabled=None,
-        alt_speed_time_end=None,
-        alt_speed_up=None,
-        blocklist_enabled=None,
-        blocklist_url=None,
-        cache_size_mb=None,
-        dht_enabled=None,
-        download_dir=None,
-        download_queue_enabled=None,
-        download_queue_size=None,
-        encryption=None,
-        idle_seeding_limit=None,
-        idle_seeding_limit_enabled=None,
-        incomplete_dir=None,
-        incomplete_dir_enabled=None,
-        lpd_enabled=None,
-        peer_limit_global=None,
-        peer_limit_per_torrent=None,
-        peer_port=None,
-        peer_port_random_on_start=None,
-        pex_enabled=None,
-        port_forwarding_enabled=None,
-        queue_stalled_enabled=None,
-        queue_stalled_minutes=None,
-        rename_partial_files=None,
-        script_torrent_done_enabled=None,
-        script_torrent_done_filename=None,
-        seed_queue_enabled=None,
-        seed_queue_size=None,
-        seed_ratio_limit=None,
-        seed_ratio_limited=None,
-        speed_limit_down=None,
-        speed_limit_down_enabled=None,
-        speed_limit_up=None,
-        speed_limit_up_enabled=None,
-        start_added_torrents=None,
-        trash_original_torrent_files=None,
-        utp_enabled=None,
+        alt_speed_down: int = None,
+        alt_speed_enabled: bool = None,
+        alt_speed_time_begin: int = None,
+        alt_speed_time_day: int = None,
+        alt_speed_time_enabled: bool = None,
+        alt_speed_time_end: int = None,
+        alt_speed_up: int = None,
+        blocklist_enabled: bool = None,
+        blocklist_url: str = None,
+        cache_size_mb: int = None,
+        dht_enabled: bool = None,
+        download_dir: Union[str, Path] = None,
+        download_queue_enabled: bool = None,
+        download_queue_size: int = None,
+        encryption: Literal["required", "preferred", "tolerated"] = None,
+        idle_seeding_limit: int = None,
+        idle_seeding_limit_enabled: bool = None,
+        incomplete_dir: Union[str, Path] = None,
+        incomplete_dir_enabled: bool = None,
+        lpd_enabled: bool = None,
+        peer_limit_global: int = None,
+        peer_limit_per_torrent: int = None,
+        peer_port: int = None,
+        peer_port_random_on_start: bool = None,
+        pex_enabled: bool = None,
+        port_forwarding_enabled: bool = None,
+        queue_stalled_enabled: bool = None,
+        queue_stalled_minutes: int = None,
+        rename_partial_files: bool = None,
+        script_torrent_done_enabled: bool = None,
+        script_torrent_done_filename: Union[str, Path] = None,
+        seed_queue_enabled: bool = None,
+        seed_queue_size: int = None,
+        seed_ratio_limit: float = None,
+        seed_ratio_limited: bool = None,
+        speed_limit_down: int = None,
+        speed_limit_down_enabled: bool = None,
+        speed_limit_up: int = None,
+        speed_limit_up_enabled: bool = None,
+        start_added_torrents: bool = None,
+        trash_original_torrent_files: bool = None,
+        utp_enabled: bool = None,
     ) -> None:
         """
         Set session parameters. The parameters are:
@@ -958,94 +957,138 @@ class Client:
 
         """
         kwargs = {}
-        if alt_speed_down is None:
-            kwargs["alt_speed_down"] = alt_speed_down
-        if alt_speed_enabled is None:
-            kwargs["alt_speed_enabled"] = alt_speed_enabled
-        if alt_speed_time_begin is None:
-            kwargs["alt_speed_time_begin"] = alt_speed_time_begin
-        if alt_speed_time_day is None:
-            kwargs["alt_speed_time_day"] = alt_speed_time_day
-        if alt_speed_time_enabled is None:
-            kwargs["alt_speed_time_enabled"] = alt_speed_time_enabled
-        if alt_speed_time_end is None:
-            kwargs["alt_speed_time_end"] = alt_speed_time_end
-        if alt_speed_up is None:
-            kwargs["alt_speed_up"] = alt_speed_up
-        if blocklist_enabled is None:
-            kwargs["blocklist_enabled"] = blocklist_enabled
-        if blocklist_url is None:
-            kwargs["blocklist_url"] = blocklist_url
-        if cache_size_mb is None:
-            kwargs["cache_size_mb"] = cache_size_mb
-        if dht_enabled is None:
-            kwargs["dht_enabled"] = dht_enabled
-        if download_dir is None:
-            kwargs["download_dir"] = download_dir
-        if download_queue_enabled is None:
-            kwargs["download_queue_enabled"] = download_queue_enabled
-        if download_queue_size is None:
-            kwargs["download_queue_size"] = download_queue_size
-        if encryption is None:
+
+        if download_dir is not None:
+            kwargs["download-dir"] = ensure_location_str(download_dir)
+
+        if encryption is not None:
+            if encryption not in ("required", "preferred", "tolerated"):
+                raise ValueError(
+                    "'encryption' must be one of ('required', 'preferred', 'tolerated')"
+                )
             kwargs["encryption"] = encryption
-        if idle_seeding_limit is None:
-            kwargs["idle_seeding_limit"] = idle_seeding_limit
-        if idle_seeding_limit_enabled is None:
-            kwargs["idle_seeding_limit_enabled"] = idle_seeding_limit_enabled
-        if incomplete_dir is None:
-            kwargs["incomplete_dir"] = incomplete_dir
-        if incomplete_dir_enabled is None:
-            kwargs["incomplete_dir_enabled"] = incomplete_dir_enabled
-        if lpd_enabled is None:
-            kwargs["lpd_enabled"] = lpd_enabled
-        if peer_limit_global is None:
-            kwargs["peer-limit-global"] = peer_limit_global
-        if peer_limit_per_torrent is None:
-            kwargs["peer_limit_per_torrent"] = peer_limit_per_torrent
-        if peer_port is None:
-            kwargs["peer_port"] = peer_port
-        if peer_port_random_on_start is None:
-            kwargs["peer_port_random_on_start"] = peer_port_random_on_start
-        if pex_enabled is None:
-            kwargs["pex_enabled"] = pex_enabled
-        if pex_enabled is None:
-            kwargs["pex_enabled"] = pex_enabled
-        if peer_port is None:
-            kwargs["peer_port"] = peer_port
-        if port_forwarding_enabled is None:
-            kwargs["port_forwarding_enabled"] = port_forwarding_enabled
-        if queue_stalled_enabled is None:
-            kwargs["queue_stalled_enabled"] = queue_stalled_enabled
-        if queue_stalled_minutes is None:
-            kwargs["queue_stalled_minutes"] = queue_stalled_minutes
-        if rename_partial_files is None:
-            kwargs["rename_partial_files"] = rename_partial_files
-        if script_torrent_done_enabled is None:
-            kwargs["script_torrent_done_enabled"] = script_torrent_done_enabled
-        if script_torrent_done_filename is None:
-            kwargs["script_torrent_done_filename"] = script_torrent_done_filename
-        if seed_queue_enabled is None:
-            kwargs["seed_queue_enabled"] = seed_queue_enabled
-        if seed_queue_size is None:
-            kwargs["seed_queue_size"] = seed_queue_size
-        if seed_ratio_limit is None:
-            kwargs["seed_ratio_limit"] = seed_ratio_limit
-        if seed_ratio_limited is None:
-            kwargs["seed_ratio_limited"] = seed_ratio_limited
-        if speed_limit_down is None:
-            kwargs["speed_limit_down"] = speed_limit_down
-        if speed_limit_down_enabled is None:
-            kwargs["speed_limit_down_enabled"] = speed_limit_down_enabled
-        if speed_limit_up is None:
-            kwargs["speed_limit_up"] = speed_limit_up
-        if speed_limit_up_enabled is None:
-            kwargs["speed_limit_up_enabled"] = speed_limit_up_enabled
-        if start_added_torrents is None:
-            kwargs["start_added_torrents"] = start_added_torrents
-        if trash_original_torrent_files is None:
-            kwargs["trash_original_torrent_files"] = trash_original_torrent_files
-        if utp_enabled is None:
-            kwargs["utp_enabled"] = utp_enabled
+
+        if port_forwarding_enabled is not None:
+            kwargs["port-forwarding-enabled"] = bool(port_forwarding_enabled)
+
+        if speed_limit_down is not None:
+            kwargs["speed-limit-down"] = int(speed_limit_down)
+
+        if speed_limit_down_enabled is not None:
+            kwargs["speed-limit-down-enabled"] = bool(speed_limit_down_enabled)
+
+        if speed_limit_up is not None:
+            kwargs["speed-limit-up"] = int(speed_limit_up)
+
+        if speed_limit_up_enabled is not None:
+            kwargs["speed-limit-up-enabled"] = bool(speed_limit_up_enabled)
+
+        if alt_speed_down is not None:
+            kwargs["alt-speed-down"] = int(alt_speed_down)
+
+        if alt_speed_enabled is not None:
+            kwargs["alt-speed-enabled"] = bool(alt_speed_enabled)
+
+        if alt_speed_time_begin is not None:
+            kwargs["alt-speed-time-begin"] = int(alt_speed_time_begin)
+
+        if alt_speed_time_enabled is not None:
+            kwargs["alt-speed-time-enabled"] = bool(alt_speed_time_enabled)
+
+        if alt_speed_time_end is not None:
+            kwargs["alt-speed-time-end"] = int(alt_speed_time_end)
+
+        if alt_speed_time_day is not None:
+            kwargs["alt-speed-time-day"] = int(alt_speed_time_day)
+
+        if alt_speed_up is not None:
+            kwargs["alt-speed-up"] = int(alt_speed_up)
+
+        if blocklist_enabled is not None:
+            kwargs["blocklist-enabled"] = bool(blocklist_enabled)
+
+        if peer_limit_global is not None:
+            kwargs["peer-limit-global"] = int(peer_limit_global)
+
+        if peer_limit_per_torrent is not None:
+            kwargs["peer-limit-per-torrent"] = int(peer_limit_per_torrent)
+
+        if pex_enabled is not None:
+            kwargs["pex-enabled"] = bool(pex_enabled)
+
+        if peer_port is not None:
+            kwargs["peer-port"] = int(peer_port)
+
+        if peer_port_random_on_start is not None:
+            kwargs["peer-port-random-on-start"] = bool(peer_port_random_on_start)
+
+        if seed_ratio_limit is not None:
+            kwargs["seedRatioLimit"] = float(seed_ratio_limit)
+
+        if seed_ratio_limited is not None:
+            kwargs["seedRatioLimited"] = bool(seed_ratio_limited)
+
+        if dht_enabled is not None:
+            kwargs["dht-enabled"] = bool(dht_enabled)
+
+        if incomplete_dir is not None:
+            kwargs["incomplete-dir"] = ensure_location_str(incomplete_dir)
+
+        if incomplete_dir_enabled is not None:
+            kwargs["incomplete-dir-enabled"] = bool(incomplete_dir_enabled)
+
+        if rename_partial_files is not None:
+            kwargs["rename-partial-files"] = bool(rename_partial_files)
+
+        if lpd_enabled is not None:
+            kwargs["lpd-enabled"] = bool(lpd_enabled)
+
+        if script_torrent_done_enabled is not None:
+            kwargs["script-torrent-done-enabled"] = bool(script_torrent_done_enabled)
+
+        if script_torrent_done_filename is not None:
+            kwargs["script-torrent-done-filename"] = ensure_location_str(
+                script_torrent_done_filename
+            )
+
+        if start_added_torrents is not None:
+            kwargs["start-added-torrents"] = bool(start_added_torrents)
+
+        if trash_original_torrent_files is not None:
+            kwargs["trash-original-torrent-files"] = bool(trash_original_torrent_files)
+
+        if cache_size_mb is not None:
+            kwargs["cache-size-mb"] = int(cache_size_mb)
+
+        if idle_seeding_limit is not None:
+            kwargs["idle-seeding-limit"] = int(idle_seeding_limit)
+
+        if idle_seeding_limit_enabled is not None:
+            kwargs["idle-seeding-limit-enabled"] = bool(idle_seeding_limit_enabled)
+
+        if blocklist_url is not None:
+            kwargs["blocklist-url"] = str(blocklist_url)
+
+        if utp_enabled is not None:
+            kwargs["utp-enabled"] = bool(utp_enabled)
+
+        if download_queue_size is not None:
+            kwargs["download-queue-size"] = int(download_queue_size)
+
+        if download_queue_enabled is not None:
+            kwargs["download-queue-enabled"] = bool(download_queue_enabled)
+
+        if queue_stalled_minutes is not None:
+            kwargs["queue-stalled-minutes"] = int(queue_stalled_minutes)
+
+        if queue_stalled_enabled is not None:
+            kwargs["queue-stalled-enabled"] = bool(queue_stalled_enabled)
+
+        if seed_queue_size is not None:
+            kwargs["seed-queue-size"] = int(seed_queue_size)
+
+        if seed_queue_enabled is not None:
+            kwargs["seed-queue-enabled"] = bool(seed_queue_enabled)
 
         if len(kwargs) > 0:
             self._request("session-set", kwargs, timeout=timeout)
