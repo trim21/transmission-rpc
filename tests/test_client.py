@@ -3,7 +3,6 @@ import time
 import base64
 import pathlib
 from unittest import mock
-from urllib.parse import urljoin
 
 import yarl
 import pytest
@@ -24,7 +23,7 @@ from transmission_rpc.lib_types import File
             "a@as +@45/:&*^",
             "127.0.0.1",
             2333,
-            "/transmission/",
+            "/transmission/rpc",
         ),
         (
             "http",
@@ -61,7 +60,7 @@ def test_client_parse_url(
                 password=password,
                 host=host,
                 port=port,
-                path=urljoin(path, "rpc"),
+                path=path,
             )
         )
 
@@ -120,12 +119,6 @@ def test_client_add_url():
 
 def test_client_add_magnet():
     assert _try_read_torrent(magnet_url) is None, "handle magnet URL with daemon"
-
-
-def test_client_add_base64_raw_data():
-    with open("tests/fixtures/iso.torrent", "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
-    assert _try_read_torrent(b64) == b64, "should skip handle base64 content"
 
 
 def test_client_add_file_protocol():

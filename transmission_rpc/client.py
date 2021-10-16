@@ -82,11 +82,11 @@ def _build_auth(username: Optional[str], password: Optional[str]) -> str:
         username = ""
 
     if password:
-        password = quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8")
+        password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8")
     else:
         password = ""
 
-    return f"{username}:{password}@"
+    return f"{username}{password}@"
 
 
 class Client:
