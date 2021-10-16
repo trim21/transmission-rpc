@@ -73,7 +73,7 @@ def test_attributes():
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(data)
     assert torrent.id == 1
     assert torrent.leftUntilDone == 500
     assert torrent.status == "downloading"
