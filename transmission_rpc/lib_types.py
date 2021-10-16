@@ -35,10 +35,10 @@ class _Base:
             raise ValueError("Cannot update with supplied data")
 
     def __getattr__(self, name: str) -> Any:
-        if name in self._fields:
+        try:
             return self._fields[name]
-        raise KeyError(f"Attribute '{name}' not available")
+        except KeyError:
+            raise KeyError(f"Attribute '{name}' not available") from None
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
-        for key, field in self._fields.items():
-            yield _to_snake(key), field
+        yield from self._fields.items()
