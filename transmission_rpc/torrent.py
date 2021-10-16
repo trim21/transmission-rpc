@@ -211,7 +211,7 @@ class Torrent(_Base):
 
         :rtype: float
         """
-        return float(self.__getattr__("uploadRatio"))
+        return float(self.__getattr__("upload_ratio"))
 
     @property
     def eta(self) -> Optional[datetime.timedelta]:
