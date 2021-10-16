@@ -30,7 +30,7 @@ class SessionCount(_Base):
 
 
 class Stat(_Base):
-    def __init__(self, data):
+    def __init__(self, data: Dict[str, Any]):
         super().__init__(data)
         self._fields["cumulative_stats"] = SessionCount(
             self._fields["cumulative_stats"]

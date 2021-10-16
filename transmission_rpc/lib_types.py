@@ -3,9 +3,8 @@
 from copy import deepcopy
 from typing import Any, Dict, Tuple, Union, Optional, Generator, NamedTuple
 
-from typing_extensions import Literal
-
 from transmission_rpc.utils import _to_snake
+from transmission_rpc.constants import Priority
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
@@ -15,14 +14,14 @@ class File(NamedTuple):
     name: str  # file name
     size: int  # file size in bytes
     completed: int  # bytes completed
-    priority: Literal["high", "normal", "low"]
+    priority: Priority
     selected: bool  # if selected for download
 
 
 class _Base:
     _fields: Dict[str, Any]
 
-    def __init__(self, other=None):
+    def __init__(self, other: Dict[str, Any] = None):
         self._fields: Dict[str, Any] = {}
         if isinstance(other, dict):
             for key, value in other.items():

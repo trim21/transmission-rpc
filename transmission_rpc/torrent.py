@@ -282,7 +282,7 @@ class Torrent(_Base):
             return "not available"
         if eta == -2:
             return "unknown"
-        return format_timedelta(self.eta)
+        return format_timedelta(datetime.timedelta(seconds=eta))
 
     @property
     def download_dir(self) -> Optional[str]:

@@ -63,7 +63,7 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
     return None
 
 
-def _camel_to_snake(camel):
+def _camel_to_snake(camel: str) -> str:
     snake = [camel[0].lower()]
     for c in camel[1:]:
         if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
@@ -74,5 +74,5 @@ def _camel_to_snake(camel):
     return str.join("", snake)
 
 
-def _to_snake(camel):
+def _to_snake(camel: str) -> str:
     return _camel_to_snake(camel).replace("-", "_")

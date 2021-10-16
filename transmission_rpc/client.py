@@ -72,7 +72,7 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
     raise ValueError(f"Invalid torrent id {args}")
 
 
-def _build_auth(username, password) -> str:
+def _build_auth(username: Optional[str], password: Optional[str]) -> str:
     if username is None and password is None:
         return ""
 
@@ -716,7 +716,7 @@ class Client:
         return result
 
     def set_files(
-        self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None
+        self, items: Dict[str, Dict[int, Dict[str, Any]]], timeout: _Timeout = None
     ) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
@@ -741,11 +741,11 @@ class Client:
         for tid, files in items.items():
             if not isinstance(files, dict):
                 continue
-            wanted = []
-            unwanted = []
-            high = []
-            normal = []
-            low = []
+            wanted: List[int] = []
+            unwanted: List[int] = []
+            high: List[int] = []
+            normal: List[int] = []
+            low: List[int] = []
             for fid, file_desc in files.items():
                 if not isinstance(file_desc, dict):
                     continue
@@ -956,7 +956,7 @@ class Client:
            transmission_rpc will try to automatically fix argument errors.
 
         """
-        kwargs = {}
+        kwargs: Dict[str, Any] = {}
 
         if download_dir is not None:
             kwargs["download-dir"] = ensure_location_str(download_dir)
