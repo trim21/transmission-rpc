@@ -20,7 +20,6 @@ import requests.auth
 import requests.exceptions
 from typing_extensions import Literal
 
-from transmission_rpc import File
 from transmission_rpc.error import (
     TransmissionError,
     TransmissionAuthError,
@@ -30,7 +29,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.utils import get_arguments, _try_read_torrent
 from transmission_rpc.session import Stat, Session
-from transmission_rpc.torrent import Torrent
+from transmission_rpc.torrent import File, Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, Priority
 from transmission_rpc.lib_types import _Timeout
 

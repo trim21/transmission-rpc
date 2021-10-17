@@ -4,7 +4,7 @@
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.client import Client
 from transmission_rpc.session import Stat, Session
-from transmission_rpc.torrent import Torrent, TorrentStatus
+from transmission_rpc.torrent import File, Torrent, TorrentStatus
 from transmission_rpc.constants import LOGGER
 
 __all__ = [
@@ -14,5 +14,6 @@ __all__ = [
     "Session",
     "TorrentStatus",
     "Torrent",
+    "File",
     "Stat",
 ]
