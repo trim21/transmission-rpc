@@ -819,7 +819,7 @@ class Client:
         self._update_session(self._request("session-get", timeout=timeout))
         try:
             self._update_server_version()
-        except KeyError:
+        except AttributeError:
             raise TransmissionVersionError(
                 "support current server version is deprecated, please install transmission-rpc<4.0.0"
             ) from None
@@ -1139,7 +1139,7 @@ class Client:
         if self.protocol_version is None:
             try:
                 self.protocol_version = self.session.rpc_version
-            except KeyError:
+            except AttributeError:
                 raise TransmissionVersionError(
                     "support current server version is removed, please install transmission-rpc<4.0.0"
                 ) from None
