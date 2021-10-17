@@ -1,7 +1,6 @@
 # Copyright (c) 2020-2021 Trim21 <i@trim21.me>
 # 2008-12, Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-import time
 import calendar
 import datetime
 
@@ -11,13 +10,13 @@ import pytest
 import transmission_rpc
 import transmission_rpc.utils
 import transmission_rpc.constants
-from transmission_rpc import TorrentStatus
+from transmission_rpc import Torrent, TorrentStatus
 
 
 def test_initial():
     with pytest.raises(ValueError, match="Torrent requires an 'id'"):
-        transmission_rpc.Torrent({})
-    transmission_rpc.Torrent({"id": 42})
+        Torrent({})
+    Torrent({"id": 42})
 
 
 def assert_property_exception(exception, ob, prop):
@@ -26,7 +25,7 @@ def assert_property_exception(exception, ob, prop):
 
 
 def test_get_name_string():
-    torrent = transmission_rpc.Torrent({"id": 42, "name": "we"})
+    torrent = Torrent({"id": 42, "name": "we"})
     name = torrent._get_name_string()  # pylint: disable=W0212
     assert isinstance(name, str)
 
@@ -37,13 +36,12 @@ def test_non_active():
         "activityDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(data)
+    torrent = Torrent(data)
     assert torrent.date_active
 
 
 def test_attributes():
-    torrent = transmission_rpc.Torrent({"id": 42})
-    assert hasattr(torrent, "id")
+    torrent = Torrent({"id": 42})
     assert torrent.id == 42
     assert_property_exception(AttributeError, torrent, "status")
     assert_property_exception(AttributeError, torrent, "progress")
@@ -74,7 +72,7 @@ def test_attributes():
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
     }
 
-    torrent = transmission_rpc.Torrent(data)
+    torrent = Torrent(data)
     assert torrent.id == 1
     assert torrent.left_until_done == 500
     assert torrent.status == TorrentStatus.downloading
@@ -96,23 +94,17 @@ def test_attributes():
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 
-    torrent = transmission_rpc.Torrent({"id": 42, "eta": -1})
+    torrent = Torrent(
+        {
+            "id": 43,
+            "eta": -1,
+            "doneDate": 0,
+            "addedDate": 3,
+            "isFinished": True,
+            "downloadedEver": 0,
+        }
+    )
     assert torrent.eta is None
-
-    data = {
-        "id": 1,
-        "status": 4,
-        "sizeWhenDone": 1000,
-        "leftUntilDone": 500,
-        "uploadedEver": 1000,
-        "downloadedEver": 2000,
-        "uploadRatio": 0.5,
-        "eta": 3600,
-        "activityDate": time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
-        "addedDate": time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
-        "startDate": time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
-        "doneDate": 0,
-    }
-
-    torrent = transmission_rpc.Torrent(data)
-    assert torrent.date_done is None
+    assert torrent.date_done == datetime.datetime.fromtimestamp(
+        3, datetime.timezone.utc
+    )

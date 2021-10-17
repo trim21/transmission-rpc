@@ -3,8 +3,8 @@
 # Licensed under the MIT license.
 # pylint: disable=C0103
 import enum
-import datetime
 from typing import Any, Dict, List, Union, Optional, NamedTuple
+from datetime import datetime, timezone, timedelta
 
 from transmission_rpc.utils import _camel_to_snake, format_timedelta
 from transmission_rpc.constants import Priority, LimitMode
@@ -135,45 +135,41 @@ class Torrent(_Base):
         return float(self._get("upload_ratio"))
 
     @property
-    def eta(self) -> Optional[datetime.timedelta]:
+    def eta(self) -> Optional[timedelta]:
         """
         the "eta" as datetime.timedelta.
         """
         eta = self._get("eta")
         if eta >= 0:
-            return datetime.timedelta(seconds=eta)
+            return timedelta(seconds=eta)
         return None
 
     @property
-    def date_active(self) -> datetime.datetime:
+    def date_active(self) -> datetime:
         """the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
 
         .. note::
 
-            raw ``activityDate`` value could be ``0`` for never activated torrent,
+            raw value_could_be ``0`` for_never_activated_torrent,
             therefore it can't always be converted to local timezone.
         """
-        return datetime.datetime.fromtimestamp(
-            self._fields["activity_date"], datetime.timezone.utc
-        )
+        return datetime.fromtimestamp(self._get("activity_date"), timezone.utc)
 
     @property
-    def date_added(self) -> datetime.datetime:
+    def date_added(self) -> datetime:
         """raw field ``addedDate`` as ``datetime.datetime`` in **local timezone**."""
-        return datetime.datetime.fromtimestamp(self._fields["added_date"]).astimezone()
+        return datetime.fromtimestamp(self._get("added_date"), timezone.utc)
 
     @property
-    def date_started(self) -> datetime.datetime:
+    def date_started(self) -> datetime:
         """raw field ``startDate`` as ``datetime.datetime`` in **local timezone**.
 
         :rtype: datetime.datetime
         """
-        return datetime.datetime.fromtimestamp(
-            self._fields["start_date"], datetime.timezone.utc
-        )
+        return datetime.fromtimestamp(self._get("start_date"), timezone.utc)
 
     @property
-    def date_done(self) -> Optional[datetime.datetime]:
+    def date_done(self) -> Optional[datetime]:
         """
         the attribute "doneDate" as datetime.datetime.
 
@@ -191,7 +187,7 @@ class Torrent(_Base):
                 # pre-downloaded torrent
                 return self.date_added
             return None
-        return datetime.datetime.fromtimestamp(done_date).astimezone()
+        return datetime.fromtimestamp(done_date).astimezone()
 
     def format_eta(self) -> str:
         """
@@ -206,7 +202,7 @@ class Torrent(_Base):
             return "not available"
         if eta == -2:
             return "unknown"
-        return format_timedelta(datetime.timedelta(seconds=eta))
+        return format_timedelta(timedelta(seconds=eta))
 
     @property
     def download_dir(self) -> Optional[str]:
@@ -436,7 +432,7 @@ class Torrent(_Base):
         return self._get("error_string")
 
     @property
-    def eta_idle(self) -> Optional[datetime.timedelta]:
+    def eta_idle(self) -> Optional[timedelta]:
         """
         timedelta left until the idle time limit is reached.
 
@@ -446,7 +442,7 @@ class Torrent(_Base):
         eta = self._get("eta_idle")
         if eta < 0:
             return None
-        return datetime.timedelta(seconds=eta)
+        return timedelta(seconds=eta)
 
     @property
     def file_stats(self) -> list:
