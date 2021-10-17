@@ -444,10 +444,10 @@ class Torrent(_Base):
             return None
         return timedelta(seconds=eta)
 
-    @property
-    def file_stats(self) -> list:
-        """use :py:meth:`Torrent.files`"""
-        return self._get("file_stats")
+    # @property
+    # def file_stats(self) -> list:
+    #     """use :py:meth:`Torrent.files`"""
+    #     return self._get("file_stats")
 
     @property
     def have_unchecked(self) -> int:
@@ -470,7 +470,7 @@ class Torrent(_Base):
         return self._get("is_private")
 
     @property
-    def labels(self) -> list:
+    def labels(self) -> List[str]:
         """array of string labels
 
         added rpc version 16"""
@@ -496,20 +496,20 @@ class Torrent(_Base):
         """Download progress of metadata. 0.0 to 1.0."""
         return self._get("metadata_percent_complete")
 
-    @property
-    def peers(self) -> list:
-        """Array of peer objects."""
-        return self._get("peers")
+    # @property
+    # def peers(self) -> list:
+    #     """Array of peer objects."""
+    #     return self._get("peers")
 
     @property
     def peers_connected(self) -> int:
         """Number of peers we are connected to."""
         return self._get("peers_connected")
 
-    @property
-    def peers_from(self) -> dict:
-        """Object containing download peers counts for different peer types."""
-        return self._get("peers_from")
+    # @property
+    # def peers_from(self) -> dict:
+    #     """Object containing download peers counts for different peer types."""
+    #     return self._get("peers_from")
 
     @property
     def peers_getting_from_us(self) -> int:
@@ -570,15 +570,15 @@ class Torrent(_Base):
         """Path to .torrent file."""
         return self._get("torrent_file")
 
-    @property
-    def tracker_stats(self) -> list:
-        """Array of object containing tracker statistics."""
-        return self._get("tracker_stats")
-
-    @property
-    def trackers(self) -> list:
-        """Array of tracker objects."""
-        return self._get("trackers")
+    # @property
+    # def tracker_stats(self) -> list:
+    #     """Array of object containing tracker statistics."""
+    #     return self._get("tracker_stats")
+    #
+    # @property
+    # def trackers(self) -> list:
+    #     """Array of tracker objects."""
+    #     return self._get("trackers")
 
     @property
     def upload_limited(self) -> bool:
@@ -600,10 +600,10 @@ class Torrent(_Base):
         """Array of booleans indicated wanted files."""
         return self._get("wanted")
 
-    @property
-    def webseeds(self) -> list:
-        """Array of webseeds objects"""
-        return self._get("webseeds")
+    # @property
+    # def webseeds(self) -> list:
+    #     """Array of webseeds objects"""
+    #     return self._get("webseeds")
 
     @property
     def webseeds_sending_to_us(self) -> int:

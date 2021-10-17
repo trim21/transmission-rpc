@@ -24,7 +24,6 @@ from transmission_rpc.error import (
     TransmissionError,
     TransmissionAuthError,
     TransmissionConnectError,
-    TransmissionTimeoutError,
     TransmissionVersionError,
 )
 from transmission_rpc.utils import get_arguments, _try_read_torrent
@@ -148,7 +147,10 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.session_id}
+        return {
+            "x-transmission-session-id": self.session_id,
+            "content-type": "application/json",
+        }
 
     def _http_query(self, query: dict, timeout: _Timeout = None) -> str:
         """
@@ -175,14 +177,10 @@ class Client:
                 r = self._http_session.post(
                     self.url,
                     headers=self._http_header,
-                    json=query,
+                    data=json.dumps(query).encode("utf-8"),
                     timeout=timeout,
                 )
-            except requests.exceptions.Timeout as e:
-                raise TransmissionTimeoutError(
-                    "timeout when connection to transmission daemon"
-                ) from e
-            except requests.exceptions.ConnectionError as e:
+            except requests.exceptions.RequestException as e:
                 raise TransmissionConnectError(
                     f"can't connect to transmission daemon: {str(e)}"
                 ) from e
@@ -192,9 +190,11 @@ class Client:
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
                 raise TransmissionAuthError(
-                    "transmission daemon require auth", original=r
+                    f"transmission daemon require auth {r.text}"
                 )
+
             if r.status_code != 409:
+                # 409 means require a valid 'session-id' header
                 return r.text
 
     def _request(
@@ -259,9 +259,8 @@ class Client:
                 results[item["id"]] = Torrent(item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
-        elif method == "session-stats":
-            return data["arguments"]
         elif method in (
+            "session-stats",
             "port-test",
             "blocklist-update",
             "free-space",
