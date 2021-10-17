@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
+          python-version: '3.8'
 
       - uses: Trim21/setup-poetry@dist/v1
 
