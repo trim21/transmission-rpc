@@ -15,7 +15,7 @@ from transmission_rpc import TorrentStatus
 
 
 def test_initial():
-    with pytest.raises(ValueError, match="Torrent requires an id"):
+    with pytest.raises(ValueError, match="Torrent requires an 'id'"):
         transmission_rpc.Torrent({})
     transmission_rpc.Torrent({"id": 42})
 

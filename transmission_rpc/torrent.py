@@ -45,7 +45,7 @@ class Torrent(_Base):
 
     def __init__(self, fields: Dict[str, Any]):
         if "id" not in fields and "hashString" not in fields:
-            raise ValueError("Torrent requires an 'id' field or 'hashString' field")
+            raise ValueError("Torrent requires an 'id' field or 'hash_string' field")
         super().__init__(fields)
 
     @property
