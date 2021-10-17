@@ -6,7 +6,6 @@ from transmission_rpc.client import Client
 from transmission_rpc.session import Stat, Session
 from transmission_rpc.torrent import Torrent, TorrentStatus
 from transmission_rpc.constants import LOGGER
-from transmission_rpc.lib_types import File
 
 __all__ = [
     "Client",
@@ -16,5 +15,4 @@ __all__ = [
     "TorrentStatus",
     "Torrent",
     "Stat",
-    "File",
 ]

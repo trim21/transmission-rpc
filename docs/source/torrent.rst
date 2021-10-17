@@ -7,7 +7,8 @@ Torrent
     :members:
 
 .. autoclass:: TorrentStatus
-
+    :members:
+    :undoc-members:
 
 .. toctree::
    :maxdepth: 2

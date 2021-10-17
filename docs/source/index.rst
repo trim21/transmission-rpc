@@ -16,8 +16,7 @@ quick start
 
     from transmission_rpc import Client
 
-    torrent_url = 'http://releases.ubuntu.com/' + \
-                  '18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
+    torrent_url = 'http://releases.ubuntu.com/18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent'
     c = Client(host='localhost', port=9091, username='transmission', password='password')
     c.add_torrent(torrent_url)
 
@@ -102,6 +101,7 @@ you can find rpc version by transmission version from
     torrent.rst
     errors.rst
     utils.rst
+    constants.rst
 
 Indices and tables
 ==================

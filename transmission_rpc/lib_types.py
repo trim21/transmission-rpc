@@ -1,21 +1,12 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 from copy import deepcopy
-from typing import Any, Dict, Tuple, Union, Optional, Generator, NamedTuple
+from typing import Any, Dict, Tuple, Union, Optional, Generator
 
 from transmission_rpc.utils import _to_snake
-from transmission_rpc.constants import Priority
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
-
-
-class File(NamedTuple):
-    name: str  # file name
-    size: int  # file size in bytes
-    completed: int  # bytes completed
-    priority: Priority
-    selected: bool  # if selected for download
 
 
 class _Base:
@@ -34,11 +25,11 @@ class _Base:
         else:
             raise ValueError("Cannot update with supplied data")
 
-    def __getattr__(self, name: str) -> Any:
+    def _get(self, name: str) -> Any:
         try:
             return self._fields[name]
         except KeyError:
-            raise KeyError(f"Attribute '{name}' not available") from None
+            raise AttributeError(f"Attribute '{name}' not available") from None
 
     def items(self) -> Generator[Tuple[str, Any], None, None]:
         for key, value in self._fields.items():

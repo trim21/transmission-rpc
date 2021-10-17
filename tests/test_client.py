@@ -8,10 +8,10 @@ import yarl
 import pytest
 from typing_extensions import Literal
 
+from transmission_rpc import File
 from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
 from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client
-from transmission_rpc.lib_types import File
 
 
 @pytest.mark.parametrize(

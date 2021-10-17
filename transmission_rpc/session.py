@@ -10,23 +10,23 @@ from transmission_rpc.lib_types import _Base
 class SessionCount(_Base):
     @property
     def downloaded_bytes(self) -> int:
-        return self.__getattr__("downloaded_bytes")
+        return self._get("downloaded_bytes")
 
     @property
     def files_added(self) -> int:
-        return self.__getattr__("files_added")
+        return self._get("files_added")
 
     @property
     def seconds_active(self) -> int:
-        return self.__getattr__("seconds_active")
+        return self._get("seconds_active")
 
     @property
     def session_count(self) -> int:
-        return self.__getattr__("session_count")
+        return self._get("session_count")
 
     @property
     def uploaded_bytes(self) -> int:
-        return self.__getattr__("uploaded_bytes")
+        return self._get("uploaded_bytes")
 
 
 class Stat(_Base):
@@ -39,31 +39,31 @@ class Stat(_Base):
 
     @property
     def cumulative_stats(self) -> SessionCount:
-        return self.__getattr__("cumulative_stats")
+        return self._get("cumulative_stats")
 
     @property
     def current_stats(self) -> SessionCount:
-        return self.__getattr__("current_stats")
+        return self._get("current_stats")
 
     @property
     def active_torrent_count(self) -> int:
-        return self.__getattr__("active_torrent_count")
+        return self._get("active_torrent_count")
 
     @property
     def download_speed(self) -> int:
-        return self.__getattr__("download_speed")
+        return self._get("download_speed")
 
     @property
     def paused_torrent_count(self) -> int:
-        return self.__getattr__("paused_torrent_count")
+        return self._get("paused_torrent_count")
 
     @property
     def torrent_count(self) -> int:
-        return self.__getattr__("torrent_count")
+        return self._get("torrent_count")
 
     @property
     def upload_speed(self) -> int:
-        return self.__getattr__("upload_speed")
+        return self._get("upload_speed")
 
 
 class Session(_Base):
@@ -103,178 +103,178 @@ class Session(_Base):
     @property
     def download_dir(self) -> str:
         """default download location"""
-        return self.__getattr__("download_dir")
+        return self._get("download_dir")
 
     @property
     def version(self) -> str:
-        return self.__getattr__("version")
+        return self._get("version")
 
     @property
     def rpc_version(self) -> int:
-        return self.__getattr__("rpc_version")
+        return self._get("rpc_version")
 
     @property
     def peer_port(self) -> int:
         """Get the peer port."""
-        return self.__getattr__("peer_port")
+        return self._get("peer_port")
 
     @property
     def pex_enabled(self) -> bool:
         """Is peer exchange enabled"""
-        return self.__getattr__("pex_enabled")
+        return self._get("pex_enabled")
 
     @property
     def alt_speed_down(self) -> int:
-        return self.__getattr__("alt_speed_down")
+        return self._get("alt_speed_down")
 
     @property
     def alt_speed_enabled(self) -> bool:
-        return self.__getattr__("alt_speed_enabled")
+        return self._get("alt_speed_enabled")
 
     @property
     def alt_speed_time_begin(self) -> int:
-        return self.__getattr__("alt_speed_time_begin")
+        return self._get("alt_speed_time_begin")
 
     @property
     def alt_speed_time_day(self) -> int:
-        return self.__getattr__("alt_speed_time_day")
+        return self._get("alt_speed_time_day")
 
     @property
     def alt_speed_time_enabled(self) -> bool:
-        return self.__getattr__("alt_speed_time_enabled")
+        return self._get("alt_speed_time_enabled")
 
     @property
     def alt_speed_time_end(self) -> int:
-        return self.__getattr__("alt_speed_time_end")
+        return self._get("alt_speed_time_end")
 
     @property
     def alt_speed_up(self) -> int:
-        return self.__getattr__("alt_speed_up")
+        return self._get("alt_speed_up")
 
     @property
     def blocklist_enabled(self) -> bool:
-        return self.__getattr__("blocklist_enabled")
+        return self._get("blocklist_enabled")
 
     @property
     def blocklist_url(self) -> str:
-        return self.__getattr__("blocklist_url")
+        return self._get("blocklist_url")
 
     @property
     def cache_size_mb(self) -> int:
-        return self.__getattr__("cache_size_mb")
+        return self._get("cache_size_mb")
 
     @property
     def dht_enabled(self) -> bool:
-        return self.__getattr__("dht_enabled")
+        return self._get("dht_enabled")
 
     @property
     def download_queue_enabled(self) -> bool:
-        return self.__getattr__("download_queue_enabled")
+        return self._get("download_queue_enabled")
 
     @property
     def download_queue_size(self) -> int:
-        return self.__getattr__("download_queue_size")
+        return self._get("download_queue_size")
 
     @property
     def encryption(self) -> str:
-        return self.__getattr__("encryption")
+        return self._get("encryption")
 
     @property
     def idle_seeding_limit(self) -> int:
-        return self.__getattr__("idle_seeding_limit")
+        return self._get("idle_seeding_limit")
 
     @property
     def idle_seeding_limit_enabled(self) -> bool:
-        return self.__getattr__("idle_seeding_limit_enabled")
+        return self._get("idle_seeding_limit_enabled")
 
     @property
     def incomplete_dir(self) -> str:
-        return self.__getattr__("incomplete_dir")
+        return self._get("incomplete_dir")
 
     @property
     def incomplete_dir_enabled(self) -> bool:
-        return self.__getattr__("incomplete_dir_enabled")
+        return self._get("incomplete_dir_enabled")
 
     @property
     def lpd_enabled(self) -> bool:
-        return self.__getattr__("lpd_enabled")
+        return self._get("lpd_enabled")
 
     @property
     def peer_limit_global(self) -> int:
-        return self.__getattr__("peer_limit_global")
+        return self._get("peer_limit_global")
 
     @property
     def peer_limit_per_torrent(self) -> int:
-        return self.__getattr__("peer_limit_per_torrent")
+        return self._get("peer_limit_per_torrent")
 
     @property
     def peer_port_random_on_start(self) -> bool:
-        return self.__getattr__("peer_port_random_on_start")
+        return self._get("peer_port_random_on_start")
 
     @property
     def port_forwarding_enabled(self) -> bool:
-        return self.__getattr__("port_forwarding_enabled")
+        return self._get("port_forwarding_enabled")
 
     @property
     def queue_stalled_enabled(self) -> bool:
-        return self.__getattr__("queue_stalled_enabled")
+        return self._get("queue_stalled_enabled")
 
     @property
     def queue_stalled_minutes(self) -> int:
-        return self.__getattr__("queue_stalled_minutes")
+        return self._get("queue_stalled_minutes")
 
     @property
     def rename_partial_files(self) -> bool:
-        return self.__getattr__("rename_partial_files")
+        return self._get("rename_partial_files")
 
     @property
     def script_torrent_done_enabled(self) -> bool:
-        return self.__getattr__("script_torrent_done_enabled")
+        return self._get("script_torrent_done_enabled")
 
     @property
     def script_torrent_done_filename(self) -> str:
-        return self.__getattr__("script_torrent_done_filename")
+        return self._get("script_torrent_done_filename")
 
     @property
     def seed_queue_enabled(self) -> bool:
-        return self.__getattr__("seed_queue_enabled")
+        return self._get("seed_queue_enabled")
 
     @property
     def seed_queue_size(self) -> int:
-        return self.__getattr__("seed_queue_size")
+        return self._get("seed_queue_size")
 
     @property
     def seed_ratio_limit(self) -> int:
-        return self.__getattr__("seed_ratio_limit")
+        return self._get("seed_ratio_limit")
 
     @property
     def seed_ratio_limited(self) -> bool:
-        return self.__getattr__("seed_ratio_limited")
+        return self._get("seed_ratio_limited")
 
     @property
     def speed_limit_down(self) -> int:
-        return self.__getattr__("speed_limit_down")
+        return self._get("speed_limit_down")
 
     @property
     def speed_limit_down_enabled(self) -> bool:
-        return self.__getattr__("speed_limit_down_enabled")
+        return self._get("speed_limit_down_enabled")
 
     @property
     def speed_limit_up(self) -> int:
-        return self.__getattr__("speed_limit_up")
+        return self._get("speed_limit_up")
 
     @property
     def speed_limit_up_enabled(self) -> bool:
-        return self.__getattr__("speed_limit_up_enabled")
+        return self._get("speed_limit_up_enabled")
 
     @property
     def start_added_torrents(self) -> bool:
-        return self.__getattr__("start_added_torrents")
+        return self._get("start_added_torrents")
 
     @property
     def trash_original_torrent_files(self) -> bool:
-        return self.__getattr__("trash_original_torrent_files")
+        return self._get("trash_original_torrent_files")
 
     @property
     def utp_enabled(self) -> bool:
-        return self.__getattr__("utp_enabled")
+        return self._get("utp_enabled")
