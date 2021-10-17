@@ -2,7 +2,7 @@
 # 2008-12, Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import calendar
-import datetime
+from datetime import datetime, timezone, timedelta
 
 import pytz
 import pytest
@@ -78,19 +78,11 @@ def test_attributes():
     assert torrent.status == TorrentStatus.downloading
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
-    assert torrent.eta == datetime.timedelta(seconds=3600)
-    assert torrent.date_active == datetime.datetime(
-        2008, 12, 11, 11, 15, 30, tzinfo=pytz.utc
-    )
-    assert torrent.date_added == datetime.datetime(
-        2008, 12, 11, 8, 5, 10, tzinfo=pytz.utc
-    )
-    assert torrent.date_started == datetime.datetime(
-        2008, 12, 11, 9, 10, 5, tzinfo=pytz.utc
-    )
-    assert torrent.date_done == datetime.datetime(
-        2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc
-    )
+    assert torrent.eta == timedelta(seconds=3600)
+    assert torrent.date_active == datetime(2008, 12, 11, 11, 15, 30, tzinfo=pytz.utc)
+    assert torrent.date_added == datetime(2008, 12, 11, 8, 5, 10, tzinfo=pytz.utc)
+    assert torrent.date_started == datetime(2008, 12, 11, 9, 10, 5, tzinfo=pytz.utc)
+    assert torrent.date_done == datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 
@@ -105,6 +97,4 @@ def test_attributes():
         }
     )
     assert torrent.eta is None
-    assert torrent.date_done == datetime.datetime.fromtimestamp(
-        3, datetime.timezone.utc
-    )
+    assert torrent.date_done == datetime.fromtimestamp(3, timezone.utc)
