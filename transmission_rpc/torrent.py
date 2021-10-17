@@ -4,7 +4,7 @@
 # pylint: disable=C0103
 import enum
 import datetime
-from typing import Any, Dict, List, TypeVar, Optional
+from typing import Any, Dict, List, Union, TypeVar, Optional
 
 from transmission_rpc.utils import _camel_to_snake, format_timedelta
 from transmission_rpc.constants import Priority, LimitMode
@@ -126,45 +126,16 @@ class Torrent(_Base):
         Examples:
 
         .. code-block:: python
+            from transmission_rpc import TorrentStatus
             torrent = Torrent()
-            assert torrent.downloading
+            assert torrent.status == TorrentStatus.downloading
         """
         return TorrentStatus(self.__getattr__("status"))
-
-    @property
-    def stopped(self) -> bool:
-        return self.status == TorrentStatus.stopped
-
-    @property
-    def check_pending(self) -> bool:
-        return self.status == TorrentStatus.check_pending
-
-    @property
-    def checking(self) -> bool:
-        return self.status == TorrentStatus.checking
-
-    @property
-    def download_pending(self) -> bool:
-        return self.status == TorrentStatus.download_pending
-
-    @property
-    def downloading(self) -> bool:
-        return self.status == TorrentStatus.downloading
-
-    @property
-    def seed_pending(self) -> bool:
-        return self.status == TorrentStatus.seed_pending
-
-    @property
-    def seeding(self) -> bool:
-        return self.status == TorrentStatus.seeding
 
     @property
     def rate_download(self) -> int:
         """
         Returns download rate in B/s
-
-        :rtype: int
         """
         return self.__getattr__("rate_download")
 
@@ -172,18 +143,12 @@ class Torrent(_Base):
     def rate_upload(self) -> int:
         """
         Returns upload rate in B/s
-
-        :rtype: int
         """
         return self.__getattr__("rate_upload")
 
     @property
     def hash_string(self) -> str:
-        """Returns the info hash of this torrent.
-
-        :raise: AttributeError -- if server don't return this field
-        :rtype: int
-        """
+        """Returns the info hash of this torrent."""
         return self.__getattr__("hash_string")
 
     @property
@@ -191,26 +156,23 @@ class Torrent(_Base):
         """
         download progress in range [0, 100].
 
-        :rtype: float
         """
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
             # percentDone is added at rpc 5
-            return round((100.0 * self._fields["percent_done"]), 2)
+            return round(100 * self.percent_done, 2)
         except KeyError:
             try:
                 size = self.size_when_done
                 left = self.left_until_done
-                return round((100.0 * (size - left) / float(size)), 2)
+                return round(100 * (size - left) / size, 2)
             except ZeroDivisionError:
-                return 0.0
+                return 0
 
     @property
     def ratio(self) -> float:
         """
         upload/download ratio.
-
-        :rtype: float
         """
         return float(self.__getattr__("upload_ratio"))
 
@@ -218,8 +180,6 @@ class Torrent(_Base):
     def eta(self) -> Optional[datetime.timedelta]:
         """
         the "eta" as datetime.timedelta.
-
-        :rtype: datetime.timedelta
         """
         eta = self.__getattr__("eta")
         if eta >= 0:
@@ -262,11 +222,20 @@ class Torrent(_Base):
 
     @property
     def date_done(self) -> Optional[datetime.datetime]:
-        """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
+        """
+        the attribute "doneDate" as datetime.datetime.
+
+        there is a bug in early version of transmission, this value is set to ``0`` for a pre-downloaded torrent,
+        see `this issues https://github.com/transmission/transmission/issues/1971`_ for more details.
+
+        returns ``done_added`` if "doneDate" is ``0`` and torrent is completed."""
         done_date = self.__getattr__("done_date")
         # Transmission might forget to set doneDate which is initialized to zero,
         # so if doneDate is zero return None
         if done_date == 0:
+            if self.progress == 100 and self.downloaded_ever == 0:
+                # pre-downloaded torrent
+                return self.date_added
             return None
         return datetime.datetime.fromtimestamp(done_date).astimezone()
 
@@ -411,16 +380,6 @@ class Torrent(_Base):
         return self.__getattr__("queue_position")
 
     @property
-    def activity_date(self) -> int:
-        """Last time of upload or download activity."""
-        return self.__getattr__("activity_date")
-
-    @property
-    def added_date(self) -> int:
-        """The date when this torrent was first added."""
-        return self.__getattr__("added_date")
-
-    @property
     def comment(self) -> str:
         """Torrent comment."""
         return self.__getattr__("comment")
@@ -439,11 +398,6 @@ class Torrent(_Base):
     def date_created(self) -> int:
         """Torrent creation date."""
         return self.__getattr__("date_created")
-
-    @property
-    def done_date(self) -> int:
-        """The date when the torrent finished downloading."""
-        return self.__getattr__("done_date")
 
     @property
     def download_limited(self) -> bool:
@@ -558,8 +512,8 @@ class Torrent(_Base):
         return self.__getattr__("peers_sending_to_us")
 
     @property
-    def percent_done(self) -> int:
-        """Download progress of selected files. 0.0 to 1.0."""
+    def percent_done(self) -> Union[float, int]:
+        """Download progress of selected files. range [0, 1]"""
         return self.__getattr__("percent_done")
 
     @property
@@ -600,11 +554,6 @@ class Torrent(_Base):
 
         added rpc version 15"""
         return self.__getattr__("seconds_seeding")
-
-    @property
-    def start_date(self) -> int:
-        """The date when the torrent was last started."""
-        return self.__getattr__("start_date")
 
     @property
     def torrent_file(self) -> str:
