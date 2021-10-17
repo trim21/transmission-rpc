@@ -15,6 +15,10 @@
 Support rpc version <= 16 (transmission <= 3.00),
 should works fine with newer rpc version but some new feature may be missing.
 
+## versioning
+
+`transmission-rpc` follow [Semantic Versioning](https://semver.org/)
+
 ## Install
 
 ```console
