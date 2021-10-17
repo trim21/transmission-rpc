@@ -33,7 +33,7 @@ from transmission_rpc.torrent import File, Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, Priority
 from transmission_rpc.lib_types import _Timeout
 
-valid_hash_char = string.digits + string.ascii_letters
+valid_hash_char = set(string.digits + string.ascii_letters)
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[str, _TorrentID, List[_TorrentID], None]
@@ -50,7 +50,7 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Torrent]) -> Union[int, st
         if raw_torrent_id >= 0:
             return raw_torrent_id
     elif isinstance(raw_torrent_id, str):
-        if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
+        if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - valid_hash_char):
             raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
     elif isinstance(raw_torrent_id, Torrent):
@@ -893,7 +893,7 @@ class Client:
         ``download_queue_enabled``       14 -  Enables download queue.
         ``download_queue_size``          14 -  Number of slots in the download queue.
         ``encryption``                   1 -   Set the session encryption mode,
-                                                one of ``required``, ``preferred`` or ``tolerated``.
+                                               one of ``required``, ``preferred`` or ``tolerated``.
         ``idle_seeding_limit``           10 -  The default seed inactivity limit in minutes.
         ``idle_seeding_limit_enabled``   10 -  Enables the default seed inactivity limit
         ``incomplete_dir``               7 -   The path to the directory of incomplete transfer data.
