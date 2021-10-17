@@ -11,6 +11,7 @@ import pytest
 import transmission_rpc
 import transmission_rpc.utils
 import transmission_rpc.constants
+from transmission_rpc import TorrentStatus
 
 
 def test_initial():
@@ -44,16 +45,16 @@ def test_attributes():
     torrent = transmission_rpc.Torrent({"id": 42})
     assert hasattr(torrent, "id")
     assert torrent.id == 42
-    assert_property_exception(KeyError, torrent, "status")
-    assert_property_exception(KeyError, torrent, "progress")
-    assert_property_exception(KeyError, torrent, "ratio")
-    assert_property_exception(KeyError, torrent, "eta")
-    assert_property_exception(KeyError, torrent, "date_active")
-    assert_property_exception(KeyError, torrent, "date_added")
-    assert_property_exception(KeyError, torrent, "date_started")
-    assert_property_exception(KeyError, torrent, "date_done")
+    assert_property_exception(AttributeError, torrent, "status")
+    assert_property_exception(AttributeError, torrent, "progress")
+    assert_property_exception(AttributeError, torrent, "ratio")
+    assert_property_exception(AttributeError, torrent, "eta")
+    assert_property_exception(AttributeError, torrent, "date_active")
+    assert_property_exception(AttributeError, torrent, "date_added")
+    assert_property_exception(AttributeError, torrent, "date_started")
+    assert_property_exception(AttributeError, torrent, "date_done")
 
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         torrent.format_eta()
     assert torrent.files() == []
 
@@ -76,7 +77,7 @@ def test_attributes():
     torrent = transmission_rpc.Torrent(data)
     assert torrent.id == 1
     assert torrent.left_until_done == 500
-    assert torrent.downloading
+    assert torrent.status == TorrentStatus.downloading
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
     assert torrent.eta == datetime.timedelta(seconds=3600)

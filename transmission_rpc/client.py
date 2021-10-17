@@ -632,7 +632,7 @@ class Client:
         if torrent_id in result:
             return result[torrent_id]
         for torrent in result.values():
-            if torrent.hashString == torrent_id:
+            if torrent.hash_string == torrent_id:
                 return torrent
         raise KeyError("Torrent not found in result")
 
