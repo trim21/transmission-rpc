@@ -3,7 +3,7 @@
 # Licensed under the MIT license.
 import base64
 import datetime
-from typing import List, Union, TypeVar, BinaryIO, Optional
+from typing import List, Union, BinaryIO, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
@@ -38,9 +38,6 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-_Fn = TypeVar("_Fn")
 
 
 def _try_read_torrent(torrent: Union[BinaryIO, str, bytes]) -> Optional[str]:
