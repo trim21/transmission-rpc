@@ -1,0 +1,7 @@
+.chglog/CHANGELOG.tpl.md
+.mypy_cache/
+.pytest_cache/
+.vscode/
+dist/
+.venv/
+docs/source/_templates/*.html

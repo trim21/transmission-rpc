@@ -2,10 +2,7 @@
   "problemMatcher": [
     {
       "owner": "pylint",
-      "fileLocation": [
-        "relative",
-        "${workspaceFolder}"
-      ],
+      "fileLocation": ["relative", "${workspaceFolder}"],
       "severity": "error",
       "pattern": [
         {

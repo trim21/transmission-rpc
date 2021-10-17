@@ -1,4 +1,4 @@
-version: '3.3'
+version: "3.3"
 services:
   transmission:
     image: caseyfw/transmission
@@ -8,6 +8,6 @@ services:
       - 8080:9091
       - 6881:6881
     environment:
-      UID: '1000'
+      UID: "1000"
       USERNAME: admin
       PASSWORD: mysecretpassword

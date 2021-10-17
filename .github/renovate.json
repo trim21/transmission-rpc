@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "@trim21",
-    "@trim21:monthly",
-    "@trim21:poetry"
-  ],
+  "extends": ["@trim21", "@trim21:monthly", "@trim21:poetry"],
   "separateMajorMinor": false,
   "separateMinorPatch": false,
   "rangeStrategy": "widen",
@@ -11,15 +7,11 @@
     {
       "groupName": "deps-docs",
       "semanticCommitScope": "docs",
-      "packagePatterns": [
-        "^sphinx"
-      ],
+      "packagePatterns": ["^sphinx"],
       "rangeStrategy": "pin"
     },
     {
-      "depTypeList": [
-        "dev-dependencies"
-      ],
+      "depTypeList": ["dev-dependencies"],
       "rangeStrategy": "pin"
     }
   ]

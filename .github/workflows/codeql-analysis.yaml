@@ -4,12 +4,12 @@ on:
   push:
     branches: [master]
     paths:
-      - '**.py'
+      - "**.py"
 
   pull_request:
     branches: [master]
     paths:
-      - '**.py'
+      - "**.py"
 
   schedule:
     - cron: 0 3 * * 5
@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: "3.8"
 
       - uses: Trim21/setup-poetry@dist/v1
 
