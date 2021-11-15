@@ -32,12 +32,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
-    rev: fd5ba70665a37ec301a1f714ed09336048b3be63  # frozen: 5.9.3
+    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1  # frozen: 5.10.1
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: a2f517f0103c1f74bffbc06be510bcec4cd181ec  # frozen: v2.28.0
+    rev: b6e103248fd97b04d2bea898b95d1d8776fece57  # frozen: v2.29.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -53,7 +53,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: b308cb12bc0a6db3e7f0e338020c0c4e4314e28a  # frozen: 0.9.0
+    rev: b6df95f87b9d1c47c21ececf19ca8bba794ca38a  # frozen: 0.10.1
     hooks:
       - id: doc8
         name: Check rst file
@@ -61,6 +61,6 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: 911470a610e47d9da5ea938b0887c3df62819b85  # frozen: 21.9b0
+    rev: 64c8be01f0cfedc94cb1c9ebd342ea77cafbb78a  # frozen: 21.10b0
     hooks:
       - id: black
