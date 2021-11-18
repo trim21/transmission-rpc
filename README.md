@@ -17,7 +17,8 @@ should works fine with newer rpc version but some new feature may be missing.
 
 ## versioning
 
-`transmission-rpc` follow [Semantic Versioning](https://semver.org/)
+`transmission-rpc` follow [Semantic Versioning](https://semver.org/),
+report an issue if you found unexpected API break changes at same major version.
 
 ## Install
 
