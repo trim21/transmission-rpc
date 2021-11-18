@@ -69,15 +69,6 @@ no_lines_before = 'LOCALFOLDER'
 use_parentheses = true
 include_trailing_comma = true
 
-[tool.coverage.report]
-exclude_lines = [
-    'pragma: no cover',
-    'if TYPE_CHECKING:',
-    'if __name__ == "__main__":',
-    'if typing.TYPE_CHECKING:',
-    'raise NotImplementedError',
-]
-
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
 
