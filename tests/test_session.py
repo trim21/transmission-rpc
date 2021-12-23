@@ -28,7 +28,7 @@ def test_session_set_attribute():
 def test_session_update_dict():
     m = mock.Mock()
     s = Session(m)
-    assert dict(s.items()) == {}
+    assert not dict(s.items())
 
     data = {"a": 1, "b": "2", "c": 3}
     s.update(data)

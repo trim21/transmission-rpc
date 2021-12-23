@@ -56,7 +56,7 @@ def test_attributes():
 
     with pytest.raises(KeyError):
         torrent.format_eta()
-    assert torrent.files() == []
+    assert not torrent.files()
 
     data = {
         "id": 1,
