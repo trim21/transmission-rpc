@@ -11,7 +11,7 @@ repos:
         exclude: ^\.chglog/config\.yml$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 38b88246ccc552bffaaf54259d064beeee434539  # frozen: v4.0.1
+    rev: 8fe62d14e0b4d7d845a7022c5c2c3ae41bdd3f26  # frozen: v4.1.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -37,7 +37,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 9db80ebadc833c3863746007d3933f8f63aea759  # frozen: v2.29.1
+    rev: e695ecd365119ab4e5463f6e49bea5f4b7ca786b  # frozen: v2.31.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
