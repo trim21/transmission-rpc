@@ -41,10 +41,10 @@ docs = ['sphinx', 'sphinx-rtd-theme']
 [tool.poetry.dev-dependencies]
 yarl = "==1.7.2"
 # tests
-pytest = "==6.2.5"
-coverage = "==6.2"
+pytest = "==7.0.0"
+coverage = "==6.3.1"
 # linter and formatter
-pre-commit = { version = "==2.16.0", markers = "implementation_name != 'pypy'" }
+pre-commit = { version = "==2.17.0", markers = "implementation_name != 'pypy'" }
 mypy = { version = "==0.931", markers = "implementation_name != 'pypy'" }
 flake8 = "==4.0.1"
 flake8-comprehensions = "==3.8.0"
@@ -55,7 +55,7 @@ flake8-pytest-style = "==1.6.0"
 pylint = "==2.12.2"
 sphinx-autobuild = "2021.3.14"
 # stubs
-types-requests = "==2.27.7"
+types-requests = "==2.27.8"
 pytz = "^2021.1"
 
 [tool.isort]
