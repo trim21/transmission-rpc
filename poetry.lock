@@ -472,7 +472,7 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "7.0.0"
+version = "7.0.1"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
@@ -720,7 +720,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "types-requests"
-version = "2.27.8"
+version = "2.27.9"
 description = "Typing stubs for requests"
 category = "dev"
 optional = false
@@ -816,7 +816,7 @@ docs = ["sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b2f23da28b8fb61492ac886124015453f7dc05d18bfd0b192ee259139058bc4b"
+content-hash = "7c995999e18aa7d50fa8843bbe025830cbe6ac142ca1c438084449c76b8c9615"
 
 [metadata.files]
 alabaster = [
@@ -1224,8 +1224,8 @@ pyparsing = [
     {file = "pyparsing-3.0.6.tar.gz", hash = "sha256:d9bdec0013ef1eb5a84ab39a3b3868911598afa494f5faa038647101504e2b81"},
 ]
 pytest = [
-    {file = "pytest-7.0.0-py3-none-any.whl", hash = "sha256:42901e6bd4bd4a0e533358a86e848427a49005a3256f657c5c8f8dd35ef137a9"},
-    {file = "pytest-7.0.0.tar.gz", hash = "sha256:dad48ffda394e5ad9aa3b7d7ddf339ed502e5e365b1350e0af65f4a602344b11"},
+    {file = "pytest-7.0.1-py3-none-any.whl", hash = "sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db"},
+    {file = "pytest-7.0.1.tar.gz", hash = "sha256:e30905a0c131d3d94b89624a1cc5afec3e0ba2fbdb151867d8e0ebd49850f171"},
 ]
 pytest-github-actions-annotate-failures = [
     {file = "pytest-github-actions-annotate-failures-0.1.6.tar.gz", hash = "sha256:162e2fe18b8ab24716c4c3a8d88c29aa67126dc75b4e54be54b58e6fa04653c2"},
@@ -1391,8 +1391,8 @@ typed-ast = [
     {file = "typed_ast-1.5.1.tar.gz", hash = "sha256:484137cab8ecf47e137260daa20bafbba5f4e3ec7fda1c1e69ab299b75fa81c5"},
 ]
 types-requests = [
-    {file = "types-requests-2.27.8.tar.gz", hash = "sha256:c2f4e4754d07ca0a88fd8a89bbc6c8a9f90fb441f9c9b572fd5c484f04817486"},
-    {file = "types_requests-2.27.8-py3-none-any.whl", hash = "sha256:8ec9f5f84adc6f579f53943312c28a84e87dc70201b54f7c4fbc7d22ecfa8a3e"},
+    {file = "types-requests-2.27.9.tar.gz", hash = "sha256:7368974534d297939492efdfdab232930440b11e2203f6df1f0c40e3242a87ea"},
+    {file = "types_requests-2.27.9-py3-none-any.whl", hash = "sha256:74070045418faf710f3154403d6a16c9e67db50e5119906ca6955f1658d20f7b"},
 ]
 types-urllib3 = [
     {file = "types-urllib3-1.26.7.tar.gz", hash = "sha256:cfd1fbbe4ba9a605ed148294008aac8a7b8b7472651d1cc357d507ae5962e3d2"},
