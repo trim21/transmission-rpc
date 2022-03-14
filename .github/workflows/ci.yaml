@@ -4,23 +4,21 @@ on:
   push:
     branches-ignore:
       - renovate/**
-      - deepsource-fix-*
   pull_request: {}
-
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.10', pypy3]
+        python: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python }}
 
@@ -48,7 +46,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
       - uses: Trim21/setup-poetry@dist/v1
 
       - run: poetry build

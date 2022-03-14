@@ -2,16 +2,15 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: e4bd622f56f4cb289b7c15f6e9f03698afbc55d2  # frozen: v0.4.1
+    rev: e4bd622f56f4cb289b7c15f6e9f03698afbc55d2 # frozen: v0.4.1
     hooks:
-      - id: yamlfmt
       - id: poetry-check-lock
       - id: find-trailing-comma
       - id: force-yaml-file-ext
         exclude: ^\.chglog/config\.yml$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 8fe62d14e0b4d7d845a7022c5c2c3ae41bdd3f26  # frozen: v4.1.0
+    rev: 8fe62d14e0b4d7d845a7022c5c2c3ae41bdd3f26 # frozen: v4.1.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -22,7 +21,7 @@ repos:
       - id: check-json
       - id: check-docstring-first
       - id: check-merge-conflict
-      - id: check-added-large-files  # check for file bigger than 500kb
+      - id: check-added-large-files # check for file bigger than 500kb
       - id: debug-statements
       - id: trailing-whitespace
       - id: mixed-line-ending
@@ -32,18 +31,18 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
-    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1  # frozen: 5.10.1
+    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1 # frozen: 5.10.1
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 0b37fd8e3b95981ff3d04b1351d2252a540e0cfc  # frozen: v2.31.1
+    rev: 0b37fd8e3b95981ff3d04b1351d2252a540e0cfc # frozen: v2.31.1
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
 
   - repo: https://github.com/myint/autoflake
-    rev: 7a53fdafc82c33f446915b60fcac947c51279260  # frozen: v1.4
+    rev: 7a53fdafc82c33f446915b60fcac947c51279260 # frozen: v1.4
     hooks:
       - id: autoflake
         args:
@@ -53,7 +52,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: b6df95f87b9d1c47c21ececf19ca8bba794ca38a  # frozen: 0.10.1
+    rev: b6df95f87b9d1c47c21ececf19ca8bba794ca38a # frozen: 0.10.1
     hooks:
       - id: doc8
         name: Check rst file
@@ -61,6 +60,6 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: fc0be6eb1e2a96091e6f64009ee5e9081bf8b6c6  # frozen: 22.1.0
+    rev: fc0be6eb1e2a96091e6f64009ee5e9081bf8b6c6 # frozen: 22.1.0
     hooks:
       - id: black

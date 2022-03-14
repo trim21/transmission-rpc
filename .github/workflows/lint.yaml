@@ -4,7 +4,6 @@ on:
   push:
     branches-ignore:
       - renovate/**
-      - deepsource-fix-*
   pull_request: {}
 
 jobs:
@@ -13,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.8'
 
       - uses: Trim21/setup-poetry@dist/v1
 
@@ -36,9 +35,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.8'
 
       - uses: Trim21/setup-poetry@dist/v1
 
@@ -60,9 +59,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.8'
 
       - uses: Trim21/setup-poetry@dist/v1
 
@@ -80,9 +79,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: '3.8'
 
       - uses: Trim21/setup-poetry@dist/v1
 
