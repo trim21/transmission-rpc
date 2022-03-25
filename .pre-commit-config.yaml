@@ -2,7 +2,7 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/Trim21/pre-commit-hooks
-    rev: e4bd622f56f4cb289b7c15f6e9f03698afbc55d2 # frozen: v0.4.1
+    rev: 2cd566d7d05582364aaa111f4522efd33857346c  # frozen: v0.5.1
     hooks:
       - id: poetry-check-lock
       - id: find-trailing-comma
