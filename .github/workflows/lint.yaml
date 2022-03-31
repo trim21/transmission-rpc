@@ -89,7 +89,7 @@ jobs:
         with:
           extras: docs
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ~/.cache/pre-commit
           key: precommit-2-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
