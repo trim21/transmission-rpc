@@ -1,8 +1,8 @@
 {
   "extends": [
-    "@trim21",
-    "@trim21:monthly",
-    "@trim21:poetry"
+    "github>Trim21/renovate-config",
+    "github>Trim21/renovate-config:monthly",
+    "github>Trim21/renovate-config:poetry"
   ],
   "separateMajorMinor": false,
   "separateMinorPatch": false,
