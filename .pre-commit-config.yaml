@@ -60,6 +60,6 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: fc0be6eb1e2a96091e6f64009ee5e9081bf8b6c6 # frozen: 22.1.0
+    rev: 712f8b3
     hooks:
       - id: black
