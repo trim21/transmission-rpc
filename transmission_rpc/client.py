@@ -13,7 +13,7 @@ import pathlib
 import operator
 import warnings
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Optional, Sequence
+from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
 from urllib.parse import quote, urljoin
 
 import requests
@@ -523,7 +523,7 @@ class Client:
     def get_torrent(
         self,
         torrent_id: _TorrentID,
-        arguments: Sequence[str] = None,
+        arguments: Iterable[str] = None,
         timeout: _Timeout = None,
     ) -> Torrent:
         """
@@ -558,7 +558,7 @@ class Client:
     def get_torrents(
         self,
         ids: _TorrentIDs = None,
-        arguments: Sequence[str] = None,
+        arguments: Iterable[str] = None,
         timeout: _Timeout = None,
     ) -> List[Torrent]:
         """
