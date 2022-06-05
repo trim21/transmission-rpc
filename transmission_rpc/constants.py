@@ -291,7 +291,6 @@ SESSION_GET_ARGS = {
     #
     "rename-partial-files": Args(Type.boolean, 8, description='True if ".part" is appended to incomplete files'),
     "rpc-version-minimum": Args(Type.number, 4, None, None, None, "Minimum accepted RPC API Version."),
-    # TODO: number,string?
     "rpc-version-semver": Args(
         Type.string, 17, description="the current RPC API version in a semver-compatible string"
     ),
@@ -417,5 +416,5 @@ def get_args_by_method(method: str) -> Dict[str, Args]:
         return SESSION_GET_ARGS
     elif method == "session-set":
         return SESSION_SET_ARGS
-    else:
-        raise ValueError(f'Method "{method}" not supported')
+
+    raise ValueError(f'Method "{method}" not supported')

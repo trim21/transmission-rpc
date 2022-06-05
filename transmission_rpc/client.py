@@ -120,7 +120,7 @@ class Client:
         self.session: Session = Session(self)
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
-        self.protocol_version: Optional[int] = None
+        self.protocol_version: int = 0
         self._http_session = requests.Session()
         self._http_session.trust_env = False
         self.get_session()
@@ -251,8 +251,6 @@ class Client:
         if method == "torrent-get":
             for item in data["arguments"]["torrents"]:
                 results[item["id"]] = Torrent(self, item)
-                if self.protocol_version == 2 and "peers" not in item:
-                    self.protocol_version = 1
         elif method == "torrent-add":
             item = None
             if "torrent-added" in data["arguments"]:
