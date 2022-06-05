@@ -22,9 +22,7 @@ def test_parse_id_raise(arg):
     ],
 )
 def test_parse_torrent_ids(arg, expected):
-    assert (
-        _parse_torrent_ids(arg) == expected
-    ), f"parse_torrent_ids({arg}) != {expected}"
+    assert _parse_torrent_ids(arg) == expected, f"parse_torrent_ids({arg}) != {expected}"
 
 
 @pytest.mark.parametrize(

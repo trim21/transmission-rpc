@@ -210,6 +210,4 @@ class Session:
         if value in {"required", "preferred", "tolerated"}:
             self._set("encryption", value, commit=True)
         else:
-            raise ValueError(
-                "Not a valid encryption, can only be one of ['required', 'preferred', 'tolerated']"
-            )
+            raise ValueError("Not a valid encryption, can only be one of ['required', 'preferred', 'tolerated']")

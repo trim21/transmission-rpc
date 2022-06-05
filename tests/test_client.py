@@ -38,9 +38,7 @@ from transmission_rpc.lib_types import File
         ),
     ],
 )
-def test_client_parse_url(
-    protocol: Literal["http", "https"], username, password, host, port, path
-):
+def test_client_parse_url(protocol: Literal["http", "https"], username, password, host, port, path):
     with mock.patch("transmission_rpc.client.Client._request"):
         client = Client(
             protocol=protocol,
@@ -137,9 +135,7 @@ def test_client_add_file_protocol():
         b64 = base64.b64encode(f.read()).decode()
     p = pathlib.Path("tests/fixtures/iso.torrent").absolute()
     with pytest.warns(DeprecationWarning):
-        assert (
-            _try_read_torrent(f"file://{p}") == b64
-        ), "should skip handle base64 content"
+        assert _try_read_torrent(f"file://{p}") == b64, "should skip handle base64 content"
 
 
 def test_client_add_read_file_in_base64():
@@ -148,9 +144,7 @@ def test_client_add_read_file_in_base64():
         f.seek(0)
         data = _try_read_torrent(f)
 
-    assert (
-        base64.b64encode(content).decode() == data
-    ), "should base64 encode torrent file"
+    assert base64.b64encode(content).decode() == data, "should base64 encode torrent file"
 
 
 def test_client_add_torrent_bytes():
@@ -193,9 +187,7 @@ def test_real_add_torrent_file_protocol(tr_client: Client):
 
 
 def test_real_add_torrent_http(tr_client: Client):
-    tr_client.add_torrent(
-        "https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent"
-    )
+    tr_client.add_torrent("https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent")
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 

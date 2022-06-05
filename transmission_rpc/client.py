@@ -107,25 +107,14 @@ class Client:
             self.logger = logger
         else:
             raise TypeError(
-                "logger must be instance of `logging.Logger`, "
-                "default: logging.getLogger('transmission-rpc')"
+                "logger must be instance of `logging.Logger`, " "default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
 
-        username = (
-            quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8")
-            if username
-            else ""
-        )
-        password = (
-            ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8")
-            if password
-            else ""
-        )
+        username = quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8") if username else ""
+        password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
         auth = f"{username}{password}@" if (username or password) else ""
-        url = urllib.parse.urlunparse(
-            (protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None)
-        )
+        url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None))
         self.url = str(url)
         self._sequence = 0
         self.session: Session = Session(self)
@@ -154,9 +143,7 @@ class Client:
                 raise ValueError("timeout tuple can only include 2 numbers elements")
             for v in value:
                 if not isinstance(v, (float, int)):
-                    raise ValueError(
-                        "element of timeout tuple can only be int of float"
-                    )
+                    raise ValueError("element of timeout tuple can only be int of float")
             self._query_timeout = (value[0], value[1])  # for type checker
         elif value is None:
             self._query_timeout = DEFAULT_TIMEOUT
@@ -183,9 +170,7 @@ class Client:
             timeout = self.timeout
         while True:
             if request_count >= 10:
-                raise TransmissionError(
-                    "too much request, try enable logger to see what happened"
-                )
+                raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
                     "url": self.url,
@@ -203,21 +188,15 @@ class Client:
                     timeout=timeout,
                 )
             except requests.exceptions.Timeout as e:
-                raise TransmissionTimeoutError(
-                    "timeout when connection to transmission daemon"
-                ) from e
+                raise TransmissionTimeoutError("timeout when connection to transmission daemon") from e
             except requests.exceptions.ConnectionError as e:
-                raise TransmissionConnectError(
-                    f"can't connect to transmission daemon: {str(e)}"
-                ) from e
+                raise TransmissionConnectError(f"can't connect to transmission daemon: {str(e)}") from e
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
-                raise TransmissionAuthError(
-                    "transmission daemon require auth", original=r
-                )
+                raise TransmissionAuthError("transmission daemon require auth", original=r)
             if r.status_code != 409:
                 return r.text
 
@@ -335,14 +314,10 @@ class Client:
         """
         if self.protocol_version is None:
             # Ugly fix for 2.20 - 2.22 reporting rpc-version 11, but having new arguments
-            if self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] in [20, 21, 22]
-            ):
+            if self.server_version and (self.server_version[0] == 2 and self.server_version[1] in [20, 21, 22]):
                 self.protocol_version = 12
             # Ugly fix for 2.12 reporting rpc-version 10, but having new arguments
-            elif self.server_version and (
-                self.server_version[0] == 2 and self.server_version[1] == 12
-            ):
+            elif self.server_version and (self.server_version[0] == 2 and self.server_version[1] == 12):
                 self.protocol_version = 11
             elif hasattr(self.session, "rpc_version"):
                 self.protocol_version = self.session.rpc_version
@@ -350,9 +325,7 @@ class Client:
                 self.protocol_version = 3
             else:
                 self.protocol_version = 2
-        if self.server_version and (
-            self.server_version[0] <= 2 and self.server_version[1] < 30
-        ):
+        if self.server_version and (self.server_version[0] <= 2 and self.server_version[1] < 30):
             warnings.warn(
                 "support for transmission version lower than 2.30 (rpc version 13) will be removed in the future",
                 PendingDeprecationWarning,
@@ -464,9 +437,7 @@ class Client:
 
         return list(self._request("torrent-add", kwargs, timeout=timeout).values())[0]
 
-    def remove_torrent(
-        self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None
-    ) -> None:
+    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None) -> None:
         """
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.
@@ -480,9 +451,7 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(
-        self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout = None
-    ) -> None:
+    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
         """Start torrent(s) with provided id(s)"""
         method = "torrent-start"
         if bypass_queue and self.rpc_version >= 14:
@@ -496,9 +465,7 @@ class Client:
         if self.rpc_version >= 14:
             if bypass_queue:
                 method = "torrent-start-now"
-            torrent_list = sorted(
-                torrent_list, key=operator.attrgetter("queuePosition")
-            )
+            torrent_list = sorted(torrent_list, key=operator.attrgetter("queuePosition"))
         self._request(
             method,
             {},
@@ -570,11 +537,7 @@ class Client:
             arguments = list(set(arguments) | {"id"})
         else:
             arguments = self.torrent_get_arguments
-        return list(
-            self._request(
-                "torrent-get", {"fields": arguments}, ids, timeout=timeout
-            ).values()
-        )
+        return list(self._request("torrent-get", {"fields": arguments}, ids, timeout=timeout).values())
 
     def get_files(
         self,
@@ -601,17 +564,13 @@ class Client:
 
         """
         fields = ["id", "name", "hashString", "files", "priorities", "wanted"]
-        request_result: Dict[int, Torrent] = self._request(
-            "torrent-get", {"fields": fields}, ids, timeout=timeout
-        )
+        request_result: Dict[int, Torrent] = self._request("torrent-get", {"fields": fields}, ids, timeout=timeout)
         result = {}
         for tid, torrent in request_result.items():
             result[tid] = torrent.files()
         return result
 
-    def set_files(
-        self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None
-    ) -> None:
+    def set_files(self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
         of :py:meth:`transmission_rpc.client.Client.get_files`.
@@ -667,9 +626,7 @@ class Client:
                 args["files_unwanted"] = unwanted
             self.change_torrent([tid], timeout=timeout, **args)
 
-    def change_torrent(
-        self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any
-    ) -> None:
+    def change_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any) -> None:
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
         parameters are:
@@ -718,9 +675,7 @@ class Client:
         args = {}
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
-            arg, val = argument_value_convert(
-                "torrent-set", argument, value, self.rpc_version
-            )
+            arg, val = argument_value_convert("torrent-set", argument, value, self.rpc_version)
             args[arg] = val
 
         if len(args) > 0:
@@ -767,9 +722,7 @@ class Client:
         if len(dirname) > 0:
             raise ValueError("Target name cannot contain a path delimiter")
         args = {"path": ensure_location_str(location), "name": name}
-        result = self._request(
-            "torrent-rename-path", args, torrent_id, True, timeout=timeout
-        )
+        result = self._request("torrent-rename-path", args, torrent_id, True, timeout=timeout)
         return result["path"], result["name"]
 
     def queue_top(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
@@ -875,9 +828,7 @@ class Client:
             ]:
                 raise ValueError("Invalid encryption value")
             argument = make_rpc_name(key)
-            (arg, val) = argument_value_convert(
-                "session-set", argument, value, self.rpc_version
-            )
+            (arg, val) = argument_value_convert("session-set", argument, value, self.rpc_version)
             args[arg] = val
         if len(args) > 0:
             self._request("session-set", args, timeout=timeout)
@@ -897,17 +848,13 @@ class Client:
         result = self._request("port-test", timeout=timeout)
         return result.get("port-is-open")
 
-    def free_space(
-        self, path: Union[str, pathlib.Path], timeout: _Timeout = None
-    ) -> Optional[int]:
+    def free_space(self, path: Union[str, pathlib.Path], timeout: _Timeout = None) -> Optional[int]:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
         self._rpc_version_warning(15)
         path = ensure_location_str(path)
-        result: Dict[str, Any] = self._request(
-            "free-space", {"path": path}, timeout=timeout
-        )
+        result: Dict[str, Any] = self._request("free-space", {"path": path}, timeout=timeout)
         if result["path"] == path:
             return result["size-bytes"]
         return None
