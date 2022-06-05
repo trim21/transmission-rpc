@@ -408,13 +408,13 @@ SESSION_SET_ARGS = {
 def get_args_by_method(method: str) -> Dict[str, Args]:
     if method == "torrent-add":
         return TORRENT_ADD_ARGS
-    elif method == "torrent-get":
+    if method == "torrent-get":
         return TORRENT_GET_ARGS
-    elif method == "torrent-set":
+    if method == "torrent-set":
         return TORRENT_SET_ARGS
-    elif method == "session-get":
+    if method == "session-get":
         return SESSION_GET_ARGS
-    elif method == "session-set":
+    if method == "session-set":
         return SESSION_SET_ARGS
 
     raise ValueError(f'Method "{method}" not supported')

@@ -371,7 +371,7 @@ class Client:
         ``priority_high``     1 -               A list of file id's that should have high priority.
         ``priority_low``      1 -               A list of file id's that should have low priority.
         ``priority_normal``   1 -               A list of file id's that should have normal priority.
-        ``labels``            16 -              Array of string labels.
+        ``labels``            17 -              Array of string labels.
         ===================== ===== =========== =============================================================
 
         Returns a Torrent object with the fields.
@@ -411,7 +411,7 @@ class Client:
             kwargs["cookies"] = cookies
 
         if labels is not None:
-            self._rpc_version_warning(16)
+            self._rpc_version_warning(17)
             kwargs["labels"] = list(labels)
 
         torrent_data = _try_read_torrent(torrent)
