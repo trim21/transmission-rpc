@@ -30,6 +30,10 @@ pip install transmission-rpc -U
 
 <https://transmission-rpc.readthedocs.io/>
 
-## Developer
+## Contributing
+
+All kinds of PRs (docs, feature, bug fixes and eta...) are most welcome.
+
+## License
 
 `transmission-rpc` is licensed under the MIT license.
