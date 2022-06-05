@@ -413,6 +413,7 @@ class Client:
             kwargs["cookies"] = cookies
 
         if labels is not None:
+            self._rpc_version_warning(16)
             kwargs["labels"] = list(labels)
 
         torrent_data = _try_read_torrent(torrent)
