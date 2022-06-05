@@ -3,7 +3,6 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import os
-import re
 import json
 import time
 import types
@@ -120,7 +119,7 @@ class Client:
         self.session: Session = Session(self)
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
-        self.protocol_version: int = 0
+        self.protocol_version: int = 17  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
         self.get_session()
@@ -292,26 +291,13 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        if self.server_version is None:
-            version_major = 2
-            version_minor = 40
-            version_change_set: Optional[str] = None
-            version_parser = re.compile(r"(\d).(\d+) \((.*)\)")
-            if hasattr(self.session, "version"):
-                match = version_parser.match(self.session.version)
-                if match:
-                    version_major = int(match.group(1))
-                    version_minor = int(match.group(2))
-                    version_change_set = str(match.group(3))
-            self.server_version = (version_major, version_minor, version_change_set)
+        self.protocol_version = self.session.rpc_version
 
     @property
     def rpc_version(self) -> int:
         """
         Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
         """
-        if self.server_version and (self.server_version[0] <= 2 and self.server_version[1] < 30):
-            raise DeprecationWarning("support for transmission version <= 2.40 (rpc version <= 14) is removed.")
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:

@@ -298,20 +298,6 @@ def test_parse_server_version():
         assert c.server_version == (2, 80, "hello")
 
 
-def test_warn_deprecated():
-    m = mock.Mock(
-        return_value=json.dumps(
-            {
-                "arguments": {"version": "2.10 (hello)", "rpc-version": 10},
-                "result": "success",
-            }
-        )
-    )
-    with mock.patch("transmission_rpc.client.Client._http_query", m):
-        with pytest.warns(PendingDeprecationWarning):
-            Client()
-
-
 @pytest.mark.parametrize(
     "status_code",
     [401, 403],
