@@ -13,7 +13,7 @@ Torrent ids
 
 Many functions in Client takes torrent id.
 You can find torrent-ids spec in `official docs
-<https://github.com/transmission/transmission/blob/3.00/extras/rpc-spec.txt#L96-L101>`_
+<https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#31-torrent-action-requests>`_
 
 .. automodule:: transmission_rpc.client
     :members:

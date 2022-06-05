@@ -90,7 +90,7 @@ so just call :code:`print(get_arguments('torrent-add', 15))`
 rpc method and class method are not same, but reversed
 
 you can find rpc version by transmission version from
-`transmission wiki <https://github.com/transmission/transmission/wiki/RPC-Protocol-Specification>`_
+`transmission rpc docs <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#5-protocol-versions>`_
 
 
 
