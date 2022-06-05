@@ -89,12 +89,7 @@ def argument_value_convert(
     """
     Check and fix Transmission RPC issues with regards to methods, arguments and values.
     """
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
+    args = constants.get_args_by_method(method)
     if argument in args:
         info = args[argument]
         invalid_version = True
@@ -128,12 +123,7 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
     """
     Get arguments for method in specified Transmission RPC version.
     """
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
+    args = constants.get_args_by_method(method)
     accessible = []
     for argument, info in args.items():
         valid_version = True
@@ -150,13 +140,7 @@ _Fn = TypeVar("_Fn")
 
 
 def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        rpc_args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        rpc_args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
-
+    rpc_args = constants.get_args_by_method(method)
     for key, arg in rpc_args.items():
         if key in kwargs and arg.added_version > rpc_version:
             raise TransmissionVersionError(
