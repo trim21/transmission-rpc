@@ -107,7 +107,7 @@ class Client:
             self.logger = logger
         else:
             raise TypeError(
-                "logger must be instance of `logging.Logger`, " "default: logging.getLogger('transmission-rpc')"
+                "logger must be instance of `logging.Logger`, default: logging.getLogger('transmission-rpc')"
             )
         self._query_timeout: _Timeout = timeout
 
