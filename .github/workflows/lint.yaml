@@ -89,6 +89,9 @@ jobs:
         with:
           extras: docs
 
+      - name: Get Latest tools version
+        run: echo "PY=$(python -VV | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
+
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pre-commit
