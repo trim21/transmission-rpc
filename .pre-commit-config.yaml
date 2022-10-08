@@ -36,13 +36,13 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: d232077d3bc16dcbaee30b42d35197f8bf337a36  # frozen: v2.37.1
+    rev: 286156f1050244a3c2a459eb56a9dd9223b12833  # frozen: v3.0.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
 
-  - repo: https://github.com/myint/autoflake
-    rev: 7a53fdafc82c33f446915b60fcac947c51279260 # frozen: v1.4
+  - repo: https://github.com/PyCQA/autoflake
+    rev: bd7651fd4867102a4fc4cf726234436ace3a8d6c  # frozen: v1.7.0
     hooks:
       - id: autoflake
         args:
@@ -52,7 +52,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: 5d785c948fd749776cbe714573996c323ff22db5  # frozen: 0.11.2
+    rev: 5923ca0c51f39411817e2fa4eb6db05301c6c873  # frozen: v1.0.0
     hooks:
       - id: doc8
         name: Check rst file
@@ -60,7 +60,7 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: f6c139c5215ce04fd3e73a900f1372942d58eca0  # frozen: 22.6.0
+    rev: 27d20144a7517594e24a1649451177b2a11284be  # frozen: 22.10.0
     hooks:
       - id: black
         args: [--line-length=120]
