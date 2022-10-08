@@ -1,9 +1,7 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Generator
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Literal, Generator
 
 from transmission_rpc.lib_types import Field
 
