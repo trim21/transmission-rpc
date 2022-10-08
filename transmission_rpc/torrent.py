@@ -495,7 +495,7 @@ class Torrent:
     def available(self) -> float:
         """Availability in percent"""
         bytes_all = self.total_size
-        bytes_done = sum(map(lambda x: x["bytesCompleted"], self._fields["fileStats"].value))
+        bytes_done = sum(x["bytesCompleted"] for x in self._fields["fileStats"].value)
         bytes_avail = self.desired_available + bytes_done
         return (bytes_avail / bytes_all) * 100 if bytes_all else 0
 

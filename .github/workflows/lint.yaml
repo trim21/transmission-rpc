@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -59,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -79,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -88,6 +88,9 @@ jobs:
       - uses: Trim21/install-poetry-project@dist/v1
         with:
           extras: docs
+
+      - name: Get Latest tools version
+        run: echo "PY=$(python -VV | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
 
       - uses: actions/cache@v3
         with:
