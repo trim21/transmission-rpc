@@ -1,8 +1,6 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
-from typing import Any, Tuple, Union, Optional, NamedTuple
-
-from typing_extensions import Literal
+from typing import Any, Tuple, Union, Literal, Optional, NamedTuple
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]

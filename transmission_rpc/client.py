@@ -13,13 +13,23 @@ import pathlib
 import operator
 import warnings
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
+from typing import (
+    Any,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Union,
+    Literal,
+    BinaryIO,
+    Iterable,
+    Optional,
+)
 from urllib.parse import quote, urljoin
 
 import requests
 import requests.auth
 import requests.exceptions
-from typing_extensions import Literal
 
 from transmission_rpc.error import (
     TransmissionError,
