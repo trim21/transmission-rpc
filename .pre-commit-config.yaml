@@ -41,7 +41,7 @@ repos:
       - id: pyupgrade
         args: [--py36-plus]
 
-  - repo: https://github.com/myint/autoflake
+  - repo: https://github.com/PyCQA/autoflake
     rev: bd7651fd4867102a4fc4cf726234436ace3a8d6c  # frozen: v1.7.0
     hooks:
       - id: autoflake
