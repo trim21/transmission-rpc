@@ -711,9 +711,7 @@ class Client:
         timeout: _Timeout = None,
     ) -> Tuple[str, str]:
         """
-        Move torrent data.
-
-        Remember to use ``get_torrent`` or ``get_torrents`` to update your torrent information.
+        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path
 
         This method can only be called on single torrent.
         """
