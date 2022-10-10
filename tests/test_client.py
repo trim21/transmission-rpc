@@ -1,7 +1,5 @@
-import os
 import time
 import base64
-import os.path
 import pathlib
 from typing import Literal
 from unittest import mock
@@ -155,20 +153,6 @@ def test_real_add_torrent_base64(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
         with pytest.warns(DeprecationWarning, match="base64"):
             tr_client.add_torrent(base64.b64encode(f.read()).decode())
-    assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
-
-
-def test_real_add_torrent_file_protocol(tr_client: Client):
-    fs = os.path.abspath(
-        os.path.join(
-            os.path.dirname(
-                __file__,
-            ),
-            "fixtures/iso.torrent",
-        )
-    )
-    with pytest.warns(DeprecationWarning):
-        tr_client.add_torrent("file://" + fs)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
