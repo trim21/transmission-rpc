@@ -13,18 +13,6 @@ if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
 
-def get_status_old(code: int) -> str:
-    """Get the torrent status using old status codes"""
-    mapping = {
-        (1 << 0): "check pending",
-        (1 << 1): "checking",
-        (1 << 2): "downloading",
-        (1 << 3): "seeding",
-        (1 << 4): "stopped",
-    }
-    return mapping[code]
-
-
 _STATUS_NEW_MAPPING = {
     0: "stopped",
     1: "check pending",
@@ -167,10 +155,7 @@ class Torrent:
 
     def _status(self) -> str:
         """Get the torrent status"""
-        code = self._fields["status"].value
-        if self._rpc_version() >= 14:
-            return get_status_new(code)
-        return get_status_old(code)
+        return get_status_new(self._fields["status"].value)
 
     def files(self) -> List[File]:
         """
