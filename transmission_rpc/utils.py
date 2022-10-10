@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 from transmission_rpc import constants
 from transmission_rpc.error import TransmissionVersionError
-from transmission_rpc.constants import LOGGER, Type
+from transmission_rpc.constants import Type
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
@@ -78,45 +78,6 @@ def make_rpc_name(name: str) -> str:
     Convert python compatible name to Transmission RPC name.
     """
     return name.replace("_", "-")
-
-
-def argument_value_convert(
-    method: str,
-    argument: str,
-    value: Any,
-    rpc_version: int,
-) -> Tuple[str, Any]:
-    """
-    Check and fix Transmission RPC issues with regards to methods, arguments and values.
-    """
-    args = constants.get_args_by_method(method)
-    if argument in args:
-        info = args[argument]
-        invalid_version = True
-        while invalid_version:
-            invalid_version = False
-            replacement = None
-            if rpc_version < info.added_version:
-                invalid_version = True
-                replacement = info.previous_argument_name
-            if info.removed_version is not None and info.removed_version <= rpc_version:
-                invalid_version = True
-                replacement = info.next_argument_name
-            if invalid_version:
-                if replacement:
-                    LOGGER.warning(
-                        'Replacing requested argument "%s" with "%s".',
-                        argument,
-                        replacement,
-                    )
-                    argument = replacement
-                    info = args[argument]
-                else:
-                    raise ValueError(
-                        f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
-                    )
-        return argument, TR_TYPE_MAP[info.type](value)
-    raise ValueError(f'Argument "{argument}" does not exists for method "{method}".')
 
 
 def get_arguments(method: str, rpc_version: int) -> List[str]:
