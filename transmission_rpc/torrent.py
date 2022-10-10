@@ -11,19 +11,6 @@ from transmission_rpc.lib_types import File, Field, _Timeout
 if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
-
-def get_status_old(code: int) -> str:
-    """Get the torrent status using old status codes"""
-    mapping = {
-        (1 << 0): "check pending",
-        (1 << 1): "checking",
-        (1 << 2): "downloading",
-        (1 << 3): "seeding",
-        (1 << 4): "stopped",
-    }
-    return mapping[code]
-
-
 _STATUS_NEW_MAPPING = {
     0: "stopped",
     1: "check pending",
@@ -124,7 +111,7 @@ class Torrent:
         """Get the Transmission RPC API version."""
         if self._client:
             return self._client.rpc_version
-        return 2
+        return 14
 
     def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
@@ -173,10 +160,7 @@ class Torrent:
 
     def _status(self) -> str:
         """Get the torrent status"""
-        code = self._fields["status"].value
-        if self._rpc_version() >= 14:
-            return get_status_new(code)
-        return get_status_old(code)
+        return get_status_new(self._fields["status"].value)
 
     def files(self) -> List[File]:
         """
@@ -607,25 +591,33 @@ class Torrent:
     @property
     def queue_position(self) -> int:
         """queue position for this torrent."""
-        if self._rpc_version() >= 14:
-            return self._fields["queuePosition"].value
-        return 0
+        return self._fields["queuePosition"].value
 
     @queue_position.setter
     def queue_position(self, position: str) -> None:
         """Queue position"""
-        if self._rpc_version() >= 14:
-            if isinstance(position, int):
-                self._fields["queuePosition"] = Field(position, True)
-                self._push()
-            else:
-                raise ValueError("Not a valid position")
+        if isinstance(position, int):
+            self._fields["queuePosition"] = Field(position, True)
+            self._push()
         else:
-            pass
+            raise ValueError("Not a valid position")
 
     @property
     def trackers(self) -> List[Tracker]:
         return self.__getattr__("trackers")
+
+    @property
+    def file_count(self) -> int:
+        """added in transmission 4.00"""
+        return self.__getattr__("file-count")
+
+    @property
+    def group(self) -> str:
+        """added in transmission 4.00
+
+        transmission will return an empty str ``""`` if torrent doesn't have a bandwidth group.
+        """
+        return self.__getattr__("group")
 
     def update(self, timeout: _Timeout = None) -> None:
         """Update the torrent information."""

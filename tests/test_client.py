@@ -1,5 +1,4 @@
 import os
-import json
 import time
 import base64
 import os.path
@@ -11,7 +10,7 @@ from urllib.parse import urljoin
 import yarl
 import pytest
 
-from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
+from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
@@ -39,7 +38,9 @@ from transmission_rpc.lib_types import File
     ],
 )
 def test_client_parse_url(protocol: Literal["http", "https"], username, password, host, port, path):
-    with mock.patch("transmission_rpc.client.Client._request"):
+    with mock.patch("transmission_rpc.client.Client._request"), mock.patch(
+        "transmission_rpc.client.Client.get_session"
+    ):
         client = Client(
             protocol=protocol,
             username=username,
@@ -75,38 +76,38 @@ torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.
 def test_client_add_kwargs():
     m = mock.Mock(return_value={"hello": "workd"})
     with mock.patch("transmission_rpc.client.Client._request", m):
-        c = Client()
-        c.protocol_version = 15
-        c.add_torrent(
-            torrent_url,
-            download_dir="dd",
-            files_unwanted=[1, 2],
-            files_wanted=[3, 4],
-            paused=False,
-            peer_limit=5,
-            priority_high=[6],
-            priority_low=[7],
-            priority_normal=[8],
-            cookies="coo",
-            bandwidthPriority=4,
+        with mock.patch("transmission_rpc.client.Client.get_session"):
+            c = Client()
+            c.add_torrent(
+                torrent_url,
+                download_dir="dd",
+                files_unwanted=[1, 2],
+                files_wanted=[3, 4],
+                paused=False,
+                peer_limit=5,
+                priority_high=[6],
+                priority_low=[7],
+                priority_normal=[8],
+                cookies="coo",
+                bandwidthPriority=4,
+            )
+        m.assert_called_with(
+            "torrent-add",
+            {
+                "filename": torrent_url,
+                "download-dir": "dd",
+                "files-unwanted": [1, 2],
+                "files-wanted": [3, 4],
+                "paused": False,
+                "peer-limit": 5,
+                "priority-high": [6],
+                "priority-low": [7],
+                "priority-normal": [8],
+                "cookies": "coo",
+                "bandwidthPriority": 4,
+            },
+            timeout=None,
         )
-    m.assert_called_with(
-        "torrent-add",
-        {
-            "filename": torrent_url,
-            "download-dir": "dd",
-            "files-unwanted": [1, 2],
-            "files-wanted": [3, 4],
-            "paused": False,
-            "peer-limit": 5,
-            "priority-high": [6],
-            "priority-low": [7],
-            "priority-normal": [8],
-            "cookies": "coo",
-            "bandwidthPriority": 4,
-        },
-        timeout=None,
-    )
 
 
 def test_client_add_url():
@@ -270,46 +271,6 @@ def test_real_torrent_get_files(tr_client: Client):
     for torrent in tr_client.get_torrents():
         for file in torrent.files():
             assert isinstance(file, File)
-
-
-def test_check_rpc_version_for_args():
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m):
-        c = Client()
-        c.protocol_version = 7
-        with pytest.raises(
-            TransmissionVersionError,
-            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
-        ):
-            c.add_torrent(magnet_url, cookies="")
-
-
-def test_parse_server_version():
-    m = mock.Mock(
-        return_value=json.dumps(
-            {
-                "arguments": {"version": "2.80 (hello)", "rpc-version": 14},
-                "result": "success",
-            }
-        )
-    )
-    with mock.patch("transmission_rpc.client.Client._http_query", m):
-        c = Client()
-        assert c.server_version == (2, 80, "hello")
-
-
-def test_warn_deprecated():
-    m = mock.Mock(
-        return_value=json.dumps(
-            {
-                "arguments": {"version": "2.10 (hello)", "rpc-version": 10},
-                "result": "success",
-            }
-        )
-    )
-    with mock.patch("transmission_rpc.client.Client._http_query", m):
-        with pytest.warns(PendingDeprecationWarning):
-            Client()
 
 
 @pytest.mark.parametrize(

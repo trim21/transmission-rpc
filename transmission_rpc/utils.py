@@ -5,12 +5,11 @@ import base64
 import pathlib
 import datetime
 import warnings
-from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
+from typing import Any, Dict, List, Tuple, Union, BinaryIO, Callable, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
-from transmission_rpc.error import TransmissionVersionError
-from transmission_rpc.constants import LOGGER, Type
+from transmission_rpc.constants import Type
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
@@ -80,88 +79,20 @@ def make_rpc_name(name: str) -> str:
     return name.replace("_", "-")
 
 
-def argument_value_convert(
-    method: str,
-    argument: str,
-    value: Any,
-    rpc_version: int,
-) -> Tuple[str, Any]:
+def get_torrent_arguments(rpc_version: int) -> List[str]:
     """
-    Check and fix Transmission RPC issues with regards to methods, arguments and values.
+    Get torrent arguments for method in specified Transmission RPC version.
     """
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
-    if argument in args:
-        info = args[argument]
-        invalid_version = True
-        while invalid_version:
-            invalid_version = False
-            replacement = None
-            if rpc_version < info.added_version:
-                invalid_version = True
-                replacement = info.previous_argument_name
-            if info.removed_version is not None and info.removed_version <= rpc_version:
-                invalid_version = True
-                replacement = info.next_argument_name
-            if invalid_version:
-                if replacement:
-                    LOGGER.warning(
-                        'Replacing requested argument "%s" with "%s".',
-                        argument,
-                        replacement,
-                    )
-                    argument = replacement
-                    info = args[argument]
-                else:
-                    raise ValueError(
-                        f'Method "{method}" Argument "{argument}" does not exist in version {rpc_version:d}.'
-                    )
-        return argument, TR_TYPE_MAP[info.type](value)
-    raise ValueError(f'Argument "{argument}" does not exists for method "{method}".')
-
-
-def get_arguments(method: str, rpc_version: int) -> List[str]:
-    """
-    Get arguments for method in specified Transmission RPC version.
-    """
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
     accessible = []
-    for argument, info in args.items():
+    for argument, info in constants.TORRENT_GET_ARGS.items():
         valid_version = True
-        if rpc_version < info[1]:
+        if rpc_version < info.added_version:
             valid_version = False
-        if info[2] is not None and info[2] <= rpc_version:
+        if info.removed_version is not None and info.removed_version <= rpc_version:
             valid_version = False
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-_Fn = TypeVar("_Fn")
-
-
-def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
-    if method in ("torrent-add", "torrent-get", "torrent-set"):
-        rpc_args = constants.TORRENT_ARGS[method[-3:]]
-    elif method in ("session-get", "session-set"):
-        rpc_args = constants.SESSION_ARGS[method[-3:]]
-    else:
-        raise ValueError(f'Method "{method}" not supported')
-
-    for key, arg in rpc_args.items():
-        if key in kwargs and arg.added_version > rpc_version:
-            raise TransmissionVersionError(
-                f'Method "{method}" Argument "{key}" does not exist in version {rpc_version}'
-            )
 
 
 def _try_read_torrent(torrent: Union[BinaryIO, str, bytes, pathlib.Path]) -> Optional[str]:  # pylint: disable=R0911

@@ -134,7 +134,6 @@ class Session:
 
         - rpc version 12
         - transmission version 2.20
-        :return:
         """
         return self.__getattr__("download_dir")
 
