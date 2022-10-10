@@ -912,6 +912,10 @@ class Client:
         start_added_torrents: bool = None,
         trash_original_torrent_files: bool = None,
         utp_enabled: bool = None,
+        script_torrent_done_seeding_filename: str = None,
+        script_torrent_done_seeding_enabled: bool = None,
+        script_torrent_added_enabled: bool = None,
+        script_torrent_added_filename: str = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -1103,6 +1107,19 @@ class Client:
             args["trash-original-torrent-files"] = trash_original_torrent_files
         if utp_enabled is not None:
             args["utp-enabled"] = utp_enabled
+
+        if script_torrent_done_seeding_filename is not None:
+            self._rpc_version_warning(17)
+            args["script-torrent-done-seeding-filename"] = script_torrent_done_seeding_filename
+        if script_torrent_done_seeding_enabled is not None:
+            self._rpc_version_warning(17)
+            args["script-torrent-done-seeding-enabled"] = script_torrent_done_seeding_enabled
+        if script_torrent_added_enabled is not None:
+            self._rpc_version_warning(17)
+            args["script-torrent-added-enabled"] = script_torrent_added_enabled
+        if script_torrent_added_filename is not None:
+            self._rpc_version_warning(17)
+            args["script-torrent-added-filename"] = script_torrent_added_filename
 
         args.update(kwargs)
 
