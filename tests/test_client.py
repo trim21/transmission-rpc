@@ -279,12 +279,12 @@ def test_check_rpc_version_for_args():
         "transmission_rpc.client.Client.get_session"
     ):
         c = Client()
-        c.protocol_version = 7
+        c.protocol_version = 15
         with pytest.raises(
             TransmissionVersionError,
             match='Method "torrent-add" Argument "cookies" does not exist in version 7',
         ):
-            c.add_torrent(magnet_url, cookies="")
+            c.add_torrent(magnet_url, labels=[""])
 
 
 @pytest.mark.parametrize(
