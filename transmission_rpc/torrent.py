@@ -5,6 +5,8 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
+from typing_extensions import TypedDict
+
 from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
 from transmission_rpc.lib_types import File, Field, _Timeout
@@ -48,6 +50,13 @@ class Status(str):
         for status in _STATUS_NEW_MAPPING.values():
             setattr(obj, status.replace(" ", "_"), raw == status)
         return obj
+
+
+class Tracker(TypedDict):
+    id: int
+    announce: str
+    scrape: str
+    tier: int
 
 
 class Torrent:
@@ -596,6 +605,10 @@ class Torrent:
             self._push()
         else:
             raise ValueError("Not a valid position")
+
+    @property
+    def trackers(self) -> List[Tracker]:
+        return self.__getattr__("trackers")
 
     def update(self, timeout: _Timeout = None) -> None:
         """Update the torrent information."""
