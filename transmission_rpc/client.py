@@ -1142,10 +1142,10 @@ class Client:
         name: str,
         *,
         timeout: _Timeout = None,
-        honors_session_limits=None,
-        speed_limit_down=None,
-        speed_limit_up_enabled=None,
-        speed_limit_up=None,
+        honors_session_limits: bool = None,
+        speed_limit_down: int = None,
+        speed_limit_up_enabled: bool = None,
+        speed_limit_up: int = None,
         speed_limit_down_enabled: bool = None,
     ) -> None:
 
@@ -1168,13 +1168,13 @@ class Client:
 
         self._request("group-set", arguments, timeout=timeout)
 
-    def get_group(self, name: Union[str, List[str]], *, timeout=None):
-        result: Dict[str, Any] = self._request("group-get", {"name": name}, timeout=timeout)
+    def get_group(self, name: str, *, timeout: _Timeout = None) -> Group:
+        result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
 
         return Group.parse_obj(result["arguments"]["group"][0])
 
-    def get_groups(self, name: List[str], *, timeout=None) -> Dict[str, Group]:
-        result: Dict[str, Any] = self._request("group-get", {"name": name}, timeout=timeout)
+    def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
+        result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
 
         return {x["name"]: Group.parse_obj(x) for x in result["arguments"]["group"]}
 

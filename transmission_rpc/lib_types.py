@@ -3,6 +3,7 @@
 from typing import Any, Tuple, Union, Literal, Optional, NamedTuple
 
 import pydantic
+from pydantic import BaseModel
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
@@ -21,7 +22,7 @@ class Field(NamedTuple):
     dirty: bool
 
 
-class Group(pydantic.BaseModel):
+class Group(BaseModel):
     name: str
 
     # https://github.com/transmission/transmission/issues/3931
