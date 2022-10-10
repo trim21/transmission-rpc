@@ -39,7 +39,7 @@ repos:
     rev: 286156f1050244a3c2a459eb56a9dd9223b12833  # frozen: v3.0.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/autoflake
     rev: bd7651fd4867102a4fc4cf726234436ace3a8d6c  # frozen: v1.7.0
