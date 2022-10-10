@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 import yarl
 import pytest
 
-from transmission_rpc.error import TransmissionAuthError, TransmissionVersionError
+from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.lib_types import File
@@ -271,20 +271,6 @@ def test_real_torrent_get_files(tr_client: Client):
     for torrent in tr_client.get_torrents():
         for file in torrent.files():
             assert isinstance(file, File)
-
-
-def test_check_rpc_version_for_args():
-    m = mock.Mock(return_value={"hello": "world"})
-    with mock.patch("transmission_rpc.client.Client._request", m), mock.patch(
-        "transmission_rpc.client.Client.get_session"
-    ):
-        c = Client()
-        c.protocol_version = 15
-        with pytest.raises(
-            TransmissionVersionError,
-            match="Using feature not supported by server. RPC version for server 15, feature introduced in 17.",
-        ):
-            c.add_torrent(magnet_url, labels=[""])
 
 
 @pytest.mark.parametrize(
