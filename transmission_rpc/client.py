@@ -550,7 +550,7 @@ class Client:
             result[tid] = torrent.files()
         return result
 
-    def set_files(self, items: Dict[str, Dict[str, Dict[str, Any]]], timeout: _Timeout = None) -> None:
+    def set_files(self, items: Dict[str, Dict[int, Dict[str, Any]]], timeout: _Timeout = None) -> None:
         """
         Set file properties. Takes a dictionary with similar contents as the result
         of :py:meth:`transmission_rpc.client.Client.get_files`.
@@ -594,11 +594,11 @@ class Client:
                     elif file_desc["priority"] == "low":
                         low.append(fid)
 
-            priority_high: Optional[List[str]] = None
-            priority_normal: Optional[List[str]] = None
-            priority_low: Optional[List[str]] = None
-            files_wanted: Optional[List[str]] = None
-            files_unwanted: Optional[List[str]] = None
+            priority_high: Optional[List[int]] = None
+            priority_normal: Optional[List[int]] = None
+            priority_low: Optional[List[int]] = None
+            files_wanted: Optional[List[int]] = None
+            files_unwanted: Optional[List[int]] = None
 
             if len(high) > 0:
                 priority_high = high
@@ -730,7 +730,7 @@ class Client:
         ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
         """
 
-        args = {}
+        args: Dict[str, Any] = {}
 
         if bandwidth_priority is not None:
             args["bandwidthPriority"] = bandwidth_priority
