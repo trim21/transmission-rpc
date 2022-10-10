@@ -106,7 +106,7 @@ class Torrent:
         """Get the Transmission RPC API version."""
         if self._client:
             return self._client.rpc_version
-        return 2
+        return 14
 
     def _dirty_fields(self) -> List[str]:
         """Enumerate changed fields"""
@@ -586,21 +586,16 @@ class Torrent:
     @property
     def queue_position(self) -> int:
         """queue position for this torrent."""
-        if self._rpc_version() >= 14:
-            return self._fields["queuePosition"].value
-        return 0
+        return self._fields["queuePosition"].value
 
     @queue_position.setter
     def queue_position(self, position: str) -> None:
         """Queue position"""
-        if self._rpc_version() >= 14:
-            if isinstance(position, int):
-                self._fields["queuePosition"] = Field(position, True)
-                self._push()
-            else:
-                raise ValueError("Not a valid position")
+        if isinstance(position, int):
+            self._fields["queuePosition"] = Field(position, True)
+            self._push()
         else:
-            pass
+            raise ValueError("Not a valid position")
 
     def update(self, timeout: _Timeout = None) -> None:
         """Update the torrent information."""
