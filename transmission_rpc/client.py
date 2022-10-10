@@ -1171,7 +1171,6 @@ class Client:
     def get_group(self, name: Union[str, List[str]], *, timeout=None):
         result: Dict[str, Any] = self._request("group-get", {"name": name}, timeout=timeout)
 
-        print(result["arguments"]["group"][0])
         return Group.parse_obj(result["arguments"]["group"][0])
 
     def get_groups(self, name: List[str], *, timeout=None) -> Dict[str, Group]:
