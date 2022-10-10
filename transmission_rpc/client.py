@@ -40,7 +40,7 @@ from transmission_rpc.utils import rpc_bool, _try_read_torrent, get_torrent_argu
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
-from transmission_rpc.lib_types import File, Field, _Timeout
+from transmission_rpc.lib_types import File, Field, Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -1136,6 +1136,48 @@ class Client:
         """Get session statistics"""
         self._request("session-stats", timeout=timeout)
         return self.session
+
+    def set_group(
+        self,
+        name: str,
+        *,
+        timeout: _Timeout = None,
+        honors_session_limits=None,
+        speed_limit_down=None,
+        speed_limit_up_enabled=None,
+        speed_limit_up=None,
+        speed_limit_down_enabled: bool = None,
+    ) -> None:
+
+        arguments: Dict[str, Any] = {"name": name}
+
+        if honors_session_limits is not None:
+            arguments["honorsSessionLimits"] = honors_session_limits
+
+        if speed_limit_down is not None:
+            arguments["speed-limit-down"] = speed_limit_down
+
+        if speed_limit_up_enabled is not None:
+            arguments["speed-limit-up-enabled"] = speed_limit_up_enabled
+
+        if speed_limit_up is not None:
+            arguments["speed-limit-up"] = speed_limit_up
+
+        if speed_limit_down_enabled is not None:
+            arguments["speed-limit-down-enabled"] = speed_limit_down_enabled
+
+        self._request("group-set", arguments, timeout=timeout)
+
+    def get_group(self, name: Union[str, List[str]], *, timeout=None):
+        result: Dict[str, Any] = self._request("group-get", {"name": name}, timeout=timeout)
+
+        print(result["arguments"]["group"][0])
+        return Group.parse_obj(result["arguments"]["group"][0])
+
+    def get_groups(self, name: List[str], *, timeout=None) -> Dict[str, Group]:
+        result: Dict[str, Any] = self._request("group-get", {"name": name}, timeout=timeout)
+
+        return {x["name"]: Group.parse_obj(x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self
