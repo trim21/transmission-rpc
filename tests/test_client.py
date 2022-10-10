@@ -282,7 +282,7 @@ def test_check_rpc_version_for_args():
         c.protocol_version = 15
         with pytest.raises(
             TransmissionVersionError,
-            match='Method "torrent-add" Argument "cookies" does not exist in version 7',
+            match="Using feature not supported by server. RPC version for server 15, feature introduced in 17.",
         ):
             c.add_torrent(magnet_url, labels=[""])
 
