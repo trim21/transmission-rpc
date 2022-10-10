@@ -39,7 +39,7 @@ repos:
     rev: d232077d3bc16dcbaee30b42d35197f8bf337a36  # frozen: v2.37.1
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py38-plus]
 
   - repo: https://github.com/myint/autoflake
     rev: 7a53fdafc82c33f446915b60fcac947c51279260 # frozen: v1.4

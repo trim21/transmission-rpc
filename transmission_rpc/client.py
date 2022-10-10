@@ -12,13 +12,23 @@ import pathlib
 import operator
 import warnings
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
+from typing import (
+    Any,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Union,
+    Literal,
+    BinaryIO,
+    Iterable,
+    Optional,
+)
 from urllib.parse import quote, urljoin
 
 import requests
 import requests.auth
 import requests.exceptions
-from typing_extensions import Literal
 
 from transmission_rpc.error import (
     TransmissionError,
@@ -615,54 +625,159 @@ class Client:
         self,
         ids: _TorrentIDs,
         timeout: _Timeout = None,
+        *,
+        bandwidth_priority: int = None,
+        download_limit: int = None,
+        download_limited: bool = None,
+        upload_limit: int = None,
+        upload_limited: bool = None,
+        files_unwanted: Iterable[int] = None,
+        files_wanted: Iterable[int] = None,
+        honors_session_limits: bool = None,
+        location: str = None,
+        peer_limit: int = None,
+        priority_high: Iterable[int] = None,
+        priority_low: Iterable[int] = None,
+        priority_normal: Iterable[int] = None,
+        queue_position: int = None,
+        seed_idle_limit: int = None,
+        seed_idle_mode: int = None,
+        seed_ratio_limit: float = None,
+        seed_ratio_mode: int = None,
+        tracker_add: Iterable[str] = None,
+        tracker_remove: Iterable[int] = None,
+        tracker_replace: Iterable[Tuple[int, str]] = None,
+        labels: Iterable[str] = None,
         group: str = None,
         tracker_list: Iterable[Iterable[str]] = None,
         **kwargs: Any,
     ) -> None:
-        """
-        Change torrent parameters for the torrent(s) with the supplied id's. The
-        parameters are:
+        """Change torrent parameters for the torrent(s) with the supplied id's.
 
-        ======================== ======== ============= =============================================================
-        Argument                 RPC      Replaced by      Description
-        ======================== ======== ============= =============================================================
-        ``bandwidthPriority``    5 -                    Priority for this transfer.
-        ``downloadLimit``        5 -                    Set the speed limit for download in Kib/s.
-        ``downloadLimited``      5 -                    Enable download speed limiter.
-        ``files_unwanted``       1 -                    A list of file id's that shouldn't be downloaded.
-        ``files_wanted``         1 -                    A list of file id's that should be downloaded.
-        ``honorsSessionLimits``  5 -                    Enables or disables the transfer
-                                                        to honour the upload limit set in the session.
-        ``location``             1 -                    Local download location.
-        ``peer_limit``           1 -                    The peer limit for the torrents.
-        ``priority_high``        1 -                    A list of file id's that should have high priority.
-        ``priority_low``         1 -                    A list of file id's that should have normal priority.
-        ``priority_normal``      1 -                    A list of file id's that should have low priority.
-        ``queuePosition``        14 -                   Position of this transfer in its queue.
-        ``seedIdleLimit``        10 -                   Seed inactivity limit in minutes.
-        ``seedIdleMode``         10 -                   Seed inactivity mode. 0 = Use session limit,
-                                                        1 = Use transfer limit, 2 = Disable limit.
-        ``seedRatioLimit``       5 -                    Seeding ratio.
-        ``seedRatioMode``        5 -                    Which ratio to use. 0 = Use session limit,
-                                                        1 = Use transfer limit, 2 = Disable limit.
-        ``trackerAdd``           10 - 16   trackerList  Array of string with announce URLs to add.
-        ``trackerRemove``        10 - 16   trackerList  Array of ids of trackers to remove.
-        ``trackerReplace``       10 - 16   trackerList  Array of (id, url) tuples
-                                                        where the announce URL should be replaced.
-        ``uploadLimit``          5 -                    Set the speed limit for upload in Kib/s.
-        ``uploadLimited``        5 -                    Enable upload speed limiter.
-        ``labels``               16 -                   Array of string labels.
-        ``trackerList``          17 -                   A ``Iterable[Iterable[str]]``,
-                                                          each ``Iterable[str]`` for a tracker tier.
-        ======================== ======== ============= ==============================================================
+        Parameters
+        ----------
+        ids
+            torrent(s) to change.
+        timeout
+            requesst timeout.
+        honors_session_limits
+            true if session upload limits are honored.
+        location
+            new location of the torrent's content
+        peer_limit
+            maximum number of peers
+        queue_position
+            position of this torrent in its queue [0...n)
+        files_wanted
+            Array of file id to download.
+        files_unwanted
+            Array of file id to not download.
+        download_limit
+            maximum download speed (KBps)
+        download_limited
+            true if ``download_limit`` is honored
+        upload_limit
+            maximum upload speed (KBps)
+        upload_limited
+            true if ``upload_limit`` is honored
+        bandwidth_priority
+            Priority for this transfer.
+        priority_high
+            list of file id to set high download priority
+        priority_low
+            list of file id to set low download priority
+        priority_normal
+            list of file id to set normal download priority
+        seed_ratio_limit
+            Seed inactivity limit in minutes.
+        seed_ratio_mode
+            Which ratio to use.
 
-        .. NOTE::
+            0 = Use session limit
 
-           transmission_rpc will try to automatically fix argument errors.
+            1 = Use transfer limit
 
+            2 = Disable limit.
+        seed_idle_limit
+            torrent-level seeding ratio
+        seed_idle_mode
+            Seed inactivity mode.
+
+            0 = Use session limit
+
+            1 = Use transfer limit
+
+            2 = Disable limit.
+        tracker_add
+            Array of string with announce URLs to add.
+        tracker_remove
+            Array of ids of trackers to remove.
+        tracker_replace
+            Array of (id, url) tuples where the announce URL should be replaced.
+        labels
+            Array of string labels.
+            Add in rpc 16.
+        group
+            The name of this torrent's bandwidth group.
+            Add in rpc 17.
+        tracker_list
+            A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            Add in rpc 17.
+
+
+        Warnings
+        ----
+        ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
         """
 
         args = {}
+
+        if bandwidth_priority is not None:
+            args["bandwidthPriority"] = bandwidth_priority
+
+        if download_limit is not None:
+            args["downloadLimit"] = download_limit
+        if download_limited is not None:
+            args["downloadLimited"] = download_limited
+        if upload_limit is not None:
+            args["uploadLimit"] = upload_limit
+        if upload_limited is not None:
+            args["uploadLimited"] = upload_limited
+        if files_unwanted is not None:
+            args["files-unwanted"] = list(files_unwanted)
+        if files_wanted is not None:
+            args["files-wanted"] = list(files_wanted)
+        if honors_session_limits is not None:
+            args["honorsSessionLimits"] = honors_session_limits
+        if location is not None:
+            args["location"] = location
+        if peer_limit is not None:
+            args["peer-limit"] = peer_limit
+        if priority_high is not None:
+            args["priority-high"] = list(priority_high)
+        if priority_low is not None:
+            args["priority-low"] = list(priority_low)
+        if priority_normal is not None:
+            args["priority-normal"] = list(priority_normal)
+        if queue_position is not None:
+            args["queuePosition"] = queue_position
+        if seed_idle_limit is not None:
+            args["seedIdleLimit"] = seed_idle_limit
+        if seed_idle_mode is not None:
+            args["seedIdleMode"] = seed_idle_mode
+        if seed_ratio_limit is not None:
+            args["seedRatioLimit"] = seed_ratio_limit
+        if seed_ratio_mode is not None:
+            args["seedRatioMode"] = seed_ratio_mode
+        if tracker_add is not None:
+            args["trackerAdd"] = tracker_add
+        if tracker_remove is not None:
+            args["trackerRemove"] = tracker_remove
+        if tracker_replace is not None:
+            args["trackerReplace"] = tracker_replace
+        if labels is not None:
+            self._rpc_version_warning(16)
+            args["labels"] = list(labels)
 
         if tracker_list is not None:
             self._rpc_version_warning(17)
@@ -682,20 +797,32 @@ class Client:
         else:
             ValueError("No arguments to set")
 
-    def move_torrent_data(self, ids: _TorrentIDs, location: Union[str, pathlib.Path], timeout: _Timeout = None) -> None:
+    def move_torrent_data(
+        self,
+        ids: _TorrentIDs,
+        location: Union[str, pathlib.Path],
+        timeout: _Timeout = None,
+    ) -> None:
         """Move torrent data to the new location."""
         args = {"location": ensure_location_str(location), "move": True}
         self._request("torrent-set-location", args, ids, True, timeout=timeout)
 
     def locate_torrent_data(
-        self, ids: _TorrentIDs, location: Union[str, pathlib.Path], timeout: _Timeout = None
+        self,
+        ids: _TorrentIDs,
+        location: Union[str, pathlib.Path],
+        timeout: _Timeout = None,
     ) -> None:
         """Locate torrent data at the provided location."""
         args = {"location": ensure_location_str(location), "move": False}
         self._request("torrent-set-location", args, ids, True, timeout=timeout)
 
     def rename_torrent_path(
-        self, torrent_id: _TorrentID, location: Union[str, pathlib.Path], name: str, timeout: _Timeout = None
+        self,
+        torrent_id: _TorrentID,
+        location: Union[str, pathlib.Path],
+        name: str,
+        timeout: _Timeout = None,
     ) -> Tuple[str, str]:
         """
         Rename directory and/or files for torrent.
