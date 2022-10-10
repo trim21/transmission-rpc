@@ -728,6 +728,8 @@ class Client:
         Warnings
         ----
         ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
+
+        it will be bypassed to request arguments.
         """
 
         args: Dict[str, Any] = {}
@@ -787,10 +789,7 @@ class Client:
             self._rpc_version_warning(17)
             args["group"] = str(group)
 
-        for key, value in kwargs.items():
-            argument = make_rpc_name(key)
-            arg, val = argument_value_convert("torrent-set", argument, value, self.rpc_version)
-            args[arg] = val
+        args.update(kwargs)
 
         if len(args) > 0:
             self._request("torrent-set", args, ids, True, timeout=timeout)
