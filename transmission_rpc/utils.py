@@ -5,7 +5,7 @@ import base64
 import pathlib
 import datetime
 import warnings
-from typing import Any, Dict, List, Tuple, Union, TypeVar, BinaryIO, Callable, Optional
+from typing import Any, Dict, List, Tuple, Union, BinaryIO, Callable, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
@@ -134,9 +134,6 @@ def get_arguments(method: str, rpc_version: int) -> List[str]:
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-_Fn = TypeVar("_Fn")
 
 
 def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
