@@ -764,7 +764,7 @@ python-versions = "*"
 name = "typing-extensions"
 version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -836,7 +836,7 @@ docs = ["sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cd8f3eb605ed4294b54896054ee5a1e8f4430ca077920c0f4962db5ee20ecd1e"
+content-hash = "ca5ee94020e0e9d8a10e590386d81547ec87b30a67290402c2e9e4483e56e799"
 
 [metadata.files]
 alabaster = [
