@@ -44,9 +44,6 @@ templates_path = ["_templates"]
 # source_suffix = ['.rst', '.md']
 source_suffix = ".rst"
 
-typehints_use_rtype = False
-napoleon_use_rtype = False
-napoleon_preprocess_types = False
 # The master toctree document.
 master_doc = "index"
 
