@@ -151,7 +151,7 @@ def test_real_add_torrent_fd(tr_client: Client):
 
 def test_real_add_torrent_base64(tr_client: Client):
     with open("tests/fixtures/iso.torrent", "rb") as f:
-        with pytest.warns(DeprecationWarning, match="base64"):
+        with pytest.raises(ValueError):
             tr_client.add_torrent(base64.b64encode(f.read()).decode())
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
@@ -242,7 +242,7 @@ def test_raise_unauthorized(status_code):
 
 
 def test_ensure_location_str_relative():
-    with pytest.warns(DeprecationWarning, match="absolute"):
+    with pytest.raises(ValueError):
         ensure_location_str(pathlib.Path("."))
 
 
