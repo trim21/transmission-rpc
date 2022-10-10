@@ -350,25 +350,33 @@ class Client:
 
             url starts with ``file://`` will be load by this package instead of transmission daemon
 
-        Additional arguments are:
-
-        ===================== ===== =========== =============================================================
-        Argument              RPC   Replaced by Description
-        ===================== ===== =========== =============================================================
-        ``bandwidthPriority`` 8 -               Priority for this transfer.
-        ``cookies``           13 -              One or more HTTP cookie(s).
-        ``download_dir``      1 -               The directory where the downloaded contents will be saved in.
-        ``files_unwanted``    1 -               A list of file id's that shouldn't be downloaded.
-        ``files_wanted``      1 -               A list of file id's that should be downloaded.
-        ``paused``            1 -               If True, does not start the transfer when added.
-        ``peer_limit``        1 -               Maximum number of peers allowed.
-        ``priority_high``     1 -               A list of file id's that should have high priority.
-        ``priority_low``      1 -               A list of file id's that should have low priority.
-        ``priority_normal``   1 -               A list of file id's that should have normal priority.
-        ``labels``            17 -              Array of string labels.
-        ===================== ===== =========== =============================================================
-
         Returns a Torrent object with the fields.
+
+        Parameters
+        ----------
+        labels :
+            Array of string labels.
+            Add in rpc 17.
+        bandwidthPriority:
+            Priority for this transfer.
+        cookies:
+            One or more HTTP cookie(s).
+        download_dir:
+            The directory where the downloaded contents will be saved in.
+        files_unwanted:
+            A list of file id's that shouldn't be downloaded.
+        files_wanted:
+            A list of file id's that should be downloaded.
+        paused:
+            If True, does not start the transfer when added.
+        peer_limit:
+            Maximum number of peers allowed.
+        priority_high:
+            A list of file id's that should have high priority.
+        priority_low:
+            A list of file id's that should have low priority.
+        priority_normal:
+            A list of file id's that should have normal priority.
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
@@ -999,6 +1007,8 @@ class Client:
         utp_enabled:
             Enables Micro Transport Protocol (UTP).
 
+
+
         Warnings
         ----
         ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
@@ -1068,9 +1078,9 @@ class Client:
         if rename_partial_files is not None:
             args["rename-partial-files"] = rename_partial_files
         if script_torrent_done_enabled is not None:
-            args["script_torrent_done_enabled"] = script_torrent_done_enabled
+            args["script-torrent-done-enabled"] = script_torrent_done_enabled
         if script_torrent_done_filename is not None:
-            args["script_torrent_done_filename"] = script_torrent_done_filename
+            args["script-torrent-done-filename"] = script_torrent_done_filename
         if seed_queue_enabled is not None:
             args["seed-queue-enabled"] = seed_queue_enabled
         if seed_queue_size is not None:
