@@ -810,8 +810,8 @@ class Client:
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
-        dir_name = os.path.dirname(name)
-        if len(dir_name) > 0:
+        dirname = os.path.dirname(name)
+        if len(dirname) > 0:
             raise ValueError("Target name cannot contain a path delimiter")
         args = {"path": ensure_location_str(location), "name": name}
         result = self._request("torrent-rename-path", args, torrent_id, True, timeout=timeout)
