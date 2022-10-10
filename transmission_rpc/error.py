@@ -38,7 +38,3 @@ class TransmissionConnectError(TransmissionError, requests.exceptions.Connection
 
 class TransmissionTimeoutError(TransmissionConnectError, requests.exceptions.Timeout):
     """Timeout"""
-
-
-class TransmissionVersionError(TransmissionError):
-    """transmission version is too lower to support some feature"""

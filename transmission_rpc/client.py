@@ -10,7 +10,6 @@ import string
 import logging
 import pathlib
 import operator
-import warnings
 import urllib.parse
 from typing import (
     Any,
@@ -36,11 +35,11 @@ from transmission_rpc.error import (
     TransmissionConnectError,
     TransmissionTimeoutError,
 )
-from transmission_rpc.utils import rpc_bool, _try_read_torrent, get_torrent_arguments
+from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
-from transmission_rpc.lib_types import File, Field, Group, _Timeout
+from transmission_rpc.lib_types import Field, Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -53,13 +52,9 @@ def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
         if s.is_absolute():
             return str(s)
 
-        warnings.warn(
-            "`pathlib.Path` will be convert to absolute path automatically, "
-            "please using a str or absolute Path to avoid unexpected path normalization\n"
-            "This warning will become error in v4",
-            DeprecationWarning,
+        raise ValueError(
+            "using relative `pathlib.Path` as remote path is not supported in v4.",
         )
-        return str(s.absolute())
 
     return str(s)
 
@@ -337,14 +332,10 @@ class Client:
         - torrent file-like object in binary mode
         - bytes of torrent content
         - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
-        - **deprecated** str of base64 encoded torrent file content
-        - **deprecated** ``file://`` URL
 
-        .. NOTE::
-
-            url starts with ``file://`` will be load by this package instead of transmission daemon
-
-        Returns a Torrent object with the fields.
+        Warnings
+        --------
+        base64 string or ``file://`` protocol URL are not supported in v4.
 
         Parameters
         ----------
@@ -426,7 +417,7 @@ class Client:
         """
         self._request(
             "torrent-remove",
-            {"delete-local-data": rpc_bool(delete_data)},
+            {"delete-local-data": delete_data},
             ids,
             True,
             timeout=timeout,
@@ -516,91 +507,6 @@ class Client:
         else:
             arguments = self.torrent_get_arguments
         return list(self._request("torrent-get", {"fields": arguments}, ids, timeout=timeout).values())
-
-    def get_files(
-        self,
-        ids: _TorrentIDs = None,
-        timeout: _Timeout = None,
-    ) -> Dict[int, List[File]]:
-        """
-        Get list of files for provided torrent id(s). If ids is empty,
-        information for all torrents are fetched. This function returns a dictionary
-        for each requested torrent id holding the information about the files.
-
-        See more detail in :py:meth:`transmission_rpc.torrent.Torrent.files`
-
-        .. code-block:: python
-
-            {
-                <torrent id>: [
-                    <File 0>,
-                    <File 1>,
-                    ...
-                ],
-                ...
-            }
-
-        """
-        fields = ["id", "name", "hashString", "files", "priorities", "wanted"]
-        request_result: Dict[int, Torrent] = self._request("torrent-get", {"fields": fields}, ids, timeout=timeout)
-        result = {}
-        for tid, torrent in request_result.items():
-            result[tid] = torrent.files()
-        return result
-
-    def set_files(self, items: Dict[str, Dict[int, Dict[str, Any]]], timeout: _Timeout = None) -> None:
-        """
-        Set file properties. Takes a dictionary with similar contents as the result
-        of :py:meth:`transmission_rpc.client.Client.get_files`.
-
-        .. code-block:: python
-
-            {
-                <torrent id>: {
-                    <file id>: {
-                        'priority': <priority ('high'|'normal'|'low')>,
-                        'selected': <selected for download (True|False)>
-                    },
-                    ...
-                },
-                ...
-            }
-
-        """
-        if not isinstance(items, dict):
-            raise ValueError("Invalid file description")
-        for tid, files in items.items():
-            if not isinstance(files, dict):
-                continue
-            wanted = []
-            unwanted = []
-            high = []
-            normal = []
-            low = []
-            for fid, file_desc in files.items():
-                if not isinstance(file_desc, dict):
-                    continue
-                if "selected" in file_desc and file_desc["selected"]:
-                    wanted.append(fid)
-                else:
-                    unwanted.append(fid)
-                if "priority" in file_desc:
-                    if file_desc["priority"] == "high":
-                        high.append(fid)
-                    elif file_desc["priority"] == "normal":
-                        normal.append(fid)
-                    elif file_desc["priority"] == "low":
-                        low.append(fid)
-
-            self.change_torrent(
-                [tid],
-                timeout=timeout,
-                priority_high=high or None,
-                priority_normal=normal or None,
-                priority_low=low or None,
-                files_wanted=wanted or None,
-                files_unwanted=unwanted or None,
-            )
 
     def change_torrent(
         self,

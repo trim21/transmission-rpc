@@ -4,12 +4,10 @@
 import base64
 import pathlib
 import datetime
-import warnings
-from typing import Any, Dict, List, Tuple, Union, BinaryIO, Callable, Optional
+from typing import List, Tuple, Union, BinaryIO, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
-from transmission_rpc.constants import Type
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
@@ -43,42 +41,6 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def rpc_bool(arg: Any) -> int:
-    """
-    Convert between Python boolean and Transmission RPC boolean.
-    """
-    if isinstance(arg, str):
-        try:
-            arg = bool(int(arg))
-        except ValueError:
-            arg = arg.lower() in ["true", "yes"]
-    return 1 if bool(arg) else 0
-
-
-TR_TYPE_MAP: Dict[str, Callable] = {
-    Type.number: int,
-    Type.string: str,
-    Type.double: float,
-    Type.boolean: rpc_bool,
-    Type.array: list,
-    Type.object: dict,
-}
-
-
-def make_python_name(name: str) -> str:
-    """
-    Convert Transmission RPC name to python compatible name.
-    """
-    return name.replace("-", "_")
-
-
-def make_rpc_name(name: str) -> str:
-    """
-    Convert python compatible name to Transmission RPC name.
-    """
-    return name.replace("_", "-")
-
-
 def get_torrent_arguments(rpc_version: int) -> List[str]:
     """
     Get torrent arguments for method in specified Transmission RPC version.
@@ -107,27 +69,7 @@ def _try_read_torrent(torrent: Union[BinaryIO, str, bytes, pathlib.Path]) -> Opt
             return None
 
         if parsed_uri.scheme in ["file"]:
-            warnings.warn("support for `file://` URL is deprecated.", DeprecationWarning)
-            filepath = torrent
-            # uri decoded different on linux / windows ?
-            if len(parsed_uri.path) > 0:
-                filepath = parsed_uri.path
-            elif len(parsed_uri.netloc) > 0:
-                filepath = parsed_uri.netloc
-            with open(filepath, "rb") as torrent_file:
-                return base64.b64encode(torrent_file.read()).decode("utf-8")
-
-        # maybe it's base64 encoded file content
-        try:
-            # check if this is base64 data
-            base64.b64decode(torrent.encode("utf-8"), validate=True)
-            warnings.warn(
-                "support for base64 encoded torrent content str is deprecated.",
-                DeprecationWarning,
-            )
-            return torrent
-        except (TypeError, ValueError):
-            pass
+            raise ValueError("support for `file://` URL has been removed.")
     elif isinstance(torrent, pathlib.Path):
         return base64.b64encode(torrent.read_bytes()).decode("utf-8")
     elif isinstance(torrent, bytes):

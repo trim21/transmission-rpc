@@ -64,23 +64,3 @@ def test_format_speed(size, expected):
 )
 def test_format_timedelta(delta, expected):
     assert utils.format_timedelta(delta), expected
-
-
-@pytest.mark.parametrize(
-    ("value", "expected"),
-    [
-        (0, 0),
-        (1, 1),
-        (1000, 1),
-        ("true", 1),
-        ("Yes", 1),
-        ("truE", 1),
-        ("baka", 0),
-        ("false", 0),
-        ("no", 0),
-        (True, 1),
-        (False, 0),
-    ],
-)
-def test_rpc_bool(value, expected):
-    assert utils.rpc_bool(value) == expected, f"{value} should be convert to {expected}"

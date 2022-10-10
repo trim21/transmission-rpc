@@ -227,17 +227,6 @@ def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
         assert torrent.status == "downloading", "all torrent should be downloading"
 
 
-def test_real_get_files(tr_client: Client):
-    with open("tests/fixtures/iso.torrent", "rb") as f:
-        tr_client.add_torrent(f)
-    assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
-    for tid, files in tr_client.get_files(1).items():
-        assert files
-        assert isinstance(tid, int)
-        for file in files:
-            assert isinstance(file, File)
-
-
 def test_real_session_get(tr_client: Client):
     tr_client.get_session()
 

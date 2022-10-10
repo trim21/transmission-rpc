@@ -78,17 +78,6 @@ you should call method like this.
 :code:`{"download-dir": "/path/to/download/dir"}` in arguments.
 
 
-helper
-------------
-
-If you want to know what kwargs you can use for a method,
-you can use :meth:`transmission_rpc.utils.get_arguments`
-to get support arguments.
-For example, transmission 2.94 is rpc version 15,
-so just call :code:`print(get_arguments('torrent-add', 15))`
-
-rpc method and class method are not same, but reversed
-
 you can find rpc version by transmission version from
 `transmission rpc docs <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#5-protocol-versions>`_
 
