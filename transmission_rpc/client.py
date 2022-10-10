@@ -36,16 +36,10 @@ from transmission_rpc.error import (
     TransmissionConnectError,
     TransmissionTimeoutError,
 )
-from transmission_rpc.utils import (
-    LOGGER,
-    rpc_bool,
-    get_arguments,
-    _try_read_torrent,
-    _rpc_version_check,
-)
+from transmission_rpc.utils import rpc_bool, _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import DEFAULT_TIMEOUT
+from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
 from transmission_rpc.lib_types import File, Field, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
@@ -131,7 +125,7 @@ class Client:
         self._http_session = requests.Session()
         self._http_session.trust_env = False
         self.get_session()
-        self.torrent_get_arguments = get_arguments("torrent-get", self.rpc_version)
+        self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
 
     @property
     def timeout(self) -> _Timeout:
@@ -422,8 +416,6 @@ class Client:
             kwargs["metainfo"] = torrent_data
         else:
             kwargs["filename"] = torrent
-
-        _rpc_version_check("torrent-add", kwargs, self.rpc_version)
 
         return list(self._request("torrent-add", kwargs, timeout=timeout).values())[0]
 
@@ -967,10 +959,7 @@ class Client:
             Number of minutes of idle that marks a transfer as stalled.
         rename_partial_files:
             Appends ".part" to incomplete files
-        script_torrent_done_enabled:
-            Whether to call the "done" script.
-        script_torrent_done_filename:
-            Filename of the script to run when the transfer is done.
+
         seed_queue_enabled:
             Enables upload queue.
         seed_queue_size:
@@ -993,8 +982,18 @@ class Client:
             The .torrent file of added torrents will be deleted.
         utp_enabled:
             Enables Micro Transport Protocol (UTP).
-
-
+        script_torrent_done_enabled:
+            Whether to call the "done" script.
+        script_torrent_done_filename:
+            Filename of the script to run when the transfer is done.
+        script_torrent_added_filename:
+            filename of the script to run
+        script_torrent_added_enabled:
+            whether or not to call the ``added`` script
+        script_torrent_done_seeding_enabled:
+            whether or not to call the ``seeding-done`` script
+        script_torrent_done_seeding_filename:
+            filename of the script to run
 
         Warnings
         ----

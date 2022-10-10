@@ -12,7 +12,6 @@ from transmission_rpc.lib_types import File, Field, _Timeout
 if TYPE_CHECKING:
     from transmission_rpc.client import Client
 
-
 _STATUS_NEW_MAPPING = {
     0: "stopped",
     1: "check pending",
@@ -607,6 +606,19 @@ class Torrent:
     @property
     def trackers(self) -> List[Tracker]:
         return self.__getattr__("trackers")
+
+    @property
+    def file_count(self) -> int:
+        """added in transmission 4.00"""
+        return self.__getattr__("file-count")
+
+    @property
+    def group(self) -> str:
+        """added in transmission 4.00
+
+        transmission will return an empty str ``""`` if torrent doesn't have a bandwidth group.
+        """
+        return self.__getattr__("group")
 
     def update(self, timeout: _Timeout = None) -> None:
         """Update the torrent information."""

@@ -9,7 +9,6 @@ from typing import Any, Dict, List, Tuple, Union, BinaryIO, Callable, Optional
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
-from transmission_rpc.error import TransmissionVersionError
 from transmission_rpc.constants import Type
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
@@ -80,30 +79,20 @@ def make_rpc_name(name: str) -> str:
     return name.replace("_", "-")
 
 
-def get_arguments(method: str, rpc_version: int) -> List[str]:
+def get_torrent_arguments(rpc_version: int) -> List[str]:
     """
-    Get arguments for method in specified Transmission RPC version.
+    Get torrent arguments for method in specified Transmission RPC version.
     """
-    args = constants.get_args_by_method(method)
     accessible = []
-    for argument, info in args.items():
+    for argument, info in constants.TORRENT_GET_ARGS.items():
         valid_version = True
-        if rpc_version < info[1]:
+        if rpc_version < info.added_version:
             valid_version = False
-        if info[2] is not None and info[2] <= rpc_version:
+        if info.removed_version is not None and info.removed_version <= rpc_version:
             valid_version = False
         if valid_version:
             accessible.append(argument)
     return accessible
-
-
-def _rpc_version_check(method: str, kwargs: Dict[str, Any], rpc_version: int) -> None:
-    rpc_args = constants.get_args_by_method(method)
-    for key, arg in rpc_args.items():
-        if key in kwargs and arg.added_version > rpc_version:
-            raise TransmissionVersionError(
-                f'Method "{method}" Argument "{key}" does not exist in version {rpc_version}'
-            )
 
 
 def _try_read_torrent(torrent: Union[BinaryIO, str, bytes, pathlib.Path]) -> Optional[str]:  # pylint: disable=R0911
