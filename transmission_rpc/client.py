@@ -716,11 +716,17 @@ class Client:
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
+        name = name.strip()  # https://github.com/trim21/transmission-rpc/issues/185
         dirname = os.path.dirname(name)
         if len(dirname) > 0:
             raise ValueError("Target name cannot contain a path delimiter")
-        args = {"path": ensure_location_str(location), "name": name}
-        result = self._request("torrent-rename-path", args, torrent_id, True, timeout=timeout)
+        result = self._request(
+            "torrent-rename-path",
+            {"path": ensure_location_str(location), "name": name},
+            torrent_id,
+            True,
+            timeout=timeout,
+        )
         return result["path"], result["name"]
 
     def queue_top(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
