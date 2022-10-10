@@ -1061,7 +1061,7 @@ class Client:
         speed_limit_up: int = None,
         speed_limit_down_enabled: bool = None,
     ) -> None:
-
+        self._rpc_version_warning(17)
         arguments: Dict[str, Any] = {"name": name}
 
         if honors_session_limits is not None:
@@ -1082,6 +1082,7 @@ class Client:
         self._request("group-set", arguments, timeout=timeout)
 
     def get_group(self, name: str, *, timeout: _Timeout = None) -> Optional[Group]:
+        self._rpc_version_warning(17)
         result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
