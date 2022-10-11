@@ -213,7 +213,7 @@ class Client:
             arguments = {}
         if not isinstance(arguments, dict):
             raise ValueError("request takes arguments as dict")
-        arguments = {key.replace("_", "-"): value for key, value in arguments.items()}
+
         ids = _parse_torrent_ids(ids)
         if len(ids) > 0:
             arguments["ids"] = ids
