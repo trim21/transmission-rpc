@@ -244,9 +244,9 @@ class Client:
             raise TransmissionError("Query failed without result.")
 
         results = {}
-        if method == "torrent-get":
+        if method == RpcMethod.TorrentGet:
             return data["arguments"]
-        elif method == "torrent-add":
+        elif method == RpcMethod.TorrentAdd:
             item = None
             if "torrent-added" in data["arguments"]:
                 item = data["arguments"]["torrent-added"]
@@ -256,19 +256,19 @@ class Client:
                 results[item["id"]] = Torrent(self, item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
-        elif method == "session-get":
+        elif method == RpcMethod.SessionGet:
             self._update_session(data["arguments"])
-        elif method == "session-stats":
+        elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
                 self._update_session(data["arguments"]["session-stats"])
             else:
                 self._update_session(data["arguments"])
         elif method in (
-            "port-test",
-            "blocklist-update",
-            "free-space",
-            "torrent-rename-path",
+            RpcMethod.PortTest,
+            RpcMethod.BlocklistUpdate,
+            RpcMethod.FreeSpace,
+            RpcMethod.TorrentRenamePath,
         ):
             results = data["arguments"]
         else:
