@@ -2,13 +2,15 @@
 dataclasses utils
 """
 import dataclasses
-from typing import Type, TypeVar
+from typing import Type, TypeVar, Optional
 
 Model = TypeVar("Model")
 alias = "alias"
 
 
-def from_dict(cls: Type["Model"], obj: dict) -> "Model":
+def from_dict(cls: Type[Model], obj: Optional[dict]) -> Model:
+    if obj is None:
+        return cls()
     fields = dataclasses.fields(cls)
 
     data = {}
