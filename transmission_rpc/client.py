@@ -44,7 +44,7 @@ from transmission_rpc.lib_types import Field, Group, _Timeout
 valid_hash_char = string.digits + string.ascii_letters
 
 _TorrentID = Union[int, str]
-_TorrentIDs = Union[str, _TorrentID, List[_TorrentID], None]
+_TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
 
 
 def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
@@ -245,8 +245,7 @@ class Client:
 
         results = {}
         if method == "torrent-get":
-            for item in data["arguments"]["torrents"]:
-                results[item["id"]] = Torrent(self, item)
+            return data["arguments"]
         elif method == "torrent-add":
             item = None
             if "torrent-added" in data["arguments"]:
@@ -472,23 +471,25 @@ class Client:
 
         Returns a Torrent object with the requested fields.
         """
-        if not arguments:
+        if arguments:
+            arguments = list(set(arguments) | {"id", "hashString"})
+        else:
             arguments = self.torrent_get_arguments
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
-        result: Dict[Union[str, int], Torrent] = self._request(
+
+        result = self._request(
             "torrent-get",
             {"fields": arguments},
             torrent_id,
             require_ids=True,
             timeout=timeout,
         )
-        if torrent_id in result:
-            return result[torrent_id]
-        for torrent in result.values():
-            if torrent.hashString == torrent_id:
-                return torrent
+
+        for torrent in result["torrents"]:
+            if torrent.get("hashString") == torrent_id or torrent.get("id") == torrent_id:
+                return Torrent(client=self, fields=torrent)
         raise KeyError("Torrent not found in result")
 
     def get_torrents(
@@ -503,10 +504,36 @@ class Client:
         Returns a list of Torrent object.
         """
         if arguments:
-            arguments = list(set(arguments) | {"id"})
+            arguments = list(set(arguments) | {"id", "hashString"})
         else:
             arguments = self.torrent_get_arguments
-        return list(self._request("torrent-get", {"fields": arguments}, ids, timeout=timeout).values())
+        return [
+            Torrent(client=self, fields=x)
+            for x in self._request("torrent-get", {"fields": arguments}, ids, timeout=timeout)["torrents"]
+        ]
+
+    def get_recently_active_torrents(
+        self, arguments: Iterable[str] = None, timeout: _Timeout = None
+    ) -> Tuple[List[Torrent], List[int]]:
+        """
+        Get information for torrents for recently active torrent. If you want to get recently-removed
+        torrents. you should use this method.
+
+        Returns
+        -------
+        active_torrents: List[Torrent]
+            List of recently active torrents
+        removed_torrents: List[int]
+            List of torrent-id of recently-removed torrents.
+        """
+        if arguments:
+            arguments = list(set(arguments) | {"id", "hashString"})
+        else:
+            arguments = self.torrent_get_arguments
+
+        result = self._request("torrent-get", {"fields": arguments}, "recently-active", timeout=timeout)
+
+        return [Torrent(client=self, fields=x) for x in result["torrents"]], result["removed"]
 
     def change_torrent(
         self,
