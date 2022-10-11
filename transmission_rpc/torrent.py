@@ -61,6 +61,37 @@ class Tracker:
     tier: int
 
 
+@dataclasses.dataclass(frozen=True)
+class TrackerStats:
+    announceState: int
+    announce: str
+    downloadCount: int
+    hasAnnounced: bool
+    hasScraped: bool
+    host: str
+    id: int
+    isBackup: bool
+    lastAnnouncePeerCount: int
+    lastAnnounceResult: str
+    lastAnnounceStartTime: int
+    lastAnnounceSucceeded: bool
+    lastAnnounceTime: int
+    lastAnnounceTimedOut: bool
+    lastScrapeResult: str
+    lastScrapeStartTime: int
+    lastScrapeSucceeded: bool
+    lastScrapeTime: int
+    lastScrapeTimedOut: bool
+    leecherCount: int
+    nextAnnounceTime: int
+    nextScrapeTime: int
+    scrapeState: int
+    scrape: str
+    seederCount: int
+    sitename: str
+    tier: int
+
+
 class Torrent:
     """
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
@@ -360,145 +391,178 @@ class Torrent:
         or from incoming connections, or from our resume file."""
         return self.get("peersFrom")
 
-    # TODO
-
     @property
-    def peers_getting_from_us(self):
+    def peers_getting_from_us(self) -> int:
+        """Number of peers that we're sending data to"""
         return self.get("peersGettingFromUs")
 
     @property
-    def peers_sending_to_us(self):
+    def peers_sending_to_us(self) -> int:
+        """Number of peers that are sending data to us."""
         return self.get("peersSendingToUs")
 
     @property
-    def percent_complete(self):
+    def percent_complete(self) -> float:
+        """How much has been downloaded of the entire torrent. Range is [0..1]"""
         return self.get("percentComplete")
 
     @property
-    def percent_done(self):
+    def percent_done(self) -> float:
+        """
+        How much has been downloaded of the files the user wants. This differs
+        from percentComplete if the user wants only some of the torrent's files.
+        Range is [0..1]
+        """
         return self.get("percentDone")
 
     @property
     def pieces(self):
+        # TODO
         return self.get("pieces")
 
     @property
     def piece_count(self):
+        # TODO
         return self.get("pieceCount")
 
     @property
     def piece_size(self):
+        # TODO
         return self.get("pieceSize")
 
     @property
     def priorities(self):
+        # TODO
         return self.get("priorities")
 
     @property
     def primary_mime_type(self):
+        # TODO
         return self.get("primary-mime-type")
 
     @property
     def queue_position(self):
+        # TODO
         return self.get("queuePosition")
 
     @property
     def rate_download(self):
+        # TODO
         return self.get("rateDownload")
 
     @property
     def rate_upload(self):
+        # TODO
         return self.get("rateUpload")
 
     @property
     def recheck_progress(self):
+        # TODO
         return self.get("recheckProgress")
 
     @property
     def seconds_downloading(self):
+        # TODO
         return self.get("secondsDownloading")
 
     @property
     def seconds_seeding(self):
+        # TODO
         return self.get("secondsSeeding")
 
     @property
     def seed_idle_limit(self):
+        # TODO
         return self.get("seedIdleLimit")
 
     @property
     def seed_idle_mode(self):
+        # TODO
         return self.get("seedIdleMode")
 
     @property
     def seed_ratio_limit(self):
+        # TODO
         return self.get("seedRatioLimit")
 
     @property
     def seed_ratio_mode(self):
+        # TODO
         return self.get("seedRatioMode")
 
     @property
     def size_when_done(self):
+        # TODO
         return self.get("sizeWhenDone")
 
     @property
     def start_date(self):
+        # TODO
         return self.get("startDate")
 
     @property
     def status(self):
+        # TODO
         return self.get("status")
 
     @property
     def trackers(self):
+        # TODO
         return self.get("trackers")
 
     @property
-    def tracker_list(self):
-        return self.get("trackerList")
+    def tracker_list(self) -> List[str]:
+        """list of str of announce URLs"""
+        return [x for x in self.get("trackerList").splitlines() if x]
 
     @property
-    def tracker_stats(self):
-        return self.get("trackerStats")
+    def tracker_stats(self) -> List[TrackerStats]:
+        return [TrackerStats(**x) for x in self.get("trackerStats")]
 
     @property
-    def total_size(self):
+    def total_size(self) -> int:
         return self.get("totalSize")
 
     @property
-    def torrent_file(self):
+    def torrent_file(self) -> str:
+        """
+        torrent file location on transmission server
+
+        Examples
+        --------
+        /var/lib/transmission-daemon/.config/transmission-daemon/torrents/00000000000000000000000000.torrent
+        """
         return self.get("torrentFile")
 
     @property
-    def uploaded_ever(self):
+    def uploaded_ever(self) -> int:
         return self.get("uploadedEver")
 
     @property
-    def upload_limit(self):
+    def upload_limit(self) -> int:
         return self.get("uploadLimit")
 
     @property
-    def upload_limited(self):
+    def upload_limited(self) -> bool:
         return self.get("uploadLimited")
 
     @property
-    def upload_ratio(self):
+    def upload_ratio(self) -> float:
         return self.get("uploadRatio")
 
     @property
-    def wanted(self):
+    def wanted(self) -> List:
+        # TODO
         return self.get("wanted")
 
     @property
-    def webseeds(self):
+    def webseeds(self) -> List[str]:
         return self.get("webseeds")
 
     @property
     def webseeds_sending_to_us(self):
+        """Number of webseeds that are sending data to us."""
         return self.get("webseedsSendingToUs")
-
-    # TODO
 
     def _status(self) -> str:
         """Get the torrent status"""

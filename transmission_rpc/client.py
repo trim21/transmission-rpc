@@ -474,7 +474,7 @@ class Client:
 
         for torrent in result["torrents"]:
             if torrent.get("hashString") == torrent_id or torrent.get("id") == torrent_id:
-                return Torrent(client=self, fields=torrent)
+                return Torrent(fields=torrent)
         raise KeyError("Torrent not found in result")
 
     def get_torrents(
