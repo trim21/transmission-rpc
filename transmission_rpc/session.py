@@ -1,16 +1,14 @@
 # Copyright (c) 2018-2022 Trim21 <i@trim21.me>
-
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
+# Licensed under the MIT license.
 
 from typing import List, Literal, Optional
-
-# Licensed under the MIT license.
 from dataclasses import field, dataclass
 
 from transmission_rpc.ds import alias
 
 
-@dataclass
+@dataclass(frozen=True)
 class Stats:
     uploaded_bytes: int = field(metadata={alias: "uploadedBytes"})
     downloaded_bytes: int = field(metadata={alias: "downloadedBytes"})
@@ -19,7 +17,7 @@ class Stats:
     seconds_active: int = field(metadata={alias: "secondsActive"})
 
 
-@dataclass
+@dataclass(frozen=True)
 class SessionStats:
     # https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md
     # 42-session-statistics
@@ -33,7 +31,7 @@ class SessionStats:
     current_stats: Stats = field(metadata={alias: "current-stats"})
 
 
-@dataclass
+@dataclass(frozen=True)
 class Units:
     speed_units: List[str] = field(metadata={alias: "speed-units"})  # 4 strings: KB/s, MB/s, GB/s, TB/s
     speed_bytes: int = field(metadata={alias: "speed-bytes"})  # number of bytes in a KB (1000 for kB; 1024 for KiB)
@@ -43,7 +41,7 @@ class Units:
     memory_bytes: int = field(metadata={alias: "memory-bytes"})  # number of bytes in a KB (1000 for kB; 1024 for KiB)
 
 
-@dataclass
+@dataclass(frozen=True)
 class Session:
     """
         Session is a class holding the session data for a Transmission daemon.

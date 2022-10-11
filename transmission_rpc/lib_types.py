@@ -22,7 +22,7 @@ class Field(NamedTuple):
     dirty: bool
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Group:
     name: str
 
