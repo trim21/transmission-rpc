@@ -1,6 +1,7 @@
-# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
+# Copyright (c) 2018-2022 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+import enum
 import logging
 from typing import Dict, Optional, NamedTuple
 
@@ -176,3 +177,38 @@ TORRENT_GET_ARGS: Dict[str, Args] = {
     "file-count": Args(Type.number, 17),
     "trackerList": Args(Type.array, 17, description=trackerListDescription),
 }
+
+
+class RpcMethod(str, enum.Enum):
+    SessionSet = "session-set"
+    SessionGet = "session-get"
+    SessionStats = "session-stats"
+
+    TorrentGet = "torrent-get"
+    TorrentAdd = "torrent-add"
+    TorrentSet = "torrent-set"
+    TorrentRemove = "torrent-remove"
+
+    TorrentStart = "torrent-start"
+    TorrentStartNow = "torrent-start-now"
+    TorrentStop = "torrent-stop"
+
+    TorrentVerify = "torrent-verify"
+    TorrentReannounce = "torrent-reannounce"
+
+    TorrentSetLocation = "torrent-set-location"
+    TorrentRenamePath = "torrent-rename-path"
+
+    QueueMoveTop = "queue-move-top"
+    QueueMoveBottom = "queue-move-bottom"
+    QueueMoveUp = "queue-move-up"
+    QueueMoveDown = "queue-move-down"
+
+    GroupSet = "group-set"
+    GroupGet = "group-get"
+
+    FreeSpace = "free-space"
+
+    PortTest = "port-test"
+
+    BlocklistUpdate = "blocklist-update"
