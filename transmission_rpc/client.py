@@ -38,7 +38,7 @@ from transmission_rpc.error import (
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
+from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
 from transmission_rpc.lib_types import Field, Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
@@ -198,7 +198,7 @@ class Client:
 
     def _request(
         self,
-        method: str,
+        method: RpcMethod,
         arguments: Dict[str, Any] = None,
         ids: _TorrentIDs = None,
         require_ids: bool = False,
@@ -407,7 +407,7 @@ class Client:
         else:
             kwargs["filename"] = torrent
 
-        return list(self._request("torrent-add", kwargs, timeout=timeout).values())[0]
+        return list(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values())[0]
 
     def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None) -> None:
         """
@@ -415,7 +415,7 @@ class Client:
         delete_data is True, otherwise not.
         """
         self._request(
-            "torrent-remove",
+            RpcMethod.TorrentRemove,
             {"delete-local-data": delete_data},
             ids,
             True,
@@ -424,16 +424,16 @@ class Client:
 
     def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
         """Start torrent(s) with provided id(s)"""
-        method = "torrent-start"
+        method = RpcMethod.TorrentStart
         if bypass_queue:
-            method = "torrent-start-now"
+            method = RpcMethod.TorrentStartNow
         self._request(method, {}, ids, True, timeout=timeout)
 
     def start_all(self, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
         """Start all torrents respecting the queue order"""
-        method = "torrent-start"
+        method = RpcMethod.TorrentStart
         if bypass_queue:
-            method = "torrent-start-now"
+            method = RpcMethod.TorrentStartNow
         torrent_list = sorted(self.get_torrents(), key=operator.attrgetter("queuePosition"))
         self._request(
             method,
@@ -445,15 +445,15 @@ class Client:
 
     def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """stop torrent(s) with provided id(s)"""
-        self._request("torrent-stop", {}, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentStop, {}, ids, True, timeout=timeout)
 
     def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """verify torrent(s) with provided id(s)"""
-        self._request("torrent-verify", {}, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentVerify, {}, ids, True, timeout=timeout)
 
     def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
-        self._request("torrent-reannounce", {}, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentReAnnounce, {}, ids, True, timeout=timeout)
 
     def get_torrent(
         self,
@@ -480,7 +480,7 @@ class Client:
             raise ValueError("Invalid id")
 
         result = self._request(
-            "torrent-get",
+            RpcMethod.TorrentGet,
             {"fields": arguments},
             torrent_id,
             require_ids=True,
@@ -509,7 +509,7 @@ class Client:
             arguments = self.torrent_get_arguments
         return [
             Torrent(client=self, fields=x)
-            for x in self._request("torrent-get", {"fields": arguments}, ids, timeout=timeout)["torrents"]
+            for x in self._request(RpcMethod.TorrentGet, {"fields": arguments}, ids, timeout=timeout)["torrents"]
         ]
 
     def get_recently_active_torrents(
@@ -531,7 +531,7 @@ class Client:
         else:
             arguments = self.torrent_get_arguments
 
-        result = self._request("torrent-get", {"fields": arguments}, "recently-active", timeout=timeout)
+        result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
 
         return [Torrent(client=self, fields=x) for x in result["torrents"]], result["removed"]
 
@@ -706,7 +706,7 @@ class Client:
         args.update(kwargs)
 
         if len(args) > 0:
-            self._request("torrent-set", args, ids, True, timeout=timeout)
+            self._request(RpcMethod.TorrentSet, args, ids, True, timeout=timeout)
         else:
             ValueError("No arguments to set")
 
@@ -718,7 +718,7 @@ class Client:
     ) -> None:
         """Move torrent data to the new location."""
         args = {"location": ensure_location_str(location), "move": True}
-        self._request("torrent-set-location", args, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
 
     def locate_torrent_data(
         self,
@@ -728,7 +728,7 @@ class Client:
     ) -> None:
         """Locate torrent data at the provided location."""
         args = {"location": ensure_location_str(location), "move": False}
-        self._request("torrent-set-location", args, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
 
     def rename_torrent_path(
         self,
@@ -749,7 +749,7 @@ class Client:
         if len(dirname) > 0:
             raise ValueError("Target name cannot contain a path delimiter")
         result = self._request(
-            "torrent-rename-path",
+            RpcMethod.TorrentRenamePath,
             {"path": ensure_location_str(location), "name": name},
             torrent_id,
             True,
@@ -759,25 +759,25 @@ class Client:
 
     def queue_top(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer to the top of the queue:_Timeout."""
-        self._request("queue-move-top", ids=ids, require_ids=True, timeout=timeout)
+        self._request(RpcMethod.QueueMoveTop, ids=ids, require_ids=True, timeout=timeout)
 
     def queue_bottom(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer to the bottom of the queue."""
-        self._request("queue-move-bottom", ids=ids, require_ids=True, timeout=timeout)
+        self._request(RpcMethod.QueueMoveBottom, ids=ids, require_ids=True, timeout=timeout)
 
     def queue_up(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer up in the queue."""
-        self._request("queue-move-up", ids=ids, require_ids=True, timeout=timeout)
+        self._request(RpcMethod.QueueMoveUp, ids=ids, require_ids=True, timeout=timeout)
 
     def queue_down(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Move transfer down in the queue."""
-        self._request("queue-move-down", ids=ids, require_ids=True, timeout=timeout)
+        self._request(RpcMethod.QueueMoveDown, ids=ids, require_ids=True, timeout=timeout)
 
     def get_session(self, timeout: _Timeout = None) -> Session:
         """
         Get session parameters. See the Session class for more information.
         """
-        self._request("session-get", timeout=timeout)
+        self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
         return self.session
 
@@ -1046,11 +1046,11 @@ class Client:
         args.update(kwargs)
 
         if len(args) > 0:
-            self._request("session-set", args, timeout=timeout)
+            self._request(RpcMethod.SessionSet, args, timeout=timeout)
 
     def blocklist_update(self, timeout: _Timeout = None) -> Optional[int]:
         """Update block list. Returns the size of the block list."""
-        result = self._request("blocklist-update", timeout=timeout)
+        result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
     def port_test(self, timeout: _Timeout = None) -> Optional[bool]:
@@ -1058,7 +1058,7 @@ class Client:
         Tests to see if your incoming peer port is accessible from the
         outside world.
         """
-        result = self._request("port-test", timeout=timeout)
+        result = self._request(RpcMethod.PortTest, timeout=timeout)
         return result.get("port-is-open")
 
     def free_space(self, path: Union[str, pathlib.Path], timeout: _Timeout = None) -> Optional[int]:
@@ -1067,14 +1067,14 @@ class Client:
         """
         self._rpc_version_warning(15)
         path = ensure_location_str(path)
-        result: Dict[str, Any] = self._request("free-space", {"path": path}, timeout=timeout)
+        result: Dict[str, Any] = self._request(RpcMethod.FreeSpace, {"path": path}, timeout=timeout)
         if result["path"] == path:
             return result["size-bytes"]
         return None
 
     def session_stats(self, timeout: _Timeout = None) -> Session:
         """Get session statistics"""
-        self._request("session-stats", timeout=timeout)
+        self._request(RpcMethod.SessionStats, timeout=timeout)
         return self.session
 
     def set_group(
@@ -1106,11 +1106,11 @@ class Client:
         if speed_limit_down_enabled is not None:
             arguments["speed-limit-down-enabled"] = speed_limit_down_enabled
 
-        self._request("group-set", arguments, timeout=timeout)
+        self._request(RpcMethod.GroupSet, arguments, timeout=timeout)
 
     def get_group(self, name: str, *, timeout: _Timeout = None) -> Optional[Group]:
         self._rpc_version_warning(17)
-        result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
+        result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
             return Group.from_dict(result["arguments"]["group"][0])
@@ -1121,7 +1121,7 @@ class Client:
         if name is not None:
             payload = {"group": name}
 
-        result: Dict[str, Any] = self._request("group-get", payload, timeout=timeout)
+        result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
         return {x["name"]: Group.from_dict(x) for x in result["arguments"]["group"]}
 
