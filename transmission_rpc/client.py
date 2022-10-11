@@ -29,6 +29,7 @@ import requests
 import requests.auth
 import requests.exceptions
 
+from transmission_rpc import ds
 from transmission_rpc.error import (
     TransmissionError,
     TransmissionAuthError,
@@ -36,7 +37,7 @@ from transmission_rpc.error import (
     TransmissionTimeoutError,
 )
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
-from transmission_rpc.session import Session
+from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
 from transmission_rpc.lib_types import Field, Group, _Timeout
@@ -113,7 +114,7 @@ class Client:
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None))
         self.url = str(url)
         self._sequence = 0
-        self.session: Session = Session(self)
+        self.raw_session: Dict[str, Any] = {}
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: int = 17  # default 17
@@ -257,13 +258,13 @@ class Client:
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == RpcMethod.SessionGet:
-            self._update_session(data["arguments"])
+            self.raw_session.update(data["arguments"])
         elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
-                self._update_session(data["arguments"]["session-stats"])
+                return data["arguments"]["session-stats"]
             else:
-                self._update_session(data["arguments"])
+                return data["arguments"]
         elif method in (
             RpcMethod.PortTest,
             RpcMethod.BlocklistUpdate,
@@ -276,18 +277,9 @@ class Client:
 
         return results
 
-    def _update_session(self, data: Dict[str, Any]) -> None:
-        """
-        Update session data.
-        """
-        if self.session:
-            self.session._update(data)  # pylint: disable=W0212
-        else:
-            self.session = Session(self, data)
-
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.protocol_version = self.session.rpc_version
+        self.protocol_version = self.raw_session["rpc-version"]
 
     @property
     def rpc_version(self) -> int:
@@ -783,7 +775,7 @@ class Client:
         """
         self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
-        return self.session
+        return ds.from_dict(Session, self.raw_session)
 
     def set_session(
         self,
@@ -1076,10 +1068,10 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: _Timeout = None) -> Session:
+    def session_stats(self, timeout: _Timeout = None) -> SessionStats:
         """Get session statistics"""
-        self._request(RpcMethod.SessionStats, timeout=timeout)
-        return self.session
+        result = self._request(RpcMethod.SessionStats, timeout=timeout)
+        return ds.from_dict(SessionStats, result)
 
     def set_group(
         self,
@@ -1117,7 +1109,7 @@ class Client:
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
-            return Group.from_dict(result["arguments"]["group"][0])
+            return ds.from_dict(Group, result["arguments"]["group"][0])
         return None
 
     def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
@@ -1127,7 +1119,7 @@ class Client:
 
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
-        return {x["name"]: Group.from_dict(x) for x in result["arguments"]["group"]}
+        return {x["name"]: ds.from_dict(Group, x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self

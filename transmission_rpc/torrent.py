@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Trim21 <i@trim21.me>
+# Copyright (c) 2020-2022 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import datetime
@@ -22,7 +22,7 @@ _STATUS_NEW_MAPPING = {
 }
 
 
-def get_status_new(code: int) -> str:
+def get_status(code: int) -> str:
     """Get the torrent status using new status codes"""
     return _STATUS_NEW_MAPPING[code]
 
@@ -160,7 +160,7 @@ class Torrent:
 
     def _status(self) -> str:
         """Get the torrent status"""
-        return get_status_new(self._fields["status"].value)
+        return get_status(self._fields["status"].value)
 
     def files(self) -> List[File]:
         """
