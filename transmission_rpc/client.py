@@ -453,7 +453,7 @@ class Client:
 
     def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
-        self._request(RpcMethod.TorrentReAnnounce, {}, ids, True, timeout=timeout)
+        self._request(RpcMethod.TorrentReannounce, {}, ids, True, timeout=timeout)
 
     def get_torrent(
         self,

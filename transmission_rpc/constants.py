@@ -194,7 +194,7 @@ class RpcMethod(str, enum.Enum):
     TorrentStop = "torrent-stop"
 
     TorrentVerify = "torrent-verify"
-    TorrentReAnnounce = "torrent-reannounce"
+    TorrentReannounce = "torrent-reannounce"
 
     TorrentSetLocation = "torrent-set-location"
     TorrentRenamePath = "torrent-rename-path"
