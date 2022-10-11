@@ -516,15 +516,15 @@ class Client:
         self, arguments: Iterable[str] = None, timeout: _Timeout = None
     ) -> Tuple[List[Torrent], List[int]]:
         """
-         Get information for torrents for recently active torrent. If you want to get recently-removed
+        Get information for torrents for recently active torrent. If you want to get recently-removed
         torrents. you should use this method.
 
-         Returns
-         -------
-         active_torrents: List[Torrent]:
-             List of recently active torrents
-         removed_torrents: List[int]:
-             List of torrent-id of recently-removed torrents.
+        Returns
+        -------
+        active_torrents: List[Torrent]
+            List of recently active torrents
+        removed_torrents: List[int]
+            List of torrent-id of recently-removed torrents.
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
