@@ -338,7 +338,11 @@ class Client:
 
         Parameters
         ----------
-        labels :
+        torrent:
+            torrent to add
+        timeout:
+            request timeout
+        labels:
             Array of string labels.
             Add in rpc 17.
         bandwidthPriority:
