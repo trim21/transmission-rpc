@@ -1113,7 +1113,7 @@ class Client:
         result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
-            return Group.parse_obj(result["arguments"]["group"][0])
+            return Group.from_dict(result["arguments"]["group"][0])
         return None
 
     def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
@@ -1123,7 +1123,7 @@ class Client:
 
         result: Dict[str, Any] = self._request("group-get", payload, timeout=timeout)
 
-        return {x["name"]: Group.parse_obj(x) for x in result["arguments"]["group"]}
+        return {x["name"]: Group.from_dict(x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self
