@@ -11,18 +11,7 @@ import logging
 import pathlib
 import operator
 import urllib.parse
-from typing import (
-    Any,
-    Dict,
-    List,
-    Type,
-    Tuple,
-    Union,
-    Literal,
-    BinaryIO,
-    Iterable,
-    Optional,
-)
+from typing import Any, Dict, List, Type, Tuple, Union, Literal, BinaryIO, Iterable, Optional
 from urllib.parse import quote, urljoin
 
 import requests

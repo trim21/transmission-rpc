@@ -5,7 +5,7 @@ import dataclasses
 from typing import Type, TypeVar
 
 Model = TypeVar("Model")
-alias_metadata = "alias"
+alias = "alias"
 
 
 def from_dict(cls: Type["Model"], obj: dict) -> "Model":
@@ -14,10 +14,14 @@ def from_dict(cls: Type["Model"], obj: dict) -> "Model":
     data = {}
 
     for field in fields:
-        if alias := field.metadata.get(alias_metadata):
-            value = obj[alias]
+        name = field.name
+        if field_alias := field.metadata.get(alias):
+            name = field_alias
+
+        if field.default is not dataclasses.MISSING or field.default_factory is not dataclasses.MISSING:
+            value = obj.get(name)
         else:
-            value = obj[field.name]
+            value = obj[name]
 
         if dataclasses.is_dataclass(field.type):
             data[field.name] = from_dict(field.type, value)
