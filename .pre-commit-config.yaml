@@ -36,13 +36,13 @@ repos:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 286156f1050244a3c2a459eb56a9dd9223b12833  # frozen: v3.0.0
+    rev: d50ce21fc45d014790d4ecf71d1b1d7ccc450526  # frozen: v3.1.0
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/autoflake
-    rev: bd7651fd4867102a4fc4cf726234436ace3a8d6c  # frozen: v1.7.0
+    rev: d603145783430b4e0f9ec3ab0227e194ad5d1d49  # frozen: v1.7.4
     hooks:
       - id: autoflake
         args:
