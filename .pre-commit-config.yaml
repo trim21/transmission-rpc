@@ -42,7 +42,7 @@ repos:
         args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/autoflake
-    rev: d603145783430b4e0f9ec3ab0227e194ad5d1d49  # frozen: v1.7.4
+    rev: 910a104e8f3b86e46ff1da8b0ea531e5f023edc7  # frozen: v1.7.7
     hooks:
       - id: autoflake
         args:
