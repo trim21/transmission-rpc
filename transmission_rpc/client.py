@@ -1,7 +1,3 @@
-# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
-# Copyright (c) 2020 littleya <me@littleya.com>
-# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
 import os
 import json
 import time

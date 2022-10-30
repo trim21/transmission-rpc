@@ -1,6 +1,3 @@
-# Copyright (c) 2020-2021 Trim21 <i@trim21.me>
-# 2008-12, Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
 import time
 import calendar
 import datetime
