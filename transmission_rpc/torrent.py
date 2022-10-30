@@ -94,14 +94,14 @@ class Torrent(Container):
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
     """
 
-    def __init__(self, fields: Dict[str, Any]):
+    def __init__(self, *, fields: Dict[str, Any]):
         if "id" not in fields:
             raise ValueError(
                 "Torrent object requires field 'id', "
                 "you need to add 'id' in your 'arguments' when calling 'get_torrent'"
             )
 
-        super().__init__(fields)
+        super().__init__(fields=fields)
 
     @property
     def id(self) -> int:

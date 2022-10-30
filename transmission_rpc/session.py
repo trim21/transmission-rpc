@@ -51,11 +51,11 @@ class SessionStats(Container):
 
     @property
     def cumulative_stats(self) -> Stats:
-        return Stats(self.fields["cumulative-stats"])
+        return Stats(fields=self.fields["cumulative-stats"])
 
     @property
     def current_stats(self) -> Stats:
-        return Stats(self.fields["current-stats"])
+        return Stats(fields=self.fields["current-stats"])
 
 
 class Units(Container):

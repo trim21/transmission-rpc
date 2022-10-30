@@ -13,8 +13,8 @@ from transmission_rpc.torrent import Status
 
 def test_initial():
     with pytest.raises(ValueError, match="Torrent object requires field 'id'"):
-        transmission_rpc.Torrent({})
-    transmission_rpc.Torrent({"id": 42})
+        transmission_rpc.Torrent(fields={})
+    transmission_rpc.Torrent(fields={"id": 42})
 
 
 def assert_property_exception(exception, ob, prop):
@@ -28,12 +28,12 @@ def test_non_active():
         "activityDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.date_active
 
 
 def test_attributes():
-    torrent = transmission_rpc.Torrent({"id": 42})
+    torrent = transmission_rpc.Torrent(fields={"id": 42})
     assert torrent.id == 42
     assert_property_exception(KeyError, torrent, "status")
     assert_property_exception(KeyError, torrent, "progress")
@@ -64,7 +64,7 @@ def test_attributes():
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
     }
 
-    torrent = transmission_rpc.Torrent(data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.id == 1
     assert torrent.left_until_done == 500
     assert torrent.status == "downloading"
@@ -93,7 +93,7 @@ def test_attributes():
         "doneDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.date_done is None
 
 

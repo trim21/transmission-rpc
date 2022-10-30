@@ -2,6 +2,7 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 import datetime
+from typing import Tuple
 
 import pytest
 
@@ -25,7 +26,7 @@ def assert_almost_eq(value: float, expected: float):
         1152921504606846976: (1.0, "EiB"),
     }.items(),
 )
-def test_format_size(size, expected):
+def test_format_size(size, expected: Tuple[float, str]):
     result = utils.format_size(size)
     assert_almost_eq(result[0], expected[0])
     assert result[1] == expected[1]
