@@ -34,7 +34,6 @@ def test_non_active():
 
 def test_attributes():
     torrent = transmission_rpc.Torrent({"id": 42})
-    assert hasattr(torrent, "id")
     assert torrent.id == 42
     assert_property_exception(KeyError, torrent, "status")
     assert_property_exception(KeyError, torrent, "progress")
@@ -78,9 +77,6 @@ def test_attributes():
     assert torrent.date_done == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
-
-    torrent = transmission_rpc.Torrent({"id": 42, "eta": -1})
-    assert_property_exception(ValueError, torrent, "eta")
 
     data = {
         "id": 1,
