@@ -449,11 +449,14 @@ class Client:
         Returns a Torrent object with the requested fields.
 
 
+        Note
+        ----
+        It's recommended that you use torrent's info_hash as torrent id. torrent's info_hash will never change.
+
         Parameters
         ----------
         torrent_id:
             torrent id can be an int or a torrent info_hash (hash_string of torrent object).
-            It's recommended that you use info_hash as torrent id.
 
         arguments:
             fetched torrent arguments, in most cases you don't need to set this,
