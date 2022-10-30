@@ -266,7 +266,7 @@ class Session(Container):
     def queue_stalled_enabled(self) -> bool:
         return self.fields["queue-stalled-enabled"]
 
-    # torrents that are idle for N minuets aren't counted toward seed-queue-size or download-queue-size
+    # torrents that are idle for N minutes aren't counted toward seed-queue-size or download-queue-size
     @property
     def queue_stalled_minutes(self) -> int:
         return self.fields["queue-stalled-minutes"]

@@ -761,7 +761,7 @@ class Client:
         """
         self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
-        return ds.from_dict(Session, self.raw_session)
+        return Session(self.raw_session)
 
     def set_session(
         self,
@@ -1095,7 +1095,7 @@ class Client:
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
-            return ds.from_dict(Group, result["arguments"]["group"][0])
+            return Group(result["arguments"]["group"][0])
         return None
 
     def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
@@ -1105,7 +1105,7 @@ class Client:
 
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
-        return {x["name"]: ds.from_dict(Group, x) for x in result["arguments"]["group"]}
+        return {x["name"]: Group(x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self
