@@ -29,21 +29,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: ${{ matrix.language }}
-
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.11'
 
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
         with:
           extras: docs
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
