@@ -9,10 +9,10 @@ T = TypeVar("T")
 class Container:
     fields: Dict[str, Any]
 
-    def __init__(self, fields):
+    def __init__(self, fields: Dict[str, Any]):
         self.fields = fields
 
-    def get(self, key, default: T = None) -> Optional[T]:
+    def get(self, key: str, default: T = None) -> Any:
         return self.fields.get(key, default)
 
 

@@ -240,7 +240,7 @@ class Client:
             elif "torrent-duplicate" in data["arguments"]:
                 item = data["arguments"]["torrent-duplicate"]
             if item:
-                results[item["id"]] = Torrent(self, item)
+                results[item["id"]] = Torrent(fields=item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == RpcMethod.SessionGet:

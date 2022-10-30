@@ -154,9 +154,10 @@ class Torrent(Container):
     def creator(self) -> str:
         return self.fields["creator"]
 
-    @property
-    def date_created(self):
-        return self.fields["dateCreated"]
+    # TODO
+    # @property
+    # def date_created(self):
+    #     return self.fields["dateCreated"]
 
     @property
     def desired_available(self) -> int:
@@ -237,11 +238,14 @@ class Torrent(Container):
         if eta >= 0:
             return timedelta(seconds=eta)
 
+        return None
+
     @property
     def eta_idle(self) -> Optional[timedelta]:
         v = self.fields["etaIdle"]
         if v >= 0:
             return timedelta(seconds=v)
+        return None
 
     @property
     def file_count(self) -> Optional[int]:
@@ -330,7 +334,7 @@ class Torrent(Container):
         return self.fields["labels"]
 
     @property
-    def left_until_done(self):
+    def left_until_done(self) -> int:
         """
         Byte count of how much data is left to be downloaded until we've got
         all the pieces that we want. [0...tr_stat.sizeWhenDone]
@@ -421,10 +425,10 @@ class Torrent(Container):
     def piece_size(self) -> int:
         return self.fields["pieceSize"]
 
-    @property
-    def priorities(self):
-        # TODO
-        return self.fields["priorities"]
+    # TODO
+    # @property
+    # def priorities(self):
+    #     return self.fields["priorities"]
 
     @property
     def primary_mime_type(self) -> str:
@@ -467,33 +471,18 @@ class Torrent(Container):
     #     return self.fields["seedIdleMode"]
 
     @property
-    def seed_ratio_limit(self) -> float:
-        """the default seed ratio for torrents to use"""
-        return self.fields["seedRatioLimit"]
-
-    @property
-    def seed_ratio_mode(self) -> int:
-        """which ratio to use. See tr_ratiolimit"""
-        return self.fields["seedRatioMode"]
-
-    @property
     def size_when_done(self) -> int:
         return self.fields["sizeWhenDone"]
 
-    @property
-    def start_date(self):
-        # TODO
-        return self.fields["startDate"]
+    #     # TODO
+    # @property
+    # def start_date(self):
+    #     return self.fields["startDate"]
 
-    @property
-    def status(self):
-        # TODO
-        return self.fields["status"]
-
-    @property
-    def trackers(self):
-        # TODO
-        return self.fields["trackers"]
+    # TODO
+    # @property
+    # def trackers(self):
+    #     return self.fields["trackers"]
 
     @property
     def tracker_list(self) -> List[str]:
@@ -545,7 +534,7 @@ class Torrent(Container):
         return self.fields["webseeds"]
 
     @property
-    def webseeds_sending_to_us(self):
+    def webseeds_sending_to_us(self) -> int:
         """Number of webseeds that are sending data to us."""
         return self.fields["webseedsSendingToUs"]
 
@@ -645,7 +634,7 @@ class Torrent(Container):
             return "not available"
         if eta == -2:
             return "unknown"
-        return format_timedelta(self.eta)
+        return format_timedelta(timedelta(seconds=eta))
 
     # @property
     # def download_limit(self) -> Optional[int]:
@@ -687,8 +676,6 @@ class Torrent(Container):
         """
         Torrent seed ratio limit as float. Also see seed_ratio_mode.
         This is a mutator.
-
-        :rtype: float
         """
 
         return float(self.fields["seedRatioLimit"])
@@ -701,8 +688,6 @@ class Torrent(Container):
          * global, use session seed ratio limit.
          * single, use torrent seed ratio limit. See seed_ratio_limit.
          * unlimited, no seed ratio limit.
-
-        This is a mutator.
         """
         return RATIO_LIMIT[self.fields["seedRatioMode"]]
 
