@@ -58,10 +58,10 @@ pytz = "==2022.4"
 [tool.isort]
 default_section = 'THIRDPARTY'
 indent = '    '
+profile = 'black'
 known_first_party = 'transmission_rpc'
 length_sort = true
-line_length = 88
-multi_line_output = 3
+line_length = 120
 no_lines_before = 'LOCALFOLDER'
 use_parentheses = true
 include_trailing_comma = true
