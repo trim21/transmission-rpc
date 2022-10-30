@@ -1,4 +1,4 @@
-default_stages: [ commit ]
+default_stages: [commit]
 
 repos:
   - repo: https://github.com/python-poetry/poetry
@@ -25,10 +25,10 @@ repos:
       - id: debug-statements
       - id: trailing-whitespace
       - id: mixed-line-ending
-        args: [ --fix=lf ]
+        args: [--fix=lf]
       - id: end-of-file-fixer
       - id: fix-encoding-pragma
-        args: [ --remove ]
+        args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
     rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1 # frozen: 5.10.1
@@ -39,7 +39,7 @@ repos:
     rev: 286156f1050244a3c2a459eb56a9dd9223b12833 # frozen: v3.0.0
     hooks:
       - id: pyupgrade
-        args: [ --py38-plus ]
+        args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/autoflake
     rev: bd7651fd4867102a4fc4cf726234436ace3a8d6c # frozen: v1.7.0
@@ -56,11 +56,11 @@ repos:
     hooks:
       - id: doc8
         name: Check rst file
-        args: [ --max-line-length=120 ]
+        args: [--max-line-length=120]
         files: \.rst$
 
   - repo: https://github.com/psf/black
     rev: 27d20144a7517594e24a1649451177b2a11284be # frozen: 22.10.0
     hooks:
       - id: black
-        args: [ --line-length=120 ]
+        args: [--line-length=120]
