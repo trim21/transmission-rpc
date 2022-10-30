@@ -116,231 +116,231 @@ class Session(Container):
 
     @property
     def alt_speed_down(self) -> int:
-        # max global download speed (KBps)
+        """max global download speed (KBps)"""
         return self.fields["alt-speed-down"]
 
-    # true means use the alt speeds
     @property
     def alt_speed_enabled(self) -> bool:
+        # true means use the alt speeds
         return self.fields["alt-speed-enabled"]
 
-    # when to turn on alt speeds (units: minutes after midnight)
     @property
     def alt_speed_time_begin(self) -> int:
+        """when to turn on alt speeds (units: minutes after midnight)"""
         return self.fields["alt-speed-time-begin"]
 
-    # what day(s) to turn on alt speeds (look at tr_sched_day)
     @property
     def alt_speed_time_day(self) -> int:
+        """what day(s) to turn on alt speeds (look at tr_sched_day)"""
         return self.fields["alt-speed-time-day"]
 
-    # true means the scheduled on/off times are used
     @property
     def alt_speed_time_enabled(self) -> bool:
+        """true means the scheduled on/off times are used"""
         return self.fields["alt-speed-time-enabled"]
 
-    # when to turn off alt speeds (units: same)
     @property
     def alt_speed_time_end(self) -> int:
+        """when to turn off alt speeds (units: same)"""
         return self.fields["alt-speed-time-end"]
 
-    # max global upload speed (KBps)
     @property
     def alt_speed_up(self) -> int:
+        """max global upload speed (KBps)"""
         return self.fields["alt-speed-up"]
 
-    # true means enabled
     @property
     def blocklist_enabled(self) -> bool:
+        """true means enabled"""
         return self.fields["blocklist-enabled"]
 
-    # int of rules in the blocklist
     @property
     def blocklist_size(self) -> int:
+        """int of rules in the blocklist"""
         return self.fields["blocklist-size"]
 
-    # location of the blocklist to use for `blocklist-update`
     @property
     def blocklist_url(self) -> str:
+        """location of the blocklist to use for `blocklist-update`"""
         return self.fields["blocklist-url"]
 
-    # maximum size of the disk cache (MB)
     @property
     def cache_size_mb(self) -> int:
+        """maximum size of the disk cache (MB)"""
         return self.fields["cache-size-mb"]
 
-    # location of transmission's configuration directory
     @property
     def config_dir(self) -> str:
+        """location of transmission's configuration directory"""
         return self.fields["config-dir"]
 
-    # true means allow dht in public torrents
     @property
     def dht_enabled(self) -> bool:
+        """true means allow dht in public torrents"""
         return self.fields["dht-enabled"]
 
-    # default path to download torrents
     @property
     def download_dir(self) -> str:
+        """default path to download torrents"""
         return self.fields["download-dir"]
 
-    # **DEPRECATED** Use the `free-space` method instead.
     @property
     def download_dir_free_space(self) -> int:
+        """**DEPRECATED** Use the `free-space` method instead."""
         return self.fields["download-dir-free-space"]
 
-    # if true, limit how many torrents can be downloaded at once
     @property
     def download_queue_enabled(self) -> bool:
+        """if true, limit how many torrents can be downloaded at once"""
         return self.fields["download-queue-enabled"]
 
-    # max int of torrents to download at once (see download-queue-enabled)
     @property
     def download_queue_size(self) -> int:
+        """max int of torrents to download at once (see download-queue-enabled)"""
         return self.fields["download-queue-size"]
 
     @property
     def encryption(self) -> Literal["required", "preferred", "tolerated"]:
         return self.fields["encryption"]
 
-    # true if the seeding inactivity limit is honored by default
     @property
     def idle_seeding_limit_enabled(self) -> bool:
+        """true if the seeding inactivity limit is honored by default"""
         return self.fields["idle-seeding-limit-enabled"]
 
-    # torrents we're seeding will be stopped if they're idle for this long
     @property
     def idle_seeding_limit(self) -> int:
+        """torrents we're seeding will be stopped if they're idle for this long"""
         return self.fields["idle-seeding-limit"]
 
-    # true means keep torrents in incomplete-dir until done
     @property
     def incomplete_dir_enabled(self) -> bool:
+        """true means keep torrents in incomplete-dir until done"""
         return self.fields["incomplete-dir-enabled"]
 
-    # path for incomplete torrents, when enabled
     @property
     def incomplete_dir(self) -> str:
+        """path for incomplete torrents, when enabled"""
         return self.fields["incomplete-dir"]
 
-    # true means allow Local Peer Discovery in public torrents
     @property
     def lpd_enabled(self) -> bool:
+        """true means allow Local Peer Discovery in public torrents"""
         return self.fields["lpd-enabled"]
 
-    # maximum global int of peers
     @property
     def peer_limit_global(self) -> int:
+        """maximum global int of peers"""
         return self.fields["peer-limit-global"]
 
-    # maximum global int of peers
     @property
     def peer_limit_per_torrent(self) -> int:
+        """maximum global int of peers"""
         return self.fields["peer-limit-per-torrent"]
 
-    # true means pick a random peer port on launch
     @property
     def peer_port_random_on_start(self) -> bool:
+        """true means pick a random peer port on launch"""
         return self.fields["peer-port-random-on-start"]
 
-    # port int
     @property
     def peer_port(self) -> int:
+        """port int"""
         return self.fields["peer-port"]
 
-    # true means allow pex in public torrents
     @property
     def pex_enabled(self) -> bool:
+        """true means allow pex in public torrents"""
         return self.fields["pex-enabled"]
 
-    # true means ask upstream router to forward the configured peer port to transmission using UPnP or NAT-PMP
     @property
     def port_forwarding_enabled(self) -> bool:
+        """true means ask upstream router to forward the configured peer port to transmission using UPnP or NAT-PMP"""
         return self.fields["port-forwarding-enabled"]
 
-    # whether or not to consider idle torrents as stalled
     @property
     def queue_stalled_enabled(self) -> bool:
+        """whether or not to consider idle torrents as stalled"""
         return self.fields["queue-stalled-enabled"]
 
-    # torrents that are idle for N minutes aren't counted toward seed-queue-size or download-queue-size
     @property
     def queue_stalled_minutes(self) -> int:
+        """torrents that are idle for N minutes aren't counted toward seed-queue-size or download-queue-size"""
         return self.fields["queue-stalled-minutes"]
 
-    # true means append `.part` to incomplete files
     @property
     def rename_partial_files(self) -> bool:
+        """true means append `.part` to incomplete files"""
         return self.fields["rename-partial-files"]
 
-    # the minimum RPC API version supported
     @property
     def rpc_version_minimum(self) -> int:
+        """the minimum RPC API version supported"""
         return self.fields["rpc-version-minimum"]
 
-    # the current RPC API version
     @property
     def rpc_version(self) -> int:
+        """the current RPC API version"""
         return self.fields["rpc-version"]
 
-    # whether or not to call the `done` script
     @property
     def script_torrent_done_enabled(self) -> bool:
+        """whether or not to call the `done` script"""
         return self.fields["script-torrent-done-enabled"]
 
-    # filename of the script to run
     @property
     def script_torrent_done_filename(self) -> str:
+        """filename of the script to run"""
         return self.fields["script-torrent-done-filename"]
 
-    # if true, limit how many torrents can be uploaded at once
     @property
     def seed_queue_enabled(self) -> bool:
+        """if true, limit how many torrents can be uploaded at once"""
         return self.fields["seed-queue-enabled"]
 
-    # max int of torrents to uploaded at once (see seed-queue-enabled)
     @property
     def seed_queue_size(self) -> int:
+        """max int of torrents to uploaded at once (see seed-queue-enabled)"""
         return self.fields["seed-queue-size"]
 
-    # the default seed ratio for torrents to use
     @property
     def seedRatioLimit(self) -> float:
+        """the default seed ratio for torrents to use"""
         return self.fields["seedRatioLimit"]
 
-    # true if seedRatioLimit is honored by default
     @property
     def seedRatioLimited(self) -> bool:
+        """true if seedRatioLimit is honored by default"""
         return self.fields["seedRatioLimited"]
 
-    # true means enabled
     @property
     def speed_limit_down_enabled(self) -> bool:
+        """true means enabled"""
         return self.fields["speed-limit-down-enabled"]
 
-    # max global download speed (KBps)
     @property
     def speed_limit_down(self) -> int:
+        """max global download speed (KBps)"""
         return self.fields["speed-limit-down"]
 
-    # true means enabled
     @property
     def speed_limit_up_enabled(self) -> bool:
+        """true means enabled"""
         return self.fields["speed-limit-up-enabled"]
 
-    # max global upload speed (KBps)
     @property
     def speed_limit_up(self) -> int:
+        """max global upload speed (KBps)"""
         return self.fields["speed-limit-up"]
 
-    # true means added torrents will be started right away
     @property
     def start_added_torrents(self) -> bool:
+        """true means added torrents will be started right away"""
         return self.fields["start-added-torrents"]
 
-    # true means the .torrent file of added torrents will be deleted
     @property
     def trash_original_torrent_files(self) -> bool:
+        """true means the .torrent file of added torrents will be deleted"""
         return self.fields["trash-original-torrent-files"]
 
     # see below
@@ -348,48 +348,60 @@ class Session(Container):
     def units(self) -> Units:
         return self.fields["units"]
 
-    # true means allow utp
     @property
     def utp_enabled(self) -> bool:
+        """true means allow utp"""
         return self.fields["utp-enabled"]
 
-    # long version str `$version ($revision)`
     @property
     def version(self) -> str:
+        """long version str `$version ($revision)`"""
         return self.fields["version"]
 
-    # list of default trackers to use on public torrents
-    # new at rpc-version 17
     @property
     def default_trackers(self) -> Optional[list]:
+        """
+        list of default trackers to use on public torrents
+        new at rpc-version 17
+        """
         return self.get("default-trackers")
 
-    # the current RPC API version in a semver-compatible str
-    # new at rpc-version 17
     @property
     def rpc_version_semver(self) -> Optional[str]:
+        """
+        the current RPC API version in a semver-compatible str
+        new at rpc-version 17
+        """
         return self.get("rpc-version-semver")
 
-    # whether or not to call the `added` script
-    # new at rpc-version 17
     @property
     def script_torrent_added_enabled(self) -> Optional[bool]:
+        """
+        whether or not to call the `added` script
+        new at rpc-version 17
+        """
         return self.get("script-torrent-added-enabled")
 
-    # filename of the script to run
-    # new at rpc-version 17
     @property
     def script_torrent_added_filename(self) -> Optional[str]:
+        """
+        filename of the script to run
+        new at rpc-version 17
+        """
         return self.get("script-torrent-added-filename")
 
-    # whether or not to call the `seeding-done` script
-    # new at rpc-version 17
     @property
     def script_torrent_done_seeding_enabled(self) -> Optional[bool]:
+        """
+        whether or not to call the `seeding-done` script
+        new at rpc-version 17
+        """
         return self.get("script-torrent-done-seeding-enabled")
 
-    # filename of the script to run
-    # new at rpc-version 17
     @property
     def script_torrent_done_seeding_filename(self) -> Optional[str]:
+        """
+        filename of the script to run
+        new at rpc-version 17
+        """
         return self.get("script-torrent-done-seeding-filename")
