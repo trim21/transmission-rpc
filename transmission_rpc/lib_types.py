@@ -7,12 +7,13 @@ T = TypeVar("T")
 
 
 class Container:
-    fields: Dict[str, Any]
+    fields: Dict[str, Any]  #: raw fields
 
     def __init__(self, *, fields: Dict[str, Any]):
         self.fields = fields
 
     def get(self, key: str, default: T = None) -> Any:
+        """get the raw value from files by the **raw keys**"""
         return self.fields.get(key, default)
 
 

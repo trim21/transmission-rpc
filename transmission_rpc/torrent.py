@@ -92,6 +92,10 @@ class TrackerStats:
 class Torrent(Container):
     """
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
+
+    Warnings
+    --------
+    setter on Torrent's properties has been removed, please use ``Client().change_torrent()`` instead
     """
 
     def __init__(self, *, fields: Dict[str, Any]):
@@ -239,9 +243,6 @@ class Torrent(Container):
         - `-2` for ETA Unknown.
 
         https://github.com/transmission/transmission/blob/3.00/libtransmission/transmission.h#L1748-L1749
-
-        :rtype: datetime.timedelta
-        :raise ValueError: non positive ETA.
         """
         eta = self.fields["eta"]
         if eta >= 0:
@@ -311,8 +312,8 @@ class Torrent(Container):
     def have_unchecked(self) -> int:
         """
         Byte count of all the partial piece data we have for this torrent.
-        As pieces become complete, this value may decrease as portions of it
-        are moved to `corrupt' or `haveValid'.
+        As pieces become complete,
+        this value may decrease as portions of it are moved to "corrupt" or "haveValid".
         """
         return self.fields["haveUnchecked"]
 
@@ -554,8 +555,6 @@ class Torrent(Container):
     @property
     def status(self) -> Status:
         """
-        :rtype: Status
-
         Returns the torrent status. Is either one of 'check pending', 'checking',
         'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'.
         The first two is related to verification.
@@ -575,8 +574,6 @@ class Torrent(Container):
     def progress(self) -> float:
         """
         download progress in percent.
-
-        :rtype: float
         """
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
@@ -593,8 +590,6 @@ class Torrent(Container):
     def ratio(self) -> float:
         """
         upload/download ratio.
-
-        :rtype: float
         """
         return float(self.fields["uploadRatio"])
 

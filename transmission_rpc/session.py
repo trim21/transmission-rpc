@@ -92,34 +92,31 @@ class Units(Container):
 
 class Session(Container):
     """
-        Session is a class holding the session data for a Transmission daemon.
+    Session is a class holding the session data for a Transmission daemon.
 
-        Access the session field can be done through attributes.
-        The attributes available are the same as the session arguments in the
-        Transmission RPC specification, but with underscore instead of hyphen.
-
-
-        get ``'download-dir'`` with ``session.download_dir``.
-
-        .. code-block:: python
-
-            session = Client().get_session()
-
-            current = session.download_dir
+    Access the session field can be done through attributes.
+    The attributes available are the same as the session arguments in the
+    Transmission RPC specification, but with underscore instead of hyphen.
 
 
-        Warnings
-        --------
-        setter on session's properties has been removed, please use ``Client().set_session()`` instead
+    get ``'download-dir'`` with ``session.download_dir``.
 
+    .. code-block:: python
 
-        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md
-    #41-session-arguments
+        session = Client().get_session()
+
+        current = session.download_dir
+
+    https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#41-session-arguments
+
+    Warnings
+    --------
+    setter on session's properties has been removed, please use ``Client().set_session()`` instead
     """
 
-    # max global download speed (KBps)
     @property
     def alt_speed_down(self) -> int:
+        # max global download speed (KBps)
         return self.fields["alt-speed-down"]
 
     # true means use the alt speeds
