@@ -5,7 +5,6 @@ import types
 import string
 import logging
 import pathlib
-import operator
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, Literal, BinaryIO, Iterable, Optional
 from urllib.parse import quote, urljoin
@@ -412,7 +411,7 @@ class Client:
         method = RpcMethod.TorrentStart
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
-        torrent_list = sorted(self.get_torrents(), key=operator.attrgetter("queuePosition"))
+        torrent_list = sorted(self.get_torrents(), key=lambda t: t.queue_position)
         self._request(
             method,
             {},
