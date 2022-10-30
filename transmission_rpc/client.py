@@ -490,7 +490,7 @@ class Client:
         else:
             arguments = self.torrent_get_arguments
         return [
-            Torrent(client=self, fields=x)
+            Torrent(fields=x)
             for x in self._request(RpcMethod.TorrentGet, {"fields": arguments}, ids, timeout=timeout)["torrents"]
         ]
 
@@ -515,7 +515,7 @@ class Client:
 
         result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
 
-        return [Torrent(client=self, fields=x) for x in result["torrents"]], result["removed"]
+        return [Torrent(fields=x) for x in result["torrents"]], result["removed"]
 
     def change_torrent(
         self,
