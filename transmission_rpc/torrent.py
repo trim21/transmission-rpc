@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
 from transmission_rpc.utils import format_timedelta
@@ -93,6 +93,14 @@ class Torrent(Container):
     """
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
     """
+
+    def __init__(self, fields: Dict[str, Any]):
+        if "id" not in self.fields:
+            raise ValueError(
+                "torrent object require fields 'id', "
+                "you need to add 'id' in your 'arguments' when calling 'get_torrent'"
+            )
+        super().__init__(fields)
 
     @property
     def id(self) -> int:
