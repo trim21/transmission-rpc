@@ -1,8 +1,19 @@
-import dataclasses
-from typing import Any, Tuple, Union, Literal, Optional, NamedTuple
+from typing import Any, Dict, Tuple, Union, Literal, TypeVar, Optional, NamedTuple
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
+
+T = TypeVar("T")
+
+
+class Container:
+    fields: Dict[str, Any]
+
+    def __init__(self, *, fields: Dict[str, Any]):
+        self.fields = fields
+
+    def get(self, key: str, default: T = None) -> Any:
+        return self.fields.get(key, default)
 
 
 class File(NamedTuple):
@@ -14,40 +25,34 @@ class File(NamedTuple):
     id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
 
 
-class Field(NamedTuple):
-    value: Any
-    dirty: bool
-
-
-_Dataclass_Alias_Name = "alias"
-
-
-@dataclasses.dataclass
-class Group:
-    name: str
+class Group(Container):
+    @property
+    def name(self) -> str:
+        return self.fields["name"]
 
     # https://github.com/transmission/transmission/issues/3931
-    honors_session_limits: bool = dataclasses.field(metadata={_Dataclass_Alias_Name: "honorsSessionLimits"})
-    speed_limit_down_enabled: bool = dataclasses.field(metadata={_Dataclass_Alias_Name: "downloadLimited"})
-    speed_limit_down: int = dataclasses.field(metadata={_Dataclass_Alias_Name: "downloadLimit"})
-    speed_limit_up_enabled: bool = dataclasses.field(metadata={_Dataclass_Alias_Name: "uploadLimited"})
-    speed_limit_up: int = dataclasses.field(metadata={_Dataclass_Alias_Name: "uploadLimit"})
+
+    @property
+    def honors_session_limits(self) -> bool:
+        return self.fields["honorsSessionLimits"]
+
+    @property
+    def speed_limit_down_enabled(self) -> bool:
+        return self.fields["downloadLimited"]
+
+    @property
+    def speed_limit_down(self) -> int:
+        return self.fields["downloadLimit"]
+
+    @property
+    def speed_limit_up_enabled(self) -> bool:
+        return self.fields["uploadLimited"]
+
+    @property
+    def speed_limit_up(self) -> int:
+        return self.fields["uploadLimit"]
 
     # speed_limit_down_enabled: bool = pydantic.Field(alias='speed-limit-down-enabled')
     # speed_limit_down: int = pydantic.Field(alias='speed-limit-down')
     # speed_limit_up_enabled: bool = pydantic.Field(alias='speed-limit-up-enabled')
     # speed_limit_up: int = pydantic.Field(alias='speed-limit-up')
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "Group":
-        fields = dataclasses.fields(cls)
-
-        data = {}
-
-        for field in fields:
-            if alias := field.metadata.get(_Dataclass_Alias_Name):
-                data[field.name] = d[alias]
-            else:
-                data[field.name] = d[field.name]
-
-        return cls(**data)

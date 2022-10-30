@@ -1,7 +1,3 @@
-# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
-# Copyright (c) 2020 littleya <me@littleya.com>
-# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
 import os
 import json
 import time
@@ -9,20 +5,8 @@ import types
 import string
 import logging
 import pathlib
-import operator
 import urllib.parse
-from typing import (
-    Any,
-    Dict,
-    List,
-    Type,
-    Tuple,
-    Union,
-    Literal,
-    BinaryIO,
-    Iterable,
-    Optional,
-)
+from typing import Any, Dict, List, Type, Tuple, Union, Literal, BinaryIO, Iterable, Optional
 from urllib.parse import quote, urljoin
 
 import requests
@@ -36,10 +20,10 @@ from transmission_rpc.error import (
     TransmissionTimeoutError,
 )
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
-from transmission_rpc.session import Session
+from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
-from transmission_rpc.lib_types import Field, Group, _Timeout
+from transmission_rpc.lib_types import Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -59,7 +43,7 @@ def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
     return str(s)
 
 
-def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]:
+def _parse_torrent_id(raw_torrent_id: Union[int, str]) -> Union[int, str]:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -67,8 +51,6 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
             raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
-    elif isinstance(raw_torrent_id, Field):
-        return _parse_torrent_id(raw_torrent_id.value)
     raise ValueError(f"{raw_torrent_id} is not valid torrent id")
 
 
@@ -113,7 +95,7 @@ class Client:
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", urljoin(path, "rpc"), None, None, None))
         self.url = str(url)
         self._sequence = 0
-        self.session: Session = Session(self)
+        self.raw_session: Dict[str, Any] = {}
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: int = 17  # default 17
@@ -253,17 +235,17 @@ class Client:
             elif "torrent-duplicate" in data["arguments"]:
                 item = data["arguments"]["torrent-duplicate"]
             if item:
-                results[item["id"]] = Torrent(self, item)
+                results[item["id"]] = Torrent(fields=item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == RpcMethod.SessionGet:
-            self._update_session(data["arguments"])
+            self.raw_session.update(data["arguments"])
         elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
-                self._update_session(data["arguments"]["session-stats"])
+                return data["arguments"]["session-stats"]
             else:
-                self._update_session(data["arguments"])
+                return data["arguments"]
         elif method in (
             RpcMethod.PortTest,
             RpcMethod.BlocklistUpdate,
@@ -276,18 +258,9 @@ class Client:
 
         return results
 
-    def _update_session(self, data: Dict[str, Any]) -> None:
-        """
-        Update session data.
-        """
-        if self.session:
-            self.session._update(data)  # pylint: disable=W0212
-        else:
-            self.session = Session(self, data)
-
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.protocol_version = self.session.rpc_version
+        self.protocol_version = self.raw_session["rpc-version"]
 
     @property
     def rpc_version(self) -> int:
@@ -438,7 +411,7 @@ class Client:
         method = RpcMethod.TorrentStart
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
-        torrent_list = sorted(self.get_torrents(), key=operator.attrgetter("queuePosition"))
+        torrent_list = sorted(self.get_torrents(), key=lambda t: t.queue_position)
         self._request(
             method,
             {},
@@ -493,7 +466,7 @@ class Client:
 
         for torrent in result["torrents"]:
             if torrent.get("hashString") == torrent_id or torrent.get("id") == torrent_id:
-                return Torrent(client=self, fields=torrent)
+                return Torrent(fields=torrent)
         raise KeyError("Torrent not found in result")
 
     def get_torrents(
@@ -512,7 +485,7 @@ class Client:
         else:
             arguments = self.torrent_get_arguments
         return [
-            Torrent(client=self, fields=x)
+            Torrent(fields=x)
             for x in self._request(RpcMethod.TorrentGet, {"fields": arguments}, ids, timeout=timeout)["torrents"]
         ]
 
@@ -537,7 +510,7 @@ class Client:
 
         result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
 
-        return [Torrent(client=self, fields=x) for x in result["torrents"]], result["removed"]
+        return [Torrent(fields=x) for x in result["torrents"]], result["removed"]
 
     def change_torrent(
         self,
@@ -783,7 +756,7 @@ class Client:
         """
         self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
-        return self.session
+        return Session(fields=self.raw_session)
 
     def set_session(
         self,
@@ -1076,10 +1049,10 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: _Timeout = None) -> Session:
+    def session_stats(self, timeout: _Timeout = None) -> SessionStats:
         """Get session statistics"""
-        self._request(RpcMethod.SessionStats, timeout=timeout)
-        return self.session
+        result = self._request(RpcMethod.SessionStats, timeout=timeout)
+        return SessionStats(fields=result)
 
     def set_group(
         self,
@@ -1117,7 +1090,7 @@ class Client:
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
         if result["arguments"]["group"]:
-            return Group.from_dict(result["arguments"]["group"][0])
+            return Group(fields=result["arguments"]["group"][0])
         return None
 
     def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
@@ -1127,7 +1100,7 @@ class Client:
 
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
-        return {x["name"]: Group.from_dict(x) for x in result["arguments"]["group"]}
+        return {x["name"]: Group(fields=x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self

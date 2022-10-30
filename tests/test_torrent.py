@@ -1,6 +1,3 @@
-# Copyright (c) 2020-2021 Trim21 <i@trim21.me>
-# 2008-12, Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
 import time
 import calendar
 import datetime
@@ -15,20 +12,14 @@ from transmission_rpc.torrent import Status
 
 
 def test_initial():
-    with pytest.raises(ValueError, match="Torrent requires an id"):
-        transmission_rpc.Torrent(None, {})
-    transmission_rpc.Torrent(None, {"id": 42})
+    with pytest.raises(ValueError, match="Torrent object requires field 'id'"):
+        transmission_rpc.Torrent(fields={})
+    transmission_rpc.Torrent(fields={"id": 42})
 
 
 def assert_property_exception(exception, ob, prop):
     with pytest.raises(exception):
         getattr(ob, prop)
-
-
-def test_get_name_string():
-    torrent = transmission_rpc.Torrent(None, {"id": 42, "name": "we"})
-    name = torrent._get_name_string()
-    assert isinstance(name, str)
 
 
 def test_non_active():
@@ -37,13 +28,12 @@ def test_non_active():
         "activityDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.date_active
 
 
 def test_attributes():
-    torrent = transmission_rpc.Torrent(None, {"id": 42})
-    assert hasattr(torrent, "id")
+    torrent = transmission_rpc.Torrent(fields={"id": 42})
     assert torrent.id == 42
     assert_property_exception(KeyError, torrent, "status")
     assert_property_exception(KeyError, torrent, "progress")
@@ -74,9 +64,9 @@ def test_attributes():
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.id == 1
-    assert torrent.leftUntilDone == 500
+    assert torrent.left_until_done == 500
     assert torrent.status == "downloading"
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
@@ -87,9 +77,6 @@ def test_attributes():
     assert torrent.date_done == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
-
-    torrent = transmission_rpc.Torrent(None, {"id": 42, "eta": -1})
-    assert_property_exception(ValueError, torrent, "eta")
 
     data = {
         "id": 1,
@@ -106,7 +93,7 @@ def test_attributes():
         "doneDate": 0,
     }
 
-    torrent = transmission_rpc.Torrent(None, data)
+    torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.date_done is None
 
 
