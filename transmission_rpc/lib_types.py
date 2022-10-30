@@ -1,7 +1,7 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 import dataclasses
-from typing import Any, Tuple, Union, Literal, Optional, NamedTuple
+from typing import Any, Dict, Tuple, Union, Literal, TypeVar, Optional, NamedTuple
 
 from .ds import alias
 
@@ -37,3 +37,13 @@ class Group:
     # speed_limit_down: int = pydantic.Field(alias='speed-limit-down')
     # speed_limit_up_enabled: bool = pydantic.Field(alias='speed-limit-up-enabled')
     # speed_limit_up: int = pydantic.Field(alias='speed-limit-up')
+
+
+T = TypeVar("T")
+
+
+class Container:
+    fields: Dict[str, Any]
+
+    def get(self, key, default: T = None) -> Optional[T]:
+        return self.fields.get(key, default)

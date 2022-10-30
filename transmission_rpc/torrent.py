@@ -1,13 +1,10 @@
-# Copyright (c) 2020-2022 Trim21 <i@trim21.me>
-# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
 import dataclasses
-from typing import Any, List, Optional
+from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 
 from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
-from transmission_rpc.lib_types import File
+from transmission_rpc.lib_types import File, Container
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",
@@ -92,30 +89,25 @@ class TrackerStats:
     tier: int
 
 
-class Torrent:
+class Torrent(Container):
     """
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
     """
 
     def __init__(self, fields: dict):
-        self._fields = fields
-
-    def get(self, key: str, default=None) -> Any:
-        if default is not None:
-            return self._fields.get(key, default=default)
-        return self._fields[key]
+        self.fields = fields
 
     @property
     def id(self) -> int:
-        return self._fields["id"]
+        return self.fields["id"]
 
     @property
     def name(self) -> str:
-        return self._fields["name"]
+        return self.fields["name"]
 
     @property
     def hashString(self) -> str:
-        return self._fields["hashString"]
+        return self.fields["hashString"]
 
     @property
     def activity_date(self) -> datetime:
@@ -135,10 +127,10 @@ class Torrent:
         bytes_avail = self.desired_available + bytes_done
         return (bytes_avail / bytes_all) * 100 if bytes_all else 0
 
-    @property
-    def availability(self):
-        """TODO"""
-        return self.get("availability")
+    # @property
+    # def availability(self) -> list:
+    #     """TODO"""
+    # return self.get("availability")
 
     @property
     def bandwidth_priority(self) -> int:
@@ -279,21 +271,20 @@ class Torrent:
 
         """
         result: List[File] = []
-        if "files" in self._fields:
+        if "files" in self.fields:
             files = self.get("files")
             indices = range(len(files))
             priorities = self.get("priorities")
             wanted = self.get("wanted")
             for item in zip(indices, files, priorities, wanted):
-                selected = bool(item[3])
-                priority = PRIORITY[item[2]]
                 result.append(
                     File(
-                        selected=selected,
-                        priority=priority,
+                        selected=bool(item[3]),
+                        priority=PRIORITY[item[2]],
                         size=item[1]["length"],
                         name=item[1]["name"],
                         completed=item[1]["bytesCompleted"],
+                        id=item[0],
                     )
                 )
         return result
