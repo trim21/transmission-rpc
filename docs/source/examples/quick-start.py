@@ -1,3 +1,5 @@
+import requests
+
 from transmission_rpc import Client
 
 torrent_url = "http://releases.ubuntu.com/18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent"
@@ -6,7 +8,6 @@ c.add_torrent(torrent_url)
 
 ########
 
-from transmission_rpc import Client
 
 c = Client(username="transmission", password="password")
 
@@ -15,9 +16,6 @@ c.add_torrent(torrent_url)
 
 ########
 
-import requests
-
-from transmission_rpc import Client
 
 c = Client(username="trim21", password="123456")
 
