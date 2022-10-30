@@ -95,11 +95,12 @@ class Torrent(Container):
     """
 
     def __init__(self, fields: Dict[str, Any]):
-        if "id" not in self.fields:
+        if "id" not in fields:
             raise ValueError(
                 "torrent object require fields 'id', "
                 "you need to add 'id' in your 'arguments' when calling 'get_torrent'"
             )
+
         super().__init__(fields)
 
     @property
