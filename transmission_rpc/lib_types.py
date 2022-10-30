@@ -1,5 +1,3 @@
-# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
-# Licensed under the MIT license.
 import dataclasses
 from typing import Any, Dict, Tuple, Union, Literal, TypeVar, Optional, NamedTuple
 
@@ -15,6 +13,7 @@ class File(NamedTuple):
     completed: int  # bytes completed
     priority: Literal["high", "normal", "low"]
     selected: bool  # if selected for download
+    id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
 
 
 class Field(NamedTuple):

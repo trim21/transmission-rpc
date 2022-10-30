@@ -274,16 +274,17 @@ class Torrent(Container):
         if "files" in self.fields:
             files = self.fields["files"]
             indices = range(len(files))
-            priorities = self.fields["priorities"]
-            wanted = self.fields["wanted"]
-            for item in zip(indices, files, priorities, wanted):
+            priorities = self._fields["priorities"].value
+            wanted = self._fields["wanted"].value
+            for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted):
                 result.append(
                     File(
-                        selected=bool(item[3]),
-                        priority=PRIORITY[item[2]],
-                        size=item[1]["length"],
-                        name=item[1]["name"],
-                        completed=item[1]["bytesCompleted"],
+                        selected=bool(raw_selected),
+                        priority=PRIORITY[raw_priority],
+                        size=file["length"],
+                        name=file["name"],
+                        completed=file["bytesCompleted"],
+                        id=id,
                     )
                 )
         return result
