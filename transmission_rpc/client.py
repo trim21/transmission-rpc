@@ -447,6 +447,20 @@ class Client:
         and this lib can't handle table response, So it's unsupported.
 
         Returns a Torrent object with the requested fields.
+
+
+        Parameters
+        ----------
+        torrent_id:
+            torrent id can be an int or a torrent info_hash (hash_string of torrent object).
+            It's recommended that you use info_hash as torrent id.
+
+        arguments:
+            fetched torrent arguments, in most cases you don't need to set this,
+            transmission-rpc will fetch all torrent fields it supported.
+
+        timeout:
+            requests timeout
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})

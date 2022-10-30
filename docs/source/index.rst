@@ -56,6 +56,22 @@ file-like object(object with :code:`read()` method)
 or base64 encoded torrent file content.
 
 
+
+Example
+=======
+
+Filter files
+
+.. literalinclude:: examples/change_torrent_file.py
+
+Move Torrent Data
+
+.. literalinclude:: examples/move_torrent_data.py
+
+Set Upload/Download Speed Limit
+
+.. literalinclude:: examples/set_download_upload_speed.py
+
 Arguments
 -------------------
 
