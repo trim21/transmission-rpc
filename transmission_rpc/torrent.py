@@ -416,18 +416,21 @@ class Torrent:
         return self.get("percentDone")
 
     @property
-    def pieces(self):
-        # TODO
+    def pieces(self) -> str:
+        """
+        A bitfield holding pieceCount flags which are set to 'true'
+        if we have the piece matching that position.
+
+        JSON doesn't allow raw binary data, so this is a base64-encoded string. (Source: tr_torrent)
+        """
         return self.get("pieces")
 
     @property
-    def piece_count(self):
-        # TODO
+    def piece_count(self) -> int:
         return self.get("pieceCount")
 
     @property
-    def piece_size(self):
-        # TODO
+    def piece_size(self) -> int:
         return self.get("pieceSize")
 
     @property
@@ -436,63 +439,57 @@ class Torrent:
         return self.get("priorities")
 
     @property
-    def primary_mime_type(self):
-        # TODO
+    def primary_mime_type(self) -> str:
         return self.get("primary-mime-type")
 
     @property
-    def queue_position(self):
-        # TODO
+    def queue_position(self) -> int:
+        """position of this torrent in its queue [0...n)"""
         return self.get("queuePosition")
 
     @property
-    def rate_download(self):
-        # TODO
+    def rate_download(self) -> int:
+        """download rate (B/s)"""
         return self.get("rateDownload")
 
     @property
-    def rate_upload(self):
-        # TODO
+    def rate_upload(self) -> int:
+        """upload rate (B/s)"""
         return self.get("rateUpload")
 
     @property
-    def recheck_progress(self):
-        # TODO
+    def recheck_progress(self) -> float:
         return self.get("recheckProgress")
 
     @property
-    def seconds_downloading(self):
-        # TODO
+    def seconds_downloading(self) -> int:
         return self.get("secondsDownloading")
 
     @property
-    def seconds_seeding(self):
-        # TODO
+    def seconds_seeding(self) -> int:
         return self.get("secondsSeeding")
 
     @property
-    def seed_idle_limit(self):
-        # TODO
+    def seed_idle_limit(self) -> int:
         return self.get("seedIdleLimit")
 
-    @property
-    def seed_idle_mode(self):
-        # TODO
-        return self.get("seedIdleMode")
+    # @property
+    # def seed_idle_mode(self) -> int:
+    #     """	which seeding inactivity to use. See tr_idlelimit"""
+    #     return self.get("seedIdleMode")
 
     @property
-    def seed_ratio_limit(self):
-        # TODO
+    def seed_ratio_limit(self) -> float:
+        """the default seed ratio for torrents to use"""
         return self.get("seedRatioLimit")
 
     @property
-    def seed_ratio_mode(self):
-        # TODO
+    def seed_ratio_mode(self) -> int:
+        """which ratio to use. See tr_ratiolimit"""
         return self.get("seedRatioMode")
 
     @property
-    def size_when_done(self):
-        # TODO
+    def size_when_done(self) -> int:
         return self.get("sizeWhenDone")
 
     @property
