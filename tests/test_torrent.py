@@ -12,7 +12,7 @@ from transmission_rpc.torrent import Status
 
 
 def test_initial():
-    with pytest.raises(ValueError, match="Torrent requires an id"):
+    with pytest.raises(ValueError, match="Torrent object requires field 'id'"):
         transmission_rpc.Torrent({})
     transmission_rpc.Torrent({"id": 42})
 
