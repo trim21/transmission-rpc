@@ -18,7 +18,6 @@ import requests
 import requests.auth
 import requests.exceptions
 
-from transmission_rpc import ds
 from transmission_rpc.error import (
     TransmissionError,
     TransmissionAuthError,
@@ -29,7 +28,7 @@ from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
-from transmission_rpc.lib_types import Field, Group, _Timeout
+from transmission_rpc.lib_types import Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -49,7 +48,7 @@ def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
     return str(s)
 
 
-def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]:
+def _parse_torrent_id(raw_torrent_id: Union[int, str]) -> Union[int, str]:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -57,8 +56,6 @@ def _parse_torrent_id(raw_torrent_id: Union[int, str, Field]) -> Union[int, str]
         if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
             raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
         return raw_torrent_id
-    elif isinstance(raw_torrent_id, Field):
-        return _parse_torrent_id(raw_torrent_id.value)
     raise ValueError(f"{raw_torrent_id} is not valid torrent id")
 
 
@@ -1060,7 +1057,7 @@ class Client:
     def session_stats(self, timeout: _Timeout = None) -> SessionStats:
         """Get session statistics"""
         result = self._request(RpcMethod.SessionStats, timeout=timeout)
-        return ds.from_dict(SessionStats, result)
+        return SessionStats(result)
 
     def set_group(
         self,

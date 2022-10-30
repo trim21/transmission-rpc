@@ -94,9 +94,6 @@ class Torrent(Container):
     Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
     """
 
-    def __init__(self, fields: dict):
-        self.fields = fields
-
     @property
     def id(self) -> int:
         return self.fields["id"]
@@ -274,8 +271,8 @@ class Torrent(Container):
         if "files" in self.fields:
             files = self.fields["files"]
             indices = range(len(files))
-            priorities = self._fields["priorities"].value
-            wanted = self._fields["wanted"].value
+            priorities = self.fields["priorities"]
+            wanted = self.fields["wanted"]
             for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted):
                 result.append(
                     File(

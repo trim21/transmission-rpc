@@ -1,48 +1,96 @@
-# Copyright (c) 2018-2022 Trim21 <i@trim21.me>
-# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
-# Licensed under the MIT license.
-
 from typing import List, Literal, Optional
-from dataclasses import field, dataclass
 
-from transmission_rpc.ds import alias
-
-
-@dataclass(frozen=True)
-class Stats:
-    uploaded_bytes: int = field(metadata={alias: "uploadedBytes"})
-    downloaded_bytes: int = field(metadata={alias: "downloadedBytes"})
-    files_added: int = field(metadata={alias: "filesAdded"})
-    session_count: int = field(metadata={alias: "sessionCount"})
-    seconds_active: int = field(metadata={alias: "secondsActive"})
+from transmission_rpc.lib_types import Container
 
 
-@dataclass(frozen=True)
-class SessionStats:
+class Stats(Container):
+    @property
+    def uploaded_bytes(self) -> int:
+        return self.fields["uploadedBytes"]
+
+    @property
+    def downloaded_bytes(self) -> int:
+        return self.fields["downloadedBytes"]
+
+    @property
+    def files_added(self) -> int:
+        return self.fields["filesAdded"]
+
+    @property
+    def session_count(self) -> int:
+        return self.fields["sessionCount"]
+
+    @property
+    def seconds_active(self) -> int:
+        return self.fields["secondsActive"]
+
+
+class SessionStats(Container):
     # https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md
     # 42-session-statistics
 
-    active_torrent_count: int = field(metadata={alias: "activeTorrentCount"})
-    download_speed: int = field(metadata={alias: "downloadSpeed"})
-    paused_torrent_count: int = field(metadata={alias: "pausedTorrentCount"})
-    torrent_count: int = field(metadata={alias: "torrentCount"})
-    upload_speed: int = field(metadata={alias: "uploadSpeed"})
-    cumulative_stats: Stats = field(metadata={alias: "cumulative-stats"})
-    current_stats: Stats = field(metadata={alias: "current-stats"})
+    @property
+    def active_torrent_count(self) -> int:
+        return self.fields["activeTorrentCount"]
+
+    @property
+    def download_speed(self) -> int:
+        return self.fields["downloadSpeed"]
+
+    @property
+    def paused_torrent_count(self) -> int:
+        return self.fields["pausedTorrentCount"]
+
+    @property
+    def torrent_count(self) -> int:
+        return self.fields["torrentCount"]
+
+    @property
+    def upload_speed(self) -> int:
+        return self.fields["uploadSpeed"]
+
+    @property
+    def cumulative_stats(self) -> Stats:
+        return Stats(self.fields["cumulative-stats"])
+
+    @property
+    def current_stats(self) -> Stats:
+        return Stats(self.fields["current-stats"])
 
 
-@dataclass(frozen=True)
-class Units:
-    speed_units: List[str] = field(metadata={alias: "speed-units"})  # 4 strings: KB/s, MB/s, GB/s, TB/s
-    speed_bytes: int = field(metadata={alias: "speed-bytes"})  # number of bytes in a KB (1000 for kB; 1024 for KiB)
-    size_units: List[str] = field(metadata={alias: "size-units"})  # 4 strings: KB/s, MB/s, GB/s, TB/s
-    size_bytes: int = field(metadata={alias: "size-bytes"})  # number of bytes in a KB (1000 for kB; 1024 for KiB)
-    memory_units: List[str] = field(metadata={alias: "memory-units"})  # 4 strings: KB/s, MB/s, GB/s, TB/s
-    memory_bytes: int = field(metadata={alias: "memory-bytes"})  # number of bytes in a KB (1000 for kB; 1024 for KiB)
+class Units(Container):
+    # 4 strings: KB/s, MB/s, GB/s, TB/s
+    @property
+    def speed_units(self) -> List[str]:
+        return self.fields["speed-units"]
+
+    # number of bytes in a KB (1000 for kB; 1024 for KiB)
+    @property
+    def speed_bytes(self) -> int:
+        return self.fields["speed-bytes"]
+
+    # 4 strings: KB/s, MB/s, GB/s, TB/s
+    @property
+    def size_units(self) -> List[str]:
+        return self.fields["size-units"]
+
+    # number of bytes in a KB (1000 for kB; 1024 for KiB)
+    @property
+    def size_bytes(self) -> int:
+        return self.fields["size-bytes"]
+
+    # 4 strings: KB/s, MB/s, GB/s, TB/s
+    @property
+    def memory_units(self) -> List[str]:
+        return self.fields["memory-units"]
+
+    # number of bytes in a KB (1000 for kB; 1024 for KiB)
+    @property
+    def memory_bytes(self) -> int:
+        return self.fields["memory-bytes"]
 
 
-@dataclass(frozen=True)
-class Session:
+class Session(Container):
     """
         Session is a class holding the session data for a Transmission daemon.
 
@@ -70,177 +118,281 @@ class Session:
     """
 
     # max global download speed (KBps)
-    alt_speed_down: int = field(metadata={alias: "alt-speed-down"})
+    @property
+    def alt_speed_down(self) -> int:
+        return self.fields["alt-speed-down"]
 
     # true means use the alt speeds
-    alt_speed_enabled: bool = field(metadata={alias: "alt-speed-enabled"})
+    @property
+    def alt_speed_enabled(self) -> bool:
+        return self.fields["alt-speed-enabled"]
 
     # when to turn on alt speeds (units: minutes after midnight)
-    alt_speed_time_begin: int = field(metadata={alias: "alt-speed-time-begin"})
+    @property
+    def alt_speed_time_begin(self) -> int:
+        return self.fields["alt-speed-time-begin"]
 
     # what day(s) to turn on alt speeds (look at tr_sched_day)
-    alt_speed_time_day: int = field(metadata={alias: "alt-speed-time-day"})
+    @property
+    def alt_speed_time_day(self) -> int:
+        return self.fields["alt-speed-time-day"]
 
     # true means the scheduled on/off times are used
-    alt_speed_time_enabled: bool = field(metadata={alias: "alt-speed-time-enabled"})
+    @property
+    def alt_speed_time_enabled(self) -> bool:
+        return self.fields["alt-speed-time-enabled"]
 
     # when to turn off alt speeds (units: same)
-    alt_speed_time_end: int = field(metadata={alias: "alt-speed-time-end"})
+    @property
+    def alt_speed_time_end(self) -> int:
+        return self.fields["alt-speed-time-end"]
 
     # max global upload speed (KBps)
-    alt_speed_up: int = field(metadata={alias: "alt-speed-up"})
+    @property
+    def alt_speed_up(self) -> int:
+        return self.fields["alt-speed-up"]
 
     # true means enabled
-    blocklist_enabled: bool = field(metadata={alias: "blocklist-enabled"})
+    @property
+    def blocklist_enabled(self) -> bool:
+        return self.fields["blocklist-enabled"]
 
     # int of rules in the blocklist
-    blocklist_size: int = field(metadata={alias: "blocklist-size"})
+    @property
+    def blocklist_size(self) -> int:
+        return self.fields["blocklist-size"]
 
     # location of the blocklist to use for `blocklist-update`
-    blocklist_url: str = field(metadata={alias: "blocklist-url"})
+    @property
+    def blocklist_url(self) -> str:
+        return self.fields["blocklist-url"]
 
     # maximum size of the disk cache (MB)
-    cache_size_mb: int = field(metadata={alias: "cache-size-mb"})
+    @property
+    def cache_size_mb(self) -> int:
+        return self.fields["cache-size-mb"]
 
     # location of transmission's configuration directory
-    config_dir: str = field(metadata={alias: "config-dir"})
+    @property
+    def config_dir(self) -> str:
+        return self.fields["config-dir"]
 
     # true means allow dht in public torrents
-    dht_enabled: bool = field(metadata={alias: "dht-enabled"})
+    @property
+    def dht_enabled(self) -> bool:
+        return self.fields["dht-enabled"]
 
     # default path to download torrents
-    download_dir: str = field(metadata={alias: "download-dir"})
+    @property
+    def download_dir(self) -> str:
+        return self.fields["download-dir"]
 
     # **DEPRECATED** Use the `free-space` method instead.
-    download_dir_free_space: int = field(metadata={alias: "download-dir-free-space"})
+    @property
+    def download_dir_free_space(self) -> int:
+        return self.fields["download-dir-free-space"]
 
     # if true, limit how many torrents can be downloaded at once
-    download_queue_enabled: bool = field(metadata={alias: "download-queue-enabled"})
+    @property
+    def download_queue_enabled(self) -> bool:
+        return self.fields["download-queue-enabled"]
 
     # max int of torrents to download at once (see download-queue-enabled)
-    download_queue_size: int = field(metadata={alias: "download-queue-size"})
+    @property
+    def download_queue_size(self) -> int:
+        return self.fields["download-queue-size"]
 
-    encryption: Literal["required", "preferred", "tolerated"] = field(metadata={alias: "encryption"})
+    @property
+    def encryption(self) -> Literal["required", "preferred", "tolerated"]:
+        return self.fields["encryption"]
 
     # true if the seeding inactivity limit is honored by default
-    idle_seeding_limit_enabled: bool = field(metadata={alias: "idle-seeding-limit-enabled"})
+    @property
+    def idle_seeding_limit_enabled(self) -> bool:
+        return self.fields["idle-seeding-limit-enabled"]
 
     # torrents we're seeding will be stopped if they're idle for this long
-    idle_seeding_limit: int = field(metadata={alias: "idle-seeding-limit"})
+    @property
+    def idle_seeding_limit(self) -> int:
+        return self.fields["idle-seeding-limit"]
 
     # true means keep torrents in incomplete-dir until done
-    incomplete_dir_enabled: bool = field(metadata={alias: "incomplete-dir-enabled"})
+    @property
+    def incomplete_dir_enabled(self) -> bool:
+        return self.fields["incomplete-dir-enabled"]
 
     # path for incomplete torrents, when enabled
-    incomplete_dir: str = field(metadata={alias: "incomplete-dir"})
+    @property
+    def incomplete_dir(self) -> str:
+        return self.fields["incomplete-dir"]
 
     # true means allow Local Peer Discovery in public torrents
-    lpd_enabled: bool = field(metadata={alias: "lpd-enabled"})
+    @property
+    def lpd_enabled(self) -> bool:
+        return self.fields["lpd-enabled"]
 
     # maximum global int of peers
-    peer_limit_global: int = field(metadata={alias: "peer-limit-global"})
+    @property
+    def peer_limit_global(self) -> int:
+        return self.fields["peer-limit-global"]
 
     # maximum global int of peers
-    peer_limit_per_torrent: int = field(metadata={alias: "peer-limit-per-torrent"})
+    @property
+    def peer_limit_per_torrent(self) -> int:
+        return self.fields["peer-limit-per-torrent"]
 
     # true means pick a random peer port on launch
-    peer_port_random_on_start: bool = field(metadata={alias: "peer-port-random-on-start"})
+    @property
+    def peer_port_random_on_start(self) -> bool:
+        return self.fields["peer-port-random-on-start"]
 
     # port int
-    peer_port: int = field(metadata={alias: "peer-port"})
+    @property
+    def peer_port(self) -> int:
+        return self.fields["peer-port"]
 
     # true means allow pex in public torrents
-    pex_enabled: bool = field(metadata={alias: "pex-enabled"})
+    @property
+    def pex_enabled(self) -> bool:
+        return self.fields["pex-enabled"]
 
     # true means ask upstream router to forward the configured peer port to transmission using UPnP or NAT-PMP
-    port_forwarding_enabled: bool = field(metadata={alias: "port-forwarding-enabled"})
+    @property
+    def port_forwarding_enabled(self) -> bool:
+        return self.fields["port-forwarding-enabled"]
 
     # whether or not to consider idle torrents as stalled
-    queue_stalled_enabled: bool = field(metadata={alias: "queue-stalled-enabled"})
+    @property
+    def queue_stalled_enabled(self) -> bool:
+        return self.fields["queue-stalled-enabled"]
 
     # torrents that are idle for N minuets aren't counted toward seed-queue-size or download-queue-size
-    queue_stalled_minutes: int = field(metadata={alias: "queue-stalled-minutes"})
+    @property
+    def queue_stalled_minutes(self) -> int:
+        return self.fields["queue-stalled-minutes"]
 
     # true means append `.part` to incomplete files
-    rename_partial_files: bool = field(metadata={alias: "rename-partial-files"})
+    @property
+    def rename_partial_files(self) -> bool:
+        return self.fields["rename-partial-files"]
 
     # the minimum RPC API version supported
-    rpc_version_minimum: int = field(metadata={alias: "rpc-version-minimum"})
+    @property
+    def rpc_version_minimum(self) -> int:
+        return self.fields["rpc-version-minimum"]
 
     # the current RPC API version
-    rpc_version: int = field(metadata={alias: "rpc-version"})
+    @property
+    def rpc_version(self) -> int:
+        return self.fields["rpc-version"]
 
     # whether or not to call the `done` script
-    script_torrent_done_enabled: bool = field(metadata={alias: "script-torrent-done-enabled"})
+    @property
+    def script_torrent_done_enabled(self) -> bool:
+        return self.fields["script-torrent-done-enabled"]
 
     # filename of the script to run
-    script_torrent_done_filename: str = field(metadata={alias: "script-torrent-done-filename"})
+    @property
+    def script_torrent_done_filename(self) -> str:
+        return self.fields["script-torrent-done-filename"]
 
     # if true, limit how many torrents can be uploaded at once
-    seed_queue_enabled: bool = field(metadata={alias: "seed-queue-enabled"})
+    @property
+    def seed_queue_enabled(self) -> bool:
+        return self.fields["seed-queue-enabled"]
 
     # max int of torrents to uploaded at once (see seed-queue-enabled)
-    seed_queue_size: int = field(metadata={alias: "seed-queue-size"})
+    @property
+    def seed_queue_size(self) -> int:
+        return self.fields["seed-queue-size"]
 
     # the default seed ratio for torrents to use
-    seedRatioLimit: float = field(metadata={alias: "seedRatioLimit"})
+    @property
+    def seedRatioLimit(self) -> float:
+        return self.fields["seedRatioLimit"]
 
     # true if seedRatioLimit is honored by default
-    seedRatioLimited: bool = field(metadata={alias: "seedRatioLimited"})
+    @property
+    def seedRatioLimited(self) -> bool:
+        return self.fields["seedRatioLimited"]
 
     # true means enabled
-    speed_limit_down_enabled: bool = field(metadata={alias: "speed-limit-down-enabled"})
+    @property
+    def speed_limit_down_enabled(self) -> bool:
+        return self.fields["speed-limit-down-enabled"]
 
     # max global download speed (KBps)
-    speed_limit_down: int = field(metadata={alias: "speed-limit-down"})
+    @property
+    def speed_limit_down(self) -> int:
+        return self.fields["speed-limit-down"]
 
     # true means enabled
-    speed_limit_up_enabled: bool = field(metadata={alias: "speed-limit-up-enabled"})
+    @property
+    def speed_limit_up_enabled(self) -> bool:
+        return self.fields["speed-limit-up-enabled"]
 
     # max global upload speed (KBps)
-    speed_limit_up: int = field(metadata={alias: "speed-limit-up"})
+    @property
+    def speed_limit_up(self) -> int:
+        return self.fields["speed-limit-up"]
 
     # true means added torrents will be started right away
-    start_added_torrents: bool = field(metadata={alias: "start-added-torrents"})
+    @property
+    def start_added_torrents(self) -> bool:
+        return self.fields["start-added-torrents"]
 
     # true means the .torrent file of added torrents will be deleted
-    trash_original_torrent_files: bool = field(metadata={alias: "trash-original-torrent-files"})
+    @property
+    def trash_original_torrent_files(self) -> bool:
+        return self.fields["trash-original-torrent-files"]
 
     # see below
-    units: Units = field(metadata={alias: "units"})
+    @property
+    def units(self) -> Units:
+        return self.fields["units"]
 
     # true means allow utp
-    utp_enabled: bool = field(metadata={alias: "utp-enabled"})
+    @property
+    def utp_enabled(self) -> bool:
+        return self.fields["utp-enabled"]
 
     # long version str `$version ($revision)`
-    version: str = field(metadata={alias: "version"})
+    @property
+    def version(self) -> str:
+        return self.fields["version"]
 
     # list of default trackers to use on public torrents
     # new at rpc-version 17
-    default_trackers: Optional[list] = field(default=None, metadata={alias: "default-trackers"})
+    @property
+    def default_trackers(self) -> Optional[list]:
+        return self.get("default-trackers")
 
     # the current RPC API version in a semver-compatible str
     # new at rpc-version 17
-    rpc_version_semver: Optional[str] = field(default=None, metadata={alias: "rpc-version-semver"})
+    @property
+    def rpc_version_semver(self) -> Optional[str]:
+        return self.get("rpc-version-semver")
 
     # whether or not to call the `added` script
     # new at rpc-version 17
-    script_torrent_added_enabled: Optional[bool] = field(default=None, metadata={alias: "script-torrent-added-enabled"})
+    @property
+    def script_torrent_added_enabled(self) -> Optional[bool]:
+        return self.get("script-torrent-added-enabled")
 
     # filename of the script to run
     # new at rpc-version 17
-    script_torrent_added_filename: Optional[str] = field(
-        default=None, metadata={alias: "script-torrent-added-filename"}
-    )
+    @property
+    def script_torrent_added_filename(self) -> Optional[str]:
+        return self.get("script-torrent-added-filename")
 
     # whether or not to call the `seeding-done` script
     # new at rpc-version 17
-    script_torrent_done_seeding_enabled: Optional[bool] = field(
-        default=None, metadata={alias: "script-torrent-done-seeding-enabled"}
-    )
+    @property
+    def script_torrent_done_seeding_enabled(self) -> Optional[bool]:
+        return self.get("script-torrent-done-seeding-enabled")
 
     # filename of the script to run
     # new at rpc-version 17
-    script_torrent_done_seeding_filename: Optional[str] = field(
-        default=None, metadata={alias: "script-torrent-done-seeding-filename"}
-    )
+    @property
+    def script_torrent_done_seeding_filename(self) -> Optional[str]:
+        return self.get("script-torrent-done-seeding-filename")
