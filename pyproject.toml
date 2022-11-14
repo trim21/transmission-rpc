@@ -44,7 +44,7 @@ pytest = "==7.2.0"
 coverage = "==6.5.0"
 # linter and formatter
 pre-commit = { version = "==2.20.0", markers = "implementation_name != 'pypy'" }
-mypy = { version = "==0.990", markers = "implementation_name != 'pypy'" }
+mypy = { version = "==0.991", markers = "implementation_name != 'pypy'" }
 flake8 = "==5.0.4"
 flake8-comprehensions = "==3.10.1"
 flake8-bugbear = "==22.10.27"
