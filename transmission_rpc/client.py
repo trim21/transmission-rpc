@@ -73,8 +73,8 @@ class Client:
         self,
         *,
         protocol: Literal["http", "https"] = "http",
-        username: str = None,
-        password: str = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
         host: str = "127.0.0.1",
         port: int = 9091,
         path: str = "/transmission/",
@@ -139,7 +139,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {"x-transmission-session-id": self.session_id}
 
-    def _http_query(self, query: dict, timeout: _Timeout = None) -> str:
+    def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -181,10 +181,10 @@ class Client:
     def _request(
         self,
         method: RpcMethod,
-        arguments: Dict[str, Any] = None,
-        ids: _TorrentIDs = None,
+        arguments: Optional[Dict[str, Any]] = None,
+        ids: Optional[_TorrentIDs] = None,
         require_ids: bool = False,
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
     ) -> dict:
         """
         Send json-rpc request to Transmission using http POST
@@ -283,19 +283,19 @@ class Client:
     def add_torrent(
         self,
         torrent: Union[BinaryIO, str, bytes, pathlib.Path],
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
         *,
-        download_dir: str = None,
-        files_unwanted: List[int] = None,
-        files_wanted: List[int] = None,
-        paused: bool = None,
-        peer_limit: int = None,
-        priority_high: List[int] = None,
-        priority_low: List[int] = None,
-        priority_normal: List[int] = None,
-        cookies: str = None,
-        labels: Iterable[str] = None,
-        bandwidthPriority: int = None,
+        download_dir: Optional[str] = None,
+        files_unwanted: Optional[List[int]] = None,
+        files_wanted: Optional[List[int]] = None,
+        paused: Optional[bool] = None,
+        peer_limit: Optional[int] = None,
+        priority_high: Optional[List[int]] = None,
+        priority_low: Optional[List[int]] = None,
+        priority_normal: Optional[List[int]] = None,
+        cookies: Optional[str] = None,
+        labels: Optional[Iterable[str]] = None,
+        bandwidthPriority: Optional[int] = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -386,7 +386,7 @@ class Client:
 
         return list(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values())[0]
 
-    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout = None) -> None:
+    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: Optional[_Timeout] = None) -> None:
         """
         remove torrent(s) with provided id(s). Local data is removed if
         delete_data is True, otherwise not.
@@ -399,14 +399,14 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
+    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: Optional[_Timeout] = None) -> None:
         """Start torrent(s) with provided id(s)"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: _Timeout = None) -> None:
+    def start_all(self, bypass_queue: bool = False, timeout: Optional[_Timeout] = None) -> None:
         """Start all torrents respecting the queue order"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
@@ -420,23 +420,23 @@ class Client:
             timeout=timeout,
         )
 
-    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def stop_torrent(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """stop torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentStop, {}, ids, True, timeout=timeout)
 
-    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def verify_torrent(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """verify torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentVerify, {}, ids, True, timeout=timeout)
 
-    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def reannounce_torrent(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentReannounce, {}, ids, True, timeout=timeout)
 
     def get_torrent(
         self,
         torrent_id: _TorrentID,
-        arguments: Iterable[str] = None,
-        timeout: _Timeout = None,
+        arguments: Optional[Iterable[str]] = None,
+        timeout: Optional[_Timeout] = None,
     ) -> Torrent:
         """
         Get information for torrent with provided id.
@@ -488,9 +488,9 @@ class Client:
 
     def get_torrents(
         self,
-        ids: _TorrentIDs = None,
-        arguments: Iterable[str] = None,
-        timeout: _Timeout = None,
+        ids: Optional[_TorrentIDs] = None,
+        arguments: Optional[Iterable[str]] = None,
+        timeout: Optional[_Timeout] = None,
     ) -> List[Torrent]:
         """
         Get information for torrents with provided ids. For more information see ``get_torrent``.
@@ -507,7 +507,7 @@ class Client:
         ]
 
     def get_recently_active_torrents(
-        self, arguments: Iterable[str] = None, timeout: _Timeout = None
+        self, arguments: Optional[Iterable[str]] = None, timeout: Optional[_Timeout] = None
     ) -> Tuple[List[Torrent], List[int]]:
         """
         Get information for torrents for recently active torrent. If you want to get recently-removed
@@ -532,32 +532,32 @@ class Client:
     def change_torrent(
         self,
         ids: _TorrentIDs,
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
         *,
-        bandwidth_priority: int = None,
-        download_limit: int = None,
-        download_limited: bool = None,
-        upload_limit: int = None,
-        upload_limited: bool = None,
-        files_unwanted: Iterable[int] = None,
-        files_wanted: Iterable[int] = None,
-        honors_session_limits: bool = None,
-        location: str = None,
-        peer_limit: int = None,
-        priority_high: Iterable[int] = None,
-        priority_low: Iterable[int] = None,
-        priority_normal: Iterable[int] = None,
-        queue_position: int = None,
-        seed_idle_limit: int = None,
-        seed_idle_mode: int = None,
-        seed_ratio_limit: float = None,
-        seed_ratio_mode: int = None,
-        tracker_add: Iterable[str] = None,
-        tracker_remove: Iterable[int] = None,
-        tracker_replace: Iterable[Tuple[int, str]] = None,
-        labels: Iterable[str] = None,
-        group: str = None,
-        tracker_list: Iterable[Iterable[str]] = None,
+        bandwidth_priority: Optional[int] = None,
+        download_limit: Optional[int] = None,
+        download_limited: Optional[bool] = None,
+        upload_limit: Optional[int] = None,
+        upload_limited: Optional[bool] = None,
+        files_unwanted: Optional[Iterable[int]] = None,
+        files_wanted: Optional[Iterable[int]] = None,
+        honors_session_limits: Optional[bool] = None,
+        location: Optional[str] = None,
+        peer_limit: Optional[int] = None,
+        priority_high: Optional[Iterable[int]] = None,
+        priority_low: Optional[Iterable[int]] = None,
+        priority_normal: Optional[Iterable[int]] = None,
+        queue_position: Optional[int] = None,
+        seed_idle_limit: Optional[int] = None,
+        seed_idle_mode: Optional[int] = None,
+        seed_ratio_limit: Optional[float] = None,
+        seed_ratio_mode: Optional[int] = None,
+        tracker_add: Optional[Iterable[str]] = None,
+        tracker_remove: Optional[Iterable[int]] = None,
+        tracker_replace: Optional[Iterable[Tuple[int, str]]] = None,
+        labels: Optional[Iterable[str]] = None,
+        group: Optional[str] = None,
+        tracker_list: Optional[Iterable[Iterable[str]]] = None,
         **kwargs: Any,
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
@@ -708,7 +708,7 @@ class Client:
         self,
         ids: _TorrentIDs,
         location: Union[str, pathlib.Path],
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
     ) -> None:
         """Move torrent data to the new location."""
         args = {"location": ensure_location_str(location), "move": True}
@@ -718,7 +718,7 @@ class Client:
         self,
         ids: _TorrentIDs,
         location: Union[str, pathlib.Path],
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
     ) -> None:
         """Locate torrent data at the provided location."""
         args = {"location": ensure_location_str(location), "move": False}
@@ -729,7 +729,7 @@ class Client:
         torrent_id: _TorrentID,
         location: Union[str, pathlib.Path],
         name: str,
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
     ) -> Tuple[str, str]:
         """
         https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path
@@ -751,23 +751,23 @@ class Client:
         )
         return result["path"], result["name"]
 
-    def queue_top(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def queue_top(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """Move transfer to the top of the queue:_Timeout."""
         self._request(RpcMethod.QueueMoveTop, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_bottom(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def queue_bottom(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """Move transfer to the bottom of the queue."""
         self._request(RpcMethod.QueueMoveBottom, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_up(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def queue_up(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """Move transfer up in the queue."""
         self._request(RpcMethod.QueueMoveUp, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_down(self, ids: _TorrentIDs, timeout: _Timeout = None) -> None:
+    def queue_down(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
         """Move transfer down in the queue."""
         self._request(RpcMethod.QueueMoveDown, ids=ids, require_ids=True, timeout=timeout)
 
-    def get_session(self, timeout: _Timeout = None) -> Session:
+    def get_session(self, timeout: Optional[_Timeout] = None) -> Session:
         """
         Get session parameters. See the Session class for more information.
         """
@@ -777,54 +777,54 @@ class Client:
 
     def set_session(
         self,
-        timeout: _Timeout = None,
+        timeout: Optional[_Timeout] = None,
         *,
-        alt_speed_down: int = None,
-        alt_speed_enabled: bool = None,
-        alt_speed_time_begin: int = None,
-        alt_speed_time_day: int = None,
-        alt_speed_time_enabled: bool = None,
-        alt_speed_time_end: int = None,
-        alt_speed_up: int = None,
-        blocklist_enabled: bool = None,
-        blocklist_url: str = None,
-        cache_size_mb: int = None,
-        dht_enabled: bool = None,
-        download_dir: str = None,
-        download_queue_enabled: bool = None,
-        download_queue_size: int = None,
-        encryption: Literal["required", "preferred", "tolerated"] = None,
-        idle_seeding_limit: int = None,
-        idle_seeding_limit_enabled: bool = None,
-        incomplete_dir: str = None,
-        incomplete_dir_enabled: bool = None,
-        lpd_enabled: bool = None,
-        peer_limit_global: int = None,
-        peer_limit_per_torrent: int = None,
-        peer_port: int = None,
-        peer_port_random_on_start: bool = None,
-        pex_enabled: bool = None,
-        port_forwarding_enabled: bool = None,
-        queue_stalled_enabled: bool = None,
-        queue_stalled_minutes: int = None,
-        rename_partial_files: bool = None,
-        script_torrent_done_enabled: bool = None,
-        script_torrent_done_filename: str = None,
-        seed_queue_enabled: bool = None,
-        seed_queue_size: int = None,
-        seed_ratio_limit: int = None,
-        seed_ratio_limited: bool = None,
-        speed_limit_down: int = None,
-        speed_limit_down_enabled: bool = None,
-        speed_limit_up: int = None,
-        speed_limit_up_enabled: bool = None,
-        start_added_torrents: bool = None,
-        trash_original_torrent_files: bool = None,
-        utp_enabled: bool = None,
-        script_torrent_done_seeding_filename: str = None,
-        script_torrent_done_seeding_enabled: bool = None,
-        script_torrent_added_enabled: bool = None,
-        script_torrent_added_filename: str = None,
+        alt_speed_down: Optional[int] = None,
+        alt_speed_enabled: Optional[bool] = None,
+        alt_speed_time_begin: Optional[int] = None,
+        alt_speed_time_day: Optional[int] = None,
+        alt_speed_time_enabled: Optional[bool] = None,
+        alt_speed_time_end: Optional[int] = None,
+        alt_speed_up: Optional[int] = None,
+        blocklist_enabled: Optional[bool] = None,
+        blocklist_url: Optional[str] = None,
+        cache_size_mb: Optional[int] = None,
+        dht_enabled: Optional[bool] = None,
+        download_dir: Optional[str] = None,
+        download_queue_enabled: Optional[bool] = None,
+        download_queue_size: Optional[int] = None,
+        encryption: Optional[Literal["required", "preferred", "tolerated"]] = None,
+        idle_seeding_limit: Optional[int] = None,
+        idle_seeding_limit_enabled: Optional[bool] = None,
+        incomplete_dir: Optional[str] = None,
+        incomplete_dir_enabled: Optional[bool] = None,
+        lpd_enabled: Optional[bool] = None,
+        peer_limit_global: Optional[int] = None,
+        peer_limit_per_torrent: Optional[int] = None,
+        peer_port: Optional[int] = None,
+        peer_port_random_on_start: Optional[bool] = None,
+        pex_enabled: Optional[bool] = None,
+        port_forwarding_enabled: Optional[bool] = None,
+        queue_stalled_enabled: Optional[bool] = None,
+        queue_stalled_minutes: Optional[int] = None,
+        rename_partial_files: Optional[bool] = None,
+        script_torrent_done_enabled: Optional[bool] = None,
+        script_torrent_done_filename: Optional[str] = None,
+        seed_queue_enabled: Optional[bool] = None,
+        seed_queue_size: Optional[int] = None,
+        seed_ratio_limit: Optional[int] = None,
+        seed_ratio_limited: Optional[bool] = None,
+        speed_limit_down: Optional[int] = None,
+        speed_limit_down_enabled: Optional[bool] = None,
+        speed_limit_up: Optional[int] = None,
+        speed_limit_up_enabled: Optional[bool] = None,
+        start_added_torrents: Optional[bool] = None,
+        trash_original_torrent_files: Optional[bool] = None,
+        utp_enabled: Optional[bool] = None,
+        script_torrent_done_seeding_filename: Optional[str] = None,
+        script_torrent_done_seeding_enabled: Optional[bool] = None,
+        script_torrent_added_enabled: Optional[bool] = None,
+        script_torrent_added_filename: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -1042,12 +1042,12 @@ class Client:
         if len(args) > 0:
             self._request(RpcMethod.SessionSet, args, timeout=timeout)
 
-    def blocklist_update(self, timeout: _Timeout = None) -> Optional[int]:
+    def blocklist_update(self, timeout: Optional[_Timeout] = None) -> Optional[int]:
         """Update block list. Returns the size of the block list."""
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
-    def port_test(self, timeout: _Timeout = None) -> Optional[bool]:
+    def port_test(self, timeout: Optional[_Timeout] = None) -> Optional[bool]:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
@@ -1055,7 +1055,7 @@ class Client:
         result = self._request(RpcMethod.PortTest, timeout=timeout)
         return result.get("port-is-open")
 
-    def free_space(self, path: Union[str, pathlib.Path], timeout: _Timeout = None) -> Optional[int]:
+    def free_space(self, path: Union[str, pathlib.Path], timeout: Optional[_Timeout] = None) -> Optional[int]:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
@@ -1066,7 +1066,7 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: _Timeout = None) -> SessionStats:
+    def session_stats(self, timeout: Optional[_Timeout] = None) -> SessionStats:
         """Get session statistics"""
         result = self._request(RpcMethod.SessionStats, timeout=timeout)
         return SessionStats(fields=result)
@@ -1075,12 +1075,12 @@ class Client:
         self,
         name: str,
         *,
-        timeout: _Timeout = None,
-        honors_session_limits: bool = None,
-        speed_limit_down: int = None,
-        speed_limit_up_enabled: bool = None,
-        speed_limit_up: int = None,
-        speed_limit_down_enabled: bool = None,
+        timeout: Optional[_Timeout] = None,
+        honors_session_limits: Optional[bool] = None,
+        speed_limit_down: Optional[int] = None,
+        speed_limit_up_enabled: Optional[bool] = None,
+        speed_limit_up: Optional[int] = None,
+        speed_limit_down_enabled: Optional[bool] = None,
     ) -> None:
         self._rpc_version_warning(17)
         arguments: Dict[str, Any] = {"name": name}
@@ -1102,7 +1102,7 @@ class Client:
 
         self._request(RpcMethod.GroupSet, arguments, timeout=timeout)
 
-    def get_group(self, name: str, *, timeout: _Timeout = None) -> Optional[Group]:
+    def get_group(self, name: str, *, timeout: Optional[_Timeout] = None) -> Optional[Group]:
         self._rpc_version_warning(17)
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
@@ -1110,7 +1110,7 @@ class Client:
             return Group(fields=result["arguments"]["group"][0])
         return None
 
-    def get_groups(self, name: List[str] = None, *, timeout: _Timeout = None) -> Dict[str, Group]:
+    def get_groups(self, name: Optional[List[str]] = None, *, timeout: Optional[_Timeout] = None) -> Dict[str, Group]:
         payload = {}
         if name is not None:
             payload = {"group": name}
