@@ -32,13 +32,13 @@ jobs:
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
-        with:
-          extras: docs
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yaml
+          setup-python-dependencies: false
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
