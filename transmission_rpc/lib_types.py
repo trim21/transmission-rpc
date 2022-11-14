@@ -12,7 +12,7 @@ class Container:
     def __init__(self, *, fields: Dict[str, Any]):
         self.fields = fields
 
-    def get(self, key: str, default: T = None) -> Any:
+    def get(self, key: str, default: Optional[T] = None) -> Any:
         """get the raw value from files by the **raw keys**"""
         return self.fields.get(key, default)
 
