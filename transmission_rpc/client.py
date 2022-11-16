@@ -7,7 +7,7 @@ import logging
 import pathlib
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, Literal, BinaryIO, Iterable, Optional
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 
 import requests
 import requests.auth
@@ -93,8 +93,8 @@ class Client:
         password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
         auth = f"{username}{password}@" if (username or password) else ""
 
-        if not path.endswith("/rpc"):
-            path = urljoin(path, "rpc")
+        if path == "/transmission/":
+            path = "/transmission/rpc"
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
         self.url = str(url)

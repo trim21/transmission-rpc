@@ -31,22 +31,20 @@ def from_url(
 ) -> Client:
     u = urllib.parse.urlparse(url)
 
-    port = u.port
-
-    if port is None:
-        if u.scheme == "http":
-            port = 80
-        elif u.scheme == "https":
-            port = 443
-        else:
-            raise ValueError(f"unknown url scheme {u.scheme}")
+    protocol = u.scheme
+    if protocol == "http":
+        default_port = 80
+    elif protocol == "https":
+        default_port = 443
+    else:
+        raise ValueError(f"unknown url scheme {u.scheme}")
 
     return Client(
-        protocol=u.scheme,
+        protocol=protocol,  # type: ignore
         username=u.username,
         password=u.password,
-        host=u.hostname,
-        port=port,
+        host=u.hostname or "127.0.0.1",
+        port=u.port or default_port,
         path=u.path,
         timeout=timeout,
         logger=logger,
