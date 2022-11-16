@@ -14,9 +14,6 @@ You can find torrent-ids spec in `official docs
 
 .. autofunction:: from_url
 
-.. automodule:: transmission_rpc.client
-    :members:
-
 .. autoclass:: Client
     :members:
 
