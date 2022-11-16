@@ -1,4 +1,3 @@
-import dataclasses
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
@@ -43,55 +42,151 @@ class Status(str):
         return obj
 
 
-@dataclasses.dataclass(frozen=True)
-class FileStat:
-    bytesCompleted: int
-    wanted: int
-    priority: int
+class FileStat(Container):
+    @property
+    def bytesCompleted(self) -> int:
+        return self.fields["bytesCompleted"]
+
+    @property
+    def wanted(self) -> int:
+        return self.fields["wanted"]
+
+    @property
+    def priority(self) -> int:
+        return self.fields["priority"]
 
 
-@dataclasses.dataclass(frozen=True)
-class Tracker:
-    id: int
-    announce: str
-    scrape: str
-    tier: int
+class Tracker(Container):
+    @property
+    def id(self) -> int:
+        return self.fields["id"]
+
+    @property
+    def announce(self) -> str:
+        return self.fields["announce"]
+
+    @property
+    def scrape(self) -> str:
+        return self.fields["scrape"]
+
+    @property
+    def tier(self) -> int:
+        return self.fields["tier"]
 
 
-@dataclasses.dataclass(frozen=True)
-class TrackerStats:
-    announceState: int
-    announce: str
-    downloadCount: int
-    hasAnnounced: bool
-    hasScraped: bool
-    host: str
-    id: int
-    isBackup: bool
-    lastAnnouncePeerCount: int
-    lastAnnounceResult: str
-    lastAnnounceStartTime: int
-    lastAnnounceSucceeded: bool
-    lastAnnounceTime: int
-    lastAnnounceTimedOut: bool
-    lastScrapeResult: str
-    lastScrapeStartTime: int
-    lastScrapeSucceeded: bool
-    lastScrapeTime: int
-    lastScrapeTimedOut: bool
-    leecherCount: int
-    nextAnnounceTime: int
-    nextScrapeTime: int
-    scrapeState: int
-    scrape: str
-    seederCount: int
-    sitename: str
-    tier: int
+class TrackerStats(Container):
+    @property
+    def id(self) -> int:
+        return self.fields["id"]
+
+    @property
+    def announce_state(self) -> int:
+        return self.fields["announceState"]
+
+    @property
+    def announce(self) -> str:
+        return self.fields["announce"]
+
+    @property
+    def download_count(self) -> int:
+        return self.fields["downloadCount"]
+
+    @property
+    def has_announced(self) -> bool:
+        return self.fields["hasAnnounced"]
+
+    @property
+    def has_scraped(self) -> bool:
+        return self.fields["hasScraped"]
+
+    @property
+    def host(self) -> str:
+        return self.fields["host"]
+
+    @property
+    def is_backup(self) -> bool:
+        return self.fields["isBackup"]
+
+    @property
+    def last_announce_peer_count(self) -> int:
+        return self.fields["lastAnnouncePeerCount"]
+
+    @property
+    def last_announce_result(self) -> str:
+        return self.fields["lastAnnounceResult"]
+
+    @property
+    def last_announce_start_time(self) -> int:
+        return self.fields["lastAnnounceStartTime"]
+
+    @property
+    def last_announce_succeeded(self) -> bool:
+        return self.fields["lastAnnounceSucceeded"]
+
+    @property
+    def last_announce_time(self) -> int:
+        return self.fields["lastAnnounceTime"]
+
+    @property
+    def last_announce_timed_out(self) -> bool:
+        return self.fields["lastAnnounceTimedOut"]
+
+    @property
+    def last_scrape_result(self) -> str:
+        return self.fields["lastScrapeResult"]
+
+    @property
+    def last_scrape_start_time(self) -> int:
+        return self.fields["lastScrapeStartTime"]
+
+    @property
+    def last_scrape_succeeded(self) -> bool:
+        return self.fields["lastScrapeSucceeded"]
+
+    @property
+    def last_scrape_time(self) -> int:
+        return self.fields["lastScrapeTime"]
+
+    @property
+    def last_scrape_timed_out(self) -> bool:
+        return self.fields["lastScrapeTimedOut"]
+
+    @property
+    def leecher_count(self) -> int:
+        return self.fields["leecherCount"]
+
+    @property
+    def next_announce_time(self) -> int:
+        return self.fields["nextAnnounceTime"]
+
+    @property
+    def next_scrape_time(self) -> int:
+        return self.fields["nextScrapeTime"]
+
+    @property
+    def scrape_state(self) -> int:
+        return self.fields["scrapeState"]
+
+    @property
+    def scrape(self) -> str:
+        return self.fields["scrape"]
+
+    @property
+    def seeder_count(self) -> int:
+        return self.fields["seederCount"]
+
+    @property
+    def site_name(self) -> str:
+        return self.fields["sitename"]
+
+    @property
+    def tier(self) -> int:
+        return self.fields["tier"]
 
 
 class Torrent(Container):
     """
-    Torrent is a dataclasses holding the data received from Transmission regarding a bittorrent transfer.
+    Torrent is a class holding the data received from Transmission regarding a bittorrent transfer.
 
     Warnings
     --------
@@ -302,7 +397,7 @@ class Torrent(Container):
 
     @property
     def file_stats(self) -> List[FileStat]:
-        return [FileStat(**x) for x in self.fields["fileStats"]]
+        return [FileStat(fields=x) for x in self.fields["fileStats"]]
 
     @property
     def group(self) -> str:
@@ -501,7 +596,7 @@ class Torrent(Container):
 
     @property
     def tracker_stats(self) -> List[TrackerStats]:
-        return [TrackerStats(**x) for x in self.fields["trackerStats"]]
+        return [TrackerStats(fields=x) for x in self.fields["trackerStats"]]
 
     @property
     def total_size(self) -> int:
