@@ -35,10 +35,14 @@ def from_url(
         from_url("http://127.0.0.1/transmission/rpc")  # http://127.0.0.1:80/transmission/rpc
         from_url("https://127.0.0.1/transmission/rpc")  # https://127.0.0.1:443/transmission/rpc
         from_url("http://127.0.0.1")  # http://127.0.0.1:80/transmission/rpc
+        from_url("http://127.0.0.1/")  # http://127.0.0.1:80/
 
     Warnings
     --------
         you can't ignore scheme, ``127.0.0.1:9091`` is not valid url, please use ``http://127.0.0.1:9091``
+
+        And ``from_url("http://127.0.0.1")`` is not same as ``from_url("http://127.0.0.1/")``,
+        ``path`` of ``http://127.0.0.1/`` is ``/``
 
     """
     u = urllib.parse.urlparse(url)

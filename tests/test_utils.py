@@ -96,6 +96,14 @@ def test_format_timedelta(delta, expected):
             "port": 443,
             "path": "/tr/transmission/rpc",
         },
+        "https://127.0.0.1/": {
+            "protocol": "https",
+            "username": None,
+            "password": None,
+            "host": "127.0.0.1",
+            "port": 443,
+            "path": "/",
+        },
     }.items(),
 )
 def test_from_url(url: str, kwargs: Dict[str, Any]):
