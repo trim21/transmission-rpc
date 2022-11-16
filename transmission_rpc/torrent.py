@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
@@ -357,11 +358,15 @@ class Torrent(Container):
         return self.fields["file-count"]
 
     def files(self) -> List[File]:
+        warnings.warn(DeprecationWarning("'.files()' is deprecated, please use '.get_files()'"))
+        return self.get_files()
+
+    def get_files(self) -> List[File]:
         """
         Get list of files for this torrent.
 
-        .. note ::
-
+        Note
+        ----
 
             The order of the files is guaranteed. The index of file object is the id of the file
             when calling :py:meth:`transmission_rpc.client.Client.set_files`.
@@ -372,8 +377,8 @@ class Torrent(Container):
 
             torrent = Client().get_torrent(0)
 
-            for file_id, file in enumerate(torrent.files()):
-                print(file_id, file)
+            for file in enumerate(torrent.get_files()):
+                print(file.id)
 
         """
         result: List[File] = []

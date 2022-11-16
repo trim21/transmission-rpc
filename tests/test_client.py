@@ -220,7 +220,7 @@ def test_real_torrent_get_files(tr_client: Client):
         tr_client.add_torrent(f)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
     for torrent in tr_client.get_torrents():
-        for file in torrent.files():
+        for file in torrent.get_files():
             assert isinstance(file, File)
 
 
