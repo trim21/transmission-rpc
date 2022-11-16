@@ -16,7 +16,8 @@ Support 14 <= rpc version <= 16 (2.40 <= transmission version <= 3.00),
 should works fine with newer rpc version but some new feature may be missing.
 
 There are also [pre-release versions](https://github.com/trim21/transmission-rpc/releases) for transmission `4.00-beta.1`,
-you can install them with `pip install --pre transmission-rpc`
+you can install them with `pip install --pre transmission-rpc` or
+`pip install https://github.com/trim21/transmission-rpc/archive/refs/heads/master.zip`
 
 ## versioning
 
