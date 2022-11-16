@@ -19,11 +19,11 @@ from transmission_rpc.error import (
     TransmissionConnectError,
     TransmissionTimeoutError,
 )
+from transmission_rpc.types import Group, _Timeout
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
-from transmission_rpc.lib_types import Group, _Timeout
 
 valid_hash_char = string.digits + string.ascii_letters
 

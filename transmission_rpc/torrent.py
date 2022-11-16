@@ -2,9 +2,9 @@ import warnings
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
+from transmission_rpc.types import File, Container
 from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
-from transmission_rpc.lib_types import File, Container
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",
@@ -589,10 +589,9 @@ class Torrent(Container):
     # def start_date(self):
     #     return self.fields["startDate"]
 
-    # TODO
-    # @property
-    # def trackers(self):
-    #     return self.fields["trackers"]
+    @property
+    def trackers(self) -> List[Tracker]:
+        return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
     def tracker_list(self) -> List[str]:

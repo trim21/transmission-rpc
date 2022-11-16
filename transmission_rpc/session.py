@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional
 
-from transmission_rpc.lib_types import Container
+from transmission_rpc.types import Container
 
 
 class Stats(Container):

@@ -9,9 +9,9 @@ import yarl
 import pytest
 
 from transmission_rpc.error import TransmissionAuthError
+from transmission_rpc.types import File
 from transmission_rpc.utils import _try_read_torrent
 from transmission_rpc.client import Client, ensure_location_str
-from transmission_rpc.lib_types import File
 
 
 @pytest.mark.parametrize(
