@@ -31,29 +31,22 @@ class Group(Container):
     def name(self) -> str:
         return self.fields["name"]
 
-    # https://github.com/transmission/transmission/issues/3931
-
     @property
     def honors_session_limits(self) -> bool:
         return self.fields["honorsSessionLimits"]
 
     @property
     def speed_limit_down_enabled(self) -> bool:
-        return self.fields["downloadLimited"]
+        return self.fields["speed-limit-down-enabled"]
 
     @property
     def speed_limit_down(self) -> int:
-        return self.fields["downloadLimit"]
+        return self.fields["speed-limit-down"]
 
     @property
     def speed_limit_up_enabled(self) -> bool:
-        return self.fields["uploadLimited"]
+        return self.fields["speed-limit-up-enabled"]
 
     @property
     def speed_limit_up(self) -> int:
-        return self.fields["uploadLimit"]
-
-    # speed_limit_down_enabled: bool = pydantic.Field(alias='speed-limit-down-enabled')
-    # speed_limit_down: int = pydantic.Field(alias='speed-limit-down')
-    # speed_limit_up_enabled: bool = pydantic.Field(alias='speed-limit-up-enabled')
-    # speed_limit_up: int = pydantic.Field(alias='speed-limit-up')
+        return self.fields["speed-limit-up"]
