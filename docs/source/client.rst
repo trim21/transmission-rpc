@@ -1,8 +1,3 @@
-.. transmission-rpc documentation master file, created by
-   sphinx-quickstart on Fri Oct  5 09:29:21 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Client
 ========
 
@@ -15,8 +10,9 @@ Many functions in Client takes torrent id.
 You can find torrent-ids spec in `official docs
 <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#31-torrent-action-requests>`_
 
-.. automodule:: transmission_rpc.client
-    :members:
+.. automodule:: transmission_rpc
+
+.. autofunction:: from_url
 
 .. autoclass:: Client
     :members:

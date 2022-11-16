@@ -29,6 +29,18 @@ def from_url(
     timeout: Union[int, float] = DEFAULT_TIMEOUT,
     logger: logging.Logger = LOGGER,
 ) -> Client:
+    """
+    .. code-block:: python
+
+        from_url("http://127.0.0.1/transmission/rpc")  # http://127.0.0.1:80/transmission/rpc
+        from_url("https://127.0.0.1/transmission/rpc")  # https://127.0.0.1:443/transmission/rpc
+        from_url("http://127.0.0.1")  # http://127.0.0.1:80/transmission/rpc
+
+    Warnings
+    --------
+        you can't ignore scheme, ``127.0.0.1:9091`` is not valid url, please use ``http://127.0.0.1:9091``
+
+    """
     u = urllib.parse.urlparse(url)
 
     protocol = u.scheme
@@ -45,7 +57,7 @@ def from_url(
         password=u.password,
         host=u.hostname or "127.0.0.1",
         port=u.port or default_port,
-        path=u.path,
+        path=u.path or "/transmission/rpc",
         timeout=timeout,
         logger=logger,
     )

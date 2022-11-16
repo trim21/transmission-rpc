@@ -2,11 +2,13 @@
 # Copyright (c) 2018-2020 Trim21 <i@trim21.me>
 # Licensed under the MIT license.
 import datetime
-from typing import Tuple
+from typing import Any, Dict, Tuple
+from unittest import mock
 
 import pytest
 
-from transmission_rpc import utils
+from transmission_rpc import utils, from_url
+from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
 
 
 def assert_almost_eq(value: float, expected: float):
@@ -65,3 +67,42 @@ def test_format_speed(size, expected):
 )
 def test_format_timedelta(delta, expected):
     assert utils.format_timedelta(delta), expected
+
+
+@pytest.mark.parametrize(
+    ("url", "kwargs"),
+    {
+        "http://a:b@127.0.0.1:9092/transmission/rpc": {
+            "protocol": "http",
+            "username": "a",
+            "password": "b",
+            "host": "127.0.0.1",
+            "port": 9092,
+            "path": "/transmission/rpc",
+        },
+        "http://127.0.0.1/transmission/rpc": {
+            "protocol": "http",
+            "username": None,
+            "password": None,
+            "host": "127.0.0.1",
+            "port": 80,
+            "path": "/transmission/rpc",
+        },
+        "https://127.0.0.1/tr/transmission/rpc": {
+            "protocol": "https",
+            "username": None,
+            "password": None,
+            "host": "127.0.0.1",
+            "port": 443,
+            "path": "/tr/transmission/rpc",
+        },
+    }.items(),
+)
+def test_from_url(url: str, kwargs: Dict[str, Any]):
+    with mock.patch("transmission_rpc.Client") as m:
+        from_url(url)
+        m.assert_called_once_with(
+            **kwargs,
+            timeout=DEFAULT_TIMEOUT,
+            logger=LOGGER,
+        )

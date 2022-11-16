@@ -59,7 +59,6 @@ you can find rpc version by transmission version from
 `transmission rpc docs <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#5-protocol-versions>`_
 
 
-
 .. toctree::
     :maxdepth: 2
     :caption: Contents:
