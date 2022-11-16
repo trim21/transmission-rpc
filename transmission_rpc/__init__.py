@@ -45,7 +45,7 @@ def from_url(
         password=u.password,
         host=u.hostname or "127.0.0.1",
         port=u.port or default_port,
-        path=u.path,
+        path=u.path or "/transmission/rpc",
         timeout=timeout,
         logger=logger,
     )
