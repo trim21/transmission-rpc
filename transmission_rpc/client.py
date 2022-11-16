@@ -93,7 +93,7 @@ class Client:
         password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
         auth = f"{username}{password}@" if (username or password) else ""
 
-        if path.endswith("/rpc"):
+        if not path.endswith("/rpc"):
             path = urljoin(path, "rpc")
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))

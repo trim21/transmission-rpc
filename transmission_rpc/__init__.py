@@ -30,7 +30,9 @@ def from_url(
     logger: logging.Logger = LOGGER,
 ) -> Client:
     u = urllib.parse.urlparse(url)
+
     port = u.port
+
     if port is None:
         if u.scheme == "http":
             port = 80
