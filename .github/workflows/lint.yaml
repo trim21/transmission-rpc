@@ -22,7 +22,7 @@ jobs:
         with:
           extras: docs
 
-      - uses: liskin/gh-problem-matcher-wrap@v1
+      - uses: liskin/gh-problem-matcher-wrap@v2
         with:
           action: add
           linters: mypy
