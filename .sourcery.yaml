@@ -1,0 +1,4 @@
+rule_settings:
+  disable:
+    - assign-if-exp
+  python_version: '3.10'
