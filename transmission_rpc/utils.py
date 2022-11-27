@@ -29,7 +29,7 @@ def format_speed(size: int) -> Tuple[float, str]:
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
     (s, unit) = format_size(size)
-    return s, unit + "/s"
+    return s, f"{unit}/s"
 
 
 def format_timedelta(delta: datetime.timedelta) -> str:
