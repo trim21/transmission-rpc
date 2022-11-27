@@ -223,12 +223,11 @@ class Client:
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
-        if "result" in data:
-            if data["result"] != "success":
-                raise TransmissionError(f'Query failed with result "{data["result"]}".')
-        else:
+        if "result" not in data:
             raise TransmissionError("Query failed without result.")
 
+        if data["result"] != "success":
+            raise TransmissionError(f'Query failed with result "{data["result"]}".')
         results = {}
         if method == RpcMethod.TorrentGet:
             return data["arguments"]
@@ -381,9 +380,7 @@ class Client:
             self._rpc_version_warning(17)
             kwargs["labels"] = list(labels)
 
-        torrent_data = _try_read_torrent(torrent)
-
-        if torrent_data:
+        if torrent_data := _try_read_torrent(torrent):
             kwargs["metainfo"] = torrent_data
         else:
             kwargs["filename"] = torrent
@@ -703,7 +700,7 @@ class Client:
 
         args.update(kwargs)
 
-        if len(args) > 0:
+        if args:
             self._request(RpcMethod.TorrentSet, args, ids, True, timeout=timeout)
         else:
             ValueError("No arguments to set")
@@ -1043,7 +1040,7 @@ class Client:
 
         args.update(kwargs)
 
-        if len(args) > 0:
+        if args:
             self._request(RpcMethod.SessionSet, args, timeout=timeout)
 
     def blocklist_update(self, timeout: Optional[_Timeout] = None) -> Optional[int]:
