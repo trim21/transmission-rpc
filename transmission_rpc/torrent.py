@@ -396,9 +396,7 @@ class Torrent(Container):
                     completed=file["bytesCompleted"],
                     id=id,
                 )
-                for id, file, raw_priority, raw_selected in zip(
-                    indices, files, priorities, wanted
-                )
+                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
             )
 
         return result
