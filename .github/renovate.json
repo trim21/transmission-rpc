@@ -3,24 +3,5 @@
     "github>Trim21/renovate-config",
     "github>Trim21/renovate-config:monthly",
     "github>Trim21/renovate-config:poetry"
-  ],
-  "separateMajorMinor": false,
-  "separateMinorPatch": false,
-  "rangeStrategy": "widen",
-  "packageRules": [
-    {
-      "groupName": "deps-docs",
-      "semanticCommitScope": "docs",
-      "packagePatterns": [
-        "^sphinx"
-      ],
-      "rangeStrategy": "pin"
-    },
-    {
-      "depTypeList": [
-        "dev-dependencies"
-      ],
-      "rangeStrategy": "pin"
-    }
   ]
 }
