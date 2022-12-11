@@ -2,7 +2,7 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/python-poetry/poetry
-    rev: "fb493f2e80a11403fa289617a703ae622d4ccd75"  # frozen: 1.3.0
+    rev: "1.3.0"
     hooks:
       - id: poetry-check
       - id: poetry-lock
@@ -10,7 +10,7 @@ repos:
         args: ["--check"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9  # frozen: v4.4.0
+    rev: v4.4.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -31,18 +31,18 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
-    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1 # frozen: 5.10.1
+    rev: 5.10.1
     hooks:
       - id: isort
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 01cee377ba3a5264c7fbe7b6beae7b575f764dc3  # frozen: v3.3.1
+    rev: v3.3.1
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/autoflake
-    rev: 75f8afa727c367ecc6829f31866e9c6fbb908bc6  # frozen: v2.0.0
+    rev: v2.0.0
     hooks:
       - id: autoflake
         args:
@@ -52,7 +52,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: 5923ca0c51f39411817e2fa4eb6db05301c6c873 # frozen: v1.0.0
+    rev: v1.0.0
     hooks:
       - id: doc8
         name: Check rst file
@@ -60,7 +60,7 @@ repos:
         files: \.rst$
 
   - repo: https://github.com/psf/black
-    rev: 2ddea293a88919650266472186620a98a4a8bb37  # frozen: 22.12.0
+    rev: 22.12.0
     hooks:
       - id: black
         args: [--line-length=120]
