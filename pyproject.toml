@@ -38,7 +38,7 @@ sphinx-rtd-theme = { version = "==1.1.1", optional = true }
 docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.dev-dependencies]
-yarl = "==1.8.1"
+yarl = "==1.8.2"
 # tests
 pytest = "==7.2.0"
 coverage = "==6.5.0"
@@ -47,7 +47,7 @@ pre-commit = { version = "==2.20.0", markers = "implementation_name != 'pypy'" }
 mypy = { version = "==0.991", markers = "implementation_name != 'pypy'" }
 flake8 = "==5.0.4"
 flake8-comprehensions = "==3.10.1"
-flake8-bugbear = "==22.10.27"
+flake8-bugbear = "==22.12.6"
 flake8-mutable = "1.2.0"
 pytest-github-actions-annotate-failures = "==0.1.7"
 flake8-pytest-style = "==1.6.0"
