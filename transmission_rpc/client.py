@@ -92,7 +92,7 @@ class Client:
 
         if username and password:
             if auth:
-                raise ValueError(f"conflicting authentication information")
+                raise ValueError("conflicting authentication information")
             auth = requests.auth.HTTPBasicAuth(username=username, password=password)
 
         if path == "/transmission/":
