@@ -80,6 +80,7 @@ class Client:
         path: str = "/transmission/rpc",
         timeout: Union[int, float] = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
+        auth: Optional[requests.auth.AuthBase] = None
     ):
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -89,14 +90,15 @@ class Client:
             )
         self._query_timeout: _Timeout = timeout
 
-        username = quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8") if username else ""
-        password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
-        auth = f"{username}{password}@" if (username or password) else ""
+        if username and password:
+            if auth:
+                raise ValueError(f"conflicting authentication information")
+            auth = requests.auth.HTTPBasicAuth(username=username, password=password)
 
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
+        url = urllib.parse.urlunparse((protocol, f"{host}:{port}", path, None, None, None))
         self.url = str(url)
         self._sequence = 0
         self.raw_session: Dict[str, Any] = {}
@@ -104,6 +106,7 @@ class Client:
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: int = 17  # default 17
         self._http_session = requests.Session()
+        self._http_session.auth = auth
         self._http_session.trust_env = False
         self.get_session()
         self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
