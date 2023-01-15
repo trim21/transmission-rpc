@@ -31,7 +31,7 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
+    rev: 5.11.4
     hooks:
       - id: isort
 
@@ -52,7 +52,7 @@ repos:
           - --expand-star-imports
 
   - repo: https://github.com/PyCQA/doc8.git
-    rev: v1.0.0
+    rev: v1.1.1
     hooks:
       - id: doc8
         name: Check rst file
