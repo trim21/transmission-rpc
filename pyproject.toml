@@ -46,7 +46,7 @@ pre-commit = { version = "==2.21.0", markers = "implementation_name != 'pypy'" }
 mypy = { version = "==0.991", markers = "implementation_name != 'pypy'" }
 flake8 = "==6.0.0"
 flake8-comprehensions = "==3.10.1"
-flake8-bugbear = "==22.12.6"
+flake8-bugbear = "==23.1.17"
 flake8-mutable = "1.2.0"
 pytest-github-actions-annotate-failures = "==0.1.8"
 flake8-pytest-style = "==1.6.0"
