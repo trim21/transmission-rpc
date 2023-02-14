@@ -358,7 +358,7 @@ class Torrent(Container):
         return self.fields["file-count"]
 
     def files(self) -> List[File]:
-        warnings.warn(DeprecationWarning("'.files()' is deprecated, please use '.get_files()'"))
+        warnings.warn(DeprecationWarning("'.files()' is deprecated, please use '.get_files()'"), stacklevel=2)
         return self.get_files()
 
     def get_files(self) -> List[File]:
