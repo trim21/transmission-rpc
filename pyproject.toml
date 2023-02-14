@@ -48,6 +48,7 @@ flake8 = "==6.0.0"
 flake8-comprehensions = "==3.10.1"
 flake8-bugbear = "==23.2.13"
 flake8-mutable = "1.2.0"
+flake8-pyproject = "1.2.2"
 pytest-github-actions-annotate-failures = "==0.1.8"
 flake8-pytest-style = "==1.7.0"
 sphinx-autobuild = "2021.3.14"
@@ -75,3 +76,9 @@ ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = true
 show_error_codes = true
+
+[tool.flake8]
+max-line-length = 88
+ignore = ['C103', 'C111', 'R903', 'W503', 'W504', 'C812', 'C813', 'C815', 'C819', 'B008', 'E265', 'E501']
+exclude = ['.venv', '.git', '__pycache__', 'docs/source/conf.py', 'old', 'build', 'dist', 'tmp', 'api']
+ban-relative-imports = 'parents'

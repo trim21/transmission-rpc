@@ -48,12 +48,7 @@ jobs:
       - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
 
       - name: flake8
-        run: |
-          flake8 \
-            --ignore=C0103,C0111,R0903,W503,W504,C812,C813,C815,C819,B008,E265,E501 \
-            --max-line-length=88 \
-            --exclude .venv,.git,__pycache__,docs/source/conf.py,old,build,dist
-
+        run: flake8
   lint:
     runs-on: ubuntu-latest
     steps:
