@@ -25,9 +25,6 @@ jobs:
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
-        with:
-          extras: |
-            docs
 
       - name: setup test env
         run: docker-compose -f tests/docker-compose.yaml up -d

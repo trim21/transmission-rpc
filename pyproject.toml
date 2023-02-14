@@ -26,7 +26,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.8"
 # dependencies
 requests = "^2.23.0"
 # build document
@@ -42,9 +42,9 @@ yarl = "==1.8.2"
 pytest = "==7.2.1"
 coverage = "==7.1.0"
 # linter and formatter
-pre-commit = { version = "==2.21.0", markers = "implementation_name != 'pypy'" }
-mypy = { version = "==0.991", markers = "implementation_name != 'pypy'" }
-flake8 = "==6.0.0"
+pre-commit = { version = "==2.21.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
+mypy = { version = "==0.991", markers = "implementation_name != 'pypy'", python = "^3.9" }
+flake8 = { version = "6.0.0", python = "^3.9" }
 flake8-comprehensions = "==3.10.1"
 flake8-bugbear = "==23.2.13"
 flake8-mutable = "1.2.0"
