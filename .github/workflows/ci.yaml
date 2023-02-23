@@ -2,9 +2,11 @@ name: ci
 
 on:
   push:
-    branches-ignore:
-      - renovate/**
-  pull_request: {}
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   test:
