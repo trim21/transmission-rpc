@@ -212,10 +212,11 @@ class Session:
         else:
             raise ValueError("Not a valid encryption, can only be one of ['required', 'preferred', 'tolerated']")
 
-    def get(self, key) -> Optional[Any]:
+    def get(self, key: str) -> Optional[Any]:
         v = self._fields.get(key)
         if v:
             return v.value
+        return None
 
     @property
     def default_trackers(self) -> Optional[list]:

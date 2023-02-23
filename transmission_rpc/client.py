@@ -624,18 +624,16 @@ class Client:
                         normal.append(fid)
                     elif file_desc["priority"] == "low":
                         low.append(fid)
-            args = {}
-            if len(high) > 0:
-                args["priority_high"] = high
-            if len(normal) > 0:
-                args["priority_normal"] = normal
-            if len(low) > 0:
-                args["priority_low"] = low
-            if len(wanted) > 0:
-                args["files_wanted"] = wanted
-            if len(unwanted) > 0:
-                args["files_unwanted"] = unwanted
-            self.change_torrent([tid], timeout=timeout, **args)
+
+            self.change_torrent(
+                [tid],
+                timeout=timeout,
+                priority_high=high or None,
+                priority_normal=normal or None,
+                priority_low=low or None,
+                files_wanted=wanted or None,
+                files_unwanted=unwanted or None,
+            )
 
     def change_torrent(
         self,
