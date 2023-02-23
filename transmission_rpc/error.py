@@ -6,7 +6,6 @@ exception raise by this package
 # Licensed under the MIT license.
 from typing import Optional
 
-import requests.exceptions
 from requests.models import Response
 
 
@@ -32,9 +31,9 @@ class TransmissionAuthError(TransmissionError):
     """Raised when username or password is incorrect"""
 
 
-class TransmissionConnectError(TransmissionError, requests.exceptions.ConnectionError):
+class TransmissionConnectError(TransmissionError):
     """raised when client can't connect to transmission daemon"""
 
 
-class TransmissionTimeoutError(TransmissionConnectError, requests.exceptions.Timeout):
+class TransmissionTimeoutError(TransmissionConnectError):
     """Timeout"""
