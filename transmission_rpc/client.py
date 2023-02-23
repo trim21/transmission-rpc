@@ -333,6 +333,7 @@ class Client:
             A list of file id's that should be downloaded.
         paused:
             If True, does not start the transfer when added.
+            Magnet url will always start to downloading torrents.
         peer_limit:
             Maximum number of peers allowed.
         priority_high:

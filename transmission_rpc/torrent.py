@@ -19,7 +19,7 @@ _STATUS_NEW_MAPPING = {
 
 def get_status(code: int) -> str:
     """Get the torrent status using new status codes"""
-    return _STATUS_NEW_MAPPING[code]
+    return _STATUS_NEW_MAPPING.get(code) or f"unknown status {code}"
 
 
 class Status(str):
@@ -648,7 +648,13 @@ class Torrent(Container):
         """Number of webseeds that are sending data to us."""
         return self.fields["webseedsSendingToUs"]
 
-    def _status(self) -> str:
+    @property
+    def _status(self) -> int:
+        """Get the torrent status"""
+        return self.fields["status"]
+
+    @property
+    def _status_str(self) -> str:
         """Get the torrent status"""
         return get_status(self.fields["status"])
 
@@ -668,7 +674,35 @@ class Torrent(Container):
             torrent.status == 'downloading'
 
         """
-        return Status(self._status())
+        return Status(self._status_str)
+
+    @property
+    def stopped(self) -> bool:
+        return self._status == 0
+
+    @property
+    def check_pending(self) -> bool:
+        return self._status == 1
+
+    @property
+    def checking(self) -> bool:
+        return self._status == 2
+
+    @property
+    def download_pending(self) -> bool:
+        return self._status == 3
+
+    @property
+    def downloading(self) -> bool:
+        return self._status == 4
+
+    @property
+    def seed_pending(self) -> bool:
+        return self._status == 5
+
+    @property
+    def seeding(self) -> bool:
+        return self._status == 6
 
     @property
     def progress(self) -> float:

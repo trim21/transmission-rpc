@@ -68,7 +68,7 @@ def hash_to_magnet(h):
 torrent_hash = "e84213a794f3ccd890382a54a64ca68b7e925433"
 magnet_url = f"magnet:?xt=urn:btih:{torrent_hash}"
 torrent_hash2 = "9fc20b9e98ea98b4a35e6223041a5ef94ea27809"
-torrent_url = "https://releases.ubuntu.com/20.04/ubuntu-20.04-desktop-amd64.iso.torrent"
+torrent_url = "https://releases.ubuntu.com/22.04/ubuntu-22.04.1-live-server-amd64.iso.torrent"
 
 
 def test_client_add_kwargs():
@@ -150,7 +150,7 @@ def test_real_add_torrent_fd(tr_client: Client):
 
 
 def test_real_add_torrent_http(tr_client: Client):
-    tr_client.add_torrent("https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent")
+    tr_client.add_torrent(torrent_url)
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
@@ -179,14 +179,13 @@ def test_real_stop(tr_client: Client, fake_hash_factory):
 
 
 def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
-    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
-    tr_client.add_torrent(hash_to_magnet(fake_hash_factory()), paused=True, timeout=1)
+    tr_client.add_torrent(torrent_url, paused=True, timeout=10)
     for torrent in tr_client.get_torrents():
-        assert torrent.status == "stopped", "all torrent should be stopped"
+        assert torrent.stopped or torrent.checking, "all torrent should be stopped"
 
     tr_client.start_all()
     for torrent in tr_client.get_torrents():
-        assert torrent.status == "downloading", "all torrent should be downloading"
+        assert torrent.downloading or torrent.checking, "all torrent should be downloading"
 
 
 def test_real_session_get(tr_client: Client):
