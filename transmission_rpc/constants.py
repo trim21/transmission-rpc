@@ -127,6 +127,7 @@ TORRENT_GET_ARGS: Dict[str, Args] = {
     "peersGettingFromUs": Args(Type.number, 1, description="Number of peers we are sending data to."),
     "peersKnown": Args(Type.number, 1, 13, description="Number of peers that the tracker knows."),
     "peersSendingToUs": Args(Type.number, 1, None, None, None, "Number of peers sending to us"),
+    "percentComplete": Args(Type.double, 17),
     "pieceCount": Args(Type.number, 1, None, None, None, "Number of pieces."),
     "pieceSize": Args(Type.number, 1, None, None, None, "Number of bytes in a piece."),
     "priorities": Args(Type.array, 1, None, None, None, "Array of file priorities."),

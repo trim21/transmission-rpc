@@ -1,7 +1,7 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Generator
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union, Optional, Generator
 
 from typing_extensions import Literal
 
@@ -211,3 +211,56 @@ class Session:
             self._set("encryption", value, commit=True)
         else:
             raise ValueError("Not a valid encryption, can only be one of ['required', 'preferred', 'tolerated']")
+
+    def get(self, key) -> Optional[Any]:
+        v = self._fields.get(key)
+        if v:
+            return v.value
+
+    @property
+    def default_trackers(self) -> Optional[list]:
+        """
+        list of default trackers to use on public torrents
+        new at rpc-version 17
+        """
+        return self.get("default-trackers")
+
+    @property
+    def rpc_version_semver(self) -> Optional[str]:
+        """
+        the current RPC API version in a semver-compatible str
+        new at rpc-version 17
+        """
+        return self.get("rpc-version-semver")
+
+    @property
+    def script_torrent_added_enabled(self) -> Optional[bool]:
+        """
+        whether or not to call the `added` script
+        new at rpc-version 17
+        """
+        return self.get("script-torrent-added-enabled")
+
+    @property
+    def script_torrent_added_filename(self) -> Optional[str]:
+        """
+        filename of the script to run
+        new at rpc-version 17
+        """
+        return self.get("script-torrent-added-filename")
+
+    @property
+    def script_torrent_done_seeding_enabled(self) -> Optional[bool]:
+        """
+        whether or not to call the `seeding-done` script
+        new at rpc-version 17
+        """
+        return self.get("script-torrent-done-seeding-enabled")
+
+    @property
+    def script_torrent_done_seeding_filename(self) -> Optional[str]:
+        """
+        filename of the script to run
+        new at rpc-version 17
+        """
+        return self.get("script-torrent-done-seeding-filename")

@@ -14,6 +14,7 @@ import operator
 import warnings
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
+from warnings import warn
 from urllib.parse import quote, urljoin
 
 import requests
@@ -23,10 +24,12 @@ from typing_extensions import Literal
 
 from transmission_rpc.error import (
     TransmissionError,
+    RemovedInV4Warning,
     TransmissionAuthError,
     TransmissionConnectError,
     TransmissionTimeoutError,
 )
+from transmission_rpc.types import Group
 from transmission_rpc.utils import (
     LOGGER,
     rpc_bool,
@@ -357,6 +360,7 @@ class Client:
         priority_low: List[int] = None,
         priority_normal: List[int] = None,
         cookies: str = None,
+        labels: Optional[Iterable[str]] = None,
         bandwidthPriority: int = None,
     ) -> Torrent:
         """
@@ -379,6 +383,7 @@ class Client:
         Argument              RPC   Replaced by Description
         ===================== ===== =========== =============================================================
         ``bandwidthPriority`` 8 -               Priority for this transfer.
+        ``labels``            17 -              Array of string labels.
         ``cookies``           13 -              One or more HTTP cookie(s).
         ``download_dir``      1 -               The directory where the downloaded contents will be saved in.
         ``files_unwanted``    1 -               A list of file id's that shouldn't be downloaded.
@@ -425,6 +430,10 @@ class Client:
 
         if cookies is not None:
             kwargs["cookies"] = cookies
+
+        if labels is not None:
+            self._rpc_version_warning(17)
+            kwargs["labels"] = list(labels)
 
         torrent_data = _try_read_torrent(torrent)
 
@@ -589,6 +598,8 @@ class Client:
             }
 
         """
+
+        warn("deprecated", RemovedInV4Warning, stacklevel=2)
         if not isinstance(items, dict):
             raise ValueError("Invalid file description")
         for tid, files in items.items():
@@ -626,7 +637,14 @@ class Client:
                 args["files_unwanted"] = unwanted
             self.change_torrent([tid], timeout=timeout, **args)
 
-    def change_torrent(self, ids: _TorrentIDs, timeout: _Timeout = None, **kwargs: Any) -> None:
+    def change_torrent(
+        self,
+        ids: _TorrentIDs,
+        timeout: _Timeout = None,
+        group: Optional[str] = None,
+        tracker_list: Optional[Iterable[Iterable[str]]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Change torrent parameters for the torrent(s) with the supplied id's. The
         parameters are:
@@ -664,6 +682,8 @@ class Client:
         ``uploadLimit``              5 -                   Set the speed limit for upload in Kib/s.
         ``uploadLimited``            5 -                   Enable upload speed limiter.
         ``labels``                   16 -                  Array of string labels.
+        ``group``                    17 -                  The name of this torrent's bandwidth group.
+        ``tracker_list``             17 -                  A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
         ============================ ===== =============== =============================================================
 
         .. NOTE::
@@ -673,6 +693,15 @@ class Client:
         """
 
         args = {}
+
+        if tracker_list is not None:
+            self._rpc_version_warning(17)
+            args["trackerList"] = " ".join("\n".join(x) for x in tracker_list)
+
+        if group is not None:
+            self._rpc_version_warning(17)
+            args["group"] = str(group)
+
         for key, value in kwargs.items():
             argument = make_rpc_name(key)
             arg, val = argument_value_convert("torrent-set", argument, value, self.rpc_version)
@@ -863,6 +892,54 @@ class Client:
         """Get session statistics"""
         self._request("session-stats", timeout=timeout)
         return self.session
+
+    def set_group(
+        self,
+        name: str,
+        *,
+        timeout: Optional[_Timeout] = None,
+        honors_session_limits: Optional[bool] = None,
+        speed_limit_down: Optional[int] = None,
+        speed_limit_up_enabled: Optional[bool] = None,
+        speed_limit_up: Optional[int] = None,
+        speed_limit_down_enabled: Optional[bool] = None,
+    ) -> None:
+        self._rpc_version_warning(17)
+        arguments: Dict[str, Any] = {"name": name}
+
+        if honors_session_limits is not None:
+            arguments["honorsSessionLimits"] = honors_session_limits
+
+        if speed_limit_down is not None:
+            arguments["speed-limit-down"] = speed_limit_down
+
+        if speed_limit_up_enabled is not None:
+            arguments["speed-limit-up-enabled"] = speed_limit_up_enabled
+
+        if speed_limit_up is not None:
+            arguments["speed-limit-up"] = speed_limit_up
+
+        if speed_limit_down_enabled is not None:
+            arguments["speed-limit-down-enabled"] = speed_limit_down_enabled
+
+        self._request("group-get", arguments, timeout=timeout)
+
+    def get_group(self, name: str, *, timeout: Optional[_Timeout] = None) -> Optional[Group]:
+        self._rpc_version_warning(17)
+        result: Dict[str, Any] = self._request("group-get", {"group": name}, timeout=timeout)
+
+        if result["arguments"]["group"]:
+            return Group(fields=result["arguments"]["group"][0])
+        return None
+
+    def get_groups(self, name: Optional[List[str]] = None, *, timeout: Optional[_Timeout] = None) -> Dict[str, Group]:
+        payload = {}
+        if name is not None:
+            payload = {"group": name}
+
+        result: Dict[str, Any] = self._request("group-set", payload, timeout=timeout)
+
+        return {x["name"]: Group(fields=x) for x in result["arguments"]["group"]}
 
     def __enter__(self) -> "Client":
         return self

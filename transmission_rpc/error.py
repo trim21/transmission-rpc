@@ -42,3 +42,7 @@ class TransmissionTimeoutError(TransmissionConnectError, requests.exceptions.Tim
 
 class TransmissionVersionError(TransmissionError):
     """transmission version is too lower to support some feature"""
+
+
+class RemovedInV4Warning(PendingDeprecationWarning):
+    """this method will be removed in transmission v4"""
