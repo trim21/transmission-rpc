@@ -24,13 +24,11 @@ jobs:
       - name: Get Tag Name
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
-      - name: Generate Changlog
-        run: |
-          docker pull quay.io/git-chglog/git-chglog:latest
-          docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog "$TAG" | \
-          python -c 'import sys;print("".join(sys.stdin.readlines()[3:]).strip())' > chglog.md
+      - uses: actions/setup-node@v3
+      - run: npm i -g conventional-changelog@3
+      - run: node .github/scripts/changelog.js | tee changelog.md
 
       - name: Upload Github Release
-        run: gh release create "$TAG" -F chglog.md ./dist/*
+        run: gh release create "$TAG" -F changelog.md ./dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
