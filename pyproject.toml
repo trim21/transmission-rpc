@@ -37,7 +37,7 @@ sphinx-rtd-theme = { version = "==1.2.0", optional = true }
 docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.group.dev.dependencies]
-python-dotenv = "^0.21.1"
+python-dotenv = "0.21.1"
 
 yarl = "==1.8.2"
 # tests
@@ -45,17 +45,17 @@ pytest = "==7.2.1"
 coverage = "==7.1.0"
 # linter and formatter
 pre-commit = { version = "==3.0.4", markers = "implementation_name != 'pypy'", python = "^3.9" }
-mypy = { version = "==1.0.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
+mypy = { version = "==1.0.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
 flake8 = { version = "6.0.0", python = "^3.9" }
 flake8-comprehensions = "==3.10.1"
 flake8-bugbear = "==23.2.13"
 flake8-mutable = "1.2.0"
 flake8-pyproject = "1.2.2"
 pytest-github-actions-annotate-failures = "==0.1.8"
-flake8-pytest-style = "==1.7.0"
+flake8-pytest-style = "==1.7.2"
 sphinx-autobuild = "2021.3.14"
 # stubs
-types-requests = "==2.28.11.12"
+types-requests = "==2.28.11.14"
 pytz = "==2022.7.1"
 
 [tool.isort]
