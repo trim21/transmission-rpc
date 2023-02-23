@@ -2,9 +2,11 @@ name: lint
 
 on:
   push:
-    branches-ignore:
-      - renovate/**
-  pull_request: {}
+    branches:
+      - v3
+  pull_request:
+    branches:
+      - v3
 
 jobs:
   mypy:

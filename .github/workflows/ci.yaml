@@ -2,16 +2,18 @@ name: ci
 
 on:
   push:
-    branches-ignore:
-      - renovate/**
-  pull_request: {}
+    branches:
+      - v3
+  pull_request:
+    branches:
+      - v3
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v3
