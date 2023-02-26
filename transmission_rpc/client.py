@@ -792,6 +792,7 @@ class Client:
         blocklist_url: Optional[str] = None,
         cache_size_mb: Optional[int] = None,
         dht_enabled: Optional[bool] = None,
+        default_trackers: Optional[Iterable[str]] = None,
         download_dir: Optional[str] = None,
         download_queue_enabled: Optional[bool] = None,
         download_queue_size: Optional[int] = None,
@@ -856,6 +857,8 @@ class Client:
             Location of the block list. Updated with blocklist-update.
         cache_size_mb:
             The maximum size of the disk cache in MB
+        default_trackers:
+            List of default trackers to use on public torrents.
         dht_enabled:
             Enables DHT.
         download_dir:
@@ -1025,6 +1028,10 @@ class Client:
             args["trash-original-torrent-files"] = trash_original_torrent_files
         if utp_enabled is not None:
             args["utp-enabled"] = utp_enabled
+
+        if default_trackers is not None:
+            self._rpc_version_warning(17)
+            args["default-trackers"] = list(default_trackers)
 
         if script_torrent_done_seeding_filename is not None:
             self._rpc_version_warning(17)
