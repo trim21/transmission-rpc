@@ -2,7 +2,7 @@ import requests
 
 from transmission_rpc import Client
 
-torrent_url = "http://releases.ubuntu.com/18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent"
+torrent_url = "https://github.com/trim21/transmission-rpc/raw/v4.1.0/tests/fixtures/iso.torrent"
 c = Client(host="localhost", port=9091, username="transmission", password="password")
 c.add_torrent(torrent_url)
 
@@ -19,7 +19,7 @@ c.add_torrent(torrent_url)
 
 c = Client(username="trim21", password="123456")
 
-torrent_url = "http://releases.ubuntu.com/18.04/ubuntu-18.04.1-desktop-amd64.iso.torrent"
+torrent_url = "https://github.com/trim21/transmission-rpc/raw/v4.1.0/tests/fixtures/iso.torrent"
 r = requests.get(torrent_url)
 
 # client will base64 the torrent content for you.
