@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v3
       - run: npm i -g conventional-changelog@3
-      - run: node .github/scripts/changelog.js | tee changelog.md
+      - run: node .github/scripts/changelog.mjs | tee changelog.md
 
       - name: Upload Github Release
         run: gh release create "$TAG" -F changelog.md ./dist/*
