@@ -58,6 +58,9 @@ sphinx-autobuild = "2021.3.14"
 types-requests = "==2.28.11.14"
 pytz = "==2022.7.1"
 
+[tool.poetry-plugin-bump]
+commit_msg = 'bump: v{version}'
+
 [tool.isort]
 default_section = 'THIRDPARTY'
 indent = '    '
