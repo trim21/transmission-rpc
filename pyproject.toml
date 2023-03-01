@@ -37,7 +37,7 @@ sphinx-rtd-theme = { version = "==1.2.0", optional = true }
 docs = ['sphinx', 'sphinx-rtd-theme']
 
 [tool.poetry.group.dev.dependencies]
-python-dotenv = "0.21.1"
+python-dotenv = "1.0.0"
 
 yarl = "==1.8.2"
 # tests
