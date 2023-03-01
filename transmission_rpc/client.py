@@ -223,6 +223,7 @@ class Client:
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
+        print(method, arguments, data)
         if "result" not in data:
             raise TransmissionError("Query failed without result.")
 
@@ -1031,7 +1032,7 @@ class Client:
 
         if default_trackers is not None:
             self._rpc_version_warning(17)
-            args["default-trackers"] = list(default_trackers)
+            args["default-trackers"] = "\n".join(default_trackers)
 
         if script_torrent_done_seeding_filename is not None:
             self._rpc_version_warning(17)

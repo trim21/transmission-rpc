@@ -364,7 +364,10 @@ class Session(Container):
         list of default trackers to use on public torrents
         new at rpc-version 17
         """
-        return self.get("default-trackers")
+        trackers = self.get("default-trackers")
+
+        if trackers:
+            return trackers.split("\n")
 
     @property
     def rpc_version_semver(self) -> Optional[str]:
