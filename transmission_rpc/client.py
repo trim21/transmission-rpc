@@ -223,7 +223,6 @@ class Client:
             raise ValueError from error
 
         self.logger.debug(json.dumps(data, indent=2))
-        print(method, arguments, data)
         if "result" not in data:
             raise TransmissionError("Query failed without result.")
 
