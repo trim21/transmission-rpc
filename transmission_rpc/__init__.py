@@ -7,7 +7,7 @@ from transmission_rpc.types import File, Group
 from transmission_rpc.client import Client
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, PRIORITY, RATIO_LIMIT, DEFAULT_TIMEOUT
+from transmission_rpc.constants import LOGGER, PRIORITY, RATIO_LIMIT, DEFAULT_TIMEOUT, Priority, IdleLimit, RatioLimit
 
 __all__ = [
     "Client",
@@ -21,6 +21,9 @@ __all__ = [
     "Torrent",
     "File",
     "from_url",
+    "Priority",
+    "RatioLimit",
+    "IdleLimit",
 ]
 
 
