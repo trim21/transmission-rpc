@@ -19,15 +19,31 @@ def mirror_dict(source: dict) -> dict:
 
 DEFAULT_TIMEOUT = 30.0
 
-TR_PRI_LOW = -1
-TR_PRI_NORMAL = 0
-TR_PRI_HIGH = 1
+
+class Priority(enum.IntEnum):
+    Low = -1
+    Normal = 0
+    High = 1
+
+
+# TODO: remove this in 5.0
+TR_PRI_LOW = Priority.Low
+TR_PRI_NORMAL = Priority.Normal
+TR_PRI_HIGH = Priority.High
 
 PRIORITY = mirror_dict({"low": TR_PRI_LOW, "normal": TR_PRI_NORMAL, "high": TR_PRI_HIGH})
 
+# TODO: remove this in 5.0
 TR_RATIOLIMIT_GLOBAL = 0  # follow the global settings
 TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certain ratio
 TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
+
+
+class RatioLimit(enum.IntEnum):
+    Global = TR_RATIOLIMIT_GLOBAL
+    Single = TR_RATIOLIMIT_SINGLE
+    Unlimited = TR_RATIOLIMIT_UNLIMITED
+
 
 RATIO_LIMIT = mirror_dict(
     {
@@ -37,9 +53,17 @@ RATIO_LIMIT = mirror_dict(
     }
 )
 
-TR_IDLELIMIT_GLOBAL = 0  # follow the global settings
-TR_IDLELIMIT_SINGLE = 1  # override the global settings, seeding until a certain idle time
-TR_IDLELIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of activity
+
+class IdleLimit(enum.IntEnum):
+    Global = 0
+    Single = 1
+    Unlimited = 2
+
+
+# TODO: remove this in 5.0
+TR_IDLELIMIT_GLOBAL = IdleLimit.Global  # follow the global settings
+TR_IDLELIMIT_SINGLE = IdleLimit.Single  # override the global settings, seeding until a certain idle time
+TR_IDLELIMIT_UNLIMITED = IdleLimit.Unlimited  # override the global settings, seeding regardless of activity
 
 IDLE_LIMIT = mirror_dict(
     {
