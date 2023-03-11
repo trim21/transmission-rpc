@@ -109,6 +109,8 @@ def test_attributes():
     torrent = transmission_rpc.Torrent(None, data)
     assert torrent.date_done is None
 
+    assert torrent.get("status") == 4
+
 
 def test_status():
     assert Status("downloading").downloading
