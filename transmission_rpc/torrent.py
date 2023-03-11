@@ -88,6 +88,13 @@ class Torrent:
         self._outgoing_pending = False
         self._client = client
 
+    def get(self, key: str, default: Optional[Any] = None) -> Any:
+        """get the raw value from files by the **raw keys**"""
+        try:
+            return self._fields[key].value
+        except KeyError:
+            return default
+
     @property
     def id(self) -> int:
         """Returns the id for this torrent"""
