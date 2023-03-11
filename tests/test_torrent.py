@@ -29,7 +29,7 @@ def test_non_active():
     }
 
     torrent = transmission_rpc.Torrent(fields=data)
-    assert torrent.date_active
+    assert torrent.activity_date
 
 
 def test_attributes():
@@ -39,10 +39,10 @@ def test_attributes():
     assert_property_exception(KeyError, torrent, "progress")
     assert_property_exception(KeyError, torrent, "ratio")
     assert_property_exception(KeyError, torrent, "eta")
-    assert_property_exception(KeyError, torrent, "date_active")
-    assert_property_exception(KeyError, torrent, "date_added")
-    assert_property_exception(KeyError, torrent, "date_started")
-    assert_property_exception(KeyError, torrent, "date_done")
+    assert_property_exception(KeyError, torrent, "activity_date")
+    assert_property_exception(KeyError, torrent, "added_date")
+    assert_property_exception(KeyError, torrent, "start_date")
+    assert_property_exception(KeyError, torrent, "done_date")
 
     with pytest.raises(KeyError):
         torrent.format_eta()
@@ -71,10 +71,10 @@ def test_attributes():
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
     assert torrent.eta == datetime.timedelta(seconds=3600)
-    assert torrent.date_active == datetime.datetime(2008, 12, 11, 11, 15, 30, tzinfo=pytz.utc)
-    assert torrent.date_added == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=pytz.utc)
-    assert torrent.date_started == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=pytz.utc)
-    assert torrent.date_done == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
+    assert torrent.activity_date == datetime.datetime(2008, 12, 11, 11, 15, 30, tzinfo=pytz.utc)
+    assert torrent.added_date == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=pytz.utc)
+    assert torrent.start_date == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=pytz.utc)
+    assert torrent.done_date == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 
@@ -94,7 +94,7 @@ def test_attributes():
     }
 
     torrent = transmission_rpc.Torrent(fields=data)
-    assert torrent.date_done is None
+    assert torrent.done_date is None
 
 
 def test_status():

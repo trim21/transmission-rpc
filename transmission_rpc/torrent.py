@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 from transmission_rpc.types import File, Container
 from transmission_rpc.utils import format_timedelta
-from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT
+from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT, Priority
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",
@@ -216,16 +216,6 @@ class Torrent(Container):
         return self.fields["hashString"]
 
     @property
-    def activity_date(self) -> datetime:
-        """The last time we uploaded or downloaded piece data on this torrent."""
-        return datetime.fromtimestamp(self.fields["activityDate"], timezone.utc)
-
-    @property
-    def added_date(self) -> datetime:
-        """When the torrent was first added."""
-        return datetime.fromtimestamp(self.fields["addedDate"], timezone.utc)
-
-    @property
     def available(self) -> float:
         """Availability in percent"""
         bytes_all = self.total_size
@@ -239,12 +229,9 @@ class Torrent(Container):
     # return self.fields["availability"]
 
     @property
-    def bandwidth_priority(self) -> int:
-        """TODO
-        An array of pieceCount numbers representing the number of connected peers that have each piece,
-        or -1 if we already have the piece ourselves.
-        """
-        return self.fields["bandwidthPriority"]
+    def bandwidth_priority(self) -> Priority:
+        """this torrent's bandwidth priority"""
+        return Priority(self.fields["bandwidthPriority"])
 
     @property
     def comment(self) -> str:
@@ -275,11 +262,6 @@ class Torrent(Container):
         but that a connected peer does have. [0...leftUntilDone]
         """
         return self.fields["desiredAvailable"]
-
-    @property
-    def done_date(self) -> datetime:
-        """When the torrent finished downloading."""
-        return datetime.fromtimestamp(self.fields["doneDate"], timezone.utc)
 
     @property
     def download_dir(self) -> Optional[str]:
@@ -585,11 +567,6 @@ class Torrent(Container):
     def size_when_done(self) -> int:
         return self.fields["sizeWhenDone"]
 
-    #     # TODO
-    # @property
-    # def start_date(self):
-    #     return self.fields["startDate"]
-
     @property
     def trackers(self) -> List[Tracker]:
         return [Tracker(fields=x) for x in self.fields["trackers"]]
@@ -728,29 +705,48 @@ class Torrent(Container):
         return float(self.fields["uploadRatio"])
 
     @property
-    def date_active(self) -> datetime:
-        """the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
+    def activity_date(self) -> datetime:
+        """
+        The last time we uploaded or downloaded piece data on this torrent.
+        the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
 
         .. note::
 
             raw ``activityDate`` value could be ``0`` for never activated torrent,
             therefore it can't always be converted to local timezone.
-
         """
+
         return datetime.fromtimestamp(self.fields["activityDate"], timezone.utc)
+
+    @property
+    def date_active(self) -> datetime:
+        warnings.warn("use .activity_date", DeprecationWarning, stacklevel=2)
+        return self.activity_date
 
     @property
     def date_added(self) -> datetime:
         """raw field ``addedDate`` as ``datetime.datetime`` in **utc timezone**."""
+        warnings.warn("use .added_date", DeprecationWarning, stacklevel=2)
+        return self.added_date
+
+    @property
+    def added_date(self) -> datetime:
+        """When the torrent was first added."""
         return datetime.fromtimestamp(self.fields["addedDate"], timezone.utc)
 
     @property
     def date_started(self) -> datetime:
         """raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
+        warnings.warn("use .start_date", DeprecationWarning, stacklevel=2)
+        return self.start_date
+
+    @property
+    def start_date(self) -> datetime:
+        """raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
         return datetime.fromtimestamp(self.fields["startDate"], timezone.utc)
 
     @property
-    def date_done(self) -> Optional[datetime]:
+    def done_date(self) -> Optional[datetime]:
         """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self.fields["doneDate"]
         # Transmission might forget to set doneDate which is initialized to zero,
@@ -758,6 +754,11 @@ class Torrent(Container):
         if done_date == 0:
             return None
         return datetime.fromtimestamp(done_date).astimezone()
+
+    @property
+    def date_done(self) -> Optional[datetime]:
+        warnings.warn("use .done_date", DeprecationWarning, stacklevel=2)
+        return self.done_date
 
     def format_eta(self) -> str:
         """
@@ -792,11 +793,6 @@ class Torrent(Container):
         """
 
         return PRIORITY[self.fields["bandwidthPriority"]]
-
-    # @property
-    # def desired_available(self) -> int:
-    #     """Bytes that are left to download and available"""
-    #     return self.fields["desiredAvailable"]
 
     @property
     def seed_idle_mode(self) -> str:

@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Literal, Optional
 
 from transmission_rpc.types import Container
@@ -306,10 +307,22 @@ class Session(Container):
     @property
     def seedRatioLimit(self) -> float:
         """the default seed ratio for torrents to use"""
+        warnings.warn("use .seed_ratio_limit", DeprecationWarning, stacklevel=2)
+        return self.fields["seedRatioLimit"]
+
+    @property
+    def seed_ratio_limit(self) -> float:
+        """the default seed ratio for torrents to use"""
         return self.fields["seedRatioLimit"]
 
     @property
     def seedRatioLimited(self) -> bool:
+        """true if seedRatioLimit is honored by default"""
+        warnings.warn("use .seed_ratio_limited", DeprecationWarning, stacklevel=2)
+        return self.fields["seedRatioLimited"]
+
+    @property
+    def seed_ratio_limited(self) -> bool:
         """true if seedRatioLimit is honored by default"""
         return self.fields["seedRatioLimited"]
 
