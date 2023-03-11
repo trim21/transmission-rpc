@@ -110,3 +110,4 @@ venv.bak/
 .vscode/
 .idea/
 app.py
+node_modules/
