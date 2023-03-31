@@ -48,7 +48,7 @@ pre-commit = { version = "==3.2.0", markers = "implementation_name != 'pypy'", p
 mypy = { version = "==1.1.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
 flake8 = { version = "6.0.0", python = "^3.9" }
 flake8-comprehensions = "==3.11.0"
-flake8-bugbear = "==23.3.12"
+flake8-bugbear = { version = "==23.2.13", python = "^3.9" }
 flake8-mutable = "1.2.0"
 flake8-pyproject = "1.2.2"
 pytest-github-actions-annotate-failures = "==0.1.8"
@@ -84,6 +84,29 @@ show_error_codes = true
 
 [tool.flake8]
 max-line-length = 88
-ignore = ['C103', 'C111', 'R903', 'W503', 'W504', 'C812', 'C813', 'C815', 'C819', 'B008', 'E265', 'E501']
-exclude = ['.venv', '.git', '__pycache__', 'docs/source/conf.py', 'old', 'build', 'dist', 'tmp', 'api']
+ignore = [
+    'C103',
+    'C111',
+    'R903',
+    'W503',
+    'W504',
+    'C812',
+    'C813',
+    'C815',
+    'C819',
+    'B008',
+    'E265',
+    'E501',
+]
+exclude = [
+    '.venv',
+    '.git',
+    '__pycache__',
+    'docs/source/conf.py',
+    'old',
+    'build',
+    'dist',
+    'tmp',
+    'api',
+]
 ban-relative-imports = 'parents'
