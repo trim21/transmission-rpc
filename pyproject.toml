@@ -58,7 +58,7 @@ flake8-pytest-style = { version = "==1.7.2", python = "^3.9" }
 
 # stubs
 types-requests = "==2.28.11.17"
-pytz = "==2022.7.1"
+pytz = "==2023.3"
 
 [tool.poetry-plugin-bump]
 commit_msg = 'bump: v{version}'
