@@ -382,7 +382,8 @@ class Client:
             self._rpc_version_warning(17)
             kwargs["labels"] = list(labels)
 
-        if torrent_data := _try_read_torrent(torrent):
+        torrent_data = _try_read_torrent(torrent)
+        if torrent_data:
             kwargs["metainfo"] = torrent_data
         else:
             kwargs["filename"] = torrent
