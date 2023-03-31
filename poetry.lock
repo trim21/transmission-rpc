@@ -333,7 +333,6 @@ files = [
 
 [package.dependencies]
 flake8 = ">=3.0,<3.2.0 || >3.2.0"
-importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "flake8-mutable"
@@ -1077,7 +1076,7 @@ name = "sphinx-rtd-theme"
 version = "1.2.0"
 description = "Read the Docs theme for Sphinx"
 category = "dev"
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 files = [
     {file = "sphinx_rtd_theme-1.2.0-py2.py3-none-any.whl", hash = "sha256:f823f7e71890abe0ac6aaa6013361ea2696fc8d3e1fa798f463e82bdb77eeff2"},
@@ -1145,7 +1144,7 @@ name = "sphinxcontrib-jquery"
 version = "4.1"
 description = "Extension to include jQuery on newer Sphinx releases"
 category = "dev"
-optional = true
+optional = false
 python-versions = ">=2.7"
 files = [
     {file = "sphinxcontrib-jquery-4.1.tar.gz", hash = "sha256:1620739f04e36a2c779f1a131a2dfd49b2fd07351bf1968ced074365933abc7a"},
@@ -1420,4 +1419,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "3b8c771e20396fe28c290ad53c34d560c67ba192acce5f82aa08ccb9cf02a07c"
+content-hash = "94b6f4830a65ab1ccf7c34daf7a569469c079d71018b80a1a7233bf6d9681a44"
