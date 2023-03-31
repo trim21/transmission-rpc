@@ -21,8 +21,6 @@ jobs:
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
-        with:
-          extras: docs
 
       - uses: liskin/gh-problem-matcher-wrap@v2
         with:
@@ -44,8 +42,6 @@ jobs:
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
-        with:
-          extras: docs
 
       - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
 
@@ -63,8 +59,6 @@ jobs:
       - uses: Trim21/setup-poetry@dist/v1
 
       - uses: Trim21/install-poetry-project@dist/v1
-        with:
-          extras: docs
 
       - name: Get Latest tools version
         run: echo "PY=$(python -VV | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
