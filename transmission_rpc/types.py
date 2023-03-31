@@ -23,7 +23,7 @@ class File(NamedTuple):
     name: str  # file name
     size: int  # file size in bytes
     completed: int  # bytes completed
-    priority: 'Literal["high", "normal", "low"]'
+    priority: Literal["high", "normal", "low"]
     selected: bool  # if selected for download
     id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
 
