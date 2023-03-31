@@ -1,4 +1,6 @@
-from typing import Any, Dict, Tuple, Union, Literal, TypeVar, Optional, NamedTuple
+from typing import Any, Dict, Tuple, Union, TypeVar, Optional, NamedTuple
+
+from typing_extensions import Literal
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]

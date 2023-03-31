@@ -1,12 +1,12 @@
 import time
 import base64
 import pathlib
-from typing import Literal
 from unittest import mock
 from urllib.parse import urljoin
 
 import yarl
 import pytest
+from typing_extensions import Literal
 
 from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.types import File
