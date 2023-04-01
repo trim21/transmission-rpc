@@ -28,7 +28,7 @@ jobs:
           linters: mypy
 
       - name: mypy
-        run: mypy --show-column-numbers transmission_rpc
+        run: mypy --show-column-numbers --python-version 3.7 transmission_rpc
 
   flake8:
     runs-on: ubuntu-latest
