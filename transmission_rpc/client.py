@@ -76,6 +76,8 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
 
 
 class Client:
+    semver_version: Optional[str]  # available in transmission>=4.0.0
+
     def __init__(
         self,
         *,
@@ -273,6 +275,7 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
+        self.semver_version = self.raw_session.get("rpc-version-semver")
         self.server_version = self.raw_session["version"]
         self.protocol_version = self.raw_session["rpc-version"]
 
