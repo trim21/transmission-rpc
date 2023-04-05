@@ -229,7 +229,7 @@ def test_real_torrent_get_files(tr_client: Client):
 )
 def test_raise_unauthorized(status_code):
     m = mock.Mock(return_value=mock.Mock(status_code=status_code))
-    with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
+    with mock.patch("transmission_rpc.client.Client._http_query", m), pytest.raises(TransmissionAuthError):
         Client()
 
 

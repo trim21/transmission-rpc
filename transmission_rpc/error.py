@@ -6,7 +6,7 @@ exception raise by this package
 # Licensed under the MIT license.
 from typing import Optional
 
-from requests.models import Response
+from urllib3 import HTTPResponse
 
 
 class TransmissionError(Exception):
@@ -15,7 +15,7 @@ class TransmissionError(Exception):
     communication with Transmission.
     """
 
-    def __init__(self, message: str = "", original: Optional[Response] = None):
+    def __init__(self, message: str = "", original: Optional[HTTPResponse] = None):
         super().__init__()
         self.message = message
         self.original = original
@@ -23,7 +23,7 @@ class TransmissionError(Exception):
     def __str__(self) -> str:
         if self.original:
             original_name = type(self.original).__name__
-            return f'{self.message} Original exception: {original_name}, "{self.original}"'
+            return f'{self.message} Original response: {original_name}, "{self.original}"'
         return self.message
 
 

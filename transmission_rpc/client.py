@@ -7,11 +7,12 @@ import logging
 import pathlib
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
+from functools import cached_property
 from urllib.parse import quote
 
-import requests
-import requests.auth
-import requests.exceptions
+import certifi
+import urllib3
+import urllib3.exceptions
 from typing_extensions import Literal
 
 from transmission_rpc.error import (
@@ -90,21 +91,19 @@ class Client:
             )
         self._query_timeout: _Timeout = timeout
 
-        username = quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8") if username else ""
-        password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
-        auth = f"{username}{password}@" if (username or password) else ""
-
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
+        url = urllib.parse.urlunparse((protocol, f"{host}:{port}", path, None, None, None))
+        self._username = username
+        self._password = password
         self.url = str(url)
         self._sequence = 0
         self.raw_session: Dict[str, Any] = {}
         self.session_id = "0"
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: int = 17  # default 17
-        self._http_session = requests.Session()
+        self._http_session = urllib3.PoolManager(ca_certs=certifi.where())
         self._http_session.trust_env = False
         self.get_session()
         self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
@@ -140,48 +139,63 @@ class Client:
         """
         self._query_timeout = DEFAULT_TIMEOUT
 
-    @property
-    def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.session_id}
+    @cached_property
+    def _base_headers(self):
+        if self._username and self._password:
+            username = quote(self._username, safe="$-_.+!*'(),;&=", encoding="utf8")
+            password = quote(self._password, safe="$-_.+!*'(),;&=", encoding="utf8")
+            return urllib3.make_headers(keep_alive=True, basic_auth=f"{username}:{password}")
 
     def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
         """
         Query Transmission through HTTP.
         """
         request_count = 0
+
         if timeout is None:
             timeout = self.timeout
+
         while True:
-            if request_count >= 10:
-                raise TransmissionError("too much request, try enable logger to see what happened")
+            if request_count >= 5:
+                raise TransmissionError("too many requests retries, try enable logger to see what happened")
+
+            headers = {
+                "x-transmission-session-id": self.session_id,
+                "Content-Type": "application/json",
+                **self._base_headers,
+            }
+
             self.logger.debug(
                 {
                     "url": self.url,
-                    "headers": self._http_header,
+                    "headers": headers,
                     "data": query,
                     "timeout": timeout,
                 }
             )
             request_count += 1
+
             try:
-                r = self._http_session.post(
+                r: urllib3.HTTPResponse = self._http_session.request(
+                    "POST",
                     self.url,
-                    headers=self._http_header,
-                    json=query,
+                    headers=headers,
+                    body=json.dumps(query),
                     timeout=timeout,
                 )
-            except requests.exceptions.Timeout as e:
+            except urllib3.exceptions.TimeoutError as e:
                 raise TransmissionTimeoutError("timeout when connection to transmission daemon") from e
-            except requests.exceptions.ConnectionError as e:
+            except urllib3.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {str(e)}") from e
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
-            self.logger.debug(r.text)
-            if r.status_code in {401, 403}:
-                self.logger.debug(r.request.headers)
+            body = r.data.decode("utf-8")
+            self.logger.debug(body)
+            if r.status in {401, 403}:
+                self.logger.debug(r.headers)
                 raise TransmissionAuthError("transmission daemon require auth", original=r)
-            if r.status_code != 409:
-                return r.text
+            if r.status != 409:
+                return body
 
     def _request(
         self,
