@@ -12,7 +12,7 @@ from urllib.parse import quote
 import requests
 import requests.auth
 import requests.exceptions
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 
 from transmission_rpc.error import (
     TransmissionError,
@@ -30,6 +30,12 @@ valid_hash_char = string.digits + string.ascii_letters
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
+
+
+class ResponseData(TypedDict):
+    arguments: Any
+    tag: int
+    result: str
 
 
 def ensure_location_str(s: Union[str, pathlib.Path]) -> str:
@@ -216,28 +222,31 @@ class Client:
         self.logger.info("http request took %.3f s", elapsed)
 
         try:
-            data: dict = json.loads(http_data)
+            data: ResponseData = json.loads(http_data)
         except ValueError as error:
             self.logger.error("Error: %s", str(error))
             self.logger.error('Request: "%s"', query)
             self.logger.error('HTTP data: "%s"', http_data)
-            raise ValueError from error
+            raise TransmissionError("failed to parse response as json") from error
 
         self.logger.debug(json.dumps(data, indent=2))
         if "result" not in data:
-            raise TransmissionError("Query failed without result.")
+            raise TransmissionError("Query failed, response data missing without result.")
 
         if data["result"] != "success":
             raise TransmissionError(f'Query failed with result "{data["result"]}".')
+
+        arguments = data["arguments"]
+
         results = {}
         if method == RpcMethod.TorrentGet:
-            return data["arguments"]
+            return arguments
         elif method == RpcMethod.TorrentAdd:
             item = None
-            if "torrent-added" in data["arguments"]:
-                item = data["arguments"]["torrent-added"]
+            if "torrent-added" in arguments:
+                item = arguments["torrent-added"]
             elif "torrent-duplicate" in data["arguments"]:
-                item = data["arguments"]["torrent-duplicate"]
+                item = arguments["torrent-duplicate"]
             if item:
                 results[item["id"]] = Torrent(fields=item)
             else:
@@ -247,16 +256,16 @@ class Client:
         elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in data["arguments"]:
-                return data["arguments"]["session-stats"]
+                return arguments["session-stats"]
             else:
-                return data["arguments"]
+                return arguments
         elif method in (
             RpcMethod.PortTest,
             RpcMethod.BlocklistUpdate,
             RpcMethod.FreeSpace,
             RpcMethod.TorrentRenamePath,
         ):
-            results = data["arguments"]
+            results = arguments
         else:
             return data
 
