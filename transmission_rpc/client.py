@@ -104,7 +104,6 @@ class Client:
         self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
         self.protocol_version: int = 17  # default 17
         self._http_session = urllib3.PoolManager(ca_certs=certifi.where())
-        self._http_session.trust_env = False
         self.get_session()
         self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
 
@@ -140,11 +139,13 @@ class Client:
         self._query_timeout = DEFAULT_TIMEOUT
 
     @cached_property
-    def _base_headers(self):
+    def _base_headers(self) -> Dict[str, str]:
         if self._username and self._password:
             username = quote(self._username, safe="$-_.+!*'(),;&=", encoding="utf8")
             password = quote(self._password, safe="$-_.+!*'(),;&=", encoding="utf8")
             return urllib3.make_headers(keep_alive=True, basic_auth=f"{username}:{password}")
+
+        return urllib3.make_headers(keep_alive=True)
 
     def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
         """
@@ -1148,4 +1149,4 @@ class Client:
         return self
 
     def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType) -> None:
-        self._http_session.close()
+        self._http_session.clear()
