@@ -236,38 +236,38 @@ class Client:
         if data["result"] != "success":
             raise TransmissionError(f'Query failed with result "{data["result"]}".')
 
-        arguments = data["arguments"]
+        res = data["arguments"]
 
         results = {}
         if method == RpcMethod.TorrentGet:
-            return arguments
+            return res
         elif method == RpcMethod.TorrentAdd:
             item = None
-            if "torrent-added" in arguments:
-                item = arguments["torrent-added"]
-            elif "torrent-duplicate" in data["arguments"]:
-                item = arguments["torrent-duplicate"]
+            if "torrent-added" in res:
+                item = res["torrent-added"]
+            elif "torrent-duplicate" in res:
+                item = res["torrent-duplicate"]
             if item:
                 results[item["id"]] = Torrent(fields=item)
             else:
                 raise TransmissionError("Invalid torrent-add response.")
         elif method == RpcMethod.SessionGet:
-            self.raw_session.update(data["arguments"])
+            self.raw_session.update(res)
         elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
-            if "session-stats" in data["arguments"]:
-                return arguments["session-stats"]
+            if "session-stats" in res:
+                return res["session-stats"]
             else:
-                return arguments
+                return res
         elif method in (
             RpcMethod.PortTest,
             RpcMethod.BlocklistUpdate,
             RpcMethod.FreeSpace,
             RpcMethod.TorrentRenamePath,
         ):
-            results = arguments
+            return res
         else:
-            return data
+            return res
 
         return results
 
