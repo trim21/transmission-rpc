@@ -89,7 +89,7 @@ warn_unused_configs = true
 show_error_codes = true
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 120
 ignore = [
     'C103',
     'C111',
@@ -116,3 +116,8 @@ exclude = [
     'api',
 ]
 ban-relative-imports = 'parents'
+
+
+[tool.black]
+line-length = 120
+target-version = ['py37', 'py38']
