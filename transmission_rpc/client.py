@@ -108,7 +108,7 @@ class Client:
         self._sequence = 0
         self.raw_session: Dict[str, Any] = {}
         self.session_id = "0"
-        self.server_version: Optional[Tuple[int, int, Optional[str]]] = None
+        self.server_version: str = "(unknown)"
         self.protocol_version: int = 17  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
@@ -273,6 +273,7 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
+        self.server_version = self.raw_session["version"]
         self.protocol_version = self.raw_session["rpc-version"]
 
     @property
