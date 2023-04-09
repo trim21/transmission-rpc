@@ -235,7 +235,13 @@ class Client:
 
         self.logger.debug(json.dumps(data, indent=2))
         if "result" not in data:
-            raise TransmissionError("Query failed, response data missing without result.")
+            raise TransmissionError(
+                "Query failed, response data missing without result.",
+                method=method,
+                argument=arguments,
+                response=data,
+                rawResponse=http_data,
+            )
 
         if data["result"] != "success":
             raise TransmissionError(
