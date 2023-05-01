@@ -17,7 +17,7 @@ jobs:
 
     services:
       transmission:
-        image: caseyfw/transmission
+        image: linuxserver/transmission
         container_name: transmission
         restart: always
         ports:
@@ -25,8 +25,9 @@ jobs:
           - 6881:6881
         environment:
           UID: '1000'
-          USERNAME: admin
-          PASSWORD: my-secret-password
+          TZ: Etc/UTC
+          USER: admin
+          PASS: my-secret-password
 
     steps:
       - uses: actions/checkout@v3
