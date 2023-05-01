@@ -1043,7 +1043,7 @@ class Client:
         ----
         ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
 
-        transmission-rpc will merge ``kwargs`` in rpc arguments *as-is`
+        transmission-rpc will merge ``kwargs`` in rpc arguments *as-is*
         """
         args: Dict[str, Any] = {}
 
