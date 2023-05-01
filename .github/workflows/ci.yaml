@@ -22,7 +22,7 @@ jobs:
         ports:
           - 8080:9091
           - 6881:6881
-        environment:
+        env:
           UID: '1000'
           TZ: Etc/UTC
           USER: admin
