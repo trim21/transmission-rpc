@@ -102,7 +102,6 @@ select = [
     "S",
     "W",
     "BLE",
-    "ERA",
     "EXE",
     "ICN",
     "INP",
