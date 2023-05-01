@@ -226,7 +226,6 @@ class Torrent(Container):
     # @property
     # def availability(self) -> list:
     #     """TODO"""
-    # return self.fields["availability"]
 
     @property
     def bandwidth_priority(self) -> Priority:
@@ -253,7 +252,6 @@ class Torrent(Container):
     # TODO
     # @property
     # def date_created(self):
-    #     return self.fields["dateCreated"]
 
     @property
     def desired_available(self) -> int:
@@ -521,7 +519,6 @@ class Torrent(Container):
     # TODO
     # @property
     # def priorities(self):
-    #     return self.fields["priorities"]
 
     @property
     def primary_mime_type(self) -> str:
@@ -561,7 +558,6 @@ class Torrent(Container):
     # @property
     # def seed_idle_mode(self) -> int:
     #     """	which seeding inactivity to use. See tr_idlelimit"""
-    #     return self.fields["seedIdleMode"]
 
     @property
     def size_when_done(self) -> int:
@@ -782,8 +778,6 @@ class Torrent(Container):
     #     Can be a number or None.
     #     """
     #     if self.fields["downloadLimited"]:
-    #         return self.fields["downloadLimit"]
-    #     return None
 
     @property
     def priority(self) -> str:
