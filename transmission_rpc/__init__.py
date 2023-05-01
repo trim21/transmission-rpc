@@ -14,6 +14,8 @@ from transmission_rpc.constants import (
     DEFAULT_TIMEOUT,
     IdleMode,
     Priority,
+    IdleLimit,
+    RatioLimit,
     RatioLimitMode,
 )
 
@@ -32,6 +34,8 @@ __all__ = [
     "Priority",
     "RatioLimitMode",
     "IdleMode",
+    "RatioLimit",
+    "IdleLimit",
 ]
 
 

@@ -50,6 +50,9 @@ class RatioLimitMode(enum.IntEnum):
     Unlimited = TR_RATIOLIMIT_UNLIMITED
 
 
+# TODO: remove these in 5.0
+RatioLimit = RatioLimitMode
+
 RATIO_LIMIT = mirror_dict(
     {
         "global": TR_RATIOLIMIT_GLOBAL,
@@ -70,7 +73,8 @@ class IdleMode(enum.IntEnum):
     Unlimited = 2
 
 
-# TODO: remove this in 5.0
+# TODO: remove these in 5.0
+IdleLimit = IdleMode
 TR_IDLELIMIT_GLOBAL = IdleMode.Global  # follow the global settings
 TR_IDLELIMIT_SINGLE = IdleMode.Single  # override the global settings, seeding until a certain idle time
 TR_IDLELIMIT_UNLIMITED = IdleMode.Unlimited  # override the global settings, seeding regardless of activity
