@@ -19,8 +19,6 @@ jobs:
     services:
       transmission:
         image: linuxserver/transmission:${{ matrix.transmission }}
-        container_name: transmission
-        restart: always
         ports:
           - 8080:9091
           - 6881:6881
