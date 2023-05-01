@@ -105,8 +105,6 @@ class Type:
     object = "object"
 
 
-trackerListDescription = "A Iterable[Iterable[str]] for a set of announce URLs, each inner list is for a tier"
-
 TORRENT_GET_ARGS: Dict[str, Args] = {
     "activityDate": Args(Type.number, 1, description="Last time of upload or download activity."),
     "addedDate": Args(Type.number, 1, description="The date when this torrent was first added."),
@@ -199,7 +197,11 @@ TORRENT_GET_ARGS: Dict[str, Args] = {
     "webseeds": Args(Type.array, 1, None, None, None, "Array of webseeds objects"),
     "webseedsSendingToUs": Args(Type.number, 1, None, None, None, "Number of webseeds seeding to us."),
     "file-count": Args(Type.number, 17),
-    "trackerList": Args(Type.array, 17, description=trackerListDescription),
+    "trackerList": Args(
+        Type.array,
+        17,
+        description="A Iterable[Iterable[str]] for a set of announce URLs, each inner list is for a tier",
+    ),
 }
 
 

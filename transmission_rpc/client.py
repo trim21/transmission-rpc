@@ -134,7 +134,7 @@ class Client:
                 raise ValueError("timeout tuple can only include 2 numbers elements")
             for v in value:
                 if not isinstance(v, (float, int)):
-                    raise ValueError("element of timeout tuple can only be int of float")
+                    raise TypeError("element of timeout tuple can only be int of float")
             self._query_timeout = (value[0], value[1])  # for type checker
         elif value is None:
             self._query_timeout = DEFAULT_TIMEOUT
@@ -203,11 +203,11 @@ class Client:
         Send json-rpc request to Transmission using http POST
         """
         if not isinstance(method, str):
-            raise ValueError("request takes method as string")
+            raise TypeError("request takes method as string")
         if arguments is None:
             arguments = {}
         if not isinstance(arguments, dict):
-            raise ValueError("request takes arguments as dict")
+            raise TypeError("request takes arguments should be dict")
 
         ids = _parse_torrent_ids(ids)
         if len(ids) > 0:
@@ -226,9 +226,9 @@ class Client:
         try:
             data: ResponseData = json.loads(http_data)
         except ValueError as error:
-            self.logger.error("Error: %s", str(error))
-            self.logger.error('Request: "%s"', query)
-            self.logger.error('HTTP data: "%s"', http_data)
+            self.logger.exception("Error: %s")
+            self.logger.exception('Request: "%s"', query)
+            self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
                 "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
             ) from error
@@ -257,7 +257,7 @@ class Client:
         results = {}
         if method == RpcMethod.TorrentGet:
             return res
-        elif method == RpcMethod.TorrentAdd:
+        if method == RpcMethod.TorrentAdd:
             item = None
             if "torrent-added" in res:
                 item = res["torrent-added"]
@@ -279,8 +279,7 @@ class Client:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in res:
                 return res["session-stats"]
-            else:
-                return res
+            return res
         elif method in (
             RpcMethod.PortTest,
             RpcMethod.BlocklistUpdate,
