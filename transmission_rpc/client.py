@@ -315,7 +315,7 @@ class Client:
 
     @property
     def rpc_version(self) -> int:
-        """Get the Transmission daemon RPC version."""
+        """Transmission daemon RPC version."""
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
