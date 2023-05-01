@@ -1,4 +1,3 @@
-import os
 import json
 import time
 import types
@@ -315,7 +314,7 @@ class Client:
 
     @property
     def rpc_version(self) -> int:
-        """Transmission daemon RPC version."""
+        """Get the Transmission daemon RPC version."""
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
@@ -819,25 +818,28 @@ class Client:
     def rename_torrent_path(
         self,
         torrent_id: _TorrentID,
-        location: Union[str, pathlib.Path],
+        location: str,
         name: str,
         timeout: Optional[_Timeout] = None,
     ) -> Tuple[str, str]:
         """
-
+        Warnings
+        --------
         This method can only be called on single torrent.
+
+        Warnings
+        --------
+        This is not the method to move torrent data directory,
 
         See Also
         --------
-
         `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
+
         name = name.strip()  # https://github.com/trim21/transmission-rpc/issues/185
-        dirname = os.path.dirname(name)
-        if len(dirname) > 0:
-            raise ValueError("Target name cannot contain a path delimiter")
+
         result = self._request(
             RpcMethod.TorrentRenamePath,
             {"path": ensure_location_str(location), "name": name},
@@ -845,6 +847,7 @@ class Client:
             True,
             timeout=timeout,
         )
+
         return result["path"], result["name"]
 
     def queue_top(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
