@@ -39,11 +39,19 @@ TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certai
 TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
 
 
-class RatioLimit(enum.IntEnum):
+class RatioLimitMode(enum.IntEnum):
+    """torrent radio limit mode"""
+
+    #: follow the global settings
     Global = TR_RATIOLIMIT_GLOBAL
+    #: override the global settings, seeding until a certain ratio
     Single = TR_RATIOLIMIT_SINGLE
+    #: override the global settings, seeding regardless of ratio
     Unlimited = TR_RATIOLIMIT_UNLIMITED
 
+
+# TODO: remove these in 5.0
+RatioLimit = RatioLimitMode
 
 RATIO_LIMIT = mirror_dict(
     {
@@ -54,16 +62,22 @@ RATIO_LIMIT = mirror_dict(
 )
 
 
-class IdleLimit(enum.IntEnum):
+class IdleMode(enum.IntEnum):
+    """torrent idle mode"""
+
+    #: follow the global settings
     Global = 0
+    #: override the global settings, seeding until a certain idle time
     Single = 1
+    #: override the global settings, seeding regardless of activity
     Unlimited = 2
 
 
-# TODO: remove this in 5.0
-TR_IDLELIMIT_GLOBAL = IdleLimit.Global  # follow the global settings
-TR_IDLELIMIT_SINGLE = IdleLimit.Single  # override the global settings, seeding until a certain idle time
-TR_IDLELIMIT_UNLIMITED = IdleLimit.Unlimited  # override the global settings, seeding regardless of activity
+# TODO: remove these in 5.0
+IdleLimit = IdleMode
+TR_IDLELIMIT_GLOBAL = IdleMode.Global  # follow the global settings
+TR_IDLELIMIT_SINGLE = IdleMode.Single  # override the global settings, seeding until a certain idle time
+TR_IDLELIMIT_UNLIMITED = IdleMode.Unlimited  # override the global settings, seeding regardless of activity
 
 IDLE_LIMIT = mirror_dict(
     {
@@ -216,7 +230,7 @@ class RpcMethod(str, enum.Enum):
     TorrentRemove = "torrent-remove"
 
     TorrentStart = "torrent-start"
-    TorrentStartNow = "torrent-start-now"
+    TorrentStartNow = "torrent-start-now"  # added in 2.40
     TorrentStop = "torrent-stop"
 
     TorrentVerify = "torrent-verify"

@@ -5,6 +5,7 @@ import types
 import string
 import logging
 import pathlib
+import warnings
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
 from urllib.parse import quote
@@ -90,6 +91,20 @@ class Client:
         timeout: Union[int, float] = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
     ):
+        """
+
+        Parameters
+        ----------
+        protocol
+        username
+        password
+        host
+        port
+        path:
+          rpc request target path, default ``/transmission/rpc``
+        timeout
+        logger
+        """
         if isinstance(logger, logging.Logger):
             self.logger = logger
         else:
@@ -300,9 +315,7 @@ class Client:
 
     @property
     def rpc_version(self) -> int:
-        """
-        Get the Transmission RPC version. Trying to deduct if the server don't have a version value.
-        """
+        """Transmission daemon RPC version."""
         return self.protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
@@ -337,7 +350,7 @@ class Client:
         Add torrent to transfers list. ``torrent`` can be:
 
         - ``http://``, ``https://`` or  ``magnet:`` URL
-        - torrent file-like object in binary mode
+        - torrent file-like object in **binary mode**
         - bytes of torrent content
         - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
 
@@ -351,9 +364,6 @@ class Client:
             torrent to add
         timeout:
             request timeout
-        labels:
-            Array of string labels.
-            Add in rpc 17.
         bandwidthPriority:
             Priority for this transfer.
         cookies:
@@ -365,7 +375,7 @@ class Client:
         files_wanted:
             A list of file id's that should be downloaded.
         paused:
-            If True, does not start the transfer when added.
+            If ``True``, does not start the transfer when added.
             Magnet url will always start to downloading torrents.
         peer_limit:
             Maximum number of peers allowed.
@@ -375,6 +385,9 @@ class Client:
             A list of file id's that should have low priority.
         priority_normal:
             A list of file id's that should have normal priority.
+        labels:
+            Array of string labels.
+            Add in rpc 17.
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
@@ -424,8 +437,9 @@ class Client:
 
     def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: Optional[_Timeout] = None) -> None:
         """
-        remove torrent(s) with provided id(s). Local data is removed if
-        delete_data is True, otherwise not.
+        remove torrent(s) with provided id(s).
+
+        Local data will be removed by transmission daemon if ``delete_data`` is set to ``True``.
         """
         self._request(
             RpcMethod.TorrentRemove,
@@ -500,6 +514,10 @@ class Client:
 
         timeout:
             requests timeout
+
+        Raises
+        ------
+        KeyError: torrent with given ``torrent_id`` not found
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
@@ -529,7 +547,7 @@ class Client:
         timeout: Optional[_Timeout] = None,
     ) -> List[Torrent]:
         """
-        Get information for torrents with provided ids. For more information see ``get_torrent``.
+        Get information for torrents with provided ids. For more information see :py:meth:`Client.get_torrent`.
 
         Returns a list of Torrent object.
         """
@@ -635,35 +653,45 @@ class Client:
         seed_ratio_limit
             Seed inactivity limit in minutes.
         seed_ratio_mode
-            Which ratio to use.
+            Torrent seed ratio mode
 
-            0 = Use session limit
-
-            1 = Use transfer limit
-
-            2 = Disable limit.
+            Valid options are :py:class:`transmission_rpc.constants.RatioLimitMode`
         seed_idle_limit
             torrent-level seeding ratio
         seed_idle_mode
             Seed inactivity mode.
 
-            0 = Use session limit
+            Valid options are :py:class:`transmission_rpc.constants.IdleMode`
 
-            1 = Use transfer limit
-
-            2 = Disable limit.
-        tracker_add
+        tracker_add:
             Array of string with announce URLs to add.
-        tracker_remove
+
+            Warnings
+            --------
+            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+
+        tracker_remove:
             Array of ids of trackers to remove.
-        tracker_replace
-            Array of (id, url) tuples where the announce URL should be replaced.
+
+            Warnings
+            --------
+            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+
+        tracker_replace:
+            Array of (id, url) tuples where the announcement URL should be replaced.
+
+            Warnings
+            --------
+            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+
         labels
             Array of string labels.
             Add in rpc 16.
+
         group
             The name of this torrent's bandwidth group.
             Add in rpc 17.
+
         tracker_list
             A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
             Add in rpc 17.
@@ -673,7 +701,7 @@ class Client:
         ----
         ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
 
-        it will be bypassed to request arguments.
+        It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
 
         args: Dict[str, Any] = {}
@@ -745,9 +773,18 @@ class Client:
         ids: _TorrentIDs,
         location: Union[str, pathlib.Path],
         timeout: Optional[_Timeout] = None,
+        *,
+        move: bool = True,
     ) -> None:
-        """Move torrent data to the new location."""
-        args = {"location": ensure_location_str(location), "move": True}
+        """
+        Move torrent data to the new location.
+
+        See Also
+        --------
+
+        `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+        """
+        args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
 
     def locate_torrent_data(
@@ -756,9 +793,28 @@ class Client:
         location: Union[str, pathlib.Path],
         timeout: Optional[_Timeout] = None,
     ) -> None:
-        """Locate torrent data at the provided location."""
-        args = {"location": ensure_location_str(location), "move": False}
-        self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
+        """
+        Locate torrent data at the provided location.
+
+        Warnings
+        --------
+            since transmission-rpc version 4.2.1, this method is deprecated.
+
+            Use ``client.move_torrent_data(ids, location, move=False)`` instead
+
+        this is same rpc call as :py:meth:`Client.move_torrent_data`, but with arguments ``move=False``
+
+        See Also
+        --------
+
+        `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+        """
+        warnings.warn(
+            "locate_torrent_data is deprecated since version 4.2.1, please use `move_torrent_data` with 'move=False'",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.move_torrent_data(ids=ids, location=location, timeout=timeout, move=False)
 
     def rename_torrent_path(
         self,
@@ -768,9 +824,13 @@ class Client:
         timeout: Optional[_Timeout] = None,
     ) -> Tuple[str, str]:
         """
-        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path
 
         This method can only be called on single torrent.
+
+        See Also
+        --------
+
+        `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
@@ -788,11 +848,19 @@ class Client:
         return result["path"], result["name"]
 
     def queue_top(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
-        """Move transfer to the top of the queue:_Timeout."""
+        """
+        Move transfer to the top of the queue.
+
+        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#46-queue-movement-requests
+        """
         self._request(RpcMethod.QueueMoveTop, ids=ids, require_ids=True, timeout=timeout)
 
     def queue_bottom(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
-        """Move transfer to the bottom of the queue."""
+        """
+        Move transfer to the bottom of the queue.
+
+        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#46-queue-movement-requests
+        """
         self._request(RpcMethod.QueueMoveBottom, ids=ids, require_ids=True, timeout=timeout)
 
     def queue_up(self, ids: _TorrentIDs, timeout: Optional[_Timeout] = None) -> None:
