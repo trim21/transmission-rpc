@@ -47,7 +47,7 @@ yarl = "==1.8.2"
 # tests
 pytest = "==7.3.0"
 pytest-github-actions-annotate-failures = "==0.1.8"
-coverage = "==7.2.3"
+coverage = "==7.2.5"
 
 # linter and formatter
 pre-commit = { version = "==3.2.2", markers = "implementation_name != 'pypy'", python = "^3.9" }
