@@ -45,7 +45,7 @@ python-dotenv = [
 
 yarl = "==1.9.2"
 # tests
-pytest = "==7.3.0"
+pytest = "==7.3.1"
 pytest-github-actions-annotate-failures = "==0.1.8"
 coverage = "==7.2.5"
 
