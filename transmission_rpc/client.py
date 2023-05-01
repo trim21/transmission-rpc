@@ -1041,9 +1041,9 @@ class Client:
 
         Warnings
         ----
-        ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
+        ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
 
-        it will be bypassed to request arguments.
+        transmission-rpc will merge ``kwargs`` in rpc arguments *as-is`
         """
         args: Dict[str, Any] = {}
 
