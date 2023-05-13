@@ -33,7 +33,7 @@ requests = "^2.23.0"
 typing-extensions = "*"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = { version = "==6.2.1", python = "^3.9" }
+sphinx = { version = "==7.0.1", python = "^3.9" }
 sphinx-rtd-theme = { version = "==1.2.0", python = "^3.9" }
 sphinx-autobuild = { version = "2021.3.14", python = "^3.9" }
 
