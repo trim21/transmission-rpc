@@ -35,6 +35,32 @@ pip install transmission-rpc -U
 
 All kinds of PRs (docs, feature, bug fixes and eta...) are most welcome.
 
+### Setup Local Development Environment
+
+At first, you need to install [python](https://python.org/) and [poetry](https://python-poetry.org/)
+
+It's recommended to python3.10 as local development python version.
+
+```shell
+poetry install --sync
+poetry run pre-commit install # install git pre-commit hooks
+```
+
+### Testing
+
+You need to have a transmission daemon running
+
+then add a `.env` file
+
+```shell
+export TR_HOST="..."
+export TR_PORT="..."
+export TR_USER="..."
+export TR_PASS="..."
+```
+
+then run `poetry run pytest` (or simply `pytest`, if your have activated your virtualenv)
+
 ## License
 
 `transmission-rpc` is licensed under the MIT license.
