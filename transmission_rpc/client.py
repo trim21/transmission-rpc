@@ -195,7 +195,7 @@ class Client:
             except requests.exceptions.Timeout as e:
                 raise TransmissionTimeoutError("timeout when connection to transmission daemon") from e
             except requests.exceptions.ConnectionError as e:
-                raise TransmissionConnectError(f"can't connect to transmission daemon: {str(e)}") from e
+                raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
             self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
