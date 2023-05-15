@@ -68,6 +68,7 @@ def test_attributes():
     assert torrent.id == 1
     assert torrent.left_until_done == 500
     assert torrent.status == "downloading"
+    assert torrent.status.downloading
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
     assert torrent.eta == datetime.timedelta(seconds=3600)
