@@ -40,7 +40,7 @@ class Status(str, enum.Enum):
 
     @property
     def check_pending(self) -> bool:
-        return self == "check-pending"
+        return self == "check pending"
 
     @property
     def checking(self) -> bool:
@@ -48,7 +48,7 @@ class Status(str, enum.Enum):
 
     @property
     def download_pending(self) -> bool:
-        return self == "download-pending"
+        return self == "download pending"
 
     @property
     def downloading(self) -> bool:
@@ -56,7 +56,7 @@ class Status(str, enum.Enum):
 
     @property
     def seed_pending(self) -> bool:
-        return self == "seed-pending"
+        return self == "seed pending"
 
     @property
     def seeding(self) -> bool:
