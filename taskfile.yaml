@@ -16,7 +16,6 @@ tasks:
     cmds:
       - poetry run pytest
 
-
   build:docs:
     cmds:
       - poetry run sphinx-build ./docs/source/ ./docs/dist/
