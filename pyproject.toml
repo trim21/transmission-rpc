@@ -37,11 +37,6 @@ sphinx = { version = "==6.2.1", python = "^3.9" }
 sphinx-rtd-theme = { version = "==1.2.0", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
-python-dotenv = [
-    { version = "0.21.1", python = "<3.8" },
-    { version = "^1.0.0", python = "^3.8" }
-]
-
 yarl = "==1.9.2"
 # tests
 pytest = "==7.3.1"

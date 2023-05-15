@@ -1,13 +1,10 @@
 import os
 import secrets
 
-import dotenv
 import pytest
 
 from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
-
-dotenv.load_dotenv()
 
 HOST = os.getenv("TR_HOST", "127.0.0.1")
 PORT = int(os.getenv("TR_PORT", "9091"))
