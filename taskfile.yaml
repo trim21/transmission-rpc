@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+    silent: true
+
+  lint:
+    cmds:
+      - poetry run ruff .
+      - poetry run mypy --show-column-numbers transmission_rpc
+      - poetry run pre-commit run --all-files
+
+  test:
+    cmds:
+      - poetry run pytest
+
+
+  build:docs:
+    cmds:
+      - poetry run sphinx-build ./docs/source/ ./docs/dist/
+    sources:
+      - ./docs/source/**/*
+      - ./transmission_rpc/**/*
+      - poetry.lock
+    generates:
+      - ./docs/dist/**/*

@@ -606,11 +606,11 @@ class Client:
         seed_ratio_limit: Optional[float] = None,
         seed_ratio_mode: Optional[int] = None,
         tracker_add: Optional[Iterable[str]] = None,
-        tracker_remove: Optional[Iterable[int]] = None,
-        tracker_replace: Optional[Iterable[Tuple[int, str]]] = None,
         labels: Optional[Iterable[str]] = None,
         group: Optional[str] = None,
         tracker_list: Optional[Iterable[Iterable[str]]] = None,
+        tracker_replace: Optional[Iterable[Tuple[int, str]]] = None,
+        tracker_remove: Optional[Iterable[int]] = None,
         **kwargs: Any,
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
@@ -661,6 +661,16 @@ class Client:
             Seed inactivity mode.
 
             Valid options are :py:class:`transmission_rpc.constants.IdleMode`
+        labels
+            Array of string labels.
+            Add in rpc 16.
+        group
+            The name of this torrent's bandwidth group.
+            Add in rpc 17.
+
+        tracker_list
+            A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            Add in rpc 17.
 
         tracker_add:
             Array of string with announce URLs to add.
@@ -682,19 +692,6 @@ class Client:
             Warnings
             --------
             since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-        labels
-            Array of string labels.
-            Add in rpc 16.
-
-        group
-            The name of this torrent's bandwidth group.
-            Add in rpc 17.
-
-        tracker_list
-            A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
-            Add in rpc 17.
-
 
         Warnings
         ----

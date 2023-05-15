@@ -15,7 +15,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "transmission-rpc"
-copyright = "2018-2022, Trim21 <trim21me@gmail.com>"
+copyright = "2018-2023, Trim21 <trim21me@gmail.com>"
 author = "Trim21 <trim21me@gmail.com>"
 
 # -- General configuration ---------------------------------------------------
