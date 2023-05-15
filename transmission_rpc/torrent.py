@@ -1,3 +1,4 @@
+import enum
 import warnings
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
@@ -22,25 +23,44 @@ def get_status(code: int) -> str:
     return _STATUS_NEW_MAPPING.get(code) or f"unknown status {code}"
 
 
-class Status(str):
-    """A wrapped ``str`` for torrent status.
+class Status(str, enum.Enum):
+    """enum for torrent status"""
 
-    returned by :py:attr:`.Torrent.status`
-    """
+    STOPPED = "stopped"
+    CHECK_PENDING = "check pending"
+    CHECKING = "checking"
+    DOWNLOAD_PENDING = "download pending"
+    DOWNLOADING = "downloading"
+    SEED_PENDING = "seed pending"
+    SEEDING = "seeding"
 
-    stopped: bool
-    check_pending: bool
-    checking: bool
-    download_pending: bool
-    downloading: bool
-    seed_pending: bool
-    seeding: bool
+    @property
+    def stopped(self) -> bool:
+        return self == "stopped"
 
-    def __new__(cls, raw: str) -> "Status":
-        obj = super().__new__(cls, raw)
-        for status in _STATUS_NEW_MAPPING.values():
-            setattr(obj, status.replace(" ", "_"), raw == status)
-        return obj
+    @property
+    def check_pending(self) -> bool:
+        return self == "check pending"
+
+    @property
+    def checking(self) -> bool:
+        return self == "checking"
+
+    @property
+    def download_pending(self) -> bool:
+        return self == "download pending"
+
+    @property
+    def downloading(self) -> bool:
+        return self == "downloading"
+
+    @property
+    def seed_pending(self) -> bool:
+        return self == "seed pending"
+
+    @property
+    def seeding(self) -> bool:
+        return self == "seeding"
 
 
 class FileStat(Container):
