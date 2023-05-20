@@ -33,8 +33,8 @@ requests = "^2.23.0"
 typing-extensions = "*"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = { version = "==6.2.1", python = "^3.9" }
-sphinx-rtd-theme = { version = "==1.2.0", python = "^3.9" }
+sphinx = { version = "^7.0.0", python = "^3.9" }
+furo = { version = "2023.05.20", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.2"
