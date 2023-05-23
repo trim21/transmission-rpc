@@ -6,7 +6,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transmission-rpc)](https://pypi.org/project/transmission-rpc/)
 [![Codecov branch](https://img.shields.io/codecov/c/github/Trim21/transmission-rpc/master)](https://codecov.io/gh/Trim21/transmission-rpc/branch/master)
 
-`transmission-rpc` is a python wrapper of on top of [transmission](https://github.com/transmission/transmission) JSON RPC protocol,
+`transmission-rpc` is a python wrapper on top of [transmission](https://github.com/transmission/transmission) JSON RPC protocol,
 hosted on GitHub at [github.com/trim21/transmission-rpc](https://github.com/trim21/transmission-rpc)
 
 ## Introduction
