@@ -6,7 +6,7 @@ import logging
 import pathlib
 import warnings
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, BinaryIO, Iterable, Optional
+from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
 from urllib.parse import quote
 
 import requests
@@ -406,7 +406,7 @@ class Client:
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
                 "cookies": cookies,
-                "labels": None if labels is None else list(labels),
+                "labels": list_or_none(labels),
             }
         )
 
@@ -699,14 +699,14 @@ class Client:
                 "downloadLimited": download_limited,
                 "uploadLimit": upload_limit,
                 "uploadLimited": upload_limited,
-                "files-unwanted": None if files_unwanted is None else list(files_unwanted),
-                "files-wanted": None if files_wanted is None else list(files_wanted),
+                "files-unwanted": list_or_none(files_unwanted),
+                "files-wanted": list_or_none(files_wanted),
                 "honorsSessionLimits": honors_session_limits,
                 "location": location,
                 "peer-limit": peer_limit,
-                "priority-high": None if priority_high is None else list(priority_high),
-                "priority-low": None if priority_low is None else list(priority_low),
-                "priority-normal": None if priority_normal is None else list(priority_normal),
+                "priority-high": list_or_none(priority_high),
+                "priority-low": list_or_none(priority_low),
+                "priority-normal": list_or_none(priority_normal),
                 "queuePosition": queue_position,
                 "seedIdleLimit": seed_idle_limit,
                 "seedIdleMode": seed_idle_mode,
@@ -715,7 +715,7 @@ class Client:
                 "trackerAdd": tracker_add,
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
-                "labels": None if labels is None else list(labels),
+                "labels": list_or_none(labels),
                 "trackerList": None if tracker_list is None else " ".join("\n".join(x) for x in tracker_list),
                 "group": group,
             }
@@ -1006,111 +1006,72 @@ class Client:
 
         transmission-rpc will merge ``kwargs`` in rpc arguments *as-is*
         """
-        args: Dict[str, Any] = {}
 
-        if alt_speed_down is not None:
-            args["alt-speed-down"] = alt_speed_down
-        if alt_speed_enabled is not None:
-            args["alt-speed-enabled"] = alt_speed_enabled
-        if alt_speed_time_begin is not None:
-            args["alt-speed-time-begin"] = alt_speed_time_begin
-        if alt_speed_time_day is not None:
-            args["alt-speed-time-day"] = alt_speed_time_day
-        if alt_speed_time_enabled is not None:
-            args["alt-speed-time-enabled"] = alt_speed_time_enabled
-        if alt_speed_time_end is not None:
-            args["alt-speed-time-end"] = alt_speed_time_end
-        if alt_speed_up is not None:
-            args["alt-speed-up"] = alt_speed_up
-        if blocklist_enabled is not None:
-            args["blocklist-enabled"] = blocklist_enabled
-        if blocklist_url is not None:
-            args["blocklist-url"] = blocklist_url
-        if cache_size_mb is not None:
-            args["cache-size-mb"] = cache_size_mb
-        if dht_enabled is not None:
-            args["dht-enabled"] = dht_enabled
-        if download_dir is not None:
-            args["download-dir"] = download_dir
-        if download_queue_enabled is not None:
-            args["download-queue-enabled"] = download_queue_enabled
-        if download_queue_size is not None:
-            args["download-queue-size"] = download_queue_size
-        if encryption is not None:
-            if encryption not in ["required", "preferred", "tolerated"]:
-                raise ValueError("Invalid encryption value")
-            args["encryption"] = encryption
-        if idle_seeding_limit_enabled is not None:
-            args["idle-seeding-limit-enabled"] = idle_seeding_limit_enabled
-        if idle_seeding_limit is not None:
-            args["idle-seeding-limit"] = idle_seeding_limit
-        if incomplete_dir is not None:
-            args["incomplete-dir"] = incomplete_dir
-        if incomplete_dir_enabled is not None:
-            args["incomplete-dir-enabled"] = incomplete_dir_enabled
-        if lpd_enabled is not None:
-            args["lpd-enabled"] = lpd_enabled
-        if peer_limit_global is not None:
-            args["peer-limit-global"] = peer_limit_global
-        if peer_limit_per_torrent is not None:
-            args["peer-limit-per-torrent"] = peer_limit_per_torrent
-        if peer_port_random_on_start is not None:
-            args["peer-port-random-on-start"] = peer_port_random_on_start
-        if peer_port is not None:
-            args["peer-port"] = peer_port
-        if pex_enabled is not None:
-            args["pex-enabled"] = pex_enabled
-        if port_forwarding_enabled is not None:
-            args["port-forwarding-enabled"] = port_forwarding_enabled
-        if queue_stalled_enabled is not None:
-            args["queue-stalled-enabled"] = queue_stalled_enabled
-        if queue_stalled_minutes is not None:
-            args["queue-stalled-minutes"] = queue_stalled_minutes
-        if rename_partial_files is not None:
-            args["rename-partial-files"] = rename_partial_files
-        if script_torrent_done_enabled is not None:
-            args["script-torrent-done-enabled"] = script_torrent_done_enabled
-        if script_torrent_done_filename is not None:
-            args["script-torrent-done-filename"] = script_torrent_done_filename
-        if seed_queue_enabled is not None:
-            args["seed-queue-enabled"] = seed_queue_enabled
-        if seed_queue_size is not None:
-            args["seed-queue-size"] = seed_queue_size
-        if seed_ratio_limit is not None:
-            args["seedRatioLimit"] = seed_ratio_limit
-        if seed_ratio_limited is not None:
-            args["seedRatioLimited"] = seed_ratio_limited
-        if speed_limit_down is not None:
-            args["speed-limit-down"] = speed_limit_down
-        if speed_limit_down_enabled is not None:
-            args["speed-limit-down-enabled"] = speed_limit_down_enabled
-        if speed_limit_up is not None:
-            args["speed-limit-up"] = speed_limit_up
-        if speed_limit_up_enabled is not None:
-            args["speed-limit-up-enabled"] = speed_limit_up_enabled
-        if start_added_torrents is not None:
-            args["start-added-torrents"] = start_added_torrents
-        if trash_original_torrent_files is not None:
-            args["trash-original-torrent-files"] = trash_original_torrent_files
-        if utp_enabled is not None:
-            args["utp-enabled"] = utp_enabled
+        if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:
+            raise ValueError("Invalid encryption value")
 
         if default_trackers is not None:
             self._rpc_version_warning(17)
-            args["default-trackers"] = "\n".join(default_trackers)
-
         if script_torrent_done_seeding_filename is not None:
             self._rpc_version_warning(17)
-            args["script-torrent-done-seeding-filename"] = script_torrent_done_seeding_filename
         if script_torrent_done_seeding_enabled is not None:
             self._rpc_version_warning(17)
-            args["script-torrent-done-seeding-enabled"] = script_torrent_done_seeding_enabled
         if script_torrent_added_enabled is not None:
             self._rpc_version_warning(17)
-            args["script-torrent-added-enabled"] = script_torrent_added_enabled
         if script_torrent_added_filename is not None:
             self._rpc_version_warning(17)
-            args["script-torrent-added-filename"] = script_torrent_added_filename
+
+        args: Dict[str, Any] = remove_unset_value(
+            {
+                "alt-speed-down": alt_speed_down,
+                "alt-speed-enabled": alt_speed_enabled,
+                "alt-speed-time-begin": alt_speed_time_begin,
+                "alt-speed-time-day": alt_speed_time_day,
+                "alt-speed-time-enabled": alt_speed_time_enabled,
+                "alt-speed-time-end": alt_speed_time_end,
+                "alt-speed-up": alt_speed_up,
+                "blocklist-enabled": blocklist_enabled,
+                "blocklist-url": blocklist_url,
+                "cache-size-mb": cache_size_mb,
+                "dht-enabled": dht_enabled,
+                "download-dir": download_dir,
+                "download-queue-enabled": download_queue_enabled,
+                "download-queue-size": download_queue_size,
+                "idle-seeding-limit-enabled": idle_seeding_limit_enabled,
+                "idle-seeding-limit": idle_seeding_limit,
+                "incomplete-dir": incomplete_dir,
+                "incomplete-dir-enabled": incomplete_dir_enabled,
+                "lpd-enabled": lpd_enabled,
+                "peer-limit-global": peer_limit_global,
+                "peer-limit-per-torrent": peer_limit_per_torrent,
+                "peer-port-random-on-start": peer_port_random_on_start,
+                "peer-port": peer_port,
+                "pex-enabled": pex_enabled,
+                "port-forwarding-enabled": port_forwarding_enabled,
+                "queue-stalled-enabled": queue_stalled_enabled,
+                "queue-stalled-minutes": queue_stalled_minutes,
+                "rename-partial-files": rename_partial_files,
+                "script-torrent-done-enabled": script_torrent_done_enabled,
+                "script-torrent-done-filename": script_torrent_done_filename,
+                "seed-queue-enabled": seed_queue_enabled,
+                "seed-queue-size": seed_queue_size,
+                "seedRatioLimit": seed_ratio_limit,
+                "seedRatioLimited": seed_ratio_limited,
+                "speed-limit-down": speed_limit_down,
+                "speed-limit-down-enabled": speed_limit_down_enabled,
+                "speed-limit-up": speed_limit_up,
+                "speed-limit-up-enabled": speed_limit_up_enabled,
+                "start-added-torrents": start_added_torrents,
+                "trash-original-torrent-files": trash_original_torrent_files,
+                "utp-enabled": utp_enabled,
+                "encryption": encryption,
+                "script-torrent-added-filename": script_torrent_added_filename,
+                "script-torrent-done-seeding-filename": script_torrent_done_seeding_filename,
+                "script-torrent-done-seeding-enabled": script_torrent_done_seeding_enabled,
+                "script-torrent-added-enabled": script_torrent_added_enabled,
+                "default-trackers": "\n".join(default_trackers) if default_trackers is not None else None,
+            }
+        )
 
         args.update(kwargs)
 
@@ -1199,6 +1160,15 @@ class Client:
 
     def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType) -> None:
         self._http_session.close()
+
+
+T = TypeVar("T")
+
+
+def list_or_none(v: Optional[Iterable[T]]) -> Optional[List[T]]:
+    if v is None:
+        return None
+    return list(v)
 
 
 def remove_unset_value(data: Dict[str, Any]) -> Dict[str, Any]:
