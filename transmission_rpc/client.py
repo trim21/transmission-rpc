@@ -1119,22 +1119,16 @@ class Client:
         speed_limit_down_enabled: Optional[bool] = None,
     ) -> None:
         self._rpc_version_warning(17)
-        arguments: Dict[str, Any] = {"name": name}
-
-        if honors_session_limits is not None:
-            arguments["honorsSessionLimits"] = honors_session_limits
-
-        if speed_limit_down is not None:
-            arguments["speed-limit-down"] = speed_limit_down
-
-        if speed_limit_up_enabled is not None:
-            arguments["speed-limit-up-enabled"] = speed_limit_up_enabled
-
-        if speed_limit_up is not None:
-            arguments["speed-limit-up"] = speed_limit_up
-
-        if speed_limit_down_enabled is not None:
-            arguments["speed-limit-down-enabled"] = speed_limit_down_enabled
+        arguments: Dict[str, Any] = remove_unset_value(
+            {
+                "name": name,
+                "honorsSessionLimits": honors_session_limits,
+                "speed-limit-down": speed_limit_down,
+                "speed-limit-up-enabled": speed_limit_up_enabled,
+                "speed-limit-up": speed_limit_up,
+                "speed-limit-down-enabled": speed_limit_down_enabled,
+            }
+        )
 
         self._request(RpcMethod.GroupSet, arguments, timeout=timeout)
 
