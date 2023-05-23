@@ -391,40 +391,24 @@ class Client:
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
 
-        kwargs: Dict[str, Any] = {}
-        if download_dir is not None:
-            kwargs["download-dir"] = download_dir
-
-        if files_unwanted is not None:
-            kwargs["files-unwanted"] = files_unwanted
-
-        if files_wanted is not None:
-            kwargs["files-wanted"] = files_wanted
-
-        if paused is not None:
-            kwargs["paused"] = paused
-
-        if peer_limit is not None:
-            kwargs["peer-limit"] = peer_limit
-
-        if priority_high is not None:
-            kwargs["priority-high"] = priority_high
-
-        if priority_low is not None:
-            kwargs["priority-low"] = priority_low
-
-        if priority_normal is not None:
-            kwargs["priority-normal"] = priority_normal
-
-        if bandwidthPriority is not None:
-            kwargs["bandwidthPriority"] = bandwidthPriority
-
-        if cookies is not None:
-            kwargs["cookies"] = cookies
-
         if labels is not None:
             self._rpc_version_warning(17)
-            kwargs["labels"] = list(labels)
+
+        kwargs: Dict[str, Any] = remove_unset_value(
+            {
+                "download-dir": download_dir,
+                "files-unwanted": files_unwanted,
+                "files-wanted": files_wanted,
+                "paused": paused,
+                "peer-limit": peer_limit,
+                "priority-high": priority_high,
+                "priority-low": priority_low,
+                "priority-normal": priority_normal,
+                "bandwidthPriority": bandwidthPriority,
+                "cookies": cookies,
+                "labels": None if labels is None else list(labels),
+            }
+        )
 
         torrent_data = _try_read_torrent(torrent)
         if torrent_data:
@@ -699,63 +683,43 @@ class Client:
 
         It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
-
-        args: Dict[str, Any] = {}
-
-        if bandwidth_priority is not None:
-            args["bandwidthPriority"] = bandwidth_priority
-
-        if download_limit is not None:
-            args["downloadLimit"] = download_limit
-        if download_limited is not None:
-            args["downloadLimited"] = download_limited
-        if upload_limit is not None:
-            args["uploadLimit"] = upload_limit
-        if upload_limited is not None:
-            args["uploadLimited"] = upload_limited
-        if files_unwanted is not None:
-            args["files-unwanted"] = list(files_unwanted)
-        if files_wanted is not None:
-            args["files-wanted"] = list(files_wanted)
-        if honors_session_limits is not None:
-            args["honorsSessionLimits"] = honors_session_limits
-        if location is not None:
-            args["location"] = location
-        if peer_limit is not None:
-            args["peer-limit"] = peer_limit
-        if priority_high is not None:
-            args["priority-high"] = list(priority_high)
-        if priority_low is not None:
-            args["priority-low"] = list(priority_low)
-        if priority_normal is not None:
-            args["priority-normal"] = list(priority_normal)
-        if queue_position is not None:
-            args["queuePosition"] = queue_position
-        if seed_idle_limit is not None:
-            args["seedIdleLimit"] = seed_idle_limit
-        if seed_idle_mode is not None:
-            args["seedIdleMode"] = seed_idle_mode
-        if seed_ratio_limit is not None:
-            args["seedRatioLimit"] = seed_ratio_limit
-        if seed_ratio_mode is not None:
-            args["seedRatioMode"] = seed_ratio_mode
-        if tracker_add is not None:
-            args["trackerAdd"] = tracker_add
-        if tracker_remove is not None:
-            args["trackerRemove"] = tracker_remove
-        if tracker_replace is not None:
-            args["trackerReplace"] = tracker_replace
         if labels is not None:
             self._rpc_version_warning(16)
-            args["labels"] = list(labels)
 
         if tracker_list is not None:
             self._rpc_version_warning(17)
-            args["trackerList"] = " ".join("\n".join(x) for x in tracker_list)
 
         if group is not None:
             self._rpc_version_warning(17)
-            args["group"] = str(group)
+
+        args: Dict[str, Any] = remove_unset_value(
+            {
+                "bandwidthPriority": bandwidth_priority,
+                "downloadLimit": download_limit,
+                "downloadLimited": download_limited,
+                "uploadLimit": upload_limit,
+                "uploadLimited": upload_limited,
+                "files-unwanted": None if files_unwanted is None else list(files_unwanted),
+                "files-wanted": None if files_wanted is None else list(files_wanted),
+                "honorsSessionLimits": honors_session_limits,
+                "location": location,
+                "peer-limit": peer_limit,
+                "priority-high": None if priority_high is None else list(priority_high),
+                "priority-low": None if priority_low is None else list(priority_low),
+                "priority-normal": None if priority_normal is None else list(priority_normal),
+                "queuePosition": queue_position,
+                "seedIdleLimit": seed_idle_limit,
+                "seedIdleMode": seed_idle_mode,
+                "seedRatioLimit": seed_ratio_limit,
+                "seedRatioMode": seed_ratio_mode,
+                "trackerAdd": tracker_add,
+                "trackerRemove": tracker_remove,
+                "trackerReplace": tracker_replace,
+                "labels": None if labels is None else list(labels),
+                "trackerList": None if tracker_list is None else " ".join("\n".join(x) for x in tracker_list),
+                "group": group,
+            }
+        )
 
         args.update(kwargs)
 
@@ -1235,3 +1199,7 @@ class Client:
 
     def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType) -> None:
         self._http_session.close()
+
+
+def remove_unset_value(data: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: value for key, value in data.items() if value is not None}
