@@ -62,6 +62,9 @@ class Status(str, enum.Enum):
     def seeding(self) -> bool:
         return self == "seeding"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class FileStat(Container):
     @property
