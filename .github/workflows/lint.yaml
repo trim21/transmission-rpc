@@ -46,14 +46,4 @@ jobs:
       - run: ruff check . --format=github
 
   pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - uses: trim21/setup-poetry@dist/v1
-      - uses: trim21/install-poetry-project@dist/v1
-      - uses: trim21/actions/pre-commit@master
+    uses: "trim21/actions/pre-commit/poetry.yaml@master"
