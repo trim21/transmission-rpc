@@ -33,26 +33,27 @@ TR_PRI_HIGH = Priority.High
 
 PRIORITY = mirror_dict({"low": TR_PRI_LOW, "normal": TR_PRI_NORMAL, "high": TR_PRI_HIGH})
 
-# TODO: remove this in 5.0
-TR_RATIOLIMIT_GLOBAL = 0  # follow the global settings
-TR_RATIOLIMIT_SINGLE = 1  # override the global settings, seeding until a certain ratio
-TR_RATIOLIMIT_UNLIMITED = 2  # override the global settings, seeding regardless of ratio
-
 
 class RatioLimitMode(enum.IntEnum):
     """torrent radio limit mode"""
 
     #: follow the global settings
-    Global = TR_RATIOLIMIT_GLOBAL
+    Global = 0
     #: override the global settings, seeding until a certain ratio
-    Single = TR_RATIOLIMIT_SINGLE
+    Single = 1
     #: override the global settings, seeding regardless of ratio
-    Unlimited = TR_RATIOLIMIT_UNLIMITED
+    Unlimited = 2
 
+
+# TODO: remove this in 5.0
+TR_RATIOLIMIT_GLOBAL = RatioLimitMode.Global  # follow the global settings
+TR_RATIOLIMIT_SINGLE = RatioLimitMode.Single  # override the global settings, seeding until a certain ratio
+TR_RATIOLIMIT_UNLIMITED = RatioLimitMode.Unlimited  # override the global settings, seeding regardless of ratio
 
 # TODO: remove these in 5.0
 RatioLimit = RatioLimitMode
 
+# TODO: remove these in 5.0
 RATIO_LIMIT = mirror_dict(
     {
         "global": TR_RATIOLIMIT_GLOBAL,
