@@ -416,7 +416,7 @@ class Client:
         else:
             kwargs["filename"] = torrent
 
-        return list(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values())[0]
+        return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
 
     def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: Optional[_Timeout] = None) -> None:
         """
