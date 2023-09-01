@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 
 from transmission_rpc.types import File, Container
 from transmission_rpc.utils import format_timedelta
-from transmission_rpc.constants import PRIORITY, IDLE_LIMIT, RATIO_LIMIT, Priority
+from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",
@@ -396,7 +396,7 @@ class Torrent(Container):
             result.extend(
                 File(
                     selected=bool(raw_selected),
-                    priority=PRIORITY[raw_priority],
+                    priority=Priority(raw_priority),
                     size=file["length"],
                     name=file["name"],
                     completed=file["bytesCompleted"],
@@ -810,16 +810,16 @@ class Torrent(Container):
     #     return None
 
     @property
-    def priority(self) -> str:
+    def priority(self) -> Priority:
         """
         Bandwidth priority as string.
         Can be one of 'low', 'normal', 'high'. This is a mutator.
         """
 
-        return PRIORITY[self.fields["bandwidthPriority"]]
+        return Priority(self.fields["bandwidthPriority"])
 
     @property
-    def seed_idle_mode(self) -> str:
+    def seed_idle_mode(self) -> IdleMode:
         """
         Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
@@ -827,7 +827,7 @@ class Torrent(Container):
          * single, use torrent seed idle limit. See seed_idle_limit.
          * unlimited, no seed idle limit.
         """
-        return IDLE_LIMIT[self.fields["seedIdleMode"]]
+        return IdleMode(self.fields["seedIdleMode"])
 
     @property
     def seed_ratio_limit(self) -> float:
@@ -839,7 +839,7 @@ class Torrent(Container):
         return float(self.fields["seedRatioLimit"])
 
     @property
-    def seed_ratio_mode(self) -> str:
+    def seed_ratio_mode(self) -> RatioLimitMode:
         """
         Seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
@@ -847,7 +847,7 @@ class Torrent(Container):
          * single, use torrent seed ratio limit. See seed_ratio_limit.
          * unlimited, no seed ratio limit.
         """
-        return RATIO_LIMIT[self.fields["seedRatioMode"]]
+        return RatioLimitMode(self.fields["seedRatioMode"])
 
     def __repr__(self) -> str:
         return f'<Torrent {self.id} "{self.name}">'
