@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple, Union, TypeVar, Optional, NamedTuple
 
-from typing_extensions import Literal
+from transmission_rpc.constants import Priority
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
@@ -23,7 +23,7 @@ class File(NamedTuple):
     name: str  # file name
     size: int  # file size in bytes
     completed: int  # bytes completed
-    priority: Literal["high", "normal", "low"]
+    priority: Priority
     selected: bool  # if selected for download
     id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
 

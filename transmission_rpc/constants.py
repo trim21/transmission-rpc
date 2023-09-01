@@ -9,14 +9,6 @@ LOGGER = logging.getLogger("transmission-rpc")
 LOGGER.setLevel(logging.ERROR)
 
 
-def mirror_dict(source: dict) -> dict:
-    """
-    Creates a dictionary with all values as keys and all keys as values.
-    """
-    source.update({value: key for key, value in source.items()})
-    return source
-
-
 DEFAULT_TIMEOUT = 30.0
 
 
@@ -24,14 +16,6 @@ class Priority(enum.IntEnum):
     Low = -1
     Normal = 0
     High = 1
-
-
-# TODO: remove this in 5.0
-TR_PRI_LOW = Priority.Low
-TR_PRI_NORMAL = Priority.Normal
-TR_PRI_HIGH = Priority.High
-
-PRIORITY = mirror_dict({"low": TR_PRI_LOW, "normal": TR_PRI_NORMAL, "high": TR_PRI_HIGH})
 
 
 class RatioLimitMode(enum.IntEnum):
@@ -45,24 +29,6 @@ class RatioLimitMode(enum.IntEnum):
     Unlimited = 2
 
 
-# TODO: remove this in 5.0
-TR_RATIOLIMIT_GLOBAL = RatioLimitMode.Global  # follow the global settings
-TR_RATIOLIMIT_SINGLE = RatioLimitMode.Single  # override the global settings, seeding until a certain ratio
-TR_RATIOLIMIT_UNLIMITED = RatioLimitMode.Unlimited  # override the global settings, seeding regardless of ratio
-
-# TODO: remove these in 5.0
-RatioLimit = RatioLimitMode
-
-# TODO: remove these in 5.0
-RATIO_LIMIT = mirror_dict(
-    {
-        "global": TR_RATIOLIMIT_GLOBAL,
-        "single": TR_RATIOLIMIT_SINGLE,
-        "unlimited": TR_RATIOLIMIT_UNLIMITED,
-    }
-)
-
-
 class IdleMode(enum.IntEnum):
     """torrent idle mode"""
 
@@ -72,21 +38,6 @@ class IdleMode(enum.IntEnum):
     Single = 1
     #: override the global settings, seeding regardless of activity
     Unlimited = 2
-
-
-# TODO: remove these in 5.0
-IdleLimit = IdleMode
-TR_IDLELIMIT_GLOBAL = IdleMode.Global  # follow the global settings
-TR_IDLELIMIT_SINGLE = IdleMode.Single  # override the global settings, seeding until a certain idle time
-TR_IDLELIMIT_UNLIMITED = IdleMode.Unlimited  # override the global settings, seeding regardless of activity
-
-IDLE_LIMIT = mirror_dict(
-    {
-        "global": TR_RATIOLIMIT_GLOBAL,
-        "single": TR_RATIOLIMIT_SINGLE,
-        "unlimited": TR_RATIOLIMIT_UNLIMITED,
-    }
-)
 
 
 class Args(NamedTuple):
