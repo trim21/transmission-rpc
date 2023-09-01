@@ -87,7 +87,7 @@ class Client:
         host: str = "127.0.0.1",
         port: int = 9091,
         path: str = "/transmission/rpc",
-        timeout: Union[int, float] = DEFAULT_TIMEOUT,
+        timeout: float = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
     ):
         """
@@ -1152,7 +1152,12 @@ class Client:
     def __enter__(self) -> "Client":
         return self
 
-    def __exit__(self, exc_type: Type[Exception], exc_val: Exception, exc_tb: types.TracebackType) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[types.TracebackType],
+    ) -> None:
         self._http_session.close()
 
 
