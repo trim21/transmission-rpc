@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple, Union, TypeVar, Optional, NamedTuple
 
-from transmission_rpc import Priority
+from transmission_rpc.constants import Priority
 
 _Number = Union[int, float]
 _Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
