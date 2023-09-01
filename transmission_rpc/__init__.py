@@ -1,6 +1,5 @@
 import logging
 import urllib.parse
-from typing import Union
 
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.types import File, Group
@@ -41,7 +40,7 @@ __all__ = [
 
 def from_url(
     url: str,
-    timeout: Union[int, float] = DEFAULT_TIMEOUT,
+    timeout: float = DEFAULT_TIMEOUT,
     logger: logging.Logger = LOGGER,
 ) -> Client:
     """
