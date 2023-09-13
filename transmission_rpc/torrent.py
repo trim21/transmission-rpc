@@ -1,5 +1,4 @@
 import enum
-import warnings
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
@@ -362,10 +361,6 @@ class Torrent(Container):
     @property
     def file_count(self) -> Optional[int]:
         return self.fields["file-count"]
-
-    def files(self) -> List[File]:
-        warnings.warn(DeprecationWarning("'.files()' is deprecated, please use '.get_files()'"), stacklevel=2)
-        return self.get_files()
 
     def get_files(self) -> List[File]:
         """
@@ -743,26 +738,9 @@ class Torrent(Container):
         return datetime.fromtimestamp(self.fields["activityDate"], timezone.utc)
 
     @property
-    def date_active(self) -> datetime:
-        warnings.warn("use .activity_date", DeprecationWarning, stacklevel=2)
-        return self.activity_date
-
-    @property
-    def date_added(self) -> datetime:
-        """raw field ``addedDate`` as ``datetime.datetime`` in **utc timezone**."""
-        warnings.warn("use .added_date", DeprecationWarning, stacklevel=2)
-        return self.added_date
-
-    @property
     def added_date(self) -> datetime:
         """When the torrent was first added."""
         return datetime.fromtimestamp(self.fields["addedDate"], timezone.utc)
-
-    @property
-    def date_started(self) -> datetime:
-        """raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
-        warnings.warn("use .start_date", DeprecationWarning, stacklevel=2)
-        return self.start_date
 
     @property
     def start_date(self) -> datetime:
@@ -778,11 +756,6 @@ class Torrent(Container):
         if done_date == 0:
             return None
         return datetime.fromtimestamp(done_date).astimezone()
-
-    @property
-    def date_done(self) -> Optional[datetime]:
-        warnings.warn("use .done_date", DeprecationWarning, stacklevel=2)
-        return self.done_date
 
     def format_eta(self) -> str:
         """

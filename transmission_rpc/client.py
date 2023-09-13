@@ -4,7 +4,6 @@ import types
 import string
 import logging
 import pathlib
-import warnings
 import urllib.parse
 from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
 from urllib.parse import quote
@@ -746,35 +745,6 @@ class Client:
         """
         args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
-
-    def locate_torrent_data(
-        self,
-        ids: _TorrentIDs,
-        location: Union[str, pathlib.Path],
-        timeout: Optional[_Timeout] = None,
-    ) -> None:
-        """
-        Locate torrent data at the provided location.
-
-        Warnings
-        --------
-            since transmission-rpc version 4.2.1, this method is deprecated.
-
-            Use ``client.move_torrent_data(ids, location, move=False)`` instead
-
-        this is same rpc call as :py:meth:`Client.move_torrent_data`, but with arguments ``move=False``
-
-        See Also
-        --------
-
-        `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
-        """
-        warnings.warn(
-            "locate_torrent_data is deprecated since version 4.2.1, please use `move_torrent_data` with 'move=False'",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.move_torrent_data(ids=ids, location=location, timeout=timeout, move=False)
 
     def rename_torrent_path(
         self,
