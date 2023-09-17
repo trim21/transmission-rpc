@@ -23,12 +23,12 @@ jobs:
 
       - name: Generate Changelog
         id: changelog
-        uses: requarks/changelog-action@v1
+        uses: trim21/action-changelog@includeTypes
         with:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
           writeToFile: false
-          excludeTypes: docs,chore,ci,tests,refactor,perf
+          includeTypes: feat,fix,revert
 
       - name: Upload Github Release
         run: gh release create "${GITHUB_REF}" --notes "${CHANGELOG}"
