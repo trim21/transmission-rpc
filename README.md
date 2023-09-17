@@ -29,7 +29,7 @@ pip install transmission-rpc -U
 
 ## Documents
 
-<https://transmission-rpc.readthedocs.io/>
+<https://transmission-rpc.readthedocs.io/en/stable/>
 
 ## Contributing
 
