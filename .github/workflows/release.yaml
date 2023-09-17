@@ -28,6 +28,7 @@ jobs:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
           writeToFile: false
+          excludeTypes: docs,chore,ci,tests,refactor,perf
 
       - name: Upload Github Release
         run: gh release create "${GITHUB_REF}" --notes "${CHANGELOG}"
