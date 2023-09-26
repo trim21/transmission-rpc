@@ -8,6 +8,7 @@ Torrent
     :members:
 
 .. autoclass:: Status
+    :exclude-members: __new__, __init__
 
     .. autoattribute:: Status.stopped
     .. autoattribute:: Status.check_pending

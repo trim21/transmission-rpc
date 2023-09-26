@@ -21,10 +21,4 @@ tasks:
 
   build:docs:
     cmds:
-      - poetry run sphinx-build ./docs/source/ ./docs/dist/
-    sources:
-      - ./docs/source/**/*
-      - ./transmission_rpc/**/*
-      - poetry.lock
-    generates:
-      - ./docs/dist/**/*
+      - poetry run sphinx-build ./docs/ ./docs/dist/
