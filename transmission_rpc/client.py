@@ -653,8 +653,11 @@ class Client:
 
         tracker_list
             A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
-            example: ``[['tracker.example.com', 'tracker2.example.com'], ['backup1.example.com'], ['backup2.example.com']]``.
+
             Add in rpc 17.
+
+            Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
+            ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
         tracker_add:
             Array of string with announce URLs to add.
