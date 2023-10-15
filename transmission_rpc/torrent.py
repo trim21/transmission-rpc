@@ -442,7 +442,7 @@ class Torrent(Container):
         return self.fields["isStalled"]
 
     @property
-    def labels(self) -> str:
+    def labels(self) -> List[str]:
         return self.fields["labels"]
 
     @property
