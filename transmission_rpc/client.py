@@ -719,7 +719,7 @@ class Client:
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
                 "labels": list_or_none(labels),
-                "trackerList": None if tracker_list is None else " ".join("\n".join(x) for x in tracker_list),
+                "trackerList": None if tracker_list is None else "\n".join("\n\n".join(x) for x in tracker_list),
                 "group": group,
             }
         )
