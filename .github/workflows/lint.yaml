@@ -43,7 +43,7 @@ jobs:
 
       - uses: Trim21/install-poetry-project@dist/v1
 
-      - run: ruff check . --format=github
+      - run: ruff check . --output-format=github
 
   pre-commit:
     runs-on: ubuntu-latest
