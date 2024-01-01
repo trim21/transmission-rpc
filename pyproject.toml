@@ -39,7 +39,7 @@ furo = { version = "2023.9.10", python = "^3.9" }
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.3"
 # tests
-pytest = "==7.4.3"
+pytest = "==7.4.4"
 pytest-github-actions-annotate-failures = "==0.2.0"
 coverage = "==7.3.2"
 
