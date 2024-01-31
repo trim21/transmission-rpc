@@ -46,7 +46,7 @@ coverage = "==7.3.2"
 # linter and formatter
 pre-commit = { version = "==3.5.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
 mypy = { version = "==1.7.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
-ruff = "0.1.9"
+ruff = "0.1.15"
 
 # stubs
 types-requests = "==2.31.0.20231231"
