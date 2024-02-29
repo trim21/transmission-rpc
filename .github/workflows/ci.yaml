@@ -38,9 +38,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - uses: trim21/setup-poetry@dist/v1
+      - uses: trim21/setup-poetry@dist/v2
 
-      - uses: trim21/install-poetry-project@dist/v1
+      - uses: trim21/install-poetry-project@dist/v2
 
       - name: test
         run: coverage run -m pytest

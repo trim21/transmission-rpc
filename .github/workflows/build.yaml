@@ -9,21 +9,21 @@ on:
       - master
 
 jobs:
-    dist-files:
-      runs-on: ubuntu-latest
+  dist-files:
+    runs-on: ubuntu-latest
 
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-python@v5
-          with:
-            python-version: "3.x"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
-        - uses: trim21/setup-poetry@dist/v1
+      - uses: trim21/setup-poetry@dist/v2
 
-        - run: poetry build
+      - run: poetry build
 
-        - name: Install twine
-          run: pip install twine
+      - name: Install twine
+        run: pip install twine
 
-        - name: Check Files
-          run: twine check dist/*
+      - name: Check Files
+        run: twine check dist/*
