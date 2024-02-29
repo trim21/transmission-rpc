@@ -49,7 +49,7 @@ mypy = { version = "==1.7.1", markers = "implementation_name != 'pypy'", python 
 ruff = "0.1.15"
 
 # stubs
-types-requests = "==2.31.0.20240125"
+types-requests = "==2.31.0.20240218"
 pytz = "==2023.3.post1"
 
 [tool.poetry-plugin-bump]
