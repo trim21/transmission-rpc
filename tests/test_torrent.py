@@ -2,7 +2,6 @@ import time
 import calendar
 import datetime
 
-import pytz
 import pytest
 
 import transmission_rpc
@@ -72,10 +71,10 @@ def test_attributes():
     assert torrent.progress == 50.0
     assert torrent.ratio == 0.5
     assert torrent.eta == datetime.timedelta(seconds=3600)
-    assert torrent.activity_date == datetime.datetime(2008, 12, 11, 11, 15, 30, tzinfo=pytz.utc)
-    assert torrent.added_date == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=pytz.utc)
-    assert torrent.start_date == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=pytz.utc)
-    assert torrent.done_date == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=pytz.utc)
+    assert torrent.activity_date == datetime.datetime(2008, 12, 11, 11, 15, 30, tzinfo=datetime.timezone.utc)
+    assert torrent.added_date == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=datetime.timezone.utc)
+    assert torrent.start_date == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=datetime.timezone.utc)
+    assert torrent.done_date == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=datetime.timezone.utc)
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 

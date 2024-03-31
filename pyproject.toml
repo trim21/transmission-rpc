@@ -50,7 +50,6 @@ ruff = "0.3.4"
 
 # stubs
 types-requests = "==2.31.0.20240311"
-pytz = "==2023.4"
 
 [tool.poetry-plugin-bump]
 commit_msg = 'bump: v{version}'
