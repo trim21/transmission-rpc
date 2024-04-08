@@ -594,6 +594,7 @@ class Client:
         tracker_list: Optional[Iterable[Iterable[str]]] = None,
         tracker_replace: Optional[Iterable[Tuple[int, str]]] = None,
         tracker_remove: Optional[Iterable[int]] = None,
+        sequential_download: Optional[bool] = None,
         **kwargs: Any,
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
@@ -680,6 +681,11 @@ class Client:
             --------
             since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
+        sequential_download:
+            download torrent pieces sequentially
+
+            Add in Transmission 4.1.0, rpc-version 18.
+
         Warnings
         ----
         ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
@@ -721,6 +727,7 @@ class Client:
                 "labels": list_or_none(labels),
                 "trackerList": None if tracker_list is None else "\n".join("\n\n".join(x) for x in tracker_list),
                 "group": group,
+                "sequentialDownload": sequential_download,
             }
         )
 
@@ -1057,13 +1064,18 @@ class Client:
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
-    def port_test(self, timeout: Optional[_Timeout] = None) -> Optional[bool]:
+    def port_test(
+        self, timeout: Optional[_Timeout] = None, *, ip_protocol: Optional[Literal["ipv4", "ipv6"]] = None
+    ) -> dict[str, Any]:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
+
+        return a dict with testing result
+
+        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
         """
-        result = self._request(RpcMethod.PortTest, timeout=timeout)
-        return result.get("port-is-open")
+        return self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
 
     def free_space(self, path: Union[str, pathlib.Path], timeout: Optional[_Timeout] = None) -> Optional[int]:
         """

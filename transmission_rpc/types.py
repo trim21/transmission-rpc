@@ -27,6 +27,11 @@ class File(NamedTuple):
     selected: bool  # if selected for download
     id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
 
+    # add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+    begin_piece: Optional[int] = None
+    # add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+    end_piece: Optional[int] = None
+
 
 class Group(Container):
     @property

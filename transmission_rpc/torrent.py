@@ -396,6 +396,8 @@ class Torrent(Container):
                     name=file["name"],
                     completed=file["bytesCompleted"],
                     id=id,
+                    begin_piece=file.get("beginPiece"),
+                    end_piece=file.get("endPiece"),
                 )
                 for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
             )
@@ -821,6 +823,15 @@ class Torrent(Container):
          * unlimited, no seed ratio limit.
         """
         return RatioLimitMode(self.fields["seedRatioMode"])
+
+    @property
+    def sequential_download(self) -> bool:
+        """
+        download torrent pieces sequentially
+
+        add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        """
+        return self.fields["sequentialDownload"]
 
     def __repr__(self) -> str:
         return f'<Torrent {self.id} "{self.name}">'
