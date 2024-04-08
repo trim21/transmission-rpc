@@ -1066,7 +1066,7 @@ class Client:
 
     def port_test(
         self, timeout: Optional[_Timeout] = None, *, ip_protocol: Optional[Literal["ipv4", "ipv6"]] = None
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
