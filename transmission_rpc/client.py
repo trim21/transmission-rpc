@@ -405,7 +405,7 @@ class Client:
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
                 "cookies": cookies,
-                "labels": list_or_none(labels),
+                "labels": list_or_none(_single_str_as_list(labels)),
             }
         )
 
@@ -718,7 +718,7 @@ class Client:
                 "trackerAdd": tracker_add,
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
-                "labels": list_or_none(labels),
+                "labels": list_or_none(_single_str_as_list(labels)),
                 "trackerList": None if tracker_list is None else "\n".join("\n\n".join(x) for x in tracker_list),
                 "group": group,
             }
@@ -1136,6 +1136,14 @@ class Client:
 
 
 T = TypeVar("T")
+
+
+def _single_str_as_list(v: Optional[Iterable[str]]) -> Optional[list[str]]:
+    if not v:
+        return v
+    if isinstance(v, str):
+        return [v]
+    return v
 
 
 def list_or_none(v: Optional[Iterable[T]]) -> Optional[List[T]]:
