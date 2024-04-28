@@ -1138,12 +1138,12 @@ class Client:
 T = TypeVar("T")
 
 
-def _single_str_as_list(v: Optional[Iterable[str]]) -> Optional[list[str]]:
-    if not v:
+def _single_str_as_list(v: Optional[Iterable[str]]) -> Optional[List[str]]:
+    if v is None:
         return v
     if isinstance(v, str):
         return [v]
-    return v
+    return list(v)
 
 
 def list_or_none(v: Optional[Iterable[T]]) -> Optional[List[T]]:
