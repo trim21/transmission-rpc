@@ -1110,8 +1110,9 @@ class Client:
         self._rpc_version_warning(17)
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
-        if result["arguments"]["group"]:
-            return Group(fields=result["arguments"]["group"][0])
+        if result["group"]:
+            return Group(fields=result["group"][0])
+
         return None
 
     def get_groups(self, name: Optional[List[str]] = None, *, timeout: Optional[_Timeout] = None) -> Dict[str, Group]:
@@ -1121,7 +1122,7 @@ class Client:
 
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
-        return {x["name"]: Group(fields=x) for x in result["arguments"]["group"]}
+        return {x["name"]: Group(fields=x) for x in result["group"]}
 
     def __enter__(self) -> "Client":
         return self
