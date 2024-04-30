@@ -1087,11 +1087,24 @@ class Client:
         *,
         timeout: Optional[_Timeout] = None,
         honors_session_limits: Optional[bool] = None,
+        speed_limit_down_enabled: Optional[bool] = None,
         speed_limit_down: Optional[int] = None,
         speed_limit_up_enabled: Optional[bool] = None,
         speed_limit_up: Optional[int] = None,
-        speed_limit_down_enabled: Optional[bool] = None,
     ) -> None:
+        """
+
+        Parameters
+        ----------
+        name: Bandwidth group name
+        honors_session_limits: true if session upload limits are honored
+        speed_limit_down_enabled: true means enabled
+        speed_limit_down: 	max global download speed (KBps)
+        speed_limit_up_enabled: 	true means enabled
+        speed_limit_up: max global upload speed (KBps)
+        timeout: request timeout
+        """
+
         self._rpc_version_warning(17)
         arguments: Dict[str, Any] = remove_unset_value(
             {
