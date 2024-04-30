@@ -8,6 +8,7 @@ import yarl
 import pytest
 from typing_extensions import Literal
 
+from tests.util import skip_on, ServerTooLowError
 from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.types import File
 from transmission_rpc.utils import _try_read_torrent
@@ -233,3 +234,14 @@ def test_ensure_location_str_relative():
 
 def test_ensure_location_str_absolute():
     ensure_location_str(pathlib.Path(".").absolute())
+
+
+@skip_on(ServerTooLowError, "group methods is added in rpc version 17")
+def test_groups(tr_client: Client):
+    if tr_client.protocol_version < 17:
+        raise ServerTooLowError
+
+    tr_client.set_group("test.1")
+    groups = tr_client.get_groups()
+
+    assert "test.1" in groups
