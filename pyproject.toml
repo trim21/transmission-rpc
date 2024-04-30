@@ -82,8 +82,11 @@ target-version = ['py38']
 
 
 [tool.ruff]
+target-version = "py38"
 extend-exclude = ["docs"]
 line-length = 120
+
+[tool.ruff.lint]
 select = [
     "B",
     "C",
@@ -150,5 +153,3 @@ ignore = [
     'PLR2004',
     'PGH003',
 ]
-
-target-version = "py38"
