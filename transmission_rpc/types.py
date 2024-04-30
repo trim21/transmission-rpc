@@ -29,26 +29,36 @@ class File(NamedTuple):
 
 
 class Group(Container):
+    """
+    https://github.com/transmission/transmission/blob/4.0.5/docs/rpc-spec.md#482-bandwidth-group-accessor-group-get
+    """
+
     @property
     def name(self) -> str:
+        """Bandwidth group name"""
         return self.fields["name"]
 
     @property
     def honors_session_limits(self) -> bool:
+        """true if session upload limits are honored"""
         return self.fields["honorsSessionLimits"]
 
     @property
     def speed_limit_down_enabled(self) -> bool:
+        """true means enabled"""
         return self.fields["speed-limit-down-enabled"]
 
     @property
     def speed_limit_down(self) -> int:
+        """max global download speed (KBps)"""
         return self.fields["speed-limit-down"]
 
     @property
     def speed_limit_up_enabled(self) -> bool:
+        """true means enabled"""
         return self.fields["speed-limit-up-enabled"]
 
     @property
     def speed_limit_up(self) -> int:
+        """max global upload speed (KBps)"""
         return self.fields["speed-limit-up"]
