@@ -244,4 +244,4 @@ def test_groups(tr_client: Client):
     tr_client.set_group("test.1")
     groups = tr_client.get_groups()
 
-    assert [g for g in groups if g == "test.1"]
+    assert "test.1" in groups
