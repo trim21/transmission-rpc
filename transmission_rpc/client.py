@@ -1092,17 +1092,15 @@ class Client:
         speed_limit_up_enabled: Optional[bool] = None,
         speed_limit_up: Optional[int] = None,
     ) -> None:
-        """
+        """create or update a Bandwidth group.
 
-        Parameters
-        ----------
-        name: Bandwidth group name
-        honors_session_limits: true if session upload limits are honored
-        speed_limit_down_enabled: true means enabled
-        speed_limit_down: 	max global download speed (KBps)
-        speed_limit_up_enabled: 	true means enabled
-        speed_limit_up: max global upload speed (KBps)
-        timeout: request timeout
+        :param name: Bandwidth group name
+        :param honors_session_limits: true if session upload limits are honored
+        :param speed_limit_down_enabled: true means enabled
+        :param speed_limit_down: 	max global download speed (KBps)
+        :param speed_limit_up_enabled: 	true means enabled
+        :param speed_limit_up: max global upload speed (KBps)
+        :param timeout: request timeout
         """
 
         self._rpc_version_warning(17)
