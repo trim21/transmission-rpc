@@ -287,7 +287,7 @@ class Torrent(Container):
         return self.fields["desiredAvailable"]
 
     @property
-    def download_dir(self) -> Optional[str]:
+    def download_dir(self) -> str:
         """The download directory.
 
         :available: transmission version 1.5.
