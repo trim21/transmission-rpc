@@ -34,7 +34,7 @@ typing-extensions = "*"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = { version = "^7.0.0", python = "^3.9" }
-furo = { version = "2024.4.27", python = "^3.9" }
+furo = { version = "2024.5.6", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"
