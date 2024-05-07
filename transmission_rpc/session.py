@@ -101,7 +101,7 @@ class Session(Container):
     Transmission RPC specification, but with underscore instead of hyphen.
 
 
-    get ``'download-dir'`` with ``session.download_dir``.
+    You should use ``session.download_dir`` to get ``'download-dir'``.
 
     .. code-block:: python
 
@@ -348,7 +348,7 @@ class Session(Container):
     # see below
     @property
     def units(self) -> Units:
-        return self.fields["units"]
+        return Units(fields=self.fields["units"])
 
     @property
     def utp_enabled(self) -> bool:
@@ -382,7 +382,7 @@ class Session(Container):
     @property
     def script_torrent_added_enabled(self) -> Optional[bool]:
         """
-        whether or not to call the `added` script
+        whether to call the `added` script
         new at rpc-version 17
         """
         return self.get("script-torrent-added-enabled")
@@ -398,7 +398,7 @@ class Session(Container):
     @property
     def script_torrent_done_seeding_enabled(self) -> Optional[bool]:
         """
-        whether or not to call the `seeding-done` script
+        whether to call the `seeding-done` script
         new at rpc-version 17
         """
         return self.get("script-torrent-done-seeding-enabled")
