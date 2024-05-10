@@ -5,8 +5,13 @@ import string
 import logging
 import pathlib
 import urllib.parse
+
+# from deprecated import deprecated
+
 from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
 from urllib.parse import quote
+
+from typing_extensions import deprecated
 
 import requests
 import requests.auth
@@ -121,14 +126,19 @@ class Client:
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
         self.url = str(url)
         self._sequence = 0
-        self.raw_session: Dict[str, Any] = {}
+        self.__raw_session: Dict[str, Any] = {}
         self.session_id = "0"
-        self.server_version: str = "(unknown)"
-        self.protocol_version: int = 17  # default 17
+        self.server_version: None | str = "(unknown)"
+        self.rpc_version: None | int = None  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
-        self.get_session()
-        self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
+
+    @deprecated("do not use this property")
+    def torrent_get_arguments(self) -> list[str]:
+        return self.__torrent_get_arguments()
+
+    def __torrent_get_arguments(self):
+        return get_torrent_arguments(self.rpc_version)
 
     @property
     def timeout(self) -> _Timeout:
@@ -287,9 +297,9 @@ class Client:
                     rawResponse=http_data,
                 )
         elif method == RpcMethod.SessionGet:
-            self.raw_session.update(res)
+            self.__raw_session.update(res)
         elif method == RpcMethod.SessionStats:
-            # older versions of T has the return data in "session-stats"
+            # older versions of T have the return data in "session-stats"
             if "session-stats" in res:
                 return res["session-stats"]
             return res
@@ -307,19 +317,23 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.semver_version = self.raw_session.get("rpc-version-semver")
-        self.server_version = self.raw_session["version"]
-        self.protocol_version = self.raw_session["rpc-version"]
+        self.semver_version = self.__raw_session.get("rpc-version-semver")
+        self.server_version = self.__raw_session["version"]
+        self.rpc_version = self.__raw_session["rpc-version"]
 
     @property
-    def rpc_version(self) -> int:
+    @deprecated("use .rpc_version instead")
+    def protocol_version(self) -> int:
         """Get the Transmission daemon RPC version."""
-        return self.protocol_version
+        return self.rpc_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
         """
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
+        if not self.rpc_version:
+            return
+
         if self.rpc_version < required_version:
             self.logger.warning(
                 "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
@@ -475,7 +489,7 @@ class Client:
         ``arguments`` contains a list of field names to be returned, when None
         all fields are requested. See the Torrent class for more information.
 
-        new argument ``format`` in rpc_version 16 is unnecessarily
+        new argument ``format`` in rpc_version 16 is unnecessary,
         and this lib can't handle table response, So it's unsupported.
 
         Returns a Torrent object with the requested fields.
@@ -504,7 +518,8 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments()
+
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
@@ -536,7 +551,7 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments()
         return [
             Torrent(fields=x)
             for x in self._request(RpcMethod.TorrentGet, {"fields": arguments}, ids, timeout=timeout)["torrents"]
@@ -559,7 +574,7 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments()
 
         result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
 
@@ -815,7 +830,7 @@ class Client:
         """
         self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
-        return Session(fields=self.raw_session)
+        return Session(fields=self.__raw_session)
 
     def set_session(
         self,

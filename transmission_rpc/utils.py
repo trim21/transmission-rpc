@@ -2,6 +2,7 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import base64
+import functools
 import pathlib
 import datetime
 from typing import List, Tuple, Union, BinaryIO, Optional
@@ -41,11 +42,20 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def get_torrent_arguments(rpc_version: int) -> List[str]:
+@functools.lru_cache
+def get_torrent_arguments(rpc_version: int | None) -> List[str]:
     """
     Get torrent arguments for method in specified Transmission RPC version.
     """
     accessible = []
+
+    if not rpc_version:
+        for argument, info in constants.TORRENT_GET_ARGS.items():
+            if info.removed_version is not None:
+                continue
+            accessible.append(argument)
+        return accessible
+
     for argument, info in constants.TORRENT_GET_ARGS.items():
         valid_version = True
         if rpc_version < info.added_version:
