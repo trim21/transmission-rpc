@@ -351,10 +351,10 @@ class Client:
         """
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
-        if self.rpc_version < required_version:
+        if self.__protocol_version < required_version:
             self.logger.warning(
                 "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
-                self.rpc_version,
+                self.__protocol_version,
                 required_version,
             )
 
