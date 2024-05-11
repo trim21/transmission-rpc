@@ -75,8 +75,6 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
 
 
 class Client:
-    semver_version: Optional[str]  # available in transmission>=4.0.0
-
     def __init__(
         self,
         *,
@@ -127,6 +125,7 @@ class Client:
         self.__protocol_version: int = 17  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
+        self.__semver_version = None
         self.get_session()
         self.__torrent_get_arguments = get_torrent_arguments(self.rpc_version)
 
