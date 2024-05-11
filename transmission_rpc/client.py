@@ -332,11 +332,18 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.semver_version = self.__raw_session.get("rpc-version-semver")
+        self.__semver_version = self.__raw_session.get("rpc-version-semver")
         self.__server_version = self.__raw_session["version"]
         self.__protocol_version = self.__raw_session["rpc-version"]
 
     @property
+    @deprecated("use .get_session().rpc_version_semver instead")
+    def semver_version(self) -> int:
+        """Get the Transmission daemon RPC version."""
+        return self.__semver_version
+
+    @property
+    @deprecated("use .get_session().rpc_version instead")
     def rpc_version(self) -> int:
         """Get the Transmission daemon RPC version."""
         return self.__protocol_version
