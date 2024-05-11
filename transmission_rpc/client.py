@@ -127,7 +127,7 @@ class Client:
         self._http_session.trust_env = False
         self.__semver_version = None
         self.get_session()
-        self.__torrent_get_arguments = get_torrent_arguments(self.rpc_version)
+        self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
     @property
     @deprecated("do not use internal property")
