@@ -43,7 +43,7 @@ def format_timedelta(delta: datetime.timedelta) -> str:
 
 
 @functools.lru_cache
-def get_torrent_arguments(rpc_version: int | None) -> List[str]:
+def get_torrent_arguments(rpc_version: Optional[int]) -> List[str]:
     """
     Get torrent arguments for method in specified Transmission RPC version.
     """

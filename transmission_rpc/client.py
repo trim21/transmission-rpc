@@ -6,11 +6,8 @@ import logging
 import pathlib
 import urllib.parse
 
-# from deprecated import deprecated
-
 from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
 from urllib.parse import quote
-
 from typing_extensions import deprecated
 
 import requests
@@ -80,8 +77,6 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
 
 
 class Client:
-    semver_version: Optional[str]  # available in transmission>=4.0.0
-
     def __init__(
         self,
         *,
@@ -98,15 +93,15 @@ class Client:
 
         Parameters
         ----------
-        protocol
-        username
-        password
-        host
-        port
-        path:
-          rpc request target path, default ``/transmission/rpc``
-        timeout
-        logger
+            protocol:
+            username:
+            password:
+            host:
+            port:
+            path:
+              rpc request target path, default ``/transmission/rpc``
+            timeout:
+            logger:
         """
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -124,21 +119,38 @@ class Client:
             path = "/transmission/rpc"
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
-        self.url = str(url)
+        self._url = str(url)
         self._sequence = 0
         self.__raw_session: Dict[str, Any] = {}
-        self.session_id = "0"
-        self.server_version: None | str = "(unknown)"
-        self.rpc_version: None | int = None  # default 17
+        self.__session_id = "0"
+        self.__server_version: str = "(unknown)"
+        self.__rpc_version: int = 17  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
+        self.__semver_version = None
 
-    @deprecated("do not use this property")
-    def torrent_get_arguments(self) -> list[str]:
-        return self.__torrent_get_arguments()
+    @property
+    @deprecated("do not use internal property")
+    def url(self) -> str:
+        return self._url
 
-    def __torrent_get_arguments(self):
-        return get_torrent_arguments(self.rpc_version)
+    @property
+    @deprecated("do not use internal property, use `.get_session()` instead")
+    def raw_session(self) -> dict:
+        return self.__raw_session
+
+    @property
+    @deprecated("do not use internal property")
+    def session_id(self) -> str:
+        return self.__session_id
+
+    @property
+    @deprecated("do not use internal property, use `.get_session().version` instead")
+    def server_version(self) -> str:
+        return self.__server_version
+
+    def __torrent_get_arguments(self) -> List[str]:
+        return get_torrent_arguments(self.__rpc_version)
 
     @property
     def timeout(self) -> _Timeout:
@@ -173,7 +185,7 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.session_id}
+        return {"x-transmission-session-id": self.__session_id}
 
     def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
         """
@@ -187,7 +199,7 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
-                    "url": self.url,
+                    "url": self._url,
                     "headers": self._http_header,
                     "data": query,
                     "timeout": timeout,
@@ -196,7 +208,7 @@ class Client:
             request_count += 1
             try:
                 r = self._http_session.post(
-                    self.url,
+                    self._url,
                     headers=self._http_header,
                     json=query,
                     timeout=timeout,
@@ -206,7 +218,7 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
+            self.__session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
@@ -317,27 +329,33 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.semver_version = self.__raw_session.get("rpc-version-semver")
-        self.server_version = self.__raw_session["version"]
-        self.rpc_version = self.__raw_session["rpc-version"]
+        self.__semver_version = self.__raw_session.get("rpc-version-semver")
+        self.__server_version = self.__raw_session["version"]
+        self.__rpc_version = self.__raw_session["rpc-version"]
 
     @property
-    @deprecated("use .rpc_version instead")
-    def protocol_version(self) -> int:
+    @deprecated("use .get_session().rpc_version_semver instead")
+    def semver_version(self) -> Optional[int]:
         """Get the Transmission daemon RPC version."""
-        return self.rpc_version
+        return self.__semver_version
+
+    @property
+    @deprecated("use .get_session().rpc_version instead")
+    def rpc_version(self) -> int:
+        """Get the Transmission daemon RPC version."""
+        return self.__rpc_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
         """
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
-        if not self.rpc_version:
+        if not self.__rpc_version:
             return
 
-        if self.rpc_version < required_version:
+        if self.__rpc_version < required_version:
             self.logger.warning(
                 "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
-                self.rpc_version,
+                self.__rpc_version,
                 required_version,
             )
 
@@ -519,7 +537,6 @@ class Client:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
             arguments = self.__torrent_get_arguments()
-
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
