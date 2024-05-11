@@ -1,10 +1,10 @@
 import enum
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timezone, timedelta
 
-from transmission_rpc.types import File, Container
-from transmission_rpc.utils import format_timedelta
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
+from transmission_rpc.types import Container, File
+from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",

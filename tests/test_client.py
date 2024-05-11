@@ -1,18 +1,18 @@
-import time
 import base64
 import pathlib
+import time
 from unittest import mock
 from urllib.parse import urljoin
 
-import yarl
 import pytest
+import yarl
 from typing_extensions import Literal
 
-from tests.util import skip_on, ServerTooLowError
+from tests.util import ServerTooLowError, skip_on
+from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.types import File
 from transmission_rpc.utils import _try_read_torrent
-from transmission_rpc.client import Client, ensure_location_str
 
 
 @pytest.mark.parametrize(

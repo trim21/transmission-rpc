@@ -1,12 +1,12 @@
-import time
 import calendar
 import datetime
+import time
 
 import pytest
 
 import transmission_rpc
-import transmission_rpc.utils
 import transmission_rpc.constants
+import transmission_rpc.utils
 from transmission_rpc.torrent import Status
 
 

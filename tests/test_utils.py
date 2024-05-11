@@ -7,8 +7,8 @@ from unittest import mock
 
 import pytest
 
-from transmission_rpc import utils, from_url
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT
+from transmission_rpc import from_url, utils
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER
 
 
 def assert_almost_eq(value: float, expected: float):

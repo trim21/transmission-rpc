@@ -1,29 +1,29 @@
 import json
-import time
-import types
-import string
 import logging
 import pathlib
+import string
+import time
+import types
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
+from typing import Any, BinaryIO, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import quote
-from typing_extensions import deprecated
+
 import requests
 import requests.auth
 import requests.exceptions
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, TypedDict, deprecated
 
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
 from transmission_rpc.error import (
-    TransmissionError,
     TransmissionAuthError,
     TransmissionConnectError,
+    TransmissionError,
     TransmissionTimeoutError,
 )
-from transmission_rpc.types import Group, _Timeout
-from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
+from transmission_rpc.types import Group, _Timeout
+from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
 valid_hash_char = string.digits + string.ascii_letters
 
