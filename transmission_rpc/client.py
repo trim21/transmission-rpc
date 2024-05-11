@@ -131,27 +131,27 @@ class Client:
 
     @property
     @deprecated("do not use internal property")
-    def url(self):
+    def url(self) -> str:
         return self._url
 
     @property
     @deprecated("do not use internal property, use `get_torrent_arguments(rpc_version)` if you need")
-    def torrent_get_arguments(self):
+    def torrent_get_arguments(self) -> List[str]:
         return self.__torrent_get_arguments
 
     @property
     @deprecated("do not use internal property, use `.get_session()` instead")
-    def raw_session(self):
+    def raw_session(self) -> dict:
         return self.__raw_session
 
     @property
     @deprecated("do not use internal property")
-    def session_id(self):
+    def session_id(self) -> str:
         return self.__session_id
 
     @property
     @deprecated("do not use internal property, use `.get_session().version` instead")
-    def server_version(self):
+    def server_version(self) -> str:
         return self.__server_version
 
     @property
@@ -337,7 +337,7 @@ class Client:
 
     @property
     @deprecated("use .get_session().rpc_version_semver instead")
-    def semver_version(self) -> int:
+    def semver_version(self) -> Optional[int]:
         """Get the Transmission daemon RPC version."""
         return self.__semver_version
 
