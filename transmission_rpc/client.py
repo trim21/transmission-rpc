@@ -202,7 +202,7 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
-                    "url": self.__url,
+                    "url": self._url,
                     "headers": self._http_header,
                     "data": query,
                     "timeout": timeout,
@@ -211,7 +211,7 @@ class Client:
             request_count += 1
             try:
                 r = self._http_session.post(
-                    self.__url,
+                    self._url,
                     headers=self._http_header,
                     json=query,
                     timeout=timeout,
