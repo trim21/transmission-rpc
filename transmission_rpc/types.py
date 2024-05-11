@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Union, TypeVar, Optional, NamedTuple
+from typing import Any, Dict, NamedTuple, Optional, Tuple, TypeVar, Union
 
 from transmission_rpc.constants import Priority
 

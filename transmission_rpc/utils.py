@@ -2,10 +2,10 @@
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
 import base64
+import datetime
 import functools
 import pathlib
-import datetime
-from typing import List, Tuple, Union, BinaryIO, Optional
+from typing import BinaryIO, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
