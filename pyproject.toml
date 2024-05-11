@@ -30,7 +30,7 @@ classifiers = [
 python = "^3.8"
 # dependencies
 requests = "^2.23.0"
-typing-extensions = "*"
+typing-extensions = ">=4.5.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = { version = "^7.0.0", python = "^3.9" }
