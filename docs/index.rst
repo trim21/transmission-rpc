@@ -69,6 +69,7 @@ you can find rpc version by transmission version from
     session.rst
     errors.rst
     utils.rst
+    types.rst
 
 Indices and tables
 ==================
