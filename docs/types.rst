@@ -2,7 +2,6 @@ Types
 ============================================
 
 .. automodule:: transmission_rpc.types
-    :members:
 
 .. autoclass:: PortTestResult
 

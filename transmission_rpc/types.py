@@ -70,6 +70,12 @@ class Group(Container):
 
 
 class PortTestResult(Container):
+    """
+    api response of ``port-test``
+
+    https://github.com/transmission/transmission/blob/5d159e0/docs/rpc-spec.md#44-port-checking
+    """
+
     @property
     def port_is_open(self) -> bool:
         """available on all transmission version"""
