@@ -20,16 +20,17 @@ class Container:
 
 
 class File(NamedTuple):
-    name: str  # file name
-    size: int  # file size in bytes
-    completed: int  # bytes completed
-    priority: Priority
-    selected: bool  # if selected for download
-    id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
+    name: str  #: file name
+    size: int  #: file size in bytes
+    completed: int  #: bytes completed
+    priority: Priority  #: download priority
+    selected: bool  #: if selected for download
+    id: int  #: id of the file of this torrent, not should not be used outside the torrent scope.
 
-    # add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+    #: add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
     begin_piece: Optional[int] = None
-    # add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+
+    #: add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
     end_piece: Optional[int] = None
 
 
