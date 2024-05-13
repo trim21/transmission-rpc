@@ -20,18 +20,29 @@ class Container:
 
 
 class File(NamedTuple):
-    name: str  #: file name
-    size: int  #: file size in bytes
-    completed: int  #: bytes completed
-    priority: Priority  #: download priority
-    selected: bool  #: if selected for download
-    id: int  #: id of the file of this torrent, not should not be used outside the torrent scope.
+    name: str
+    """file name"""
 
-    #: add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+    size: int
+    """file size in bytes"""
+
+    completed: int
+    """bytes completed"""
+
+    priority: Priority
+    """download priority"""
+
+    selected: bool
+    """if selected for download"""
+
+    id: int
+    """id of the file of this torrent, not should not be used outside the torrent scope"""
+
     begin_piece: Optional[int] = None
+    """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
 
-    #: add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
     end_piece: Optional[int] = None
+    """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
 
 
 class Group(Container):
@@ -72,7 +83,7 @@ class Group(Container):
 
 class PortTestResult(Container):
     """
-    api response of ``port-test``
+    api response of :meth:`transmission_rpc.Client.port_test`
 
     https://github.com/transmission/transmission/blob/5d159e0/docs/rpc-spec.md#44-port-checking
     """

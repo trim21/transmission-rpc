@@ -20,5 +20,11 @@ tasks:
       - poetry run pytest
 
   build:docs:
+    sources:
+      - transmission_rpc/**/*.py
+      - docs/**/*
+      - exclude: docs/dist/**/*
+    generates:
+      - docs/dist/**/*
     cmds:
       - poetry run sphinx-build ./docs/ ./docs/dist/
