@@ -10,6 +10,8 @@ Many functions in Client takes torrent id.
 You can find torrent-ids spec in `official docs
 <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#31-torrent-action-requests>`_
 
+They are all supported but using SHA1 hash strings is highly recommended.
+
 .. automodule:: transmission_rpc
 
 .. autofunction:: from_url
