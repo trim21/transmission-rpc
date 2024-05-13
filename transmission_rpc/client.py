@@ -1102,8 +1102,6 @@ class Client:
         Tests to see if your incoming peer port is accessible from the
         outside world.
 
-        return a dict with testing result
-
         https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
         """
         return PortTestResult(
