@@ -1,29 +1,29 @@
 import json
-import time
-import types
-import string
 import logging
 import pathlib
+import string
+import time
+import types
 import urllib.parse
-from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, BinaryIO, Iterable, Optional
+from typing import Any, BinaryIO, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import quote
 
 import requests
 import requests.auth
 import requests.exceptions
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, TypedDict, deprecated
 
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
 from transmission_rpc.error import (
-    TransmissionError,
     TransmissionAuthError,
     TransmissionConnectError,
+    TransmissionError,
     TransmissionTimeoutError,
 )
-from transmission_rpc.types import Group, _Timeout
-from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, RpcMethod
+from transmission_rpc.types import Group, _Timeout
+from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
 valid_hash_char = string.digits + string.ascii_letters
 
@@ -75,8 +75,6 @@ def _parse_torrent_ids(args: Any) -> Union[str, List[Union[str, int]]]:
 
 
 class Client:
-    semver_version: Optional[str]  # available in transmission>=4.0.0
-
     def __init__(
         self,
         *,
@@ -119,16 +117,42 @@ class Client:
             path = "/transmission/rpc"
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
-        self.url = str(url)
+        self._url = str(url)
         self._sequence = 0
-        self.raw_session: Dict[str, Any] = {}
-        self.session_id = "0"
-        self.server_version: str = "(unknown)"
-        self.protocol_version: int = 17  # default 17
+        self.__raw_session: Dict[str, Any] = {}
+        self.__session_id = "0"
+        self.__server_version: str = "(unknown)"
+        self.__protocol_version: int = 17  # default 17
         self._http_session = requests.Session()
         self._http_session.trust_env = False
+        self.__semver_version = None
         self.get_session()
-        self.torrent_get_arguments = get_torrent_arguments(self.rpc_version)
+        self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
+
+    @property
+    @deprecated("do not use internal property")
+    def url(self) -> str:
+        return self._url
+
+    @property
+    @deprecated("do not use internal property, use `get_torrent_arguments(rpc_version)` if you need")
+    def torrent_get_arguments(self) -> List[str]:
+        return self.__torrent_get_arguments
+
+    @property
+    @deprecated("do not use internal property, use `.get_session()` instead")
+    def raw_session(self) -> dict:
+        return self.__raw_session
+
+    @property
+    @deprecated("do not use internal property")
+    def session_id(self) -> str:
+        return self.__session_id
+
+    @property
+    @deprecated("do not use internal property, use `.get_session().version` instead")
+    def server_version(self) -> str:
+        return self.__server_version
 
     @property
     def timeout(self) -> _Timeout:
@@ -163,7 +187,7 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.session_id}
+        return {"x-transmission-session-id": self.__session_id}
 
     def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
         """
@@ -177,7 +201,7 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
-                    "url": self.url,
+                    "url": self._url,
                     "headers": self._http_header,
                     "data": query,
                     "timeout": timeout,
@@ -186,7 +210,7 @@ class Client:
             request_count += 1
             try:
                 r = self._http_session.post(
-                    self.url,
+                    self._url,
                     headers=self._http_header,
                     json=query,
                     timeout=timeout,
@@ -196,7 +220,7 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            self.session_id = r.headers.get("X-Transmission-Session-Id", "0")
+            self.__session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
@@ -287,7 +311,7 @@ class Client:
                     rawResponse=http_data,
                 )
         elif method == RpcMethod.SessionGet:
-            self.raw_session.update(res)
+            self.__raw_session.update(res)
         elif method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in res:
@@ -307,23 +331,30 @@ class Client:
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.semver_version = self.raw_session.get("rpc-version-semver")
-        self.server_version = self.raw_session["version"]
-        self.protocol_version = self.raw_session["rpc-version"]
+        self.__semver_version = self.__raw_session.get("rpc-version-semver")
+        self.__server_version = self.__raw_session["version"]
+        self.__protocol_version = self.__raw_session["rpc-version"]
 
     @property
+    @deprecated("use .get_session().rpc_version_semver instead")
+    def semver_version(self) -> Optional[int]:
+        """Get the Transmission daemon RPC version."""
+        return self.__semver_version
+
+    @property
+    @deprecated("use .get_session().rpc_version instead")
     def rpc_version(self) -> int:
         """Get the Transmission daemon RPC version."""
-        return self.protocol_version
+        return self.__protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
         """
         Add a warning to the log if the Transmission RPC version is lower then the provided version.
         """
-        if self.rpc_version < required_version:
+        if self.__protocol_version < required_version:
             self.logger.warning(
                 "Using feature not supported by server. RPC version for server %d, feature introduced in %d.",
-                self.rpc_version,
+                self.__protocol_version,
                 required_version,
             )
 
@@ -405,7 +436,7 @@ class Client:
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
                 "cookies": cookies,
-                "labels": list_or_none(labels),
+                "labels": list_or_none(_single_str_as_list(labels)),
             }
         )
 
@@ -504,7 +535,7 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments
         torrent_id = _parse_torrent_id(torrent_id)
         if torrent_id is None:
             raise ValueError("Invalid id")
@@ -536,7 +567,7 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments
         return [
             Torrent(fields=x)
             for x in self._request(RpcMethod.TorrentGet, {"fields": arguments}, ids, timeout=timeout)["torrents"]
@@ -559,7 +590,7 @@ class Client:
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
         else:
-            arguments = self.torrent_get_arguments
+            arguments = self.__torrent_get_arguments
 
         result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
 
@@ -724,7 +755,7 @@ class Client:
                 "trackerAdd": tracker_add,
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
-                "labels": list_or_none(labels),
+                "labels": list_or_none(_single_str_as_list(labels)),
                 "trackerList": None if tracker_list is None else "\n".join("\n\n".join(x) for x in tracker_list),
                 "group": group,
                 "sequentialDownload": sequential_download,
@@ -822,7 +853,7 @@ class Client:
         """
         self._request(RpcMethod.SessionGet, timeout=timeout)
         self._update_server_version()
-        return Session(fields=self.raw_session)
+        return Session(fields=self.__raw_session)
 
     def set_session(
         self,
@@ -1099,11 +1130,22 @@ class Client:
         *,
         timeout: Optional[_Timeout] = None,
         honors_session_limits: Optional[bool] = None,
+        speed_limit_down_enabled: Optional[bool] = None,
         speed_limit_down: Optional[int] = None,
         speed_limit_up_enabled: Optional[bool] = None,
         speed_limit_up: Optional[int] = None,
-        speed_limit_down_enabled: Optional[bool] = None,
     ) -> None:
+        """create or update a Bandwidth group.
+
+        :param name: Bandwidth group name
+        :param honors_session_limits: true if session upload limits are honored
+        :param speed_limit_down_enabled: true means enabled
+        :param speed_limit_down: 	max global download speed (KBps)
+        :param speed_limit_up_enabled: 	true means enabled
+        :param speed_limit_up: max global upload speed (KBps)
+        :param timeout: request timeout
+        """
+
         self._rpc_version_warning(17)
         arguments: Dict[str, Any] = remove_unset_value(
             {
@@ -1122,8 +1164,9 @@ class Client:
         self._rpc_version_warning(17)
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
-        if result["arguments"]["group"]:
-            return Group(fields=result["arguments"]["group"][0])
+        if result["group"]:
+            return Group(fields=result["group"][0])
+
         return None
 
     def get_groups(self, name: Optional[List[str]] = None, *, timeout: Optional[_Timeout] = None) -> Dict[str, Group]:
@@ -1133,7 +1176,7 @@ class Client:
 
         result: Dict[str, Any] = self._request(RpcMethod.GroupGet, payload, timeout=timeout)
 
-        return {x["name"]: Group(fields=x) for x in result["arguments"]["group"]}
+        return {x["name"]: Group(fields=x) for x in result["group"]}
 
     def __enter__(self) -> "Client":
         return self
@@ -1148,6 +1191,14 @@ class Client:
 
 
 T = TypeVar("T")
+
+
+def _single_str_as_list(v: Optional[Iterable[str]]) -> Optional[List[str]]:
+    if v is None:
+        return v
+    if isinstance(v, str):
+        return [v]
+    return list(v)
 
 
 def list_or_none(v: Optional[Iterable[T]]) -> Optional[List[T]]:

@@ -3,7 +3,7 @@
 # Licensed under the MIT license.
 import enum
 import logging
-from typing import Dict, Optional, NamedTuple
+from typing import Dict, NamedTuple, Optional
 
 LOGGER = logging.getLogger("transmission-rpc")
 LOGGER.setLevel(logging.ERROR)

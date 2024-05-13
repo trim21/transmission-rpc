@@ -14,7 +14,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        transmission: ["version-3.00-r8", "4.0.3"]
+        transmission: ["version-3.00-r8", "4.0.5"]
         python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     services:

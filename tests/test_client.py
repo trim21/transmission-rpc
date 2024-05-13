@@ -1,17 +1,18 @@
-import time
 import base64
 import pathlib
+import time
 from unittest import mock
 from urllib.parse import urljoin
 
-import yarl
 import pytest
+import yarl
 from typing_extensions import Literal
 
+from tests.util import ServerTooLowError, skip_on
+from transmission_rpc.client import Client, ensure_location_str
 from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.types import File
 from transmission_rpc.utils import _try_read_torrent
-from transmission_rpc.client import Client, ensure_location_str
 
 
 @pytest.mark.parametrize(
@@ -58,7 +59,7 @@ def test_client_parse_url(protocol: Literal["http", "https"], username, password
             )
         )
 
-        assert client.url == u
+        assert client._url == u  # noqa: SLF001
 
 
 def hash_to_magnet(h):
@@ -233,3 +234,14 @@ def test_ensure_location_str_relative():
 
 def test_ensure_location_str_absolute():
     ensure_location_str(pathlib.Path(".").absolute())
+
+
+@skip_on(ServerTooLowError, "group methods is added in rpc version 17")
+def test_groups(tr_client: Client):
+    if tr_client.get_session().rpc_version < 17:
+        raise ServerTooLowError
+
+    tr_client.set_group("test.1")
+    groups = tr_client.get_groups()
+
+    assert "test.1" in groups

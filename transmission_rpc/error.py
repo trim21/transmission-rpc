@@ -1,6 +1,7 @@
 """
 exception raise by this package
 """
+
 from typing import Any, Optional
 
 from requests.models import Response

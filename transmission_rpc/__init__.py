@@ -1,12 +1,12 @@
 import logging
 import urllib.parse
 
-from transmission_rpc.error import TransmissionError
-from transmission_rpc.types import File, Group
 from transmission_rpc.client import Client
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, IdleMode, Priority, RatioLimitMode
+from transmission_rpc.error import TransmissionError
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.constants import LOGGER, DEFAULT_TIMEOUT, IdleMode, Priority, RatioLimitMode
+from transmission_rpc.types import File, Group
 
 __all__ = [
     "Client",

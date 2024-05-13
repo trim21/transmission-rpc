@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "transmission-rpc"
-version = "7.0.3"
+version = "7.0.5"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
 authors = ["Trim21 <i@trim21.me>"]
 readme = 'README.md'
@@ -30,26 +30,26 @@ classifiers = [
 python = "^3.8"
 # dependencies
 requests = "^2.23.0"
-typing-extensions = "*"
+typing-extensions = ">=4.5.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = { version = "^7.0.0", python = "^3.9" }
-furo = { version = "2024.1.29", python = "^3.9" }
+furo = { version = "2024.5.6", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"
 # tests
-pytest = "==7.4.4"
+pytest = "==8.2.0"
 pytest-github-actions-annotate-failures = "==0.2.0"
-coverage = "==7.4.4"
+coverage = "==7.5.0"
 
 # linter and formatter
 pre-commit = { version = "==3.7.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
-mypy = { version = "==1.9.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
-ruff = "0.3.4"
+mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
+ruff = "0.4.2"
 
 # stubs
-types-requests = "==2.31.0.20240311"
+types-requests = "==2.31.0.20240406"
 
 [tool.poetry-plugin-bump]
 commit_msg = 'bump: v{version}'
@@ -82,8 +82,11 @@ target-version = ['py38']
 
 
 [tool.ruff]
+target-version = "py38"
 extend-exclude = ["docs"]
 line-length = 120
+
+[tool.ruff.lint]
 select = [
     "B",
     "C",
@@ -135,7 +138,6 @@ ignore = [
     'C901',
     'ISC003',
     'PLR0913',
-    'I001',
     'RUF001',
     'SIM108',
     'TCH003',
@@ -150,5 +152,3 @@ ignore = [
     'PLR2004',
     'PGH003',
 ]
-
-target-version = "py38"

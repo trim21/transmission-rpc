@@ -2,7 +2,7 @@ default_stages: [commit]
 
 repos:
   - repo: https://github.com/python-poetry/poetry
-    rev: "1.4.0"
+    rev: "1.8.3"
     hooks:
       - id: poetry-check
       - id: poetry-lock
@@ -10,7 +10,7 @@ repos:
         args: ["--check"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -30,36 +30,13 @@ repos:
       - id: fix-encoding-pragma
         args: [--remove]
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.2
     hooks:
-      - id: isort
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.4.0
-    hooks:
-      - id: pyupgrade
-        args: [--py37-plus]
-
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.1.1
-    hooks:
-      - id: autoflake
-        args:
-          - --in-place
-          - --remove-unused-variables
-          - --remove-all-unused-imports
-          - --expand-star-imports
-
-  - repo: https://github.com/PyCQA/doc8.git
-    rev: v1.1.1
-    hooks:
-      - id: doc8
-        name: Check rst file
-        args: [--max-line-length=120]
-        files: \.rst$
+      - id: ruff
+        args: [ --fix ]
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 24.4.2
     hooks:
       - id: black
