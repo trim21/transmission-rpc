@@ -2,8 +2,7 @@ Types
 ============================================
 
 .. automodule:: transmission_rpc.types
-
-.. autoclass:: PortTestResult
+    :members:
 
 .. toctree::
    :maxdepth: 2
