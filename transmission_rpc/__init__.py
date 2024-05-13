@@ -6,7 +6,7 @@ from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, IdleMode, Priori
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.session import Session
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import File, Group
+from transmission_rpc.types import File, Group, PortTestResult
 
 __all__ = [
     "Client",
@@ -21,6 +21,7 @@ __all__ = [
     "Priority",
     "RatioLimitMode",
     "IdleMode",
+    "PortTestResult",
 ]
 
 

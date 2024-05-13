@@ -22,7 +22,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group, _Timeout
+from transmission_rpc.types import Group, PortTestResult, _Timeout
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
 valid_hash_char = string.digits + string.ascii_letters
@@ -1097,7 +1097,7 @@ class Client:
 
     def port_test(
         self, timeout: Optional[_Timeout] = None, *, ip_protocol: Optional[Literal["ipv4", "ipv6"]] = None
-    ) -> Dict[str, Any]:
+    ) -> PortTestResult:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
@@ -1106,7 +1106,9 @@ class Client:
 
         https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
         """
-        return self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
+        return PortTestResult(
+            fields=self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
+        )
 
     def free_space(self, path: Union[str, pathlib.Path], timeout: Optional[_Timeout] = None) -> Optional[int]:
         """

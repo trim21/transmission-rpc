@@ -67,3 +67,20 @@ class Group(Container):
     def speed_limit_up(self) -> int:
         """max global upload speed (KBps)"""
         return self.fields["speed-limit-up"]
+
+
+class PortTestResult(Container):
+    @property
+    def port_is_open(self) -> bool:
+        """available on all transmission version"""
+        return self.fields["port-is-open"]
+
+    @property
+    def ip_protocol(self) -> str:
+        """ipv4 if the test was carried out on IPv4,
+        ipv6 if the test was carried out on IPv6,
+        unset if it cannot be determined
+
+        Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        """
+        return self.fields["ipProtocol"]
