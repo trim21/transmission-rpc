@@ -10,7 +10,10 @@ Many functions in Client takes torrent id.
 You can find torrent-ids spec in `official docs
 <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#31-torrent-action-requests>`_
 
-They are all supported but using SHA1 hash strings is highly recommended.
+=======
+.. note::
+
+    It's recommended that you use torrent's ``info_hash`` as torrent id. The torrent's ``info_hash`` will never change.
 
 .. automodule:: transmission_rpc
 

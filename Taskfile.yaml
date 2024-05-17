@@ -19,6 +19,10 @@ tasks:
     cmds:
       - poetry run pytest
 
+  dev:docs:
+    cmds:
+      - poetry run sphinx-autobuild ./docs/ ./docs/dist/ --watch transmission_rpc
+
   build:docs:
     sources:
       - transmission_rpc/**/*.py
