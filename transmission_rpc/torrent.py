@@ -365,6 +365,7 @@ class Torrent(Container):
     def get_files(self) -> List[File]:
         """
         Get list of files for this torrent.
+        You need to fetch torrent arguments  ``files``, ``priorities`` and ``wanted`` to use this method.
 
         Note
         ----
@@ -382,25 +383,20 @@ class Torrent(Container):
                 print(file.id)
 
         """
-        result: List[File] = []
-        if "files" in self.fields:
-            files = self.fields["files"]
-            indices = range(len(files))
-            priorities = self.fields["priorities"]
-            wanted = self.fields["wanted"]
-            result.extend(
-                File(
-                    selected=bool(raw_selected),
-                    priority=Priority(raw_priority),
-                    size=file["length"],
-                    name=file["name"],
-                    completed=file["bytesCompleted"],
-                    id=id,
-                )
-                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
+        files = self.fields["files"]
+        priorities = self.fields["priorities"]
+        wanted = self.fields["wanted"]
+        return [
+            File(
+                selected=bool(raw_selected),
+                priority=Priority(raw_priority),
+                size=file["length"],
+                name=file["name"],
+                completed=file["bytesCompleted"],
+                id=id,
             )
-
-        return result
+            for id, file, raw_priority, raw_selected in zip(range(len(files)), files, priorities, wanted)
+        ]
 
     @property
     def file_stats(self) -> List[FileStat]:
