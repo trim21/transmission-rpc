@@ -14,6 +14,7 @@ You can find torrent-ids spec in `official docs
 
     It's recommended that you use torrent's ``info_hash`` as torrent id. The torrent's ``info_hash`` will never change.
 
+
 .. automodule:: transmission_rpc
 
 .. autofunction:: from_url
