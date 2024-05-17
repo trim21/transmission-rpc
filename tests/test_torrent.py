@@ -32,7 +32,7 @@ def test_non_active():
 
 
 def test_attributes():
-    torrent = transmission_rpc.Torrent(fields={"id": 42})
+    torrent = transmission_rpc.Torrent(fields={"id": 42, "files": [], "wanted": [], "priorities": []})
     assert torrent.id == 42
     assert_property_exception(KeyError, torrent, "status")
     assert_property_exception(KeyError, torrent, "progress")
