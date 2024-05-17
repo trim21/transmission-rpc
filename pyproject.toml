@@ -51,9 +51,6 @@ mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python
 types-requests = "==2.31.0.20240406"
 sphinx-autobuild = {version = "2024.4.16", python = "^3.9"}
 
-[tool.poetry-plugin-bump]
-commit_msg = 'bump: v{version}'
-
 [tool.isort]
 default_section = 'THIRDPARTY'
 indent = '    '

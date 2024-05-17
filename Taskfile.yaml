@@ -9,6 +9,15 @@ tasks:
       - task --list-all
     silent: true
 
+  bump:
+    vars:
+      VERSION:
+        sh: poetry version -s
+    cmds:
+      - git add pyproject.toml
+      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
+
   lint:
     cmds:
       - poetry run ruff .
