@@ -7,9 +7,11 @@ on:
       - reopened
       - edited
       - synchronize
+      - converted_to_draft
+      - ready_for_review
 
 permissions:
-  pull-requests: read
+  pull-requests: write
   statuses: write
 
 jobs:
