@@ -361,7 +361,7 @@ class Session(Container):
         return self.fields["version"]
 
     @property
-    def default_trackers(self) -> Optional[list]:
+    def default_trackers(self) -> Optional[List[str]]:
         """
         list of default trackers to use on public torrents
         new at rpc-version 17

@@ -631,8 +631,8 @@ class Torrent(Container):
         return self.fields["uploadRatio"]
 
     @property
-    def wanted(self) -> List:
-        # TODO
+    def wanted(self) -> List[int]:
+        """if files are wanted, sorted by file index. 1 for wanted 0 for unwanted"""
         return self.fields["wanted"]
 
     @property
