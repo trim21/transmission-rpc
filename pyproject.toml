@@ -51,17 +51,6 @@ mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python
 types-requests = "==2.31.0.20240406"
 sphinx-autobuild = {version = "2024.4.16", python = "^3.9"}
 
-[tool.isort]
-default_section = 'THIRDPARTY'
-indent = '    '
-profile = 'black'
-known_first_party = 'transmission_rpc'
-length_sort = true
-line_length = 120
-no_lines_before = 'LOCALFOLDER'
-use_parentheses = true
-include_trailing_comma = true
-
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
 
