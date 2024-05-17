@@ -503,7 +503,7 @@ class Client:
     ) -> Torrent:
         """
         Get information for torrent with provided id.
-        ``arguments`` contains a list of field names to be returned, when None
+        ``arguments`` contains a list of field names to be returned, when ``arguments=None`` (default),
         all fields are requested. See the Torrent class for more information.
 
         new argument ``format`` in rpc_version 16 is unnecessarily
@@ -511,10 +511,13 @@ class Client:
 
         Returns a Torrent object with the requested fields.
 
-
         Note
         ----
-        It's recommended that you use torrent's ``info_hash`` as torrent id. The torrent's ``info_hash`` will never change.
+        It's recommended that you only fetch arguments you need,
+        this could improve response speed.
+
+        For example, fetch all fields from transmission daemon with 1500 torrents would take ~5s,
+        but is only ~0.2s if to fetch 6 fields.
 
         Parameters
         ----------
