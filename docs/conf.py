@@ -32,10 +32,10 @@ author = "Trim21 <trim21me@gmail.com>"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
     "furo.sphinxext",
+    "sphinx.ext.linkcode",
 ]
 
 napoleon_numpy_docstring = False
