@@ -4,7 +4,6 @@ import pathlib
 import string
 import time
 import types
-import urllib.parse
 from typing import Any, BinaryIO, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import quote
 
@@ -116,7 +115,7 @@ class Client:
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
+        url = f"{protocol}://{auth}{host}:{port}{path}"
         self._url = str(url)
         self.__raw_session: Dict[str, Any] = {}
         self.__session_id = "0"
