@@ -141,7 +141,7 @@ class Client:
 
     @property
     @deprecated("do not use internal property, use `.get_session()` instead")
-    def raw_session(self) -> dict:
+    def raw_session(self) -> Dict[str, Any]:
         return self.__raw_session
 
     @property
@@ -189,7 +189,7 @@ class Client:
     def _http_header(self) -> Dict[str, str]:
         return {"x-transmission-session-id": self.__session_id}
 
-    def _http_query(self, query: dict, timeout: Optional[_Timeout] = None) -> str:
+    def _http_query(self, query: Dict[str, Any], timeout: Optional[_Timeout] = None) -> str:
         """
         Query Transmission through HTTP.
         """
@@ -235,7 +235,7 @@ class Client:
         ids: Optional[_TorrentIDs] = None,
         require_ids: bool = False,
         timeout: Optional[_Timeout] = None,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Send json-rpc request to Transmission using http POST
         """
