@@ -679,7 +679,8 @@ class Client:
 
         Warnings:
             ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
-            It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
+            It will be bypassed to request arguments **as-is**,
+            the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
         if labels is not None:
             self._rpc_version_warning(16)
@@ -739,7 +740,8 @@ class Client:
         Move torrent data to the new location.
 
         See Also:
-            `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+            `RPC Spec: moving-a-torrent
+            <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
         """
         args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
@@ -759,7 +761,8 @@ class Client:
             This is not the method to move torrent data directory,
 
         See Also:
-            `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
+            `RPC Spec: renaming-a-torrents-path
+            <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
@@ -1055,7 +1058,9 @@ class Client:
         https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
 
         Parameters:
-            ip_protocol: ``ipv4`` or ``ipv6``. Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+            ip_protocol: ``ipv4`` or ``ipv6``.
+                Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+            timeout: request timeout
         """
         return PortTestResult(
             fields=self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
