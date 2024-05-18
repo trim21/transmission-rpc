@@ -30,6 +30,8 @@ valid_hash_char = string.digits + string.ascii_letters
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
 
+_header_session_id = "x-transmission-session-id"
+
 
 class ResponseData(TypedDict):
     arguments: Any
@@ -116,7 +118,6 @@ class Client:
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
         self._url = str(url)
-        self._sequence = 0
         self.__raw_session: Dict[str, Any] = {}
         self.__session_id = "0"
         self.__server_version: str = "(unknown)"
@@ -185,7 +186,7 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.__session_id}
+        return {_header_session_id: self.__session_id}
 
     def _http_query(self, query: Dict[str, Any], timeout: Optional[_Timeout] = None) -> str:
         """
@@ -195,7 +196,7 @@ class Client:
         if timeout is None:
             timeout = self.timeout
         while True:
-            if request_count >= 10:
+            if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
@@ -205,6 +206,7 @@ class Client:
                     "timeout": timeout,
                 }
             )
+
             request_count += 1
             try:
                 r = self._http_session.post(
@@ -218,11 +220,14 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            self.__session_id = r.headers.get("X-Transmission-Session-Id", "0")
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
                 raise TransmissionAuthError("transmission daemon require auth", original=r)
+
+            if _header_session_id in r.headers:
+                self.__session_id = r.headers["x-transmission-session-id"]
+
             if r.status_code != 409:
                 return r.text
 
@@ -250,18 +255,19 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = {"tag": self._sequence, "method": method, "arguments": arguments}
+        query = {"method": method, "arguments": arguments}
 
-        self._sequence += 1
-        start = time.time()
-        http_data = self._http_query(query, timeout)
-        elapsed = time.time() - start
-        self.logger.info("http request took %.3f s", elapsed)
+        start = time.monotonic()
+        try:
+            http_data = self._http_query(query, timeout)
+        finally:
+            elapsed = time.monotonic() - start
+            self.logger.debug("http request took %.3f s", elapsed)
 
         try:
             data: ResponseData = json.loads(http_data)
-        except ValueError as error:
-            self.logger.exception("Error: %s")
+        except json.JSONDecodeError as error:
+            self.logger.exception("Error:")
             self.logger.exception('Request: "%s"', query)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
