@@ -35,30 +35,37 @@ class Status(str, enum.Enum):
 
     @property
     def stopped(self) -> bool:
+        """if torrent stopped"""
         return self == "stopped"
 
     @property
     def check_pending(self) -> bool:
+        """if torrent check pending"""
         return self == "check pending"
 
     @property
     def checking(self) -> bool:
+        """if torrent checking"""
         return self == "checking"
 
     @property
     def download_pending(self) -> bool:
+        """if download pending"""
         return self == "download pending"
 
     @property
     def downloading(self) -> bool:
+        """if downloading"""
         return self == "downloading"
 
     @property
     def seed_pending(self) -> bool:
+        """if seed pending"""
         return self == "seed pending"
 
     @property
     def seeding(self) -> bool:
+        """if seeding"""
         return self == "seeding"
 
     def __str__(self) -> str:
@@ -66,6 +73,10 @@ class Status(str, enum.Enum):
 
 
 class FileStat(Container):
+    """
+    type for :py:meth:`Torrent.file_stats`
+    """
+
     @property
     def bytesCompleted(self) -> int:
         return self.fields["bytesCompleted"]
@@ -80,6 +91,10 @@ class FileStat(Container):
 
 
 class Tracker(Container):
+    """
+    type for :py:attr:`Torrent.trackers`
+    """
+
     @property
     def id(self) -> int:
         return self.fields["id"]
@@ -98,6 +113,10 @@ class Tracker(Container):
 
 
 class TrackerStats(Container):
+    """
+    type for :py:attr:`Torrent.tracker_stats`
+    """
+
     @property
     def id(self) -> int:
         return self.fields["id"]
@@ -211,9 +230,8 @@ class Torrent(Container):
     """
     Torrent is a class holding the data received from Transmission regarding a bittorrent transfer.
 
-    Warnings
-    --------
-    setter on Torrent's properties has been removed, please use ``Client().change_torrent()`` instead
+    Warnings:
+        setter on Torrent's properties has been removed, please use :py:meth:`Client.change_torrent` instead
     """
 
     def __init__(self, *, fields: Dict[str, Any]):
@@ -366,11 +384,9 @@ class Torrent(Container):
         """
         Get list of files for this torrent.
 
-        Note
-        ----
-
+        Note:
             The order of the files is guaranteed. The index of file object is the id of the file
-            when calling :py:meth:`transmission_rpc.client.Client.set_files`.
+            when calling :py:meth:`transmission_rpc.Client.change_torrent`
 
         .. code-block:: python
 
@@ -378,7 +394,7 @@ class Torrent(Container):
 
             torrent = Client().get_torrent(0)
 
-            for file in enumerate(torrent.get_files()):
+            for file in torrent.get_files():
                 print(file.id)
 
         """
@@ -404,6 +420,7 @@ class Torrent(Container):
 
     @property
     def file_stats(self) -> List[FileStat]:
+        """file stats"""
         return [FileStat(fields=x) for x in self.fields["fileStats"]]
 
     @property
@@ -588,6 +605,7 @@ class Torrent(Container):
 
     @property
     def trackers(self) -> List[Tracker]:
+        """trackers of torrent"""
         return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
@@ -597,6 +615,7 @@ class Torrent(Container):
 
     @property
     def tracker_stats(self) -> List[TrackerStats]:
+        """tracker status, for example, announce success/failure status"""
         return [TrackerStats(fields=x) for x in self.fields["trackerStats"]]
 
     @property

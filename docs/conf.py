@@ -4,6 +4,10 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
+import importlib
+import inspect
+import os
+import sys
 
 # -- Path setup --------------------------------------------------------------
 
@@ -29,10 +33,13 @@ author = "Trim21 <trim21me@gmail.com>"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx_copybutton",
     "furo.sphinxext",
+    "sphinx.ext.linkcode",
 ]
+
+napoleon_numpy_docstring = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -73,16 +80,27 @@ html_theme = "furo"
 # documentation.
 #
 html_theme_options = {
-    "source_edit_link": "https://github.com/trim21/transmission-rpc/blob/master/docs/source/{filename}",
+    "source_edit_link": "https://github.com/trim21/transmission-rpc/blob/master/docs/{filename}",
+    # "source_view_link": "https://github.com/trim21/transmission-rpc/blob/master/{filename}",
+    "source_repository": "https://github.com/trim21/transmission-rpc/",
+    "source_branch": "master",
+    "source_directory": "docs/",
 }
+
+html_copy_source = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
-# autodoc_member_order = "bysource"
+autodoc_member_order = "bysource"
 autodoc_class_signature = "separated"
-autodoc_typehints = "both"
+autodoc_typehints = "signature"
+
+autodoc_default_options = {
+    "special-members": "",
+    "exclude-members": "__new__",
+}
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -98,3 +116,58 @@ autodoc_typehints = "both"
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "transmission-rpc doc"
+
+ref = "master"
+
+if os.environ.get("READTHEDOCS"):
+    sys.path.insert(0, os.path.normpath(".."))
+
+    if os.environ["READTHEDOCS_VERSION_TYPE"] == "tag":
+        ref = os.environ["READTHEDOCS_GIT_IDENTIFIER"]
+    else:
+        ref = os.environ["READTHEDOCS_GIT_COMMIT_HASH"]
+
+
+def linkcode_resolve(domain, info):
+    if domain != "py":
+        return None
+    if not info["module"]:
+        return None
+
+    assert domain == "py", "expected only Python objects"
+
+    mod = importlib.import_module(info["module"])
+    if "." in info["fullname"]:
+        objname, attrname = info["fullname"].split(".")
+        obj = getattr(mod, objname)
+        try:
+            # object is a method of a class
+            obj = getattr(obj, attrname)
+        except AttributeError:
+            # object is an attribute of a class
+            return None
+    else:
+        obj = getattr(mod, info["fullname"])
+
+    try:
+        file = inspect.getsourcefile(obj)
+        lines = inspect.getsourcelines(obj)
+    except TypeError:
+        # e.g. object is a typing.Union
+        return None
+
+    file = os.path.relpath(file, os.path.abspath(".."))
+
+    if file.startswith("transmission-rpc"):
+        # e.g. object is a typing.NewType
+        file = file.removeprefix("transmission-rpc" + os.sep)
+
+        start = lines[1]
+
+        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
+
+    if file.startswith("transmission_rpc"):
+        # read the docs, don't know why
+        start = lines[1]
+
+        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
