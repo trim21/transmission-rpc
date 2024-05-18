@@ -136,8 +136,6 @@ def linkcode_resolve(domain, info):
 
     assert domain == "py", "expected only Python objects"
 
-    print(info)
-
     mod = importlib.import_module(info["module"])
     if "." in info["fullname"]:
         objname, attrname = info["fullname"].split(".")
@@ -160,16 +158,16 @@ def linkcode_resolve(domain, info):
 
     file = os.path.relpath(file, os.path.abspath(".."))
 
-    print(file)
-
-    if not file.startswith("transmission-rpc"):
+    if file.startswith("transmission-rpc"):
         # e.g. object is a typing.NewType
-        return None
+        file = file.removeprefix("transmission-rpc" + os.sep)
 
-    file = file.removeprefix("transmission-rpc" + os.sep)
+        start = lines[1]
 
-    print(file)
+        return f"https://github.com/trim21/transmission-rpc/tree/{ref}/{file}#L{start}"
 
-    start = lines[1]
+    if file.startswith("transmission_rpc"):
+        # read the docs, don't know why
+        start = lines[1]
 
-    return f"https://github.com/trim21/transmission-rpc/tree/{ref}/{file}#L{start}"
+        return f"https://github.com/trim21/transmission-rpc/tree/{ref}/{file}#L{start}"
