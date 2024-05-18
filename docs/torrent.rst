@@ -28,6 +28,12 @@ Torrent
     :inherited-members:
     :exclude-members: __init__, __new__
 
+.. autoclass:: PortTestResult
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :exclude-members: __init__, __new__
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
