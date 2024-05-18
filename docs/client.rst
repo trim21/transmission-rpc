@@ -4,7 +4,7 @@ Client
 Client is the class handling the Transmission JSON-RPC client protocol.
 
 Torrent ids
-------------
+-----------
 
 Many functions in Client takes torrent id.
 You can find torrent-ids spec in `official docs
@@ -14,6 +14,8 @@ You can find torrent-ids spec in `official docs
 
     It's recommended that you use torrent's ``info_hash`` as torrent id. The torrent's ``info_hash`` will never change.
 
+Client
+------
 
 .. automodule:: transmission_rpc
 
