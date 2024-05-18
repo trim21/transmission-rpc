@@ -207,8 +207,6 @@ class Client:
                 }
             )
 
-            print(query)
-
             request_count += 1
             try:
                 r = self._http_session.post(
