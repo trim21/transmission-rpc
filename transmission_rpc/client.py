@@ -220,13 +220,14 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            if _header_session_id in r.headers:
-                self.__session_id = r.headers["x-transmission-session-id"]
-
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
                 raise TransmissionAuthError("transmission daemon require auth", original=r)
+
+            if _header_session_id in r.headers:
+                self.__session_id = r.headers["x-transmission-session-id"]
+
             if r.status_code != 409:
                 return r.text
 
