@@ -157,13 +157,18 @@ def linkcode_resolve(domain, info):
     except TypeError:
         # e.g. object is a typing.Union
         return None
+
     file = os.path.relpath(file, os.path.abspath(".."))
+
+    print(file)
 
     if not file.startswith("transmission-rpc"):
         # e.g. object is a typing.NewType
         return None
 
     file = file.removeprefix("transmission-rpc" + os.sep)
+
+    print(file)
 
     start = lines[1]
 
