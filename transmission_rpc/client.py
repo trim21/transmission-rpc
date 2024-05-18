@@ -383,40 +383,38 @@ class Client:
         - bytes of torrent content
         - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
 
-        Warnings
-        --------
-        base64 string or ``file://`` protocol URL are not supported in v4.
+        Warnings:
+            base64 string or ``file://`` protocol URL are not supported in v4.
 
-        Parameters
-        ----------
-        torrent:
-            torrent to add
-        timeout:
-            request timeout
-        bandwidthPriority:
-            Priority for this transfer.
-        cookies:
-            One or more HTTP cookie(s).
-        download_dir:
-            The directory where the downloaded contents will be saved in.
-        files_unwanted:
-            A list of file id's that shouldn't be downloaded.
-        files_wanted:
-            A list of file id's that should be downloaded.
-        paused:
-            If ``True``, does not start the transfer when added.
-            Magnet url will always start to downloading torrents.
-        peer_limit:
-            Maximum number of peers allowed.
-        priority_high:
-            A list of file id's that should have high priority.
-        priority_low:
-            A list of file id's that should have low priority.
-        priority_normal:
-            A list of file id's that should have normal priority.
-        labels:
-            Array of string labels.
-            Add in rpc 17.
+        Parameters:
+            torrent:
+                torrent to add
+            timeout:
+                request timeout
+            bandwidthPriority:
+                Priority for this transfer.
+            cookies:
+                One or more HTTP cookie(s).
+            download_dir:
+                The directory where the downloaded contents will be saved in.
+            files_unwanted:
+                A list of file id's that shouldn't be downloaded.
+            files_wanted:
+                A list of file id's that should be downloaded.
+            paused:
+                If ``True``, does not start the transfer when added.
+                Magnet url will always start to downloading torrents.
+            peer_limit:
+                Maximum number of peers allowed.
+            priority_high:
+                A list of file id's that should have high priority.
+            priority_low:
+                A list of file id's that should have low priority.
+            priority_normal:
+                A list of file id's that should have normal priority.
+            labels:
+                Array of string labels.
+                Add in rpc 17.
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
@@ -907,110 +905,108 @@ class Client:
         """
         Set session parameters.
 
-        Parameters
-        ----------
-        timeout
-            request timeout
-        alt_speed_down:
-            max global download speed (KBps)
-        alt_speed_enabled:
-            true means use the alt speeds
-        alt_speed_time_begin:
-            Time when alternate speeds should be enabled. Minutes after midnight.
-        alt_speed_time_day:
-            Enables alternate speeds scheduling these days.
-        alt_speed_time_enabled:
-            Enables alternate speeds scheduling.
-        alt_speed_time_end:
-            Time when alternate speeds should be disabled. Minutes after midnight.
-        alt_speed_up:
-            Alternate session upload speed limit (in Kib/s).
-        blocklist_enabled:
-            Enables the block list
-        blocklist_url:
-            Location of the block list. Updated with blocklist-update.
-        cache_size_mb:
-            The maximum size of the disk cache in MB
-        default_trackers:
-            List of default trackers to use on public torrents.
-        dht_enabled:
-            Enables DHT.
-        download_dir:
-            Set the session download directory.
-        download_queue_enabled:
-            Enables download queue.
-        download_queue_size:
-            Number of slots in the download queue.
-        encryption:
-            Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
-        idle_seeding_limit:
-            The default seed inactivity limit in minutes.
-        idle_seeding_limit_enabled:
-            Enables the default seed inactivity limit
-        incomplete_dir:
-            The path to the directory of incomplete transfer data.
-        incomplete_dir_enabled:
-            Enables the incomplete transfer data directory,
-            Otherwise data for incomplete transfers are stored in the download target.
-        lpd_enabled:
-            Enables local peer discovery for public torrents.
-        peer_limit_global:
-            Maximum number of peers.
-        peer_limit_per_torrent:
-            Maximum number of peers per transfer.
-        peer_port:
-            Peer port.
-        peer_port_random_on_start:
-            Enables randomized peer port on start of Transmission.
-        pex_enabled:
-            Allowing PEX in public torrents.
-        port_forwarding_enabled:
-            Enables port forwarding.
-        queue_stalled_enabled:
-            Enable tracking of stalled transfers.
-        queue_stalled_minutes:
-            Number of minutes of idle that marks a transfer as stalled.
-        rename_partial_files:
-            Appends ".part" to incomplete files
+        Parameters:
+            timeout
+                request timeout
+            alt_speed_down:
+                max global download speed (KBps)
+            alt_speed_enabled:
+                true means use the alt speeds
+            alt_speed_time_begin:
+                Time when alternate speeds should be enabled. Minutes after midnight.
+            alt_speed_time_day:
+                Enables alternate speeds scheduling these days.
+            alt_speed_time_enabled:
+                Enables alternate speeds scheduling.
+            alt_speed_time_end:
+                Time when alternate speeds should be disabled. Minutes after midnight.
+            alt_speed_up:
+                Alternate session upload speed limit (in Kib/s).
+            blocklist_enabled:
+                Enables the block list
+            blocklist_url:
+                Location of the block list. Updated with blocklist-update.
+            cache_size_mb:
+                The maximum size of the disk cache in MB
+            default_trackers:
+                List of default trackers to use on public torrents.
+            dht_enabled:
+                Enables DHT.
+            download_dir:
+                Set the session download directory.
+            download_queue_enabled:
+                Enables download queue.
+            download_queue_size:
+                Number of slots in the download queue.
+            encryption:
+                Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
+            idle_seeding_limit:
+                The default seed inactivity limit in minutes.
+            idle_seeding_limit_enabled:
+                Enables the default seed inactivity limit
+            incomplete_dir:
+                The path to the directory of incomplete transfer data.
+            incomplete_dir_enabled:
+                Enables the incomplete transfer data directory,
+                Otherwise data for incomplete transfers are stored in the download target.
+            lpd_enabled:
+                Enables local peer discovery for public torrents.
+            peer_limit_global:
+                Maximum number of peers.
+            peer_limit_per_torrent:
+                Maximum number of peers per transfer.
+            peer_port:
+                Peer port.
+            peer_port_random_on_start:
+                Enables randomized peer port on start of Transmission.
+            pex_enabled:
+                Allowing PEX in public torrents.
+            port_forwarding_enabled:
+                Enables port forwarding.
+            queue_stalled_enabled:
+                Enable tracking of stalled transfers.
+            queue_stalled_minutes:
+                Number of minutes of idle that marks a transfer as stalled.
+            rename_partial_files:
+                Appends ".part" to incomplete files
 
-        seed_queue_enabled:
-            Enables upload queue.
-        seed_queue_size:
-            Number of slots in the upload queue.
-        seed_ratio_limit:
-            Seed ratio limit. 1.0 means 1:1 download and upload ratio.
-        seed_ratio_limited:
-            Enables seed ration limit.
-        speed_limit_down:
-            Download speed limit (in Kib/s).
-        speed_limit_down_enabled:
-            Enables download speed limiting.
-        speed_limit_up:
-            Upload speed limit (in Kib/s).
-        speed_limit_up_enabled:
-            Enables upload speed limiting.
-        start_added_torrents:
-            Added torrents will be started right away.
-        trash_original_torrent_files:
-            The .torrent file of added torrents will be deleted.
-        utp_enabled:
-            Enables Micro Transport Protocol (UTP).
-        script_torrent_done_enabled:
-            Whether to call the "done" script.
-        script_torrent_done_filename:
-            Filename of the script to run when the transfer is done.
-        script_torrent_added_filename:
-            filename of the script to run
-        script_torrent_added_enabled:
-            whether or not to call the ``added`` script
-        script_torrent_done_seeding_enabled:
-            whether or not to call the ``seeding-done`` script
-        script_torrent_done_seeding_filename:
-            filename of the script to run
+            seed_queue_enabled:
+                Enables upload queue.
+            seed_queue_size:
+                Number of slots in the upload queue.
+            seed_ratio_limit:
+                Seed ratio limit. 1.0 means 1:1 download and upload ratio.
+            seed_ratio_limited:
+                Enables seed ration limit.
+            speed_limit_down:
+                Download speed limit (in Kib/s).
+            speed_limit_down_enabled:
+                Enables download speed limiting.
+            speed_limit_up:
+                Upload speed limit (in Kib/s).
+            speed_limit_up_enabled:
+                Enables upload speed limiting.
+            start_added_torrents:
+                Added torrents will be started right away.
+            trash_original_torrent_files:
+                The .torrent file of added torrents will be deleted.
+            utp_enabled:
+                Enables Micro Transport Protocol (UTP).
+            script_torrent_done_enabled:
+                Whether to call the "done" script.
+            script_torrent_done_filename:
+                Filename of the script to run when the transfer is done.
+            script_torrent_added_filename:
+                filename of the script to run
+            script_torrent_added_enabled:
+                whether or not to call the ``added`` script
+            script_torrent_done_seeding_enabled:
+                whether or not to call the ``seeding-done`` script
+            script_torrent_done_seeding_filename:
+                filename of the script to run
 
-        Warnings
-        ----
-        ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
+        Warnings:
+            ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
 
         transmission-rpc will merge ``kwargs`` in rpc arguments *as-is*
         """

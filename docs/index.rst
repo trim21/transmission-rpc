@@ -16,7 +16,7 @@ quick start
 
 .. seealso::
 
-   :py:meth:`transmission_rpc.client.Client.add_torrent`
+   :py:meth:`transmission_rpc.Client.add_torrent`
 
 Example
 =======

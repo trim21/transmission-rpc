@@ -34,6 +34,8 @@ extensions = [
     "furo.sphinxext",
 ]
 
+napoleon_numpy_docstring = False
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
 
@@ -73,7 +75,8 @@ html_theme = "furo"
 # documentation.
 #
 html_theme_options = {
-    "source_edit_link": "https://github.com/trim21/transmission-rpc/blob/master/docs/source/{filename}",
+    "source_edit_link": "https://github.com/trim21/transmission-rpc/blob/master/docs/{filename}",
+    "source_view_link": "https://github.com/trim21/transmission-rpc/blob/master/{filename}",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
