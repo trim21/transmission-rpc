@@ -36,6 +36,7 @@ typing-extensions = ">=4.5.0"
 sphinx = { version = "^7.3.7", python = "^3.9" }
 furo = { version = "2024.5.6", python = "^3.9" }
 sphinx-copybutton = { version = "^0.5.2", python = "^3.9" }
+sphinx-new-tab-link = { version = "^0.4.0", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"

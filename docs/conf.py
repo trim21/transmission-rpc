@@ -37,6 +37,7 @@ extensions = [
     "sphinx_copybutton",
     "furo.sphinxext",
     "sphinx.ext.linkcode",
+    "sphinx_new_tab_link",
 ]
 
 napoleon_numpy_docstring = False
