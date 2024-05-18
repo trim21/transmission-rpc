@@ -1,7 +1,6 @@
 import json
 import logging
 import pathlib
-import random
 import string
 import time
 import types
@@ -30,6 +29,8 @@ valid_hash_char = string.digits + string.ascii_letters
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
+
+_header_session_id = "x-transmission-session-id"
 
 
 class ResponseData(TypedDict):
@@ -185,7 +186,7 @@ class Client:
 
     @property
     def _http_header(self) -> Dict[str, str]:
-        return {"x-transmission-session-id": self.__session_id}
+        return {_header_session_id: self.__session_id}
 
     def _http_query(self, query: Dict[str, Any], timeout: Optional[_Timeout] = None) -> str:
         """
@@ -195,7 +196,7 @@ class Client:
         if timeout is None:
             timeout = self.timeout
         while True:
-            if request_count >= 10:
+            if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
             self.logger.debug(
                 {
@@ -205,6 +206,9 @@ class Client:
                     "timeout": timeout,
                 }
             )
+
+            print(query)
+
             request_count += 1
             try:
                 r = self._http_session.post(
@@ -218,7 +222,9 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            self.__session_id = r.headers.get("X-Transmission-Session-Id", "0")
+            if _header_session_id in r.headers:
+                self.__session_id = r.headers["x-transmission-session-id"]
+
             self.logger.debug(r.text)
             if r.status_code in {401, 403}:
                 self.logger.debug(r.request.headers)
@@ -250,14 +256,7 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        # they use a uint64_t as tag, we just use a uint32.
-        tag = int.from_bytes(random.randbytes(4), byteorder="big")  # noqa: S311
-
-        query = {
-            "tag": tag,
-            "method": method,
-            "arguments": arguments,
-        }
+        query = {"method": method, "arguments": arguments}
 
         start = time.monotonic()
         try:
