@@ -22,6 +22,11 @@ You can find torrent-ids spec in `official docs
 .. autoclass:: Client
     :members:
 
+.. autoclass:: PortTestResult
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :exclude-members: __init__, __new__
 
 Timeouts
 --------
