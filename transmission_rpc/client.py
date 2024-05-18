@@ -4,7 +4,6 @@ import pathlib
 import string
 import time
 import types
-import urllib.parse
 from typing import Any, BinaryIO, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import quote
 
@@ -114,7 +113,7 @@ class Client:
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
+        url = f"{protocol}://{auth}{host}:{port}{path}"
         self._url = str(url)
         self._sequence = 0
         self.__raw_session: Dict[str, Any] = {}
@@ -620,13 +619,13 @@ class Client:
         seed_idle_mode: Optional[int] = None,
         seed_ratio_limit: Optional[float] = None,
         seed_ratio_mode: Optional[int] = None,
-        tracker_add: Optional[Iterable[str]] = None,
         labels: Optional[Iterable[str]] = None,
         group: Optional[str] = None,
         tracker_list: Optional[Iterable[Iterable[str]]] = None,
+        sequential_download: Optional[bool] = None,
+        tracker_add: Optional[Iterable[str]] = None,
         tracker_replace: Optional[Iterable[Tuple[int, str]]] = None,
         tracker_remove: Optional[Iterable[int]] = None,
-        sequential_download: Optional[bool] = None,
         **kwargs: Any,
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
@@ -656,34 +655,27 @@ class Client:
                 Valid options are :py:class:`transmission_rpc.IdleMode`
             labels: Array of string labels. Add in rpc 16.
             group: The name of this torrent's bandwidth group. Add in rpc 17.
-            tracker_list:
-                A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+
+            tracker_list: A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
 
                 Add in rpc 17.
 
                 Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
-            tracker_add:
-                Array of string with announce URLs to add.
+            sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
 
-                Warnings:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            tracker_add: Array of string with announce URLs to add.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
-            tracker_remove:
-                Array of ids of trackers to remove.
+            tracker_remove: Array of ids of trackers to remove.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
-                Warnings:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-            tracker_replace:
-                Array of (id, url) tuples where the announcement URL should be replaced.
-
-                Warning:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-            sequential_download:
-                download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
+            tracker_replace: Array of (id, url) tuples where the announcement URL should be replaced.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
         Warnings:
             ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
