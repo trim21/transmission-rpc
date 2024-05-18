@@ -58,6 +58,6 @@ jobs:
 
       - uses: trim21/install-poetry-project@dist/v2
         with:
-          extras: docs
+          install_args: --with docs
 
       - run: sphinx-build docs/ dist/
