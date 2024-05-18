@@ -1,22 +1,32 @@
 Torrent
 ============================================
 
-.. automodule:: transmission_rpc.torrent
-
+.. automodule:: transmission_rpc
+    :no-index:
 
 .. autoclass:: Torrent
     :members:
 
 .. autoclass:: Status
-    :exclude-members: __new__, __init__
+    :exclude-members: __init__, __new__
 
-    .. autoattribute:: Status.stopped
-    .. autoattribute:: Status.check_pending
-    .. autoattribute:: Status.checking
-    .. autoattribute:: Status.download_pending
-    .. autoattribute:: Status.downloading
-    .. autoattribute:: Status.seed_pending
-    .. autoattribute:: Status.seeding
+.. autoclass:: FileStat
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :exclude-members: __init__, __new__
+
+.. autoclass:: Tracker
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :exclude-members: __init__, __new__
+
+.. autoclass:: TrackerStats
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :exclude-members: __init__, __new__
 
 .. toctree::
    :maxdepth: 2

@@ -33,8 +33,9 @@ requests = "^2.23.0"
 typing-extensions = ">=4.5.0"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = { version = "^7.0.0", python = "^3.9" }
+sphinx = { version = "^7.3.7", python = "^3.9" }
 furo = { version = "2024.5.6", python = "^3.9" }
+sphinx-copybutton = { version = "^0.5.2", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"

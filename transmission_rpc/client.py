@@ -89,17 +89,15 @@ class Client:
     ):
         """
 
-        Parameters
-        ----------
-        protocol
-        username
-        password
-        host
-        port
-        path:
-          rpc request target path, default ``/transmission/rpc``
-        timeout
-        logger
+        Parameters:
+            protocol:
+            username:
+            password:
+            host:
+            port:
+            path: rpc request target path, default ``/transmission/rpc``
+            timeout:
+            logger:
         """
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -509,29 +507,26 @@ class Client:
 
         Returns a Torrent object with the requested fields.
 
-        Note
-        ----
-        It's recommended that you only fetch arguments you need,
-        this could improve response speed.
+        Note:
+            It's recommended that you only fetch arguments you need,
+            this could improve response speed.
 
-        For example, fetch all fields from transmission daemon with 1500 torrents would take ~5s,
-        but is only ~0.2s if to fetch 6 fields.
+            For example, fetch all fields from transmission daemon with 1500 torrents would take ~5s,
+            but is only ~0.2s if to fetch 6 fields.
 
-        Parameters
-        ----------
-        torrent_id:
-            torrent id can be an int or a torrent ``info_hash`` (``hashString`` property of the ``Torrent`` object).
+        Parameters:
+            torrent_id:
+                torrent id can be an int or a torrent ``info_hash`` (``hashString`` property of the ``Torrent`` object).
 
-        arguments:
-            fetched torrent arguments, in most cases you don't need to set this,
-            transmission-rpc will fetch all torrent fields it supported.
+            arguments:
+                fetched torrent arguments, in most cases you don't need to set this,
+                transmission-rpc will fetch all torrent fields it supported.
 
-        timeout:
-            requests timeout
+            timeout:
+                requests timeout
 
-        Raises
-        ------
-        KeyError: torrent with given ``torrent_id`` not found
+        Raises:
+            KeyError: torrent with given ``torrent_id`` not found
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
@@ -581,12 +576,9 @@ class Client:
         Get information for torrents for recently active torrent. If you want to get recently-removed
         torrents. you should use this method.
 
-        Returns
-        -------
-        active_torrents: List[Torrent]
-            List of recently active torrents
-        removed_torrents: List[int]
-            List of torrent-id of recently-removed torrents.
+        Returns:
+            active_torrents, removed_torrents
+                List of recently active torrents and list of torrent-id of recently-removed torrents.
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
@@ -630,93 +622,60 @@ class Client:
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
 
-        Parameters
-        ----------
-        ids
-            torrent(s) to change.
-        timeout
-            requesst timeout.
-        honors_session_limits
-            true if session upload limits are honored.
-        location
-            new location of the torrent's content
-        peer_limit
-            maximum number of peers
-        queue_position
-            position of this torrent in its queue [0...n)
-        files_wanted
-            Array of file id to download.
-        files_unwanted
-            Array of file id to not download.
-        download_limit
-            maximum download speed (KBps)
-        download_limited
-            true if ``download_limit`` is honored
-        upload_limit
-            maximum upload speed (KBps)
-        upload_limited
-            true if ``upload_limit`` is honored
-        bandwidth_priority
-            Priority for this transfer.
-        priority_high
-            list of file id to set high download priority
-        priority_low
-            list of file id to set low download priority
-        priority_normal
-            list of file id to set normal download priority
-        seed_ratio_limit
-            Seed inactivity limit in minutes.
-        seed_ratio_mode
-            Torrent seed ratio mode
+        Parameters:
+            ids: torrent(s) to change.
+            timeout: requesst timeout.
+            honors_session_limits: true if session upload limits are honored.
+            location: new location of the torrent's content
+            peer_limit: maximum number of peers
+            queue_position: position of this torrent in its queue [0...n)
+            files_wanted: Array of file id to download.
+            files_unwanted: Array of file id to not download.
+            download_limit: maximum download speed (KBps)
+            download_limited: true if ``download_limit`` is honored
+            upload_limit: maximum upload speed (KBps)
+            upload_limited: true if ``upload_limit`` is honored
+            bandwidth_priority: Priority for this transfer.
+            priority_high: list of file id to set high download priority
+            priority_low: list of file id to set low download priority
+            priority_normal: list of file id to set normal download priority
+            seed_ratio_limit: Seed inactivity limit in minutes.
+            seed_ratio_mode: Torrent seed ratio mode
+                Valid options are :py:class:`transmission_rpc.RatioLimitMode`
+            seed_idle_limit: torrent-level seeding ratio
+            seed_idle_mode: Seed inactivity mode.
+                Valid options are :py:class:`transmission_rpc.IdleMode`
+            labels: Array of string labels. Add in rpc 16.
+            group: The name of this torrent's bandwidth group. Add in rpc 17.
+            tracker_list:
+                A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
 
-            Valid options are :py:class:`transmission_rpc.constants.RatioLimitMode`
-        seed_idle_limit
-            torrent-level seeding ratio
-        seed_idle_mode
-            Seed inactivity mode.
+                Add in rpc 17.
 
-            Valid options are :py:class:`transmission_rpc.constants.IdleMode`
-        labels
-            Array of string labels.
-            Add in rpc 16.
-        group
-            The name of this torrent's bandwidth group.
-            Add in rpc 17.
+                Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
+                ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
-        tracker_list
-            A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            tracker_add:
+                Array of string with announce URLs to add.
 
-            Add in rpc 17.
+                Warnings:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
-            ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
+            tracker_remove:
+                Array of ids of trackers to remove.
 
-        tracker_add:
-            Array of string with announce URLs to add.
+                Warnings:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            tracker_replace:
+                Array of (id, url) tuples where the announcement URL should be replaced.
 
-        tracker_remove:
-            Array of ids of trackers to remove.
+                Warning:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-        tracker_replace:
-            Array of (id, url) tuples where the announcement URL should be replaced.
-
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-        Warnings
-        ----
-        ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
-
-        It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
+        Warnings:
+            ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
+            It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
         if labels is not None:
             self._rpc_version_warning(16)
@@ -774,10 +733,8 @@ class Client:
         """
         Move torrent data to the new location.
 
-        See Also
-        --------
-
-        `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+        See Also:
+            `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
         """
         args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
@@ -790,17 +747,14 @@ class Client:
         timeout: Optional[_Timeout] = None,
     ) -> Tuple[str, str]:
         """
-        Warnings
-        --------
-        This method can only be called on single torrent.
+        Warnings:
+            This method can only be called on single torrent.
 
-        Warnings
-        --------
-        This is not the method to move torrent data directory,
+        Warnings:
+            This is not the method to move torrent data directory,
 
-        See Also
-        --------
-        `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
+        See Also:
+            `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
@@ -1007,8 +961,7 @@ class Client:
 
         Warnings:
             ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
-
-        transmission-rpc will merge ``kwargs`` in rpc arguments *as-is*
+            transmission-rpc will merge ``kwargs`` in rpc arguments **as-is**
         """
 
         if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:

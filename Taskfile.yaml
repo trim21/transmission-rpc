@@ -30,7 +30,7 @@ tasks:
 
   dev:docs:
     cmds:
-      - poetry run sphinx-autobuild ./docs/ ./docs/dist/ --watch transmission_rpc
+      - poetry run sphinx-autobuild --fail-on-warning --watch transmission_rpc ./docs/ ./docs/dist/
 
   build:docs:
     cmds:
