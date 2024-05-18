@@ -111,9 +111,8 @@ class Session(Container):
 
     https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#41-session-arguments
 
-    Warnings
-    --------
-    setter on session's properties has been removed, please use ``Client().set_session()`` instead
+    Warnings:
+        setter on session's properties has been removed, please use :py:meth`Client.set_session` instead
     """
 
     @property

@@ -1,7 +1,8 @@
 Session
 =======
 
-.. automodule:: transmission_rpc.session
+.. automodule:: transmission_rpc
+    :no-index:
 
 .. autoclass:: Session
     :inherited-members: get

@@ -30,14 +30,14 @@ tasks:
 
   dev:docs:
     cmds:
-      - poetry run sphinx-autobuild ./docs/ ./docs/dist/ --watch transmission_rpc
+      - poetry run sphinx-autobuild --watch transmission_rpc ./docs/ ./dist/
 
   build:docs:
     sources:
-      - transmission_rpc/**/*.py
       - docs/**/*
-      - exclude: docs/dist/**/*
+      - transmission_rpc/**/*
     generates:
-      - docs/dist/**/*
+      - dist/**/*
     cmds:
-      - poetry run sphinx-build ./docs/ ./docs/dist/
+      - rm -rf dist/
+      - poetry run sphinx-build ./docs/ ./dist/

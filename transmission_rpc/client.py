@@ -89,17 +89,15 @@ class Client:
     ):
         """
 
-        Parameters
-        ----------
-        protocol
-        username
-        password
-        host
-        port
-        path:
-          rpc request target path, default ``/transmission/rpc``
-        timeout
-        logger
+        Parameters:
+            protocol:
+            username:
+            password:
+            host:
+            port:
+            path: rpc request target path, default ``/transmission/rpc``
+            timeout:
+            logger:
         """
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -383,40 +381,38 @@ class Client:
         - bytes of torrent content
         - ``pathlib.Path`` for local torrent file, will be read and encoded as base64.
 
-        Warnings
-        --------
-        base64 string or ``file://`` protocol URL are not supported in v4.
+        Warnings:
+            base64 string or ``file://`` protocol URL are not supported in v4.
 
-        Parameters
-        ----------
-        torrent:
-            torrent to add
-        timeout:
-            request timeout
-        bandwidthPriority:
-            Priority for this transfer.
-        cookies:
-            One or more HTTP cookie(s).
-        download_dir:
-            The directory where the downloaded contents will be saved in.
-        files_unwanted:
-            A list of file id's that shouldn't be downloaded.
-        files_wanted:
-            A list of file id's that should be downloaded.
-        paused:
-            If ``True``, does not start the transfer when added.
-            Magnet url will always start to downloading torrents.
-        peer_limit:
-            Maximum number of peers allowed.
-        priority_high:
-            A list of file id's that should have high priority.
-        priority_low:
-            A list of file id's that should have low priority.
-        priority_normal:
-            A list of file id's that should have normal priority.
-        labels:
-            Array of string labels.
-            Add in rpc 17.
+        Parameters:
+            torrent:
+                torrent to add
+            timeout:
+                request timeout
+            bandwidthPriority:
+                Priority for this transfer.
+            cookies:
+                One or more HTTP cookie(s).
+            download_dir:
+                The directory where the downloaded contents will be saved in.
+            files_unwanted:
+                A list of file id's that shouldn't be downloaded.
+            files_wanted:
+                A list of file id's that should be downloaded.
+            paused:
+                If ``True``, does not start the transfer when added.
+                Magnet url will always start to downloading torrents.
+            peer_limit:
+                Maximum number of peers allowed.
+            priority_high:
+                A list of file id's that should have high priority.
+            priority_low:
+                A list of file id's that should have low priority.
+            priority_normal:
+                A list of file id's that should have normal priority.
+            labels:
+                Array of string labels.
+                Add in rpc 17.
         """
         if torrent is None:
             raise ValueError("add_torrent requires data or a URI.")
@@ -511,29 +507,26 @@ class Client:
 
         Returns a Torrent object with the requested fields.
 
-        Note
-        ----
-        It's recommended that you only fetch arguments you need,
-        this could improve response speed.
+        Note:
+            It's recommended that you only fetch arguments you need,
+            this could improve response speed.
 
-        For example, fetch all fields from transmission daemon with 1500 torrents would take ~5s,
-        but is only ~0.2s if to fetch 6 fields.
+            For example, fetch all fields from transmission daemon with 1500 torrents would take ~5s,
+            but is only ~0.2s if to fetch 6 fields.
 
-        Parameters
-        ----------
-        torrent_id:
-            torrent id can be an int or a torrent ``info_hash`` (``hashString`` property of the ``Torrent`` object).
+        Parameters:
+            torrent_id:
+                torrent id can be an int or a torrent ``info_hash`` (``hashString`` property of the ``Torrent`` object).
 
-        arguments:
-            fetched torrent arguments, in most cases you don't need to set this,
-            transmission-rpc will fetch all torrent fields it supported.
+            arguments:
+                fetched torrent arguments, in most cases you don't need to set this,
+                transmission-rpc will fetch all torrent fields it supported.
 
-        timeout:
-            requests timeout
+            timeout:
+                requests timeout
 
-        Raises
-        ------
-        KeyError: torrent with given ``torrent_id`` not found
+        Raises:
+            KeyError: torrent with given ``torrent_id`` not found
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
@@ -583,12 +576,9 @@ class Client:
         Get information for torrents for recently active torrent. If you want to get recently-removed
         torrents. you should use this method.
 
-        Returns
-        -------
-        active_torrents: List[Torrent]
-            List of recently active torrents
-        removed_torrents: List[int]
-            List of torrent-id of recently-removed torrents.
+        Returns:
+            active_torrents, removed_torrents
+                List of recently active torrents and list of torrent-id of recently-removed torrents.
         """
         if arguments:
             arguments = list(set(arguments) | {"id", "hashString"})
@@ -633,98 +623,63 @@ class Client:
     ) -> None:
         """Change torrent parameters for the torrent(s) with the supplied id's.
 
-        Parameters
-        ----------
-        ids
-            torrent(s) to change.
-        timeout
-            requesst timeout.
-        honors_session_limits
-            true if session upload limits are honored.
-        location
-            new location of the torrent's content
-        peer_limit
-            maximum number of peers
-        queue_position
-            position of this torrent in its queue [0...n)
-        files_wanted
-            Array of file id to download.
-        files_unwanted
-            Array of file id to not download.
-        download_limit
-            maximum download speed (KBps)
-        download_limited
-            true if ``download_limit`` is honored
-        upload_limit
-            maximum upload speed (KBps)
-        upload_limited
-            true if ``upload_limit`` is honored
-        bandwidth_priority
-            Priority for this transfer.
-        priority_high
-            list of file id to set high download priority
-        priority_low
-            list of file id to set low download priority
-        priority_normal
-            list of file id to set normal download priority
-        seed_ratio_limit
-            Seed inactivity limit in minutes.
-        seed_ratio_mode
-            Torrent seed ratio mode
+        Parameters:
+            ids: torrent(s) to change.
+            timeout: requesst timeout.
+            honors_session_limits: true if session upload limits are honored.
+            location: new location of the torrent's content
+            peer_limit: maximum number of peers
+            queue_position: position of this torrent in its queue [0...n)
+            files_wanted: Array of file id to download.
+            files_unwanted: Array of file id to not download.
+            download_limit: maximum download speed (KBps)
+            download_limited: true if ``download_limit`` is honored
+            upload_limit: maximum upload speed (KBps)
+            upload_limited: true if ``upload_limit`` is honored
+            bandwidth_priority: Priority for this transfer.
+            priority_high: list of file id to set high download priority
+            priority_low: list of file id to set low download priority
+            priority_normal: list of file id to set normal download priority
+            seed_ratio_limit: Seed inactivity limit in minutes.
+            seed_ratio_mode: Torrent seed ratio mode
+                Valid options are :py:class:`transmission_rpc.RatioLimitMode`
+            seed_idle_limit: torrent-level seeding ratio
+            seed_idle_mode: Seed inactivity mode.
+                Valid options are :py:class:`transmission_rpc.IdleMode`
+            labels: Array of string labels. Add in rpc 16.
+            group: The name of this torrent's bandwidth group. Add in rpc 17.
+            tracker_list:
+                A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
 
-            Valid options are :py:class:`transmission_rpc.constants.RatioLimitMode`
-        seed_idle_limit
-            torrent-level seeding ratio
-        seed_idle_mode
-            Seed inactivity mode.
+                Add in rpc 17.
 
-            Valid options are :py:class:`transmission_rpc.constants.IdleMode`
-        labels
-            Array of string labels.
-            Add in rpc 16.
-        group
-            The name of this torrent's bandwidth group.
-            Add in rpc 17.
+                Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
+                ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
-        tracker_list
-            A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            tracker_add:
+                Array of string with announce URLs to add.
 
-            Add in rpc 17.
+                Warnings:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
-            ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
+            tracker_remove:
+                Array of ids of trackers to remove.
 
-        tracker_add:
-            Array of string with announce URLs to add.
+                Warnings:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            tracker_replace:
+                Array of (id, url) tuples where the announcement URL should be replaced.
 
-        tracker_remove:
-            Array of ids of trackers to remove.
+                Warning:
+                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
 
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            sequential_download:
+                download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
 
-        tracker_replace:
-            Array of (id, url) tuples where the announcement URL should be replaced.
-
-            Warnings
-            --------
-            since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-        sequential_download:
-            download torrent pieces sequentially
-
-            Add in Transmission 4.1.0, rpc-version 18.
-
-        Warnings
-        ----
-        ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
-
-        It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
+        Warnings:
+            ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
+            It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
         if labels is not None:
             self._rpc_version_warning(16)
@@ -783,10 +738,8 @@ class Client:
         """
         Move torrent data to the new location.
 
-        See Also
-        --------
-
-        `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+        See Also:
+            `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
         """
         args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
@@ -799,17 +752,14 @@ class Client:
         timeout: Optional[_Timeout] = None,
     ) -> Tuple[str, str]:
         """
-        Warnings
-        --------
-        This method can only be called on single torrent.
+        Warnings:
+            This method can only be called on single torrent.
 
-        Warnings
-        --------
-        This is not the method to move torrent data directory,
+        Warnings:
+            This is not the method to move torrent data directory,
 
-        See Also
-        --------
-        `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
+        See Also:
+            `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
@@ -914,112 +864,109 @@ class Client:
         """
         Set session parameters.
 
-        Parameters
-        ----------
-        timeout
-            request timeout
-        alt_speed_down:
-            max global download speed (KBps)
-        alt_speed_enabled:
-            true means use the alt speeds
-        alt_speed_time_begin:
-            Time when alternate speeds should be enabled. Minutes after midnight.
-        alt_speed_time_day:
-            Enables alternate speeds scheduling these days.
-        alt_speed_time_enabled:
-            Enables alternate speeds scheduling.
-        alt_speed_time_end:
-            Time when alternate speeds should be disabled. Minutes after midnight.
-        alt_speed_up:
-            Alternate session upload speed limit (in Kib/s).
-        blocklist_enabled:
-            Enables the block list
-        blocklist_url:
-            Location of the block list. Updated with blocklist-update.
-        cache_size_mb:
-            The maximum size of the disk cache in MB
-        default_trackers:
-            List of default trackers to use on public torrents.
-        dht_enabled:
-            Enables DHT.
-        download_dir:
-            Set the session download directory.
-        download_queue_enabled:
-            Enables download queue.
-        download_queue_size:
-            Number of slots in the download queue.
-        encryption:
-            Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
-        idle_seeding_limit:
-            The default seed inactivity limit in minutes.
-        idle_seeding_limit_enabled:
-            Enables the default seed inactivity limit
-        incomplete_dir:
-            The path to the directory of incomplete transfer data.
-        incomplete_dir_enabled:
-            Enables the incomplete transfer data directory,
-            Otherwise data for incomplete transfers are stored in the download target.
-        lpd_enabled:
-            Enables local peer discovery for public torrents.
-        peer_limit_global:
-            Maximum number of peers.
-        peer_limit_per_torrent:
-            Maximum number of peers per transfer.
-        peer_port:
-            Peer port.
-        peer_port_random_on_start:
-            Enables randomized peer port on start of Transmission.
-        pex_enabled:
-            Allowing PEX in public torrents.
-        port_forwarding_enabled:
-            Enables port forwarding.
-        queue_stalled_enabled:
-            Enable tracking of stalled transfers.
-        queue_stalled_minutes:
-            Number of minutes of idle that marks a transfer as stalled.
-        rename_partial_files:
-            Appends ".part" to incomplete files
+        Parameters:
+            timeout
+                request timeout
+            alt_speed_down:
+                max global download speed (KBps)
+            alt_speed_enabled:
+                true means use the alt speeds
+            alt_speed_time_begin:
+                Time when alternate speeds should be enabled. Minutes after midnight.
+            alt_speed_time_day:
+                Enables alternate speeds scheduling these days.
+            alt_speed_time_enabled:
+                Enables alternate speeds scheduling.
+            alt_speed_time_end:
+                Time when alternate speeds should be disabled. Minutes after midnight.
+            alt_speed_up:
+                Alternate session upload speed limit (in Kib/s).
+            blocklist_enabled:
+                Enables the block list
+            blocklist_url:
+                Location of the block list. Updated with blocklist-update.
+            cache_size_mb:
+                The maximum size of the disk cache in MB
+            default_trackers:
+                List of default trackers to use on public torrents.
+            dht_enabled:
+                Enables DHT.
+            download_dir:
+                Set the session download directory.
+            download_queue_enabled:
+                Enables download queue.
+            download_queue_size:
+                Number of slots in the download queue.
+            encryption:
+                Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
+            idle_seeding_limit:
+                The default seed inactivity limit in minutes.
+            idle_seeding_limit_enabled:
+                Enables the default seed inactivity limit
+            incomplete_dir:
+                The path to the directory of incomplete transfer data.
+            incomplete_dir_enabled:
+                Enables the incomplete transfer data directory,
+                Otherwise data for incomplete transfers are stored in the download target.
+            lpd_enabled:
+                Enables local peer discovery for public torrents.
+            peer_limit_global:
+                Maximum number of peers.
+            peer_limit_per_torrent:
+                Maximum number of peers per transfer.
+            peer_port:
+                Peer port.
+            peer_port_random_on_start:
+                Enables randomized peer port on start of Transmission.
+            pex_enabled:
+                Allowing PEX in public torrents.
+            port_forwarding_enabled:
+                Enables port forwarding.
+            queue_stalled_enabled:
+                Enable tracking of stalled transfers.
+            queue_stalled_minutes:
+                Number of minutes of idle that marks a transfer as stalled.
+            rename_partial_files:
+                Appends ".part" to incomplete files
 
-        seed_queue_enabled:
-            Enables upload queue.
-        seed_queue_size:
-            Number of slots in the upload queue.
-        seed_ratio_limit:
-            Seed ratio limit. 1.0 means 1:1 download and upload ratio.
-        seed_ratio_limited:
-            Enables seed ration limit.
-        speed_limit_down:
-            Download speed limit (in Kib/s).
-        speed_limit_down_enabled:
-            Enables download speed limiting.
-        speed_limit_up:
-            Upload speed limit (in Kib/s).
-        speed_limit_up_enabled:
-            Enables upload speed limiting.
-        start_added_torrents:
-            Added torrents will be started right away.
-        trash_original_torrent_files:
-            The .torrent file of added torrents will be deleted.
-        utp_enabled:
-            Enables Micro Transport Protocol (UTP).
-        script_torrent_done_enabled:
-            Whether to call the "done" script.
-        script_torrent_done_filename:
-            Filename of the script to run when the transfer is done.
-        script_torrent_added_filename:
-            filename of the script to run
-        script_torrent_added_enabled:
-            whether or not to call the ``added`` script
-        script_torrent_done_seeding_enabled:
-            whether or not to call the ``seeding-done`` script
-        script_torrent_done_seeding_filename:
-            filename of the script to run
+            seed_queue_enabled:
+                Enables upload queue.
+            seed_queue_size:
+                Number of slots in the upload queue.
+            seed_ratio_limit:
+                Seed ratio limit. 1.0 means 1:1 download and upload ratio.
+            seed_ratio_limited:
+                Enables seed ration limit.
+            speed_limit_down:
+                Download speed limit (in Kib/s).
+            speed_limit_down_enabled:
+                Enables download speed limiting.
+            speed_limit_up:
+                Upload speed limit (in Kib/s).
+            speed_limit_up_enabled:
+                Enables upload speed limiting.
+            start_added_torrents:
+                Added torrents will be started right away.
+            trash_original_torrent_files:
+                The .torrent file of added torrents will be deleted.
+            utp_enabled:
+                Enables Micro Transport Protocol (UTP).
+            script_torrent_done_enabled:
+                Whether to call the "done" script.
+            script_torrent_done_filename:
+                Filename of the script to run when the transfer is done.
+            script_torrent_added_filename:
+                filename of the script to run
+            script_torrent_added_enabled:
+                whether or not to call the ``added`` script
+            script_torrent_done_seeding_enabled:
+                whether or not to call the ``seeding-done`` script
+            script_torrent_done_seeding_filename:
+                filename of the script to run
 
-        Warnings
-        ----
-        ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
-
-        transmission-rpc will merge ``kwargs`` in rpc arguments *as-is*
+        Warnings:
+            ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
+            transmission-rpc will merge ``kwargs`` in rpc arguments **as-is**
         """
 
         if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:

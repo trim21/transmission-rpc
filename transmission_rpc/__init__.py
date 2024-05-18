@@ -3,20 +3,34 @@ import urllib.parse
 
 from transmission_rpc.client import Client
 from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, IdleMode, Priority, RatioLimitMode
-from transmission_rpc.error import TransmissionError
-from transmission_rpc.session import Session
-from transmission_rpc.torrent import Torrent
+from transmission_rpc.error import (
+    TransmissionAuthError,
+    TransmissionConnectError,
+    TransmissionError,
+    TransmissionTimeoutError,
+)
+from transmission_rpc.session import Session, SessionStats, Stats
+from transmission_rpc.torrent import FileStat, Status, Torrent, Tracker, TrackerStats
 from transmission_rpc.types import File, Group, PortTestResult
 
 __all__ = [
     "Client",
     "Group",
+    "Status",
     "DEFAULT_TIMEOUT",
     "LOGGER",
     "TransmissionError",
+    "TransmissionTimeoutError",
+    "TransmissionAuthError",
+    "TransmissionConnectError",
     "Session",
+    "Stats",
+    "SessionStats",
     "Torrent",
     "File",
+    "FileStat",
+    "Tracker",
+    "TrackerStats",
     "from_url",
     "Priority",
     "RatioLimitMode",
@@ -38,8 +52,7 @@ def from_url(
         from_url("http://127.0.0.1")  # http://127.0.0.1:80/transmission/rpc
         from_url("http://127.0.0.1/")  # http://127.0.0.1:80/
 
-    Warnings
-    --------
+    Warnings:
         you can't ignore scheme, ``127.0.0.1:9091`` is not valid url, please use ``http://127.0.0.1:9091``
 
         And ``from_url("http://127.0.0.1")`` is not same as ``from_url("http://127.0.0.1/")``,

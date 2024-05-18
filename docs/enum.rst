@@ -1,7 +1,8 @@
-Const
-============================================
+Enum
+====
 
-.. automodule:: transmission_rpc.constants
+.. automodule:: transmission_rpc
+    :no-index:
 
 .. autoclass:: RatioLimitMode
    :members:

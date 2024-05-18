@@ -9,8 +9,7 @@ T = TypeVar("T")
 
 
 class Container:
-    fields: Dict[str, Any]
-    """raw response"""
+    fields: Dict[str, Any]  #: raw response data
 
     def __init__(self, *, fields: Dict[str, Any]):
         self.fields = fields
