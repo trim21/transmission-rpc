@@ -3,7 +3,12 @@ import urllib.parse
 
 from transmission_rpc.client import Client
 from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, IdleMode, Priority, RatioLimitMode
-from transmission_rpc.error import TransmissionError
+from transmission_rpc.error import (
+    TransmissionAuthError,
+    TransmissionConnectError,
+    TransmissionError,
+    TransmissionTimeoutError,
+)
 from transmission_rpc.session import Session, SessionStats, Stats
 from transmission_rpc.torrent import FileStat, Status, Torrent, Tracker, TrackerStats
 from transmission_rpc.types import File, Group
@@ -15,6 +20,9 @@ __all__ = [
     "DEFAULT_TIMEOUT",
     "LOGGER",
     "TransmissionError",
+    "TransmissionTimeoutError",
+    "TransmissionAuthError",
+    "TransmissionConnectError",
     "Session",
     "Stats",
     "SessionStats",
