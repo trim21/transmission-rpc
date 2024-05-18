@@ -164,10 +164,10 @@ def linkcode_resolve(domain, info):
 
         start = lines[1]
 
-        return f"https://github.com/trim21/transmission-rpc/tree/{ref}/{file}#L{start}"
+        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
 
     if file.startswith("transmission_rpc"):
         # read the docs, don't know why
         start = lines[1]
 
-        return f"https://github.com/trim21/transmission-rpc/tree/{ref}/{file}#L{start}"
+        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
