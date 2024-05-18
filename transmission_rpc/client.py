@@ -1054,7 +1054,8 @@ class Client:
 
         https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
 
-        :argument ip_protocol: Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        Parameters:
+            ip_protocol: ``ipv4`` or ``ipv6``. Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
         """
         return PortTestResult(
             fields=self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
