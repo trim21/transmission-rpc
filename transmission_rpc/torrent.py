@@ -231,7 +231,7 @@ class Torrent(Container):
     Torrent is a class holding the data received from Transmission regarding a bittorrent transfer.
 
     Warnings:
-        setter on Torrent's properties has been removed, please use ``Client().change_torrent()`` instead
+        setter on Torrent's properties has been removed, please use :py:meth:`Client.change_torrent` instead
     """
 
     def __init__(self, *, fields: Dict[str, Any]):
