@@ -136,6 +136,8 @@ def linkcode_resolve(domain, info):
 
     assert domain == "py", "expected only Python objects"
 
+    print(info)
+
     mod = importlib.import_module(info["module"])
     if "." in info["fullname"]:
         objname, attrname = info["fullname"].split(".")
