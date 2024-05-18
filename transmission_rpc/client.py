@@ -1,6 +1,7 @@
 import json
 import logging
 import pathlib
+import random
 import string
 import time
 import types
@@ -116,7 +117,6 @@ class Client:
 
         url = urllib.parse.urlunparse((protocol, f"{auth}{host}:{port}", path, None, None, None))
         self._url = str(url)
-        self._sequence = 0
         self.__raw_session: Dict[str, Any] = {}
         self.__session_id = "0"
         self.__server_version: str = "(unknown)"
@@ -250,18 +250,26 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = {"tag": self._sequence, "method": method, "arguments": arguments}
+        # they use a uint64_t as tag, we just use a uint32.
+        tag = int.from_bytes(random.randbytes(4), byteorder="big")  # noqa: S311
 
-        self._sequence += 1
-        start = time.time()
-        http_data = self._http_query(query, timeout)
-        elapsed = time.time() - start
-        self.logger.info("http request took %.3f s", elapsed)
+        query = {
+            "tag": tag,
+            "method": method,
+            "arguments": arguments,
+        }
+
+        start = time.monotonic()
+        try:
+            http_data = self._http_query(query, timeout)
+        finally:
+            elapsed = time.monotonic() - start
+            self.logger.debug("http request took %.3f s", elapsed)
 
         try:
             data: ResponseData = json.loads(http_data)
-        except ValueError as error:
-            self.logger.exception("Error: %s")
+        except json.JSONDecodeError as error:
+            self.logger.exception("Error:")
             self.logger.exception('Request: "%s"', query)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
