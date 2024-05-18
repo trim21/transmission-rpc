@@ -7,8 +7,7 @@
 import importlib
 import inspect
 import os
-
-print("current directory:", os.getcwd())
+import sys
 
 # -- Path setup --------------------------------------------------------------
 
@@ -121,6 +120,8 @@ htmlhelp_basename = "transmission-rpc doc"
 ref = "master"
 
 if os.environ.get("READTHEDOCS"):
+    sys.path.insert(0, os.path.normpath(".."))
+
     if os.environ["READTHEDOCS_VERSION_TYPE"] == "tag":
         ref = os.environ["READTHEDOCS_GIT_IDENTIFIER"]
     else:
