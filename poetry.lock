@@ -1016,6 +1016,20 @@ code-style = ["pre-commit (==2.12.1)"]
 rtd = ["ipython", "myst-nb", "sphinx", "sphinx-book-theme", "sphinx-examples"]
 
 [[package]]
+name = "sphinx-github-style"
+version = "1.2.2"
+description = "GitHub source code links and syntax highlighting for Sphinx documentation"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sphinx-github-style-1.2.2.tar.gz", hash = "sha256:aad6231fcc0a4f59df82531eb3a82dda8a461a94d9e304895c34ac1158d7347c"},
+    {file = "sphinx_github_style-1.2.2-py3-none-any.whl", hash = "sha256:8f6fd1a2c1a5878428a010050549c8353354a1ca9650f6bb01049c649935677d"},
+]
+
+[package.dependencies]
+sphinx = ">=1.8"
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "1.0.8"
 description = "sphinxcontrib-applehelp is a Sphinx extension which outputs Apple help books"
@@ -1508,4 +1522,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "36548da496314e9ce1079ee05bb8b6d3db067b32b1b4bc5eb38dfe43bc141267"
+content-hash = "4b14a0e8e0176792d39070881f0eeeb01baeade4d4aa380441df510af9dd4df4"

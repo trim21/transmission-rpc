@@ -4,10 +4,10 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-import importlib
-import inspect
 import os
 import sys
+
+from sphinx_github_style.utils.linkcode import get_linkcode_resolve
 
 # -- Path setup --------------------------------------------------------------
 
@@ -127,47 +127,6 @@ if os.environ.get("READTHEDOCS"):
     else:
         ref = os.environ["READTHEDOCS_GIT_COMMIT_HASH"]
 
-
-def linkcode_resolve(domain, info):
-    if domain != "py":
-        return None
-    if not info["module"]:
-        return None
-
-    assert domain == "py", "expected only Python objects"
-
-    mod = importlib.import_module(info["module"])
-    if "." in info["fullname"]:
-        objname, attrname = info["fullname"].split(".")
-        obj = getattr(mod, objname)
-        try:
-            # object is a method of a class
-            obj = getattr(obj, attrname)
-        except AttributeError:
-            # object is an attribute of a class
-            return None
-    else:
-        obj = getattr(mod, info["fullname"])
-
-    try:
-        file = inspect.getsourcefile(obj)
-        lines = inspect.getsourcelines(obj)
-    except TypeError:
-        # e.g. object is a typing.Union
-        return None
-
-    file = os.path.relpath(file, os.path.abspath(".."))
-
-    if file.startswith("transmission-rpc"):
-        # e.g. object is a typing.NewType
-        file = file.removeprefix("transmission-rpc" + os.sep)
-
-        start = lines[1]
-
-        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
-
-    if file.startswith("transmission_rpc"):
-        # read the docs, don't know why
-        start = lines[1]
-
-        return f"https://github.com/trim21/transmission-rpc/blob/{ref}/{file}#L{start}"
+linkcode_resolve = get_linkcode_resolve(
+    "https://github.com/trim21/transmission-rpc/blob/" + ref + "/{filepath}#L{linestart}"
+)
