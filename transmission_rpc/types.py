@@ -95,8 +95,8 @@ class PortTestResult(Container):
 
     @property
     def ip_protocol(self) -> str:
-        """ipv4 if the test was carried out on IPv4,
-        ipv6 if the test was carried out on IPv6,
+        """``ipv4`` if the test was carried out on IPv4,
+        ``ipv6`` if the test was carried out on IPv6,
         unset if it cannot be determined
 
         Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
