@@ -6,7 +6,7 @@ import pathlib
 import string
 import time
 import types
-from typing import Any, BinaryIO, Iterable, TypeVar, Union, list
+from typing import Any, BinaryIO, Iterable, TypeVar, Union
 from urllib.parse import quote
 
 import requests
