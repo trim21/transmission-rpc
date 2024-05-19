@@ -29,7 +29,7 @@ from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 valid_hash_char = string.digits + string.ascii_letters
 
 _TorrentID = Union[int, str]
-_TorrentIDs = Union[_TorrentID, list[_TorrentID], None]
+_TorrentIDs = Union[_TorrentID, "list[_TorrentID]", None]
 
 _header_session_id = "x-transmission-session-id"
 
