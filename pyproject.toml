@@ -108,7 +108,12 @@ select = [
     "TID",
     "TRY",
     "YTT",
+    "UP",
+    "FA100",
+    "FA102"
 ]
+
+extend-fixable = ['UP']
 
 ignore = [
     'PLR0911',
@@ -132,6 +137,7 @@ ignore = [
     'TCH003',
     'RUF003',
     'RET504',
+    'TCH001',
     'TRY300',
     'TRY003',
     'TRY201',
