@@ -1,4 +1,4 @@
-from typing import List, Optional
+from __future__ import annotations
 
 from typing_extensions import Literal
 
@@ -63,7 +63,7 @@ class SessionStats(Container):
 class Units(Container):
     # 4 strings: KB/s, MB/s, GB/s, TB/s
     @property
-    def speed_units(self) -> List[str]:
+    def speed_units(self) -> list[str]:
         return self.fields["speed-units"]
 
     # number of bytes in a KB (1000 for kB; 1024 for KiB)
@@ -73,7 +73,7 @@ class Units(Container):
 
     # 4 strings: KB/s, MB/s, GB/s, TB/s
     @property
-    def size_units(self) -> List[str]:
+    def size_units(self) -> list[str]:
         return self.fields["size-units"]
 
     # number of bytes in a KB (1000 for kB; 1024 for KiB)
@@ -83,7 +83,7 @@ class Units(Container):
 
     # 4 strings: KB/s, MB/s, GB/s, TB/s
     @property
-    def memory_units(self) -> List[str]:
+    def memory_units(self) -> list[str]:
         return self.fields["memory-units"]
 
     # number of bytes in a KB (1000 for kB; 1024 for KiB)
@@ -111,9 +111,8 @@ class Session(Container):
 
     https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#41-session-arguments
 
-    Warnings
-    --------
-    setter on session's properties has been removed, please use ``Client().set_session()`` instead
+    Warnings:
+        setter on session's properties has been removed, please use :py:meth`Client.set_session` instead
     """
 
     @property
@@ -361,7 +360,7 @@ class Session(Container):
         return self.fields["version"]
 
     @property
-    def default_trackers(self) -> Optional[list]:
+    def default_trackers(self) -> list[str] | None:
         """
         list of default trackers to use on public torrents
         new at rpc-version 17
@@ -372,7 +371,7 @@ class Session(Container):
         return None
 
     @property
-    def rpc_version_semver(self) -> Optional[str]:
+    def rpc_version_semver(self) -> str | None:
         """
         the current RPC API version in a semver-compatible str
         new at rpc-version 17
@@ -380,7 +379,7 @@ class Session(Container):
         return self.get("rpc-version-semver")
 
     @property
-    def script_torrent_added_enabled(self) -> Optional[bool]:
+    def script_torrent_added_enabled(self) -> bool | None:
         """
         whether to call the `added` script
         new at rpc-version 17
@@ -388,7 +387,7 @@ class Session(Container):
         return self.get("script-torrent-added-enabled")
 
     @property
-    def script_torrent_added_filename(self) -> Optional[str]:
+    def script_torrent_added_filename(self) -> str | None:
         """
         filename of the script to run
         new at rpc-version 17
@@ -396,7 +395,7 @@ class Session(Container):
         return self.get("script-torrent-added-filename")
 
     @property
-    def script_torrent_done_seeding_enabled(self) -> Optional[bool]:
+    def script_torrent_done_seeding_enabled(self) -> bool | None:
         """
         whether to call the `seeding-done` script
         new at rpc-version 17
@@ -404,7 +403,7 @@ class Session(Container):
         return self.get("script-torrent-done-seeding-enabled")
 
     @property
-    def script_torrent_done_seeding_filename(self) -> Optional[str]:
+    def script_torrent_done_seeding_filename(self) -> str | None:
         """
         filename of the script to run
         new at rpc-version 17

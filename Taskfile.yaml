@@ -9,6 +9,15 @@ tasks:
       - task --list-all
     silent: true
 
+  bump:
+    vars:
+      VERSION:
+        sh: poetry version -s
+    cmds:
+      - git add pyproject.toml
+      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
+
   lint:
     cmds:
       - poetry run ruff .
@@ -21,8 +30,14 @@ tasks:
 
   dev:docs:
     cmds:
-      - poetry run sphinx-autobuild ./docs/ ./docs/dist/ --watch transmission_rpc
+      - poetry run sphinx-autobuild --watch transmission_rpc ./docs/ ./dist/
 
   build:docs:
+    sources:
+      - docs/**/*
+      - transmission_rpc/**/*
+    generates:
+      - dist/**/*
     cmds:
-      - poetry run sphinx-build ./docs/ ./docs/dist/
+      - rm -rf dist/
+      - poetry run sphinx-build ./docs/ ./dist/

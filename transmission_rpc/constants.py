@@ -1,9 +1,11 @@
 # Copyright (c) 2018-2022 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+from __future__ import annotations
+
 import enum
 import logging
-from typing import Dict, NamedTuple, Optional
+from typing import NamedTuple
 
 LOGGER = logging.getLogger("transmission-rpc")
 LOGGER.setLevel(logging.ERROR)
@@ -43,9 +45,9 @@ class IdleMode(enum.IntEnum):
 class Args(NamedTuple):
     type: str
     added_version: int
-    removed_version: Optional[int] = None
-    previous_argument_name: Optional[str] = None
-    next_argument_name: Optional[str] = None
+    removed_version: int | None = None
+    previous_argument_name: str | None = None
+    next_argument_name: str | None = None
     description: str = ""
 
     def __repr__(self) -> str:
@@ -71,7 +73,7 @@ class Type:
     object = "object"
 
 
-TORRENT_GET_ARGS: Dict[str, Args] = {
+TORRENT_GET_ARGS: dict[str, Args] = {
     "activityDate": Args(Type.number, 1, description="Last time of upload or download activity."),
     "addedDate": Args(Type.number, 1, description="The date when this torrent was first added."),
     "bandwidthPriority": Args(Type.number, 5, description="Bandwidth priority. Low (-1), Normal (0) or High (1)."),
