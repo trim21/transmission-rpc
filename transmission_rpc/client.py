@@ -6,7 +6,7 @@ import pathlib
 import string
 import time
 import types
-from typing import Any, BinaryIO, Iterable, TypeVar, Union
+from typing import Any, BinaryIO, Iterable, List, TypeVar, Union
 from urllib.parse import quote
 
 import requests
@@ -29,7 +29,7 @@ from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 valid_hash_char = string.digits + string.ascii_letters
 
 _TorrentID = Union[int, str]
-_TorrentIDs = Union[_TorrentID, "list[_TorrentID]", None]
+_TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
 
 _header_session_id = "x-transmission-session-id"
 
