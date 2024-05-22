@@ -60,4 +60,4 @@ jobs:
         with:
           install_args: --with docs
 
-      - run: sphinx-build docs/ dist/
+      - run: sphinx-build -W docs/ dist/
