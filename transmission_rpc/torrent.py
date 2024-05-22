@@ -28,12 +28,23 @@ class Status(str, enum.Enum):
     """enum for torrent status"""
 
     STOPPED = "stopped"
+    """"""
     CHECK_PENDING = "check pending"
+    """"""
+
     CHECKING = "checking"
+    """"""
     DOWNLOAD_PENDING = "download pending"
+    """"""
+
     DOWNLOADING = "downloading"
+    """"""
+
     SEED_PENDING = "seed pending"
+    """"""
+
     SEEDING = "seeding"
+    """"""
 
     @property
     def stopped(self) -> bool:

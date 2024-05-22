@@ -8,7 +8,7 @@ Torrent
     :members:
 
 .. autoclass:: Status
-    :exclude-members: __init__, __new__
+    :members:
 
 .. autoclass:: FileStat
     :members:

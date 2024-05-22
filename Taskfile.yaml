@@ -30,7 +30,7 @@ tasks:
 
   dev:docs:
     cmds:
-      - poetry run sphinx-autobuild --watch transmission_rpc ./docs/ ./dist/
+      - poetry run sphinx-autobuild -W --watch transmission_rpc ./docs/ ./dist/
 
   build:docs:
     sources:
@@ -40,4 +40,4 @@ tasks:
       - dist/**/*
     cmds:
       - rm -rf dist/
-      - poetry run sphinx-build ./docs/ ./dist/
+      - poetry run sphinx-build -W ./docs/ ./dist/
