@@ -270,6 +270,16 @@ class Torrent(Container):
         return self.fields["hashString"]
 
     @property
+    def hash_string(self) -> str:
+        """Torrent info hash string, can also be used as Torrent ID"""
+        return self.fields["hashString"]
+
+    @property
+    def into_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
+
+    @property
     def available(self) -> float:
         """Availability in percent"""
         bytes_all = self.total_size
