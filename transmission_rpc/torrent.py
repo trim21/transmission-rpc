@@ -624,7 +624,7 @@ class Torrent(Container):
     @property
     def tracker_list(self) -> list[str]:
         """list of str of announce URLs"""
-        return [x for x in self.fields["trackerlist"].splitlines() if x]
+        return [x for x in self.fields["trackerList"].splitlines() if x]
 
     @property
     def tracker_stats(self) -> list[TrackerStats]:
