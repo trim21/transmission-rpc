@@ -855,7 +855,7 @@ class Torrent(Container):
         return RatioLimitMode(self.fields["seedRatioMode"])
 
     def __repr__(self) -> str:
-        return f'<Torrent {self.id} "{self.name}">'
+        return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
 
     def __str__(self) -> str:
-        return f'Torrent "{self.name}"'
+        return f"<transmission_rpc.Torrent {self.name!r}>"
