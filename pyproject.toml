@@ -46,7 +46,7 @@ pytest-github-actions-annotate-failures = "==0.2.0"
 coverage = "==7.5.3"
 
 # linter and formatter
-pre-commit = { version = "==3.7.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
+pre-commit = { version = "==3.7.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
 mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
 
 # stubs
