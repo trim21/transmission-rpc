@@ -50,7 +50,7 @@ pre-commit = { version = "==3.7.1", markers = "implementation_name != 'pypy'", p
 mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
 
 # stubs
-types-requests = "==2.31.0.20240406"
+types-requests = "==2.32.0.20240523"
 sphinx-autobuild = {version = "2024.4.16", python = "^3.9"}
 
 [tool.pytest.ini_options]
