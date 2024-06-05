@@ -41,7 +41,7 @@ sphinx-github-style = {version = "^1.2.2", python = "^3.9"}
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"
 # tests
-pytest = "==8.2.1"
+pytest = "==8.2.2"
 pytest-github-actions-annotate-failures = "==0.2.0"
 coverage = "==7.5.3"
 
