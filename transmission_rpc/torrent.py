@@ -4,6 +4,8 @@ import enum
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from typing_extensions import deprecated
+
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import Container, File
 from transmission_rpc.utils import format_timedelta
@@ -275,6 +277,12 @@ class Torrent(Container):
         return self.fields["hashString"]
 
     @property
+    def info_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
+
+    @property
+    @deprecated("this is a typo, do not use this. use `.info_hash` instead")
     def into_hash(self) -> str:
         """alias of ``hashString``"""
         return self.hashString
