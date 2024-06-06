@@ -4,6 +4,8 @@ import enum
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from typing_extensions import deprecated
+
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import Container, File
 from transmission_rpc.utils import format_timedelta
@@ -28,12 +30,23 @@ class Status(str, enum.Enum):
     """enum for torrent status"""
 
     STOPPED = "stopped"
+    """"""
     CHECK_PENDING = "check pending"
+    """"""
+
     CHECKING = "checking"
+    """"""
     DOWNLOAD_PENDING = "download pending"
+    """"""
+
     DOWNLOADING = "downloading"
+    """"""
+
     SEED_PENDING = "seed pending"
+    """"""
+
     SEEDING = "seeding"
+    """"""
 
     @property
     def stopped(self) -> bool:
@@ -257,6 +270,22 @@ class Torrent(Container):
     def hashString(self) -> str:
         """Torrent info hash string, can also be used as Torrent ID"""
         return self.fields["hashString"]
+
+    @property
+    def hash_string(self) -> str:
+        """Torrent info hash string, can also be used as Torrent ID"""
+        return self.fields["hashString"]
+
+    @property
+    def info_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
+
+    @property
+    @deprecated("this is a typo, do not use this. use `.info_hash` instead")
+    def into_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
 
     @property
     def available(self) -> float:
@@ -609,7 +638,7 @@ class Torrent(Container):
     @property
     def tracker_list(self) -> list[str]:
         """list of str of announce URLs"""
-        return [x for x in self.fields["trackerlist"].splitlines() if x]
+        return [x for x in self.fields["trackerList"].splitlines() if x]
 
     @property
     def tracker_stats(self) -> list[TrackerStats]:
@@ -840,7 +869,7 @@ class Torrent(Container):
         return RatioLimitMode(self.fields["seedRatioMode"])
 
     def __repr__(self) -> str:
-        return f'<Torrent {self.id} "{self.name}">'
+        return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
 
     def __str__(self) -> str:
-        return f'Torrent "{self.name}"'
+        return f"<transmission_rpc.Torrent {self.name!r}>"

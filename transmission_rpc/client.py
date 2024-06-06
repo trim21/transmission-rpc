@@ -26,7 +26,7 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group, _Timeout
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
-valid_hash_char = string.digits + string.ascii_letters
+_hex_chars = frozenset(string.hexdigits.lower())
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
@@ -57,8 +57,8 @@ def _parse_torrent_id(raw_torrent_id: int | str) -> int | str:
         if raw_torrent_id >= 0:
             return raw_torrent_id
     elif isinstance(raw_torrent_id, str):
-        if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - set(valid_hash_char)):
-            raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id")
+        if len(raw_torrent_id) != 40 or (set(raw_torrent_id) - _hex_chars):
+            raise ValueError(f"torrent ids {raw_torrent_id} is not valid torrent id, should be a hex str for sha1 hash")
         return raw_torrent_id
     raise ValueError(f"{raw_torrent_id} is not valid torrent id")
 
@@ -717,7 +717,7 @@ class Client:
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
                 "labels": list_or_none(_single_str_as_list(labels)),
-                "trackerlist": None if tracker_list is None else "\n".join("\n\n".join(x) for x in tracker_list),
+                "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
                 "group": group,
             }
         )
