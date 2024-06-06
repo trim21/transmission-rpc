@@ -22,12 +22,22 @@ class Container:
 
 
 class File(NamedTuple):
-    name: str  # file name
-    size: int  # file size in bytes
-    completed: int  # bytes completed
+    name: str
+    """file name"""
+    size: int
+    """file size in bytes"""
+
+    completed: int
+    """bytes completed"""
+
     priority: Priority
-    selected: bool  # if selected for download
-    id: int  # id of the file of this torrent, not should not be used outside the torrent scope.
+    """download priority"""
+
+    selected: bool
+    """if selected for download"""
+
+    id: int
+    """id of the file of this torrent, not should not be used outside the torrent scope"""
 
 
 class Group(Container):
