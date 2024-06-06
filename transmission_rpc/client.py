@@ -342,7 +342,7 @@ class Client:
 
     @property
     @deprecated("use .get_session().rpc_version_semver instead")
-    def semver_version(self) -> int | None:
+    def semver_version(self) -> str | None:
         """Get the Transmission daemon RPC version.
 
         .. deprecated:: 7.0.5
