@@ -1,10 +1,12 @@
 # Copyright (c) 2018-2021 Trim21 <i@trim21.me>
 # Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
 # Licensed under the MIT license.
+from __future__ import annotations
+
 import base64
 import datetime
 import pathlib
-from typing import BinaryIO, List, Optional, Tuple, Union
+from typing import BinaryIO
 from urllib.parse import urlparse
 
 from transmission_rpc import constants
@@ -12,7 +14,7 @@ from transmission_rpc import constants
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
 
-def format_size(size: int) -> Tuple[float, str]:
+def format_size(size: int) -> tuple[float, str]:
     """
     Format byte size into IEC prefixes, B, KiB, MiB ...
     """
@@ -24,7 +26,7 @@ def format_size(size: int) -> Tuple[float, str]:
     return s, UNITS[i]
 
 
-def format_speed(size: int) -> Tuple[float, str]:
+def format_speed(size: int) -> tuple[float, str]:
     """
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
@@ -41,7 +43,7 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def get_torrent_arguments(rpc_version: int) -> List[str]:
+def get_torrent_arguments(rpc_version: int) -> list[str]:
     """
     Get torrent arguments for method in specified Transmission RPC version.
     """
@@ -57,7 +59,7 @@ def get_torrent_arguments(rpc_version: int) -> List[str]:
     return accessible
 
 
-def _try_read_torrent(torrent: Union[BinaryIO, str, bytes, pathlib.Path]) -> Optional[str]:  # pylint: disable=R0911
+def _try_read_torrent(torrent: BinaryIO | str | bytes | pathlib.Path) -> str | None:
     """
     if torrent should be encoded with base64, return a non-None value.
     """

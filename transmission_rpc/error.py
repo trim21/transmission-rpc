@@ -2,9 +2,12 @@
 exception raise by this package
 """
 
-from typing import Any, Optional
+from __future__ import annotations
 
-from requests.models import Response
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from requests.models import Response
 
 
 class TransmissionError(Exception):
@@ -14,20 +17,20 @@ class TransmissionError(Exception):
     """
 
     message: str
-    method: Optional[Any]  # rpc call method
-    argument: Optional[Any]  # rpc call arguments
-    response: Optional[Any]  # parsed json response, may be dict with keys 'result' and 'arguments'
-    rawResponse: Optional[str]  # raw text http response
-    original: Optional[Response]  # original http requests
+    method: Any | None  # rpc call method
+    argument: Any | None  # rpc call arguments
+    response: Any | None  # parsed json response, may be dict with keys 'result' and 'arguments'
+    rawResponse: str | None  # raw text http response
+    original: Response | None  # original http requests
 
     def __init__(
         self,
         message: str = "",
-        method: Optional[Any] = None,
-        argument: Optional[Any] = None,
-        response: Optional[Any] = None,
-        rawResponse: Optional[str] = None,
-        original: Optional[Response] = None,
+        method: Any | None = None,
+        argument: Any | None = None,
+        response: Any | None = None,
+        rawResponse: str | None = None,
+        original: Response | None = None,
     ):
         super().__init__()
         self.message = message

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "transmission-rpc"
-version = "7.0.5"
+version = "7.0.9"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
 authors = ["Trim21 <i@trim21.me>"]
 readme = 'README.md'
@@ -37,20 +37,21 @@ sphinx = { version = "^7.3.7", python = "^3.9" }
 furo = { version = "2024.5.6", python = "^3.9" }
 sphinx-copybutton = { version = "^0.5.2", python = "^3.9" }
 sphinx-new-tab-link = { version = "^0.4.0", python = "^3.9" }
+sphinx-github-style = {version = "^1.2.2", python = "^3.9"}
 
 [tool.poetry.group.dev.dependencies]
 yarl = "==1.9.4"
 # tests
-pytest = "==8.2.0"
+pytest = "==8.2.2"
 pytest-github-actions-annotate-failures = "==0.2.0"
-coverage = "==7.5.0"
+coverage = "==7.5.3"
 
 # linter and formatter
-pre-commit = { version = "==3.7.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
+pre-commit = { version = "==3.7.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
 mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
 
 # stubs
-types-requests = "==2.31.0.20240406"
+types-requests = "==2.32.0.20240602"
 sphinx-autobuild = {version = "2024.4.16", python = "^3.9"}
 
 [tool.pytest.ini_options]
@@ -108,7 +109,12 @@ select = [
     "TID",
     "TRY",
     "YTT",
+    "UP",
+    "FA100",
+    "FA102"
 ]
+
+extend-fixable = ['UP']
 
 ignore = [
     'PLR0911',
@@ -132,6 +138,7 @@ ignore = [
     'TCH003',
     'RUF003',
     'RET504',
+    'TCH001',
     'TRY300',
     'TRY003',
     'TRY201',

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import enum
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import Container, File
@@ -26,12 +30,23 @@ class Status(str, enum.Enum):
     """enum for torrent status"""
 
     STOPPED = "stopped"
+    """"""
     CHECK_PENDING = "check pending"
+    """"""
+
     CHECKING = "checking"
+    """"""
     DOWNLOAD_PENDING = "download pending"
+    """"""
+
     DOWNLOADING = "downloading"
+    """"""
+
     SEED_PENDING = "seed pending"
+    """"""
+
     SEEDING = "seeding"
+    """"""
 
     @property
     def stopped(self) -> bool:
@@ -234,7 +249,7 @@ class Torrent(Container):
         setter on Torrent's properties has been removed, please use :py:meth:`Client.change_torrent` instead
     """
 
-    def __init__(self, *, fields: Dict[str, Any]):
+    def __init__(self, *, fields: dict[str, Any]):
         if "id" not in fields:
             raise ValueError(
                 "Torrent object requires field 'id', "
@@ -255,6 +270,22 @@ class Torrent(Container):
     def hashString(self) -> str:
         """Torrent info hash string, can also be used as Torrent ID"""
         return self.fields["hashString"]
+
+    @property
+    def hash_string(self) -> str:
+        """Torrent info hash string, can also be used as Torrent ID"""
+        return self.fields["hashString"]
+
+    @property
+    def info_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
+
+    @property
+    @deprecated("this is a typo, do not use this. use `.info_hash` instead")
+    def into_hash(self) -> str:
+        """alias of ``hashString``"""
+        return self.hashString
 
     @property
     def available(self) -> float:
@@ -350,7 +381,7 @@ class Torrent(Container):
         return self.fields["errorString"]
 
     @property
-    def eta(self) -> Optional[timedelta]:
+    def eta(self) -> timedelta | None:
         """
         the "eta" as datetime.timedelta.
 
@@ -370,17 +401,17 @@ class Torrent(Container):
         return None
 
     @property
-    def eta_idle(self) -> Optional[timedelta]:
+    def eta_idle(self) -> timedelta | None:
         v = self.fields["etaIdle"]
         if v >= 0:
             return timedelta(seconds=v)
         return None
 
     @property
-    def file_count(self) -> Optional[int]:
+    def file_count(self) -> int | None:
         return self.fields["file-count"]
 
-    def get_files(self) -> List[File]:
+    def get_files(self) -> list[File]:
         """
         Get list of files for this torrent.
 
@@ -398,7 +429,7 @@ class Torrent(Container):
                 print(file.id)
 
         """
-        result: List[File] = []
+        result: list[File] = []
         if "files" in self.fields:
             files = self.fields["files"]
             indices = range(len(files))
@@ -421,7 +452,7 @@ class Torrent(Container):
         return result
 
     @property
-    def file_stats(self) -> List[FileStat]:
+    def file_stats(self) -> list[FileStat]:
         """file stats"""
         return [FileStat(fields=x) for x in self.fields["fileStats"]]
 
@@ -461,7 +492,7 @@ class Torrent(Container):
         return self.fields["isStalled"]
 
     @property
-    def labels(self) -> List[str]:
+    def labels(self) -> list[str]:
         return self.fields["labels"]
 
     @property
@@ -606,17 +637,17 @@ class Torrent(Container):
         return self.fields["sizeWhenDone"]
 
     @property
-    def trackers(self) -> List[Tracker]:
+    def trackers(self) -> list[Tracker]:
         """trackers of torrent"""
         return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
-    def tracker_list(self) -> List[str]:
+    def tracker_list(self) -> list[str]:
         """list of str of announce URLs"""
         return [x for x in self.fields["trackerList"].splitlines() if x]
 
     @property
-    def tracker_stats(self) -> List[TrackerStats]:
+    def tracker_stats(self) -> list[TrackerStats]:
         """tracker status, for example, announce success/failure status"""
         return [TrackerStats(fields=x) for x in self.fields["trackerStats"]]
 
@@ -652,12 +683,12 @@ class Torrent(Container):
         return self.fields["uploadRatio"]
 
     @property
-    def wanted(self) -> List[int]:
+    def wanted(self) -> list[int]:
         """if files are wanted, sorted by file index. 1 for wanted 0 for unwanted"""
         return self.fields["wanted"]
 
     @property
-    def webseeds(self) -> List[str]:
+    def webseeds(self) -> list[str]:
         return self.fields["webseeds"]
 
     @property
@@ -769,7 +800,7 @@ class Torrent(Container):
         return datetime.fromtimestamp(self.fields["startDate"], timezone.utc)
 
     @property
-    def done_date(self) -> Optional[datetime]:
+    def done_date(self) -> datetime | None:
         """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self.fields["doneDate"]
         # Transmission might forget to set doneDate which is initialized to zero,
@@ -853,7 +884,7 @@ class Torrent(Container):
         return self.fields["sequentialDownload"]
 
     def __repr__(self) -> str:
-        return f'<Torrent {self.id} "{self.name}">'
+        return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
 
     def __str__(self) -> str:
-        return f'Torrent "{self.name}"'
+        return f"<transmission_rpc.Torrent {self.name!r}>"

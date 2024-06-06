@@ -1,4 +1,6 @@
-from typing import Any, Dict, NamedTuple, Optional, Tuple, TypeVar, Union
+from __future__ import annotations
+
+from typing import Any, NamedTuple, Optional, Tuple, TypeVar, Union
 
 from transmission_rpc.constants import Priority
 
@@ -9,12 +11,12 @@ T = TypeVar("T")
 
 
 class Container:
-    fields: Dict[str, Any]  #: raw response data
+    fields: dict[str, Any]  #: raw response data
 
-    def __init__(self, *, fields: Dict[str, Any]):
+    def __init__(self, *, fields: dict[str, Any]):
         self.fields = fields
 
-    def get(self, key: str, default: Optional[T] = None) -> Any:
+    def get(self, key: str, default: T | None = None) -> Any:
         """get the raw value by the **raw rpc response key**"""
         return self.fields.get(key, default)
 
@@ -38,10 +40,10 @@ class File(NamedTuple):
     id: int
     """id of the file of this torrent, not should not be used outside the torrent scope"""
 
-    begin_piece: Optional[int] = None
+    begin_piece: int | None = None
     """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
 
-    end_piece: Optional[int] = None
+    end_piece: int | None = None
     """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
 
 
