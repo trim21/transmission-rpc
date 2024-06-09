@@ -27,9 +27,12 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
-__USER_AGENT__ = "transmission-rpc/{} (https://github.com/trim21/transmission-rpc)".format(
-    importlib.metadata.version("transmission_rpc")
-)
+try:
+    __version__ = importlib.metadata.version("transmission-rpc")
+except ImportError:
+    __version__ = "develop"
+
+__USER_AGENT__ = f"transmission-rpc/{__version__} (https://github.com/trim21/transmission-rpc)"
 
 _hex_chars = frozenset(string.hexdigits.lower())
 
