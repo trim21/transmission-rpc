@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
+      fail-fast: false
       matrix:
         transmission: ["version-3.00-r8", "4.0.5"]
         python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
