@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.metadata
 import json
 import logging
 import pathlib
@@ -7,12 +8,11 @@ import string
 import time
 import types
 from typing import Any, BinaryIO, Iterable, List, TypeVar, Union
-from urllib.parse import quote
 
-import requests
-import requests.auth
-import requests.exceptions
+import certifi
+import urllib3
 from typing_extensions import Literal, Self, TypedDict, deprecated
+from urllib3.util import make_headers
 
 from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
 from transmission_rpc.error import (
@@ -26,12 +26,16 @@ from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group, _Timeout
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
+_USER_AGENT = "transmission-rpc/{} (https://github.com/trim21/transmission-rpc)".format(
+    importlib.metadata.version("transmission_rpc")
+)
+
 _hex_chars = frozenset(string.hexdigits.lower())
 
 _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
 
-_header_session_id = "x-transmission-session-id"
+_header_session_id_key = "x-transmission-session-id"
 
 
 class ResponseData(TypedDict):
@@ -110,23 +114,23 @@ class Client:
             )
         self._query_timeout: _Timeout = timeout
 
-        username = quote(username or "", safe="$-_.+!*'(),;&=", encoding="utf8") if username else ""
-        password = ":" + quote(password or "", safe="$-_.+!*'(),;&=", encoding="utf8") if password else ""
-        auth = f"{username}{password}@" if (username or password) else ""
+        if username or password:
+            self.__auth_headers = make_headers(basic_auth=f"{username}:{password}", user_agent=_USER_AGENT)
+        else:
+            self.__auth_headers = make_headers(user_agent=_USER_AGENT)
 
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = f"{protocol}://{auth}{host}:{port}{path}"
+        url = f"{protocol}://{host}:{port}{path}"
         self._url = str(url)
         self.__raw_session: dict[str, Any] = {}
         self.__session_id = "0"
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
-        self._http_session = requests.Session()
-        self._http_session.trust_env = False
+        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where())
         self.__semver_version = None
-        self.get_session()
+        self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
     @property
@@ -185,9 +189,8 @@ class Client:
         """
         self._query_timeout = DEFAULT_TIMEOUT
 
-    @property
-    def _http_header(self) -> dict[str, str]:
-        return {_header_session_id: self.__session_id}
+    def __get_headers(self) -> dict[str, str]:
+        return self.__auth_headers | {_header_session_id_key: self.__session_id}
 
     def _http_query(self, query: dict[str, Any], timeout: _Timeout | None = None) -> str:
         """
@@ -199,38 +202,34 @@ class Client:
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
-            self.logger.debug(
-                {
-                    "url": self._url,
-                    "headers": self._http_header,
-                    "data": query,
-                    "timeout": timeout,
-                }
-            )
+
+            headers = self.__get_headers()
+            self.logger.debug({"url": self._url, "headers": headers, "data": query, "timeout": timeout})
 
             request_count += 1
             try:
-                r = self._http_session.post(
+                r = self.__http_client.request(
+                    "POST",
                     self._url,
-                    headers=self._http_header,
+                    headers=headers,
                     json=query,
                     timeout=timeout,
                 )
-            except requests.exceptions.Timeout as e:
+            except urllib3.exceptions.TimeoutError as e:
                 raise TransmissionTimeoutError("timeout when connection to transmission daemon") from e
-            except requests.exceptions.ConnectionError as e:
+            except urllib3.exceptions.ConnectionError as e:
                 raise TransmissionConnectError(f"can't connect to transmission daemon: {e!s}") from e
 
-            self.logger.debug(r.text)
-            if r.status_code in {401, 403}:
-                self.logger.debug(r.request.headers)
+            self.logger.debug(r.data)
+            if r.status in {401, 403}:
+                self.logger.debug(headers)
                 raise TransmissionAuthError("transmission daemon require auth", original=r)
 
-            if _header_session_id in r.headers:
-                self.__session_id = r.headers["x-transmission-session-id"]
+            if _header_session_id_key in r.headers:
+                self.__session_id = r.headers[_header_session_id_key]
 
-            if r.status_code != 409:
-                return r.text
+            if r.status != 409:
+                return r.data.decode("utf-8")
 
     def _request(
         self,
@@ -810,11 +809,20 @@ class Client:
         """Move transfer down in the queue."""
         self._request(RpcMethod.QueueMoveDown, ids=ids, require_ids=True, timeout=timeout)
 
-    def get_session(self, timeout: _Timeout | None = None) -> Session:
+    def get_session(
+        self,
+        timeout: _Timeout | None = None,
+        arguments: Iterable[str] | None = None,
+    ) -> Session:
         """
         Get session parameters. See the Session class for more information.
         """
-        self._request(RpcMethod.SessionGet, timeout=timeout)
+
+        data = {}
+        if arguments:
+            data["fields"] = list(arguments)
+
+        self._request(RpcMethod.SessionGet, timeout=timeout, arguments=data)
         self._update_server_version()
         return Session(fields=self.__raw_session)
 
@@ -1142,7 +1150,7 @@ class Client:
         exc_val: BaseException | None,
         exc_tb: types.TracebackType | None,
     ) -> None:
-        self._http_session.close()
+        self.__http_client.close()
 
 
 T = TypeVar("T")
