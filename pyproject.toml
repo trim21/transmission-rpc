@@ -36,7 +36,6 @@ dependencies = [
 Homepage = 'https://github.com/Trim21/transmission-rpc'
 
 [project.optional-dependencies]
-
 dev = [
     # lint
     'pre-commit==3.7.1 ; python_version >= "3.9"',
