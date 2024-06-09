@@ -145,7 +145,7 @@ class Client:
         self.__protocol_version: int = 17  # default 17
         self.__semver_version = None
 
-        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where(), timeout=self.timeout)
+        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where(), timeout=self.timeout, retries=False)
         self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
