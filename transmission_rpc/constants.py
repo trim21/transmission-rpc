@@ -11,9 +11,6 @@ LOGGER = logging.getLogger("transmission-rpc")
 LOGGER.setLevel(logging.ERROR)
 
 
-DEFAULT_TIMEOUT = 30.0
-
-
 class Priority(enum.IntEnum):
     Low = -1
     Normal = 0

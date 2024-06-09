@@ -12,9 +12,10 @@ from typing import Any, BinaryIO, Iterable, List, TypeVar, Union
 import certifi
 import urllib3
 from typing_extensions import Literal, Self, TypedDict, deprecated
+from urllib3 import Timeout
 from urllib3.util import make_headers
 
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
+from transmission_rpc.constants import LOGGER, RpcMethod
 from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
@@ -23,10 +24,10 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group, _Timeout
+from transmission_rpc.types import Group
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
-_USER_AGENT = "transmission-rpc/{} (https://github.com/trim21/transmission-rpc)".format(
+__USER_AGENT__ = "transmission-rpc/{} (https://github.com/trim21/transmission-rpc)".format(
     importlib.metadata.version("transmission_rpc")
 )
 
@@ -36,6 +37,8 @@ _TorrentID = Union[int, str]
 _TorrentIDs = Union[_TorrentID, List[_TorrentID], None]
 
 _header_session_id_key = "x-transmission-session-id"
+
+DEFAULT_TIMEOUT = 30.0
 
 
 class ResponseData(TypedDict):
@@ -82,6 +85,8 @@ def _parse_torrent_ids(args: Any) -> str | list[str | int]:
 
 
 class Client:
+    __query_timeout: Timeout
+
     def __init__(
         self,
         *,
@@ -112,24 +117,32 @@ class Client:
             raise TypeError(
                 "logger must be instance of `logging.Logger`, default: logging.getLogger('transmission-rpc')"
             )
-        self._query_timeout: _Timeout = timeout
+        if isinstance(timeout, (int, float)):
+            self.__query_timeout = Timeout(timeout)
+        elif isinstance(timeout, Timeout):
+            self.__query_timeout = timeout
+        else:
+            raise TypeError(f"unsupported value {timeout!r}, only Timeout/float/int are supported")
 
         if username or password:
-            self.__auth_headers = make_headers(basic_auth=f"{username}:{password}", user_agent=_USER_AGENT)
+            self.__auth_headers = make_headers(basic_auth=f"{username}:{password}", user_agent=__USER_AGENT__)
         else:
-            self.__auth_headers = make_headers(user_agent=_USER_AGENT)
+            self.__auth_headers = make_headers(user_agent=__USER_AGENT__)
 
         if path == "/transmission/":
             path = "/transmission/rpc"
 
         url = f"{protocol}://{host}:{port}{path}"
         self._url = str(url)
+
         self.__raw_session: dict[str, Any] = {}
         self.__session_id = "0"
+
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
-        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where())
         self.__semver_version = None
+
+        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where(), timeout=self.timeout)
         self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
@@ -159,46 +172,39 @@ class Client:
         return self.__server_version
 
     @property
-    def timeout(self) -> _Timeout:
+    def timeout(self) -> Timeout:
         """
         Get current timeout for HTTP queries.
         """
-        return self._query_timeout
+        return self.__query_timeout
 
     @timeout.setter
-    def timeout(self, value: _Timeout) -> None:
+    def timeout(self, value: Timeout) -> None:
         """
         Set timeout for HTTP queries.
         """
-        if isinstance(value, (tuple, list)):
-            if len(value) != 2:
-                raise ValueError("timeout tuple can only include 2 numbers elements")
-            for v in value:
-                if not isinstance(v, (float, int)):
-                    raise TypeError("element of timeout tuple can only be int of float")
-            self._query_timeout = (value[0], value[1])  # for type checker
-        elif value is None:
-            self._query_timeout = DEFAULT_TIMEOUT
-        else:
-            self._query_timeout = float(value)
+        if not isinstance(value, Timeout):
+            raise TypeError("must use Timeout instance")
+
+        self.__query_timeout = value
 
     @timeout.deleter
     def timeout(self) -> None:
         """
         Reset the HTTP query timeout to the default.
         """
-        self._query_timeout = DEFAULT_TIMEOUT
+        self.__query_timeout = Timeout(DEFAULT_TIMEOUT)
 
     def __get_headers(self) -> dict[str, str]:
-        return self.__auth_headers | {_header_session_id_key: self.__session_id}
+        self.__auth_headers[_header_session_id_key] = self.__session_id
 
-    def _http_query(self, query: dict[str, Any], timeout: _Timeout | None = None) -> str:
+        return self.__auth_headers
+
+    def _http_query(self, query: dict[str, Any], timeout: Timeout | None = None) -> str:
         """
         Query Transmission through HTTP.
         """
         request_count = 0
-        if timeout is None:
-            timeout = self.timeout
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
@@ -210,7 +216,7 @@ class Client:
             try:
                 r = self.__http_client.request(
                     "POST",
-                    self._url,
+                    url=self._url,
                     headers=headers,
                     json=query,
                     timeout=timeout,
@@ -237,7 +243,7 @@ class Client:
         arguments: dict[str, Any] | None = None,
         ids: _TorrentIDs | None = None,
         require_ids: bool = False,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
     ) -> dict[str, Any]:
         """
         Send json-rpc request to Transmission using http POST
@@ -373,7 +379,7 @@ class Client:
     def add_torrent(
         self,
         torrent: BinaryIO | str | bytes | pathlib.Path,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         *,
         download_dir: str | None = None,
         files_unwanted: list[int] | None = None,
@@ -458,7 +464,7 @@ class Client:
 
         return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
 
-    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout | None = None) -> None:
+    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: Timeout | None = None) -> None:
         """
         remove torrent(s) with provided id(s).
 
@@ -472,14 +478,14 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
+    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: Timeout | None = None) -> None:
         """Start torrent(s) with provided id(s)"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
+    def start_all(self, bypass_queue: bool = False, timeout: Timeout | None = None) -> None:
         """Start all torrents respecting the queue order"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
@@ -493,15 +499,15 @@ class Client:
             timeout=timeout,
         )
 
-    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def stop_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """stop torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentStop, {}, ids, True, timeout=timeout)
 
-    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def verify_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """verify torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentVerify, {}, ids, True, timeout=timeout)
 
-    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def reannounce_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentReannounce, {}, ids, True, timeout=timeout)
 
@@ -509,7 +515,7 @@ class Client:
         self,
         torrent_id: _TorrentID,
         arguments: Iterable[str] | None = None,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
     ) -> Torrent:
         """
         Get information for torrent with provided id.
@@ -567,7 +573,7 @@ class Client:
         self,
         ids: _TorrentIDs | None = None,
         arguments: Iterable[str] | None = None,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
     ) -> list[Torrent]:
         """
         Get information for torrents with provided ids. For more information see :py:meth:`Client.get_torrent`.
@@ -584,7 +590,7 @@ class Client:
         ]
 
     def get_recently_active_torrents(
-        self, arguments: Iterable[str] | None = None, timeout: _Timeout | None = None
+        self, arguments: Iterable[str] | None = None, timeout: Timeout | None = None
     ) -> tuple[list[Torrent], list[int]]:
         """
         Get information for torrents for recently active torrent. If you want to get recently-removed
@@ -606,7 +612,7 @@ class Client:
     def change_torrent(
         self,
         ids: _TorrentIDs,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         *,
         bandwidth_priority: int | None = None,
         download_limit: int | None = None,
@@ -740,7 +746,7 @@ class Client:
         self,
         ids: _TorrentIDs,
         location: str | pathlib.Path,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         *,
         move: bool = True,
     ) -> None:
@@ -758,7 +764,7 @@ class Client:
         torrent_id: _TorrentID,
         location: str,
         name: str,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
     ) -> tuple[str, str]:
         """
         Warnings:
@@ -785,7 +791,7 @@ class Client:
 
         return result["path"], result["name"]
 
-    def queue_top(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def queue_top(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """
         Move transfer to the top of the queue.
 
@@ -793,7 +799,7 @@ class Client:
         """
         self._request(RpcMethod.QueueMoveTop, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_bottom(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def queue_bottom(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """
         Move transfer to the bottom of the queue.
 
@@ -801,17 +807,17 @@ class Client:
         """
         self._request(RpcMethod.QueueMoveBottom, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_up(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def queue_up(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """Move transfer up in the queue."""
         self._request(RpcMethod.QueueMoveUp, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_down(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
+    def queue_down(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
         """Move transfer down in the queue."""
         self._request(RpcMethod.QueueMoveDown, ids=ids, require_ids=True, timeout=timeout)
 
     def get_session(
         self,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         arguments: Iterable[str] | None = None,
     ) -> Session:
         """
@@ -828,7 +834,7 @@ class Client:
 
     def set_session(
         self,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         *,
         alt_speed_down: int | None = None,
         alt_speed_enabled: bool | None = None,
@@ -1058,12 +1064,12 @@ class Client:
         if args:
             self._request(RpcMethod.SessionSet, args, timeout=timeout)
 
-    def blocklist_update(self, timeout: _Timeout | None = None) -> int | None:
+    def blocklist_update(self, timeout: Timeout | None = None) -> int | None:
         """Update block list. Returns the size of the block list."""
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
-    def port_test(self, timeout: _Timeout | None = None) -> bool | None:
+    def port_test(self, timeout: Timeout | None = None) -> bool | None:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
@@ -1071,7 +1077,7 @@ class Client:
         result = self._request(RpcMethod.PortTest, timeout=timeout)
         return result.get("port-is-open")
 
-    def free_space(self, path: str | pathlib.Path, timeout: _Timeout | None = None) -> int | None:
+    def free_space(self, path: str | pathlib.Path, timeout: Timeout | None = None) -> int | None:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
@@ -1082,7 +1088,7 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: _Timeout | None = None) -> SessionStats:
+    def session_stats(self, timeout: Timeout | None = None) -> SessionStats:
         """Get session statistics"""
         result = self._request(RpcMethod.SessionStats, timeout=timeout)
         return SessionStats(fields=result)
@@ -1091,7 +1097,7 @@ class Client:
         self,
         name: str,
         *,
-        timeout: _Timeout | None = None,
+        timeout: Timeout | None = None,
         honors_session_limits: bool | None = None,
         speed_limit_down_enabled: bool | None = None,
         speed_limit_down: int | None = None,
@@ -1123,7 +1129,7 @@ class Client:
 
         self._request(RpcMethod.GroupSet, arguments, timeout=timeout)
 
-    def get_group(self, name: str, *, timeout: _Timeout | None = None) -> Group | None:
+    def get_group(self, name: str, *, timeout: Timeout | None = None) -> Group | None:
         self._rpc_version_warning(17)
         result: dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
@@ -1132,7 +1138,7 @@ class Client:
 
         return None
 
-    def get_groups(self, name: list[str] | None = None, *, timeout: _Timeout | None = None) -> dict[str, Group]:
+    def get_groups(self, name: list[str] | None = None, *, timeout: Timeout | None = None) -> dict[str, Group]:
         payload = {}
         if name is not None:
             payload = {"group": name}
@@ -1150,7 +1156,7 @@ class Client:
         exc_val: BaseException | None,
         exc_tb: types.TracebackType | None,
     ) -> None:
-        self.__http_client.close()
+        self.__http_client.clear()
 
 
 T = TypeVar("T")
