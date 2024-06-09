@@ -1,5 +1,9 @@
+# ruff: noqa: SIM117
+import contextlib
 import os
 import secrets
+import socket
+import time
 
 import pytest
 
@@ -10,6 +14,17 @@ HOST = os.getenv("TR_HOST", "127.0.0.1")
 PORT = int(os.getenv("TR_PORT", "9091"))
 USER = os.getenv("TR_USER", "admin")
 PASSWORD = os.getenv("TR_PASSWORD", "password")
+
+
+def pytest_configure():
+    start = time.time()
+    while True:
+        with contextlib.suppress(ConnectionError):
+            with socket.create_connection((HOST, PORT), timeout=5):
+                break
+
+        if time.time() - start > 30:
+            print()
 
 
 @pytest.fixture()
