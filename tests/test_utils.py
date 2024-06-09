@@ -9,8 +9,8 @@ from unittest import mock
 
 import pytest
 
-from transmission_rpc import from_url, utils
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER
+from transmission_rpc import DEFAULT_TIMEOUT, from_url, utils
+from transmission_rpc.constants import LOGGER
 
 
 def assert_almost_eq(value: float, expected: float):
