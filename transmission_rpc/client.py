@@ -40,6 +40,7 @@ _header_session_id_key = "x-transmission-session-id"
 
 DEFAULT_TIMEOUT = 30.0
 
+# urllib3 may remove support for int/float in the future
 _Timeout = Union[Timeout, int, float]
 
 
