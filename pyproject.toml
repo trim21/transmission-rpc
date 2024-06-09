@@ -52,7 +52,6 @@ dev = [
     'pytest==8.2.2',
     'pytest-github-actions-annotate-failures==0.2.0',
     'coverage==7.5.3',
-    'pre-commit==3.7.1',
     'mypy==1.10.0',
     'types-requests==2.32.0.20240602',
     'sphinx-autobuild==2024.4.16',
