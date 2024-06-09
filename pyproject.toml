@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transmission-rpc"
-version = "7.0.10a0"
+version = "7.0.10"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
 authors = [
     { name = "trim21", email = "trim21me@gmail.com" },
