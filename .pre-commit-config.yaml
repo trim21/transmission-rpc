@@ -1,13 +1,18 @@
 default_stages: [commit]
 
 repos:
-  - repo: https://github.com/python-poetry/poetry
-    rev: "1.8.3"
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.18
     hooks:
-      - id: poetry-check
-      - id: poetry-lock
-        name: poetry-lock-check
-        args: ["--check"]
+      - id: validate-pyproject
+        # Optional extra validations from SchemaStore:
+        additional_dependencies: ["validate-pyproject-schema-store[all]"]
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.13.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', '--preserve-quotes', --offset, '2']
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -34,7 +39,7 @@ repos:
     rev: v0.4.8
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
 
   - repo: https://github.com/psf/black
     rev: 24.4.2
