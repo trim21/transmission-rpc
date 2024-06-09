@@ -40,6 +40,8 @@ _header_session_id_key = "x-transmission-session-id"
 
 DEFAULT_TIMEOUT = 30.0
 
+_Timeout = Union[Timeout, int, float]
+
 
 class ResponseData(TypedDict):
     arguments: Any
@@ -200,11 +202,15 @@ class Client:
 
         return self.__auth_headers
 
-    def _http_query(self, query: dict[str, Any], timeout: Timeout | None = None) -> str:
+    def _http_query(self, query: dict[str, Any], timeout: _Timeout | None = None) -> str:
         """
         Query Transmission through HTTP.
         """
         request_count = 0
+
+        if isinstance(timeout, (int, float)):
+            timeout = Timeout(read=timeout, connect=timeout)
+
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
@@ -243,7 +249,7 @@ class Client:
         arguments: dict[str, Any] | None = None,
         ids: _TorrentIDs | None = None,
         require_ids: bool = False,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
     ) -> dict[str, Any]:
         """
         Send json-rpc request to Transmission using http POST
@@ -379,7 +385,7 @@ class Client:
     def add_torrent(
         self,
         torrent: BinaryIO | str | bytes | pathlib.Path,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         *,
         download_dir: str | None = None,
         files_unwanted: list[int] | None = None,
@@ -464,7 +470,7 @@ class Client:
 
         return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
 
-    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: Timeout | None = None) -> None:
+    def remove_torrent(self, ids: _TorrentIDs, delete_data: bool = False, timeout: _Timeout | None = None) -> None:
         """
         remove torrent(s) with provided id(s).
 
@@ -478,14 +484,14 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: Timeout | None = None) -> None:
+    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
         """Start torrent(s) with provided id(s)"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: Timeout | None = None) -> None:
+    def start_all(self, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
         """Start all torrents respecting the queue order"""
         method = RpcMethod.TorrentStart
         if bypass_queue:
@@ -499,15 +505,15 @@ class Client:
             timeout=timeout,
         )
 
-    def stop_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """stop torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentStop, {}, ids, True, timeout=timeout)
 
-    def verify_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def verify_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """verify torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentVerify, {}, ids, True, timeout=timeout)
 
-    def reannounce_torrent(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def reannounce_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """Reannounce torrent(s) with provided id(s)"""
         self._request(RpcMethod.TorrentReannounce, {}, ids, True, timeout=timeout)
 
@@ -515,7 +521,7 @@ class Client:
         self,
         torrent_id: _TorrentID,
         arguments: Iterable[str] | None = None,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
     ) -> Torrent:
         """
         Get information for torrent with provided id.
@@ -573,7 +579,7 @@ class Client:
         self,
         ids: _TorrentIDs | None = None,
         arguments: Iterable[str] | None = None,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
     ) -> list[Torrent]:
         """
         Get information for torrents with provided ids. For more information see :py:meth:`Client.get_torrent`.
@@ -590,7 +596,7 @@ class Client:
         ]
 
     def get_recently_active_torrents(
-        self, arguments: Iterable[str] | None = None, timeout: Timeout | None = None
+        self, arguments: Iterable[str] | None = None, timeout: _Timeout | None = None
     ) -> tuple[list[Torrent], list[int]]:
         """
         Get information for torrents for recently active torrent. If you want to get recently-removed
@@ -612,7 +618,7 @@ class Client:
     def change_torrent(
         self,
         ids: _TorrentIDs,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         *,
         bandwidth_priority: int | None = None,
         download_limit: int | None = None,
@@ -746,7 +752,7 @@ class Client:
         self,
         ids: _TorrentIDs,
         location: str | pathlib.Path,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         *,
         move: bool = True,
     ) -> None:
@@ -764,7 +770,7 @@ class Client:
         torrent_id: _TorrentID,
         location: str,
         name: str,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
     ) -> tuple[str, str]:
         """
         Warnings:
@@ -791,7 +797,7 @@ class Client:
 
         return result["path"], result["name"]
 
-    def queue_top(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def queue_top(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """
         Move transfer to the top of the queue.
 
@@ -799,7 +805,7 @@ class Client:
         """
         self._request(RpcMethod.QueueMoveTop, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_bottom(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def queue_bottom(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """
         Move transfer to the bottom of the queue.
 
@@ -807,17 +813,17 @@ class Client:
         """
         self._request(RpcMethod.QueueMoveBottom, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_up(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def queue_up(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """Move transfer up in the queue."""
         self._request(RpcMethod.QueueMoveUp, ids=ids, require_ids=True, timeout=timeout)
 
-    def queue_down(self, ids: _TorrentIDs, timeout: Timeout | None = None) -> None:
+    def queue_down(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """Move transfer down in the queue."""
         self._request(RpcMethod.QueueMoveDown, ids=ids, require_ids=True, timeout=timeout)
 
     def get_session(
         self,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         arguments: Iterable[str] | None = None,
     ) -> Session:
         """
@@ -834,7 +840,7 @@ class Client:
 
     def set_session(
         self,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         *,
         alt_speed_down: int | None = None,
         alt_speed_enabled: bool | None = None,
@@ -1064,12 +1070,12 @@ class Client:
         if args:
             self._request(RpcMethod.SessionSet, args, timeout=timeout)
 
-    def blocklist_update(self, timeout: Timeout | None = None) -> int | None:
+    def blocklist_update(self, timeout: _Timeout | None = None) -> int | None:
         """Update block list. Returns the size of the block list."""
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
-    def port_test(self, timeout: Timeout | None = None) -> bool | None:
+    def port_test(self, timeout: _Timeout | None = None) -> bool | None:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
@@ -1077,7 +1083,7 @@ class Client:
         result = self._request(RpcMethod.PortTest, timeout=timeout)
         return result.get("port-is-open")
 
-    def free_space(self, path: str | pathlib.Path, timeout: Timeout | None = None) -> int | None:
+    def free_space(self, path: str | pathlib.Path, timeout: _Timeout | None = None) -> int | None:
         """
         Get the amount of free space (in bytes) at the provided location.
         """
@@ -1088,7 +1094,7 @@ class Client:
             return result["size-bytes"]
         return None
 
-    def session_stats(self, timeout: Timeout | None = None) -> SessionStats:
+    def session_stats(self, timeout: _Timeout | None = None) -> SessionStats:
         """Get session statistics"""
         result = self._request(RpcMethod.SessionStats, timeout=timeout)
         return SessionStats(fields=result)
@@ -1097,7 +1103,7 @@ class Client:
         self,
         name: str,
         *,
-        timeout: Timeout | None = None,
+        timeout: _Timeout | None = None,
         honors_session_limits: bool | None = None,
         speed_limit_down_enabled: bool | None = None,
         speed_limit_down: int | None = None,
@@ -1129,7 +1135,7 @@ class Client:
 
         self._request(RpcMethod.GroupSet, arguments, timeout=timeout)
 
-    def get_group(self, name: str, *, timeout: Timeout | None = None) -> Group | None:
+    def get_group(self, name: str, *, timeout: _Timeout | None = None) -> Group | None:
         self._rpc_version_warning(17)
         result: dict[str, Any] = self._request(RpcMethod.GroupGet, {"group": name}, timeout=timeout)
 
@@ -1138,7 +1144,7 @@ class Client:
 
         return None
 
-    def get_groups(self, name: list[str] | None = None, *, timeout: Timeout | None = None) -> dict[str, Group]:
+    def get_groups(self, name: list[str] | None = None, *, timeout: _Timeout | None = None) -> dict[str, Group]:
         payload = {}
         if name is not None:
             payload = {"group": name}
