@@ -209,6 +209,9 @@ class Client:
         """
         request_count = 0
 
+        if timeout is None:
+            timeout = self.__query_timeout
+
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
