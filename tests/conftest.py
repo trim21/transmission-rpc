@@ -20,11 +20,11 @@ def pytest_configure():
     start = time.time()
     while True:
         with contextlib.suppress(ConnectionError):
-            with socket.create_connection((HOST, PORT), timeout=5):
+            with socket.create_connection((HOST, PORT), timeout=3):
                 break
 
         if time.time() - start > 30:
-            print()
+            raise ConnectionError("timeout trying to connect to transmission-daemon, is transmission daemon started?")
 
 
 @pytest.fixture()
