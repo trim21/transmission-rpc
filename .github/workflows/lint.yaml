@@ -10,54 +10,48 @@ on:
 
 jobs:
   mypy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
+          cache: pip
 
       - uses: liskin/gh-problem-matcher-wrap@v3
         with:
           action: add
           linters: mypy
 
+      - run: pip install -e '.[dev]'
+
       - name: mypy
         run: mypy --show-column-numbers transmission_rpc
 
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.x"
 
-      - uses: trim21/setup-poetry@dist/v2
-      - uses: trim21/install-poetry-project@dist/v2
+      - run: pip install -e '.[dev]'
+
       - uses: trim21/actions/pre-commit@master
 
-
-
   sphinx:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+          cache: pip
 
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
-        with:
-          install_args: --with docs
+      - run: pip install -e '.[dev]'
 
       - run: sphinx-build -W docs/ dist/

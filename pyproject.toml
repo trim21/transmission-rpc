@@ -1,16 +1,17 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "transmission-rpc"
 version = "7.0.9"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
-authors = ["Trim21 <i@trim21.me>"]
+authors = [
+    { name = "trim21", email = "trim21me@gmail.com" },
+]
 readme = 'README.md'
-repository = 'https://github.com/Trim21/transmission-rpc'
-license = 'MIT'
-packages = [{ include = 'transmission_rpc' }]
+requires-python = "~=3.8"
+license = { text = 'MIT' }
 keywords = ['transmission', 'rpc']
 classifiers = [
     'Intended Audience :: Developers',
@@ -26,35 +27,34 @@ classifiers = [
     'Programming Language :: Python :: Implementation :: PyPy',
 ]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-# dependencies
-urllib3 = "^2.2.1"
-certifi = '>=2017.4.17'
-typing-extensions = ">=4.5.0"
+dependencies = [
+    'urllib3~=2.2',
+    'certifi>=2017.4.17',
+    'typing-extensions>=4.5.0',
+]
 
-[tool.poetry.group.docs.dependencies]
-sphinx = { version = "^7.3.7", python = "^3.9" }
-furo = { version = "2024.5.6", python = "^3.9" }
-sphinx-copybutton = { version = "^0.5.2", python = "^3.9" }
-sphinx-new-tab-link = { version = "^0.4.0", python = "^3.9" }
-sphinx-github-style = { version = "^1.2.2", python = "^3.9" }
+[project.urls]
+Homepage = 'https://github.com/Trim21/transmission-rpc'
 
-[tool.poetry.group.dev.dependencies]
-# we have a example need this
-requests = "^2.23.0"
-# tests
-pytest = "==8.2.2"
-pytest-github-actions-annotate-failures = "==0.2.0"
-coverage = "==7.5.3"
-
-# linter and formatter
-pre-commit = { version = "==3.7.1", markers = "implementation_name != 'pypy'", python = "^3.9" }
-mypy = { version = "==1.10.0", markers = "implementation_name != 'pypy'", python = "^3.9" }
-
-# stubs
-types-requests = "==2.32.0.20240602"
-sphinx-autobuild = { version = "2024.4.16", python = "^3.9" }
+[project.optional-dependencies]
+dev = [
+    # lint
+    'pre-commit==3.7.1 ; python_version >= "3.9"',
+    # tests
+    'yarl==1.9.4',
+    'pytest==8.2.2',
+    'pytest-github-actions-annotate-failures==0.2.0',
+    'coverage==7.5.3',
+    # types
+    'mypy==1.10.0',
+    # docs
+    'sphinx==7.3.7 ; python_version >= "3.9"',
+    'furo==2024.5.6 ; python_version >= "3.9"',
+    'sphinx-copybutton==0.5.2 ; python_version >= "3.9"',
+    'sphinx-new-tab-link==0.4.0 ; python_version >= "3.9"',
+    'sphinx-github-style==1.2.2 ; python_version >= "3.9"',
+    'sphinx-autobuild==2024.4.16 ; python_version >= "3.9"',
+]
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'

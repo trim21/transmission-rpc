@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       max-parallel: 2
       fail-fast: false
@@ -38,10 +38,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
 
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
+      - run: pip install -e '.[dev]'
 
       - name: test
         run: coverage run -m pytest
@@ -54,3 +53,17 @@ jobs:
         with:
           flags: "${{ matrix.python }}"
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  dist-files:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - run: pipx run flit build
+
+      - name: Check Files
+        run: pipx run twine check --strict dist/*
