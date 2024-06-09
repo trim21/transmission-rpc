@@ -45,7 +45,6 @@ docs = [
     'sphinx-github-style==1.2.2',
 ]
 
-
 dev = [
     'yarl==1.9.4',
     # tests
@@ -54,7 +53,8 @@ dev = [
     'coverage==7.5.3',
     'mypy==1.10.0',
     'types-requests==2.32.0.20240602',
-    'sphinx-autobuild==2024.4.16',
+    'pre-commit==3.7.1; python_version >= "3.9"',
+    'sphinx-autobuild==2024.4.16; python_version >= "3.9"',
 ]
 
 [tool.pytest.ini_options]
