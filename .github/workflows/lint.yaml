@@ -17,15 +17,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
+          cache: pip
 
       - uses: liskin/gh-problem-matcher-wrap@v3
         with:
           action: add
           linters: mypy
+
+      - run: pip install -e '.[dev]'
 
       - name: mypy
         run: mypy --show-column-numbers transmission_rpc
@@ -38,9 +37,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+          cache: pip
 
-      - uses: trim21/setup-poetry@dist/v2
-      - uses: trim21/install-poetry-project@dist/v2
+      - run: pip install -e '.[dev,docs]'
+
       - uses: trim21/actions/pre-commit@master
 
 
@@ -53,11 +53,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+          cache: pip
 
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
-        with:
-          install_args: --with docs
+      - run: pip install -e '.[dev,docs]'
 
       - run: sphinx-build -W docs/ dist/

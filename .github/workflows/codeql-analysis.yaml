@@ -28,10 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - uses: trim21/setup-poetry@dist/v2
-
-      - uses: trim21/install-poetry-project@dist/v2
+          cache: pip
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3

@@ -11,27 +11,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
-      - uses: trim21/setup-poetry@dist/v2
+        with:
+          python-version: '3.x'
 
-      - run: poetry publish --build
+      - run: pipx run flit publish
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+          FLIT_USERNAME: '__token__'
+          FLIT_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
-      - name: Generate Changelog
-        id: changelog
-        uses: requarks/changelog-action@v1.10.2
+      - name: Get Previous Tag
+        id: tag
+        uses: trim21/changelog-previous-tag@master
         with:
           token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
-          writeToFile: false
+          version-spec: pep440
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          fromTag: ${{ github.ref_name }}
+          toTag: ${{ env.previousTag }}
           restrictToTypes: feat,fix,revert
 
       - name: Upload Github Release
-        run: gh release create "${GITHUB_REF}" --notes "${CHANGELOG}"
+        run: gh release create "${GITHUB_REF}" --notes "${CHANGELOG}" $EXTRA_OPTS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHANGELOG: "${{ steps.changelog.outputs.changes }}"
+          EXTRA_OPTS: "${{ env.preRelease == 'true' && '-p' || '' }}"
