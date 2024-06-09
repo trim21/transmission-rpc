@@ -37,13 +37,16 @@ All kinds of PRs (docs, feature, bug fixes and eta...) are most welcome.
 
 ### Setup Local Development Environment
 
-At first, you need to install [python](https://python.org/), [poetry](https://python-poetry.org/) and [task](https://taskfile.dev/) (or you can also run command in `taskfile.yaml` directly).
+At first, you need to install [python>=3.10](https://python.org/), and [task](https://taskfile.dev/) (or you can also run command in `taskfile.yaml` directly).
 
 It's recommended to python3.10 as local development python version.
 
 ```shell
-poetry install --sync
-poetry run pre-commit install # install git pre-commit hooks
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+# install git pre-commit hooks
+pre-commit install
 ```
 
 ### Lint
