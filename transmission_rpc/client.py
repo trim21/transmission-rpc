@@ -208,9 +208,6 @@ class Client:
         """
         request_count = 0
 
-        if isinstance(timeout, (int, float)):
-            timeout = Timeout(read=timeout, connect=timeout)
-
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
