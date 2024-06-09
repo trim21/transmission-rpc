@@ -6,14 +6,12 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transmission-rpc)](https://pypi.org/project/transmission-rpc/)
 [![Codecov branch](https://img.shields.io/codecov/c/github/Trim21/transmission-rpc/master)](https://codecov.io/gh/Trim21/transmission-rpc/branch/master)
 
+## Introduction
+
 `transmission-rpc` is a python wrapper on top of [transmission](https://github.com/transmission/transmission) JSON RPC protocol,
 hosted on GitHub at [github.com/trim21/transmission-rpc](https://github.com/trim21/transmission-rpc)
 
-## Introduction
-
-`transmission-rpc` is a python module implementing the json-rpc client protocol for the BitTorrent client Transmission.
-
-Support 14 <= rpc version <= 17 (2.40 <= transmission version <= 4.0.6),
+Support 2.40 (released 2011-10-05) <= transmission version <= 4.0.6 (released 2024-05-29),
 should works fine with newer rpc version but some new feature may be missing.
 
 ## versioning
@@ -37,13 +35,16 @@ All kinds of PRs (docs, feature, bug fixes and eta...) are most welcome.
 
 ### Setup Local Development Environment
 
-At first, you need to install [python](https://python.org/), [poetry](https://python-poetry.org/) and [task](https://taskfile.dev/) (or you can also run command in `taskfile.yaml` directly).
+At first, you need to install [python>=3.10](https://python.org/), and [task](https://taskfile.dev/) (or you can also run command in `taskfile.yaml` directly).
 
 It's recommended to python3.10 as local development python version.
 
 ```shell
-poetry install --sync
-poetry run pre-commit install # install git pre-commit hooks
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+# install git pre-commit hooks
+pre-commit install
 ```
 
 ### Lint
