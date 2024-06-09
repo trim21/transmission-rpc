@@ -36,10 +36,9 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
-          cache: pip
+          python-version: "3.x"
 
-      - run: pip install -e '.[dev,docs]'
+      - run: pip install pre-commit
 
       - uses: trim21/actions/pre-commit@master
 
