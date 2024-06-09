@@ -12,7 +12,6 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     strategy:
-      max-parallel: 2
       fail-fast: false
       matrix:
         transmission: ["version-3.00-r8", "4.0.5"]
