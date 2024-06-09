@@ -41,7 +41,6 @@ sphinx-new-tab-link = { version = "^0.4.0", python = "^3.9" }
 sphinx-github-style = { version = "^1.2.2", python = "^3.9" }
 
 [tool.poetry.group.dev.dependencies]
-yarl = "==1.9.4"
 # we have a example need this
 requests = "^2.23.0"
 # tests

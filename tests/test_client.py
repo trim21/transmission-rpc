@@ -5,7 +5,6 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
-import yarl
 from typing_extensions import Literal
 
 from tests.util import ServerTooLowError, skip_on
@@ -48,18 +47,8 @@ def test_client_parse_url(protocol: Literal["http", "https"], username, password
             port=port,
             path=path,
         )
-        u = str(
-            yarl.URL.build(
-                scheme=protocol,
-                user=username,
-                password=password,
-                host=host,
-                port=port,
-                path=urljoin(path, "rpc"),
-            )
-        )
 
-        assert client._url == u  # noqa: SLF001
+        assert client._url == f'{protocol}://{host}:{port}{urljoin(path, "rpc")}'  # noqa: SLF001
 
 
 def hash_to_magnet(h):
