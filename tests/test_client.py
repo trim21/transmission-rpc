@@ -211,7 +211,7 @@ def test_real_torrent_get_files(tr_client: Client):
     [401, 403],
 )
 def test_raise_unauthorized(status_code):
-    m = mock.Mock(return_value=mock.Mock(status_code=status_code))
+    m = mock.Mock(return_value=mock.Mock(status=status_code))
     with mock.patch("urllib3.PoolManager.request", m), pytest.raises(TransmissionAuthError):
         Client()
 
