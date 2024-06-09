@@ -96,7 +96,7 @@ class Client:
         host: str = "127.0.0.1",
         port: int = 9091,
         path: str = "/transmission/rpc",
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | Timeout = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
     ):
         """
