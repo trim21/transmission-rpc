@@ -12,6 +12,7 @@ from urllib.parse import quote
 import requests
 import requests.auth
 import requests.exceptions
+import requests_unixsocket
 from typing_extensions import Literal, Self, TypedDict, deprecated
 
 from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
@@ -87,6 +88,7 @@ class Client:
         host: str = "127.0.0.1",
         port: int = 9091,
         path: str = "/transmission/rpc",
+        url: str | None = None,
         timeout: float = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
     ):
@@ -99,6 +101,9 @@ class Client:
             host:
             port:
             path: rpc request target path, default ``/transmission/rpc``
+            url: if specified, takes precedence over protocol, host, port and path. Unix
+              sockets can be specified in `requests_unixsocket` format, e.g.
+              'http+unix://%2Frun%2Ftransmission.sock/transmission/rpc'
             timeout:
             logger:
         """
@@ -117,13 +122,14 @@ class Client:
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = f"{protocol}://{auth}{host}:{port}{path}"
+        if url is None:
+            url = f"{protocol}://{auth}{host}:{port}{path}"
         self._url = str(url)
         self.__raw_session: dict[str, Any] = {}
         self.__session_id = "0"
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
-        self._http_session = requests.Session()
+        self._http_session = requests_unixsocket.Session()
         self._http_session.trust_env = False
         self.__semver_version = None
         self.get_session()

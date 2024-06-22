@@ -29,6 +29,7 @@ classifiers = [
 
 dependencies = [
     'requests~=2.23',
+    'requests-unixsocket2~=0.4.0',
     'typing-extensions>=4.5.0',
 ]
 
