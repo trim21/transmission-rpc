@@ -10,6 +10,7 @@ import pytest
 from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
 
+PROTOCOL = os.getenv("TR_PROTOCOL", "http")
 HOST = os.getenv("TR_HOST", "127.0.0.1")
 PORT = int(os.getenv("TR_PORT", "9091"))
 USER = os.getenv("TR_USER", "admin")
@@ -19,8 +20,11 @@ PASSWORD = os.getenv("TR_PASSWORD", "password")
 def pytest_configure():
     start = time.time()
     while True:
-        with contextlib.suppress(ConnectionError):
-            with socket.create_connection((HOST, PORT), timeout=3):
+        with contextlib.suppress(ConnectionError, FileNotFoundError):
+            is_unix = PROTOCOL == "http+unix"
+            with socket.socket(socket.AF_UNIX if is_unix else socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(3)
+                sock.connect(HOST if is_unix else (HOST, PORT))
                 break
 
         if time.time() - start > 30:
@@ -30,7 +34,7 @@ def pytest_configure():
 @pytest.fixture()
 def tr_client():
     LOGGER.setLevel("INFO")
-    with Client(host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
+    with Client(protocol=PROTOCOL, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
         yield c

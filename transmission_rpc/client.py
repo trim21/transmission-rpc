@@ -15,6 +15,7 @@ from typing_extensions import Literal, Self, TypedDict, deprecated
 from urllib3 import Timeout
 from urllib3.util import make_headers
 
+from transmission_rpc._unix_socket import UnixHTTPConnectionPool
 from transmission_rpc.constants import LOGGER, RpcMethod
 from transmission_rpc.error import (
     TransmissionAuthError,
@@ -96,7 +97,7 @@ class Client:
     def __init__(
         self,
         *,
-        protocol: Literal["http", "https"] = "http",
+        protocol: Literal["http", "https", "http+unix"] = "http",
         username: str | None = None,
         password: str | None = None,
         host: str = "127.0.0.1",
@@ -116,6 +117,9 @@ class Client:
             path: rpc request target path, default ``/transmission/rpc``
             timeout:
             logger:
+
+        To connect to a Unix socket, pass "http+unix" as `protocol` and the path to
+        the socket as `host`.
         """
         if isinstance(logger, logging.Logger):
             self.logger = logger
@@ -138,8 +142,10 @@ class Client:
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url = f"{protocol}://{host}:{port}{path}"
+        url_host = "localhost" if protocol == "http+unix" else host
+        url = f"{protocol}://{url_host}:{port}{path}"
         self._url = str(url)
+        self._path = path
 
         self.__raw_session: dict[str, Any] = {}
         self.__session_id = "0"
@@ -148,7 +154,12 @@ class Client:
         self.__protocol_version: int = 17  # default 17
         self.__semver_version = None
 
-        self.__http_client = urllib3.PoolManager(ca_certs=certifi.where(), timeout=self.timeout, retries=False)
+        common_args: dict[str, Any] = {"host": host, "timeout": self.timeout, "retries": False}
+        self.__http_client = {
+            "http": urllib3.HTTPConnectionPool(port=port, **common_args),
+            "https": urllib3.HTTPSConnectionPool(port=port, ca_certs=certifi.where(), **common_args),
+            "http+unix": UnixHTTPConnectionPool(**common_args),
+        }[protocol]
         self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
@@ -220,13 +231,13 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
 
             headers = self.__get_headers()
-            self.logger.debug({"url": self._url, "headers": headers, "data": query, "timeout": timeout})
+            self.logger.debug({"path": self._path, "headers": headers, "data": query, "timeout": timeout})
 
             request_count += 1
             try:
                 r = self.__http_client.request(
                     "POST",
-                    url=self._url,
+                    url=self._path,
                     headers=headers,
                     json=query,
                     timeout=timeout,
@@ -1166,7 +1177,7 @@ class Client:
         exc_val: BaseException | None,
         exc_tb: types.TracebackType | None,
     ) -> None:
-        self.__http_client.clear()
+        self.__http_client.close()
 
 
 T = TypeVar("T")
