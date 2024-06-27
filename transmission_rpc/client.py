@@ -456,7 +456,7 @@ class Client:
             kwargs["filename"] = torrent
         else:
             if not torrent_data:
-                raise RuntimeError("Torrent metadata is empty")
+                raise ValueError("Torrent metadata is empty")
             kwargs["metainfo"] = torrent_data
 
         return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
