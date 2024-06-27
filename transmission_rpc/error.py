@@ -4,10 +4,9 @@ exception raise by this package
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    from requests.models import Response
+from urllib3 import BaseHTTPResponse
 
 
 class TransmissionError(Exception):
@@ -21,7 +20,7 @@ class TransmissionError(Exception):
     argument: Any | None  # rpc call arguments
     response: Any | None  # parsed json response, may be dict with keys 'result' and 'arguments'
     rawResponse: str | None  # raw text http response
-    original: Response | None  # original http requests
+    original: BaseHTTPResponse | None  # original http requests
 
     def __init__(
         self,
@@ -30,7 +29,7 @@ class TransmissionError(Exception):
         argument: Any | None = None,
         response: Any | None = None,
         rawResponse: str | None = None,
-        original: Response | None = None,
+        original: BaseHTTPResponse | None = None,
     ):
         super().__init__()
         self.message = message

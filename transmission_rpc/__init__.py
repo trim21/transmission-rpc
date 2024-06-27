@@ -1,8 +1,8 @@
 import logging
 import urllib.parse
 
-from transmission_rpc.client import Client
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, IdleMode, Priority, RatioLimitMode
+from transmission_rpc.client import DEFAULT_TIMEOUT, Client
+from transmission_rpc.constants import LOGGER, IdleMode, Priority, RatioLimitMode
 from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
