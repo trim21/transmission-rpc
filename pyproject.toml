@@ -43,15 +43,15 @@ dev = [
     'yarl==1.9.4',
     'pytest==8.2.2',
     'pytest-github-actions-annotate-failures==0.2.0',
-    'coverage==7.5.3',
+    'coverage==7.5.4',
     # types
-    'mypy==1.10.0',
-    'types-requests==2.32.0.20240602',
+    'mypy==1.10.1',
+    'types-requests==2.32.0.20240622',
     # docs
     'sphinx==7.3.7 ; python_version >= "3.9"',
     'furo==2024.5.6 ; python_version >= "3.9"',
     'sphinx-copybutton==0.5.2 ; python_version >= "3.9"',
-    'sphinx-new-tab-link==0.4.0 ; python_version >= "3.9"',
+    'sphinx-new-tab-link==0.5.0; python_version >= "3.9"',
     'sphinx-github-style==1.2.2 ; python_version >= "3.9"',
     'sphinx-autobuild==2024.4.16 ; python_version >= "3.9"',
 ]
