@@ -307,7 +307,7 @@ class Session(Container):
     @property
     def seed_ratio_limit(self) -> float:
         """the default seed ratio for torrents to use"""
-        return self.fields["seedRatioLimit"]
+        return float(self.fields["seedRatioLimit"])
 
     @property
     def seed_ratio_limited(self) -> bool:
