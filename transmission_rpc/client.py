@@ -737,7 +737,7 @@ class Client:
         if args:
             self._request(RpcMethod.TorrentSet, args, ids, True, timeout=timeout)
         else:
-            ValueError("No arguments to set")
+            raise ValueError("No arguments to set")
 
     def move_torrent_data(
         self,
