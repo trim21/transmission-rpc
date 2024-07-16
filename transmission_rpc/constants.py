@@ -125,7 +125,7 @@ TORRENT_GET_ARGS: dict[str, Args] = {
     "magnetLink": Args(Type.string, 7, None, None, None, "The magnet link for this torrent."),
     "manualAnnounceTime": Args(Type.number, 1, description="The time until you manually ask for more peers."),
     "maxConnectedPeers": Args(Type.number, 1, None, None, None, "Maximum of connected peers."),
-    "metadataPercentComplete": Args(Type.number, 7, description="Download progress of metadata. 0.0 to 1.0."),
+    "metadataPercentComplete": Args(Type.double, 7, description="Download progress of metadata. 0.0 to 1.0."),
     "name": Args(Type.string, 1, None, None, None, "Torrent name."),
     "peer-limit": Args(Type.number, 5, None, None, None, "Maximum number of peers."),
     "peers": Args(Type.array, 2, None, None, None, "Array of peer objects."),
