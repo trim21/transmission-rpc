@@ -171,7 +171,7 @@ class Client:
                 raise ValueError("timeout tuple can only include 2 numbers elements")
             for v in value:
                 if not isinstance(v, (float, int)):
-                    raise TypeError("element of timeout tuple can only be int of float")
+                    raise TypeError("element of timeout tuple can only be int or float")
             self._query_timeout = (value[0], value[1])  # for type checker
         elif value is None:
             self._query_timeout = DEFAULT_TIMEOUT
@@ -858,7 +858,7 @@ class Client:
         script_torrent_done_filename: str | None = None,
         seed_queue_enabled: bool | None = None,
         seed_queue_size: int | None = None,
-        seed_ratio_limit: int | None = None,
+        seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,
