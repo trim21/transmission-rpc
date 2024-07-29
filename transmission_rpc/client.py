@@ -92,7 +92,7 @@ def _parse_torrent_ids(args: Any) -> str | list[str | int]:
 
 
 class Client:
-    __query_timeout: Timeout
+    __query_timeout: Timeout | None
 
     def __init__(
         self,
@@ -103,7 +103,7 @@ class Client:
         host: str = "127.0.0.1",
         port: int = 9091,
         path: str = "/transmission/rpc",
-        timeout: float | Timeout = DEFAULT_TIMEOUT,
+        timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
     ):
         """
@@ -129,7 +129,7 @@ class Client:
             )
         if isinstance(timeout, (int, float)):
             self.__query_timeout = Timeout(timeout)
-        elif isinstance(timeout, Timeout):
+        elif isinstance(timeout, Timeout) or timeout is None:
             self.__query_timeout = timeout
         else:
             raise TypeError(f"unsupported value {timeout!r}, only Timeout/float/int are supported")
@@ -189,7 +189,7 @@ class Client:
         return self.__server_version
 
     @property
-    def timeout(self) -> Timeout:
+    def timeout(self) -> Timeout | None:
         """
         Get current timeout for HTTP queries.
         """
