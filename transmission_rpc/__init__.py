@@ -11,7 +11,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats, Stats
 from transmission_rpc.torrent import FileStat, Status, Torrent, Tracker, TrackerStats
-from transmission_rpc.types import File, Group
+from transmission_rpc.types import File, Group, PortTestResult
 
 __all__ = [
     "Client",
@@ -35,6 +35,7 @@ __all__ = [
     "Priority",
     "RatioLimitMode",
     "IdleMode",
+    "PortTestResult",
 ]
 
 
