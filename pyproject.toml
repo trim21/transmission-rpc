@@ -43,7 +43,7 @@ dev = [
     'yarl==1.9.4',
     'pytest==8.2.2',
     'pytest-github-actions-annotate-failures==0.2.0',
-    'coverage==7.5.4',
+    'coverage==7.6.0',
     # types
     'mypy==1.10.1',
     'types-requests==2.32.0.20240622',
