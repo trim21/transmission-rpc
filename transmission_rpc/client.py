@@ -275,7 +275,9 @@ class Client:
                 "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
             ) from error
 
-        self.logger.debug(json.dumps(data, indent=2))
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug(json.dumps(data, indent=2))
+
         if "result" not in data:
             raise TransmissionError(
                 "Query failed, response data missing without result.",
