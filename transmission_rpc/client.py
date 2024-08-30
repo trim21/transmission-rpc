@@ -101,7 +101,7 @@ class Client:
         username: str | None = None,
         password: str | None = None,
         host: str = "127.0.0.1",
-        port: int = 9091,
+        port: int | None = 9091,
         path: str = "/transmission/rpc",
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
