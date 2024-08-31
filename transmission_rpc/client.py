@@ -143,7 +143,7 @@ class Client:
             path = "/transmission/rpc"
 
         url_host = "localhost" if protocol == "http+unix" else host
-        url = f"{protocol}://{url_host}:{port}{path}"
+        url = f"{protocol}://{url_host}{'' if port is None else f':{port}'}{path}"
         self._url = str(url)
         self._path = path
 
