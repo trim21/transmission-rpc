@@ -101,7 +101,7 @@ class Client:
         username: str | None = None,
         password: str | None = None,
         host: str = "127.0.0.1",
-        port: int = 9091,
+        port: int | None = 9091,
         path: str = "/transmission/rpc",
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
@@ -143,7 +143,7 @@ class Client:
             path = "/transmission/rpc"
 
         url_host = "localhost" if protocol == "http+unix" else host
-        url = f"{protocol}://{url_host}:{port}{path}"
+        url = f"{protocol}://{url_host}{'' if port is None else f':{port}'}{path}"
         self._url = str(url)
         self._path = path
 

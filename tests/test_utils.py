@@ -106,6 +106,14 @@ def test_format_timedelta(delta, expected):
             "port": 443,
             "path": "/",
         },
+        "http+unix://%2Fvar%2Frun%2Ftransmission.sock/transmission/rpc": {
+            "protocol": "http+unix",
+            "username": None,
+            "password": None,
+            "host": "/var/run/transmission.sock",
+            "port": None,
+            "path": "/transmission/rpc",
+        },
     }.items(),
 )
 def test_from_url(url: str, kwargs: dict[str, Any]):
