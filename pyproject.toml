@@ -51,7 +51,7 @@ dev = [
     'sphinx>=7,<=8; python_version >= "3.9"',
     'furo==2024.7.18; python_version >= "3.9"',
     'sphinx-copybutton==0.5.2 ; python_version >= "3.9"',
-    'sphinx-new-tab-link==0.5.2; python_version >= "3.9"',
+    'sphinx-new-tab-link==0.5.3; python_version >= "3.9"',
     'sphinx-github-style==1.2.2 ; python_version >= "3.9"',
     'sphinx-autobuild==2024.4.16 ; python_version >= "3.9"',
 ]
