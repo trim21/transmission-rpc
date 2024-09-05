@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, NamedTuple, Optional, TypeVar, Union
+from typing import Any, NamedTuple, Optional, Tuple, TypeVar, Union
 
 from transmission_rpc.constants import Priority
 
 _Number = Union[int, float]
-_Timeout = Optional[_Number | tuple[_Number, _Number]]
+_Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
 
 T = TypeVar("T")
 
@@ -17,7 +17,7 @@ class Container:
         self.fields = fields
 
     def get(self, key: str, default: T | None = None) -> Any:
-        """Get the raw value by the **raw rpc response key**"""
+        """get the raw value by the **raw rpc response key**"""
         return self.fields.get(key, default)
 
 
@@ -41,7 +41,9 @@ class File(NamedTuple):
 
 
 class Group(Container):
-    """https://github.com/transmission/transmission/blob/4.0.5/docs/rpc-spec.md#482-bandwidth-group-accessor-group-get"""
+    """
+    https://github.com/transmission/transmission/blob/4.0.5/docs/rpc-spec.md#482-bandwidth-group-accessor-group-get
+    """
 
     @property
     def name(self) -> str:
@@ -50,27 +52,27 @@ class Group(Container):
 
     @property
     def honors_session_limits(self) -> bool:
-        """True if session upload limits are honored"""
+        """true if session upload limits are honored"""
         return self.fields["honorsSessionLimits"]
 
     @property
     def speed_limit_down_enabled(self) -> bool:
-        """True means enabled"""
+        """true means enabled"""
         return self.fields["speed-limit-down-enabled"]
 
     @property
     def speed_limit_down(self) -> int:
-        """Max global download speed (KBps)"""
+        """max global download speed (KBps)"""
         return self.fields["speed-limit-down"]
 
     @property
     def speed_limit_up_enabled(self) -> bool:
-        """True means enabled"""
+        """true means enabled"""
         return self.fields["speed-limit-up-enabled"]
 
     @property
     def speed_limit_up(self) -> int:
-        """Max global upload speed (KBps)"""
+        """max global upload speed (KBps)"""
         return self.fields["speed-limit-up"]
 
 
@@ -85,7 +87,6 @@ class BitMap:
         """
         Args:
             index: piece index
-
         Returns:
             this method always return a bool, even index overflow piece count of torrent.
             This is because there is no reliable way to know piece count only based on `torrent.pieces`.
