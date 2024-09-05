@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import base64
 import enum
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from functools import cached_property
 from typing import Any
 
 from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
-from transmission_rpc.types import Container, File
+from transmission_rpc.types import BitMap, Container, File
 from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
@@ -50,37 +52,37 @@ class Status(str, enum.Enum):
 
     @property
     def stopped(self) -> bool:
-        """if torrent stopped"""
+        """If torrent stopped"""
         return self == "stopped"
 
     @property
     def check_pending(self) -> bool:
-        """if torrent check pending"""
+        """If torrent check pending"""
         return self == "check pending"
 
     @property
     def checking(self) -> bool:
-        """if torrent checking"""
+        """If torrent checking"""
         return self == "checking"
 
     @property
     def download_pending(self) -> bool:
-        """if download pending"""
+        """If download pending"""
         return self == "download pending"
 
     @property
     def downloading(self) -> bool:
-        """if downloading"""
+        """If downloading"""
         return self == "downloading"
 
     @property
     def seed_pending(self) -> bool:
-        """if seed pending"""
+        """If seed pending"""
         return self == "seed pending"
 
     @property
     def seeding(self) -> bool:
-        """if seeding"""
+        """If seeding"""
         return self == "seeding"
 
     def __str__(self) -> str:
@@ -88,9 +90,7 @@ class Status(str, enum.Enum):
 
 
 class FileStat(Container):
-    """
-    type for :py:meth:`Torrent.file_stats`
-    """
+    """type for :py:meth:`Torrent.file_stats`"""
 
     @property
     def bytesCompleted(self) -> int:
@@ -106,9 +106,7 @@ class FileStat(Container):
 
 
 class Tracker(Container):
-    """
-    type for :py:attr:`Torrent.trackers`
-    """
+    """type for :py:attr:`Torrent.trackers`"""
 
     @property
     def id(self) -> int:
@@ -128,9 +126,7 @@ class Tracker(Container):
 
 
 class TrackerStats(Container):
-    """
-    type for :py:attr:`Torrent.tracker_stats`
-    """
+    """type for :py:attr:`Torrent.tracker_stats`"""
 
     @property
     def id(self) -> int:
@@ -242,8 +238,7 @@ class TrackerStats(Container):
 
 
 class Torrent(Container):
-    """
-    Torrent is a class holding the data received from Transmission regarding a bittorrent transfer.
+    """Torrent is a class holding the data received from Transmission regarding a bittorrent transfer.
 
     Warnings:
         setter on Torrent's properties has been removed, please use :py:meth:`Client.change_torrent` instead
@@ -278,13 +273,13 @@ class Torrent(Container):
 
     @property
     def info_hash(self) -> str:
-        """alias of ``hashString``"""
+        """Alias of ``hashString``"""
         return self.hashString
 
     @property
     @deprecated("this is a typo, do not use this. use `.info_hash` instead")
     def into_hash(self) -> str:
-        """alias of ``hashString``"""
+        """Alias of ``hashString``"""
         return self.hashString
 
     @property
@@ -302,7 +297,7 @@ class Torrent(Container):
 
     @property
     def bandwidth_priority(self) -> Priority:
-        """this torrent's bandwidth priority"""
+        """This torrent's bandwidth priority"""
         return Priority(self.fields["bandwidthPriority"])
 
     @property
@@ -311,8 +306,7 @@ class Torrent(Container):
 
     @property
     def corrupt_ever(self) -> int:
-        """
-        Byte count of all the corrupt data you've ever downloaded for
+        """Byte count of all the corrupt data you've ever downloaded for
         this torrent. If you're on a poisoned torrent, this number can
         grow very large.
         """
@@ -329,8 +323,7 @@ class Torrent(Container):
 
     @property
     def desired_available(self) -> int:
-        """
-        Byte count of all the piece data we want and don't have yet,
+        """Byte count of all the piece data we want and don't have yet,
         but that a connected peer does have. [0...leftUntilDone]
         """
         return self.fields["desiredAvailable"]
@@ -346,8 +339,7 @@ class Torrent(Container):
 
     @property
     def downloaded_ever(self) -> int:
-        """
-        Byte count of all the non-corrupt data you've ever downloaded for this torrent.
+        """Byte count of all the non-corrupt data you've ever downloaded for this torrent.
         If you deleted the files and downloaded a second time, this will be 2*totalSize.
         """
         return self.fields["downloadedEver"]
@@ -362,13 +354,12 @@ class Torrent(Container):
 
     @property
     def edit_date(self) -> datetime:
-        """
-        The last time during this session that a rarely-changing field
+        """The last time during this session that a rarely-changing field
         changed -- e.g. any tr_torrent_metainfo field (trackers, filenames, name)
         or download directory. RPC clients can monitor this to know when
         to reload fields that rarely change.
         """
-        return datetime.fromtimestamp(self.fields["editDate"], timezone.utc)
+        return datetime.fromtimestamp(self.fields["editDate"], UTC)
 
     @property
     def error(self) -> int:
@@ -377,13 +368,12 @@ class Torrent(Container):
 
     @property
     def error_string(self) -> str:
-        """empty string for fine task"""
+        """Empty string for fine task"""
         return self.fields["errorString"]
 
     @property
     def eta(self) -> timedelta | None:
-        """
-        the "eta" as datetime.timedelta.
+        """The "eta" as datetime.timedelta.
 
         If downloading, estimated the ``timedelta`` left until the torrent is done.
         If seeding, estimated the ``timedelta`` left until seed ratio is reached.
@@ -412,8 +402,7 @@ class Torrent(Container):
         return self.fields["file-count"]
 
     def get_files(self) -> list[File]:
-        """
-        Get list of files for this torrent.
+        """Get list of files for this torrent.
 
         Note:
             The order of the files is guaranteed. The index of file object is the id of the file
@@ -444,14 +433,14 @@ class Torrent(Container):
                     completed=file["bytesCompleted"],
                     id=id,
                 )
-                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
+                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted, strict=False)
             )
 
         return result
 
     @property
     def file_stats(self) -> list[FileStat]:
-        """file stats"""
+        """File stats"""
         return [FileStat(fields=x) for x in self.fields["fileStats"]]
 
     @property
@@ -460,8 +449,7 @@ class Torrent(Container):
 
     @property
     def have_unchecked(self) -> int:
-        """
-        Byte count of all the partial piece data we have for this torrent.
+        """Byte count of all the partial piece data we have for this torrent.
         As pieces become complete,
         this value may decrease as portions of it are moved to "corrupt" or "haveValid".
         """
@@ -474,7 +462,7 @@ class Torrent(Container):
 
     @property
     def honors_session_limits(self) -> bool:
-        """true if session upload limits are honored"""
+        """True if session upload limits are honored"""
         return self.fields["honorsSessionLimits"]
 
     @property
@@ -495,8 +483,7 @@ class Torrent(Container):
 
     @property
     def left_until_done(self) -> int:
-        """
-        Byte count of how much data is left to be downloaded until we've got
+        """Byte count of how much data is left to be downloaded until we've got
         all the pieces that we want. [0...tr_stat.sizeWhenDone]
         """
         return self.fields["leftUntilDone"]
@@ -507,7 +494,7 @@ class Torrent(Container):
 
     @property
     def manual_announce_time(self) -> datetime:
-        return datetime.fromtimestamp(self.fields["manualAnnounceTime"], timezone.utc)
+        return datetime.fromtimestamp(self.fields["manualAnnounceTime"], UTC)
 
     @property
     def max_connected_peers(self) -> int:
@@ -515,8 +502,7 @@ class Torrent(Container):
 
     @property
     def metadata_percent_complete(self) -> float:
-        """
-        How much of the metadata the torrent has.
+        """How much of the metadata the torrent has.
         For torrents added from a torrent this will always be 1.
         For magnet links, this number will from from 0 to 1 as the metadata is downloaded.
         Range is [0..1]
@@ -525,7 +511,7 @@ class Torrent(Container):
 
     @property
     def peer_limit(self) -> int:
-        """maximum number of peers"""
+        """Maximum number of peers"""
         return self.fields["peer-limit"]
 
     @property
@@ -540,7 +526,8 @@ class Torrent(Container):
     @property
     def peers_from(self) -> int:
         """How many peers we found out about from the tracker, or from pex,
-        or from incoming connections, or from our resume file."""
+        or from incoming connections, or from our resume file.
+        """
         return self.fields["peersFrom"]
 
     @property
@@ -560,22 +547,15 @@ class Torrent(Container):
 
     @property
     def percent_done(self) -> float:
-        """
-        How much has been downloaded of the files the user wants. This differs
+        """How much has been downloaded of the files the user wants. This differs
         from percentComplete if the user wants only some of the torrent's files.
         Range is [0..1]
         """
         return float(self.fields["percentDone"])
 
-    @property
-    def pieces(self) -> str:
-        """
-        A bitfield holding pieceCount flags which are set to 'true'
-        if we have the piece matching that position.
-
-        JSON doesn't allow raw binary data, so this is a base64-encoded string. (Source: tr_torrent)
-        """
-        return self.fields["pieces"]
+    @cached_property
+    def pieces(self) -> BitMap:
+        return BitMap(base64.b64decode(self.fields["pieces"].decode()))
 
     @property
     def piece_count(self) -> int:
@@ -596,17 +576,17 @@ class Torrent(Container):
 
     @property
     def queue_position(self) -> int:
-        """position of this torrent in its queue [0...n)"""
+        """Position of this torrent in its queue [0...n)"""
         return self.fields["queuePosition"]
 
     @property
     def rate_download(self) -> int:
-        """download rate (B/s)"""
+        """Download rate (B/s)"""
         return self.fields["rateDownload"]
 
     @property
     def rate_upload(self) -> int:
-        """upload rate (B/s)"""
+        """Upload rate (B/s)"""
         return self.fields["rateUpload"]
 
     @property
@@ -636,17 +616,17 @@ class Torrent(Container):
 
     @property
     def trackers(self) -> list[Tracker]:
-        """trackers of torrent"""
+        """Trackers of torrent"""
         return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
     def tracker_list(self) -> list[str]:
-        """list of str of announce URLs"""
+        """List of str of announce URLs"""
         return [x for x in self.fields["trackerList"].splitlines() if x]
 
     @property
     def tracker_stats(self) -> list[TrackerStats]:
-        """tracker status, for example, announce success/failure status"""
+        """Tracker status, for example, announce success/failure status"""
         return [TrackerStats(fields=x) for x in self.fields["trackerStats"]]
 
     @property
@@ -655,10 +635,9 @@ class Torrent(Container):
 
     @property
     def torrent_file(self) -> str:
-        """
-        torrent file location on transmission server
+        """Torrent file location on transmission server
 
-        Examples
+        Examples:
         --------
         /var/lib/transmission-daemon/.config/transmission-daemon/torrents/00000000000000000000000000.torrent
         """
@@ -682,7 +661,7 @@ class Torrent(Container):
 
     @property
     def wanted(self) -> list[int]:
-        """if files are wanted, sorted by file index. 1 for wanted 0 for unwanted"""
+        """If files are wanted, sorted by file index. 1 for wanted 0 for unwanted"""
         return self.fields["wanted"]
 
     @property
@@ -706,8 +685,7 @@ class Torrent(Container):
 
     @property
     def status(self) -> Status:
-        """
-        Returns the torrent status. Is either one of 'check pending', 'checking',
+        """Returns the torrent status. Is either one of 'check pending', 'checking',
         'downloading', 'download pending', 'seeding', 'seed pending' or 'stopped'.
         The first two is related to verification.
 
@@ -752,9 +730,7 @@ class Torrent(Container):
 
     @property
     def progress(self) -> float:
-        """
-        download progress in percent.
-        """
+        """Download progress in percent."""
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
             return round((100.0 * self.fields["percentDone"]), 2)
@@ -768,15 +744,12 @@ class Torrent(Container):
 
     @property
     def ratio(self) -> float:
-        """
-        upload/download ratio.
-        """
+        """upload/download ratio."""
         return float(self.fields["uploadRatio"])
 
     @property
     def activity_date(self) -> datetime:
-        """
-        The last time we uploaded or downloaded piece data on this torrent.
+        """The last time we uploaded or downloaded piece data on this torrent.
         the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
 
         .. note::
@@ -784,22 +757,21 @@ class Torrent(Container):
             raw ``activityDate`` value could be ``0`` for never activated torrent,
             therefore it can't always be converted to local timezone.
         """
-
-        return datetime.fromtimestamp(self.fields["activityDate"], timezone.utc)
+        return datetime.fromtimestamp(self.fields["activityDate"], UTC)
 
     @property
     def added_date(self) -> datetime:
         """When the torrent was first added."""
-        return datetime.fromtimestamp(self.fields["addedDate"], timezone.utc)
+        return datetime.fromtimestamp(self.fields["addedDate"], UTC)
 
     @property
     def start_date(self) -> datetime:
-        """raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
-        return datetime.fromtimestamp(self.fields["startDate"], timezone.utc)
+        """Raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
+        return datetime.fromtimestamp(self.fields["startDate"], UTC)
 
     @property
     def done_date(self) -> datetime | None:
-        """the attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
+        """The attribute "doneDate" as datetime.datetime. returns None if "doneDate" is invalid."""
         done_date = self.fields["doneDate"]
         # Transmission might forget to set doneDate which is initialized to zero,
         # so if doneDate is zero return None
@@ -808,8 +780,7 @@ class Torrent(Container):
         return datetime.fromtimestamp(done_date).astimezone()
 
     def format_eta(self) -> str:
-        """
-        Returns the attribute *eta* formatted as a string.
+        """Returns the attribute *eta* formatted as a string.
 
         * If eta is -1 the result is 'not available'
         * If eta is -2 the result is 'unknown'
@@ -834,41 +805,35 @@ class Torrent(Container):
 
     @property
     def priority(self) -> Priority:
-        """
-        Bandwidth priority as string.
+        """Bandwidth priority as string.
         Can be one of 'low', 'normal', 'high'. This is a mutator.
         """
-
         return Priority(self.fields["bandwidthPriority"])
 
     @property
     def seed_idle_mode(self) -> IdleMode:
-        """
-        Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
+        """Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
-         * global, use session seed idle limit.
-         * single, use torrent seed idle limit. See seed_idle_limit.
-         * unlimited, no seed idle limit.
+        * global, use session seed idle limit.
+        * single, use torrent seed idle limit. See seed_idle_limit.
+        * unlimited, no seed idle limit.
         """
         return IdleMode(self.fields["seedIdleMode"])
 
     @property
     def seed_ratio_limit(self) -> float:
-        """
-        Torrent seed ratio limit as float. Also see seed_ratio_mode.
+        """Torrent seed ratio limit as float. Also see seed_ratio_mode.
         This is a mutator.
         """
-
         return float(self.fields["seedRatioLimit"])
 
     @property
     def seed_ratio_mode(self) -> RatioLimitMode:
-        """
-        Seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
+        """Seed ratio mode as string. Can be one of 'global', 'single' or 'unlimited'.
 
-         * global, use session seed ratio limit.
-         * single, use torrent seed ratio limit. See seed_ratio_limit.
-         * unlimited, no seed ratio limit.
+        * global, use session seed ratio limit.
+        * single, use torrent seed ratio limit. See seed_ratio_limit.
+        * unlimited, no seed ratio limit.
         """
         return RatioLimitMode(self.fields["seedRatioMode"])
 

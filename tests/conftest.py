@@ -12,7 +12,7 @@ USER = os.getenv("TR_USER", "admin")
 PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
-@pytest.fixture()
+@pytest.fixture
 def tr_client():
     LOGGER.setLevel("INFO")
     with Client(host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
@@ -23,6 +23,6 @@ def tr_client():
             c.remove_torrent(torrent.id, delete_data=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_hash_factory():
     return lambda: secrets.token_hex(20)
