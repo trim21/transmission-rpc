@@ -82,4 +82,15 @@ class BitMap:
         self.__value = b
 
     def get(self, index: int) -> bool:
-        return (self.__value[index // 8] & (1 << (8 - index & 8))) != 0
+        """
+        Args:
+            index: piece index
+
+        Returns:
+            this method always return a bool, even index overflow piece count of torrent.
+            This is because there is no reliable way to know piece count only based on `torrent.pieces`.
+        """
+        try:
+            return bool(self.__value[index // 8] & (1 << (7 - (index % 8))))
+        except IndexError:
+            return False

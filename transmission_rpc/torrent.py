@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import enum
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from typing import Any
 
@@ -359,7 +359,7 @@ class Torrent(Container):
         or download directory. RPC clients can monitor this to know when
         to reload fields that rarely change.
         """
-        return datetime.fromtimestamp(self.fields["editDate"], UTC)
+        return datetime.fromtimestamp(self.fields["editDate"], timezone.utc)
 
     @property
     def error(self) -> int:
@@ -494,7 +494,7 @@ class Torrent(Container):
 
     @property
     def manual_announce_time(self) -> datetime:
-        return datetime.fromtimestamp(self.fields["manualAnnounceTime"], UTC)
+        return datetime.fromtimestamp(self.fields["manualAnnounceTime"], timezone.utc)
 
     @property
     def max_connected_peers(self) -> int:
@@ -555,7 +555,7 @@ class Torrent(Container):
 
     @cached_property
     def pieces(self) -> BitMap:
-        return BitMap(base64.b64decode(self.fields["pieces"].decode()))
+        return BitMap(base64.b64decode(self.fields["pieces"].encode()))
 
     @property
     def piece_count(self) -> int:
@@ -750,24 +750,24 @@ class Torrent(Container):
     @property
     def activity_date(self) -> datetime:
         """The last time we uploaded or downloaded piece data on this torrent.
-        the attribute ``activityDate`` as ``datetime.datetime`` in **UTC timezone**.
+        the attribute ``activityDate`` as ``datetime.datetime`` in **timezone.utc timezone**.
 
         .. note::
 
             raw ``activityDate`` value could be ``0`` for never activated torrent,
             therefore it can't always be converted to local timezone.
         """
-        return datetime.fromtimestamp(self.fields["activityDate"], UTC)
+        return datetime.fromtimestamp(self.fields["activityDate"], timezone.utc)
 
     @property
     def added_date(self) -> datetime:
         """When the torrent was first added."""
-        return datetime.fromtimestamp(self.fields["addedDate"], UTC)
+        return datetime.fromtimestamp(self.fields["addedDate"], timezone.utc)
 
     @property
     def start_date(self) -> datetime:
-        """Raw field ``startDate`` as ``datetime.datetime`` in **utc timezone**."""
-        return datetime.fromtimestamp(self.fields["startDate"], UTC)
+        """Raw field ``startDate`` as ``datetime.datetime`` in **timezone.utc timezone**."""
+        return datetime.fromtimestamp(self.fields["startDate"], timezone.utc)
 
     @property
     def done_date(self) -> datetime | None:
