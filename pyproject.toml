@@ -48,7 +48,7 @@ dev = [
     'mypy==1.11.2',
     'types-requests==2.32.0.20240914',
     # docs
-    'sphinx>=7,<=8; python_version >= "3.10"',
+    'sphinx>=8,<=8.0.2; python_version >= "3.10"',
     'furo==2024.8.6; python_version >= "3.10"',
     'sphinx-copybutton==0.5.2 ; python_version >= "3.10"',
     'sphinx-new-tab-link==0.6.0; python_version >= "3.10"',
