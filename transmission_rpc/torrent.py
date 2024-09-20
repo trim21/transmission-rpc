@@ -293,7 +293,7 @@ class Torrent(Container):
         bytes_all = self.total_size
         bytes_done = sum(x["bytesCompleted"] for x in self.fields["fileStats"])
         bytes_avail = self.desired_available + bytes_done
-        return (bytes_avail / bytes_all) * 100 if bytes_all else 0
+        return float((bytes_avail / bytes_all) * 100 if bytes_all else 0)
 
     # @property
     # def availability(self) -> list:
@@ -523,7 +523,7 @@ class Torrent(Container):
         For magnet links, this number will from from 0 to 1 as the metadata is downloaded.
         Range is [0..1]
         """
-        return self.fields["metadataPercentComplete"]
+        return float(self.fields["metadataPercentComplete"])
 
     @property
     def peer_limit(self) -> int:
@@ -558,7 +558,7 @@ class Torrent(Container):
     @property
     def percent_complete(self) -> float:
         """How much has been downloaded of the entire torrent. Range is [0..1]"""
-        return self.fields["percentComplete"]
+        return float(self.fields["percentComplete"])
 
     @property
     def percent_done(self) -> float:
@@ -567,7 +567,7 @@ class Torrent(Container):
         from percentComplete if the user wants only some of the torrent's files.
         Range is [0..1]
         """
-        return self.fields["percentDone"]
+        return float(self.fields["percentDone"])
 
     @property
     def pieces(self) -> str:
@@ -613,7 +613,7 @@ class Torrent(Container):
 
     @property
     def recheck_progress(self) -> float:
-        return self.fields["recheckProgress"]
+        return float(self.fields["recheckProgress"])
 
     @property
     def seconds_downloading(self) -> int:
@@ -680,7 +680,7 @@ class Torrent(Container):
 
     @property
     def upload_ratio(self) -> float:
-        return self.fields["uploadRatio"]
+        return float(self.fields["uploadRatio"])
 
     @property
     def wanted(self) -> list[int]:

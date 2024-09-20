@@ -171,7 +171,7 @@ class Client:
                 raise ValueError("timeout tuple can only include 2 numbers elements")
             for v in value:
                 if not isinstance(v, (float, int)):
-                    raise TypeError("element of timeout tuple can only be int of float")
+                    raise TypeError("element of timeout tuple can only be int or float")
             self._query_timeout = (value[0], value[1])  # for type checker
         elif value is None:
             self._query_timeout = DEFAULT_TIMEOUT
@@ -275,7 +275,9 @@ class Client:
                 "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
             ) from error
 
-        self.logger.debug(json.dumps(data, indent=2))
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug(json.dumps(data, indent=2))
+
         if "result" not in data:
             raise TransmissionError(
                 "Query failed, response data missing without result.",
@@ -452,10 +454,12 @@ class Client:
         )
 
         torrent_data = _try_read_torrent(torrent)
-        if torrent_data:
-            kwargs["metainfo"] = torrent_data
-        else:
+        if torrent_data is None:
             kwargs["filename"] = torrent
+        else:
+            if not torrent_data:
+                raise ValueError("Torrent metadata is empty")
+            kwargs["metainfo"] = torrent_data
 
         return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
 
@@ -734,7 +738,7 @@ class Client:
         if args:
             self._request(RpcMethod.TorrentSet, args, ids, True, timeout=timeout)
         else:
-            ValueError("No arguments to set")
+            raise ValueError("No arguments to set")
 
     def move_torrent_data(
         self,
@@ -857,7 +861,7 @@ class Client:
         script_torrent_done_filename: str | None = None,
         seed_queue_enabled: bool | None = None,
         seed_queue_size: int | None = None,
-        seed_ratio_limit: int | None = None,
+        seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,
