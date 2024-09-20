@@ -11,7 +11,7 @@
 `transmission-rpc` is a python wrapper on top of [transmission](https://github.com/transmission/transmission) JSON RPC protocol,
 hosted on GitHub at [github.com/trim21/transmission-rpc](https://github.com/trim21/transmission-rpc)
 
-Support 2.40 (released 2011-10-05) <= transmission version <= 4.1.0 (released ...),
+Support 2.40 (released 2011-10-05) <= transmission version <= 5.0.0 (released ...),
 should works fine with newer rpc version but some new feature may be missing.
 
 ## versioning
