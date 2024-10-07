@@ -272,7 +272,7 @@ class Client:
             self.logger.exception('Request: "%s"', query)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
-                "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
+                "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
             ) from error
 
         if self.logger.isEnabledFor(logging.DEBUG):
@@ -284,7 +284,7 @@ class Client:
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         if data["result"] != "success":
@@ -293,7 +293,7 @@ class Client:
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         res = data["arguments"]
@@ -315,7 +315,7 @@ class Client:
                     method=method,
                     argument=arguments,
                     response=data,
-                    rawResponse=http_data,
+                    raw_response=http_data,
                 )
         elif method == RpcMethod.SessionGet:
             self.__raw_session.update(res)
