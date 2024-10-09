@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import base64
 import enum
 from datetime import datetime, timedelta, timezone
+from functools import cached_property
 from typing import Any
 
 from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
-from transmission_rpc.types import Container, File
+from transmission_rpc.types import BitMap, Container, File
 from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
@@ -567,15 +569,9 @@ class Torrent(Container):
         """
         return float(self.fields["percentDone"])
 
-    @property
-    def pieces(self) -> str:
-        """
-        A bitfield holding pieceCount flags which are set to 'true'
-        if we have the piece matching that position.
-
-        JSON doesn't allow raw binary data, so this is a base64-encoded string. (Source: tr_torrent)
-        """
-        return self.fields["pieces"]
+    @cached_property
+    def pieces(self) -> BitMap:
+        return BitMap(base64.b64decode(self.fields["pieces"].encode()))
 
     @property
     def piece_count(self) -> int:
