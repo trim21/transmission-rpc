@@ -40,7 +40,7 @@ dev = [
     # lint
     'pre-commit==4.0.1; python_version >= "3.9"',
     # tests
-    'yarl==1.13.1',
+    'yarl==1.18.3',
     'pytest==8.3.3',
     'pytest-github-actions-annotate-failures==0.2.0',
     'coverage==7.6.1',
