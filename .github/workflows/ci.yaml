@@ -64,7 +64,7 @@ jobs:
       - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.10  # Oldest version available for ubuntu-24.04
+          python-version: '3.10'
           cache: pip
       - run: pip install -e .[dev]
       - run: coverage run -m pytest
