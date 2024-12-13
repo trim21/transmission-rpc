@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, NamedTuple, Optional, Tuple, TypeVar, Union
+from typing import Any, NamedTuple, TypeVar
 
 from transmission_rpc.constants import Priority
-
-_Number = Union[int, float]
-_Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
 
 T = TypeVar("T")
 

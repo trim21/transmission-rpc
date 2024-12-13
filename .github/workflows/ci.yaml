@@ -12,6 +12,7 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         transmission: ["version-3.00-r8", "4.0.5"]
         python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -50,6 +51,33 @@ jobs:
       - uses: codecov/codecov-action@v5
         with:
           flags: "${{ matrix.python }}"
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-unix-socket:
+    # At the time of writing ubuntu-latest is ubuntu-22.04. But we need
+    # an even later version because ubuntu-22.04 provides Transmission 3.0.0 but
+    # Unix socket support was added in Transmission 4.0.0. Use 24.04 which is
+    # currently in beta.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - run: sudo apt-get install -y transmission-daemon
+      - run: mkdir -p $HOME/Downloads
+      - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.9  # Oldest version available for ubuntu-24.04
+          cache: pip
+      - run: pip install -e .[dev]
+      - run: coverage run -m pytest
+        env:
+          TR_PROTOCOL: 'http+unix'
+          TR_HOST: '/tmp/transmission.socket'
+      - uses: codecov/codecov-action@v4
+        with:
+          flags: "unix-socket"
           token: ${{ secrets.CODECOV_TOKEN }}
 
   dist-files:

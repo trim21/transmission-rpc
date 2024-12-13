@@ -5,7 +5,6 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
-import yarl
 from typing_extensions import Literal
 
 from tests.util import ServerTooLowError, skip_on
@@ -48,18 +47,8 @@ def test_client_parse_url(protocol: Literal["http", "https"], username, password
             port=port,
             path=path,
         )
-        u = str(
-            yarl.URL.build(
-                scheme=protocol,
-                user=username,
-                password=password,
-                host=host,
-                port=port,
-                path=urljoin(path, "rpc"),
-            )
-        )
 
-        assert client._url == u  # noqa: SLF001
+        assert client._url == f'{protocol}://{host}:{port}{urljoin(path, "rpc")}'  # noqa: SLF001
 
 
 def hash_to_magnet(h):
@@ -222,8 +211,8 @@ def test_real_torrent_get_files(tr_client: Client):
     [401, 403],
 )
 def test_raise_unauthorized(status_code):
-    m = mock.Mock(return_value=mock.Mock(status_code=status_code))
-    with mock.patch("requests.Session.post", m), pytest.raises(TransmissionAuthError):
+    m = mock.Mock(return_value=mock.Mock(status=status_code))
+    with mock.patch("urllib3.HTTPConnectionPool.request", m), pytest.raises(TransmissionAuthError):
         Client()
 
 
