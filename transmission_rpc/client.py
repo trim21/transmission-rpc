@@ -25,7 +25,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group
+from transmission_rpc.types import Group, PortTestResult
 from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
 try:
@@ -657,10 +657,11 @@ class Client:
         seed_idle_mode: int | None = None,
         seed_ratio_limit: float | None = None,
         seed_ratio_mode: int | None = None,
-        tracker_add: Iterable[str] | None = None,
         labels: Iterable[str] | None = None,
         group: str | None = None,
         tracker_list: Iterable[Iterable[str]] | None = None,
+        sequential_download: bool | None = None,
+        tracker_add: Iterable[str] | None = None,
         tracker_replace: Iterable[tuple[int, str]] | None = None,
         tracker_remove: Iterable[int] | None = None,
         **kwargs: Any,
@@ -692,35 +693,32 @@ class Client:
                 Valid options are :py:class:`transmission_rpc.IdleMode`
             labels: Array of string labels. Add in rpc 16.
             group: The name of this torrent's bandwidth group. Add in rpc 17.
-            tracker_list:
-                A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+
+            tracker_list: A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
 
                 Add in rpc 17.
 
                 Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
-            tracker_add:
-                Array of string with announce URLs to add.
+            sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
 
-                Warnings:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            tracker_add: Array of string with announce URLs to add.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
-            tracker_remove:
-                Array of ids of trackers to remove.
+            tracker_remove: Array of ids of trackers to remove.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
-                Warnings:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
-
-            tracker_replace:
-                Array of (id, url) tuples where the announcement URL should be replaced.
-
-                Warning:
-                    since transmission daemon 4.0.0, this argument is deprecated, use ``tracker_list`` instead.
+            tracker_replace: Array of (id, url) tuples where the announcement URL should be replaced.
+                **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
+                use ``tracker_list`` instead.
 
         Warnings:
             ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
-            It will be bypassed to request arguments **as-is**, the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
+            It will be bypassed to request arguments **as-is**,
+            the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
         """
         if labels is not None:
             self._rpc_version_warning(16)
@@ -757,6 +755,7 @@ class Client:
                 "labels": list_or_none(_single_str_as_list(labels)),
                 "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
                 "group": group,
+                "sequentialDownload": sequential_download,
             }
         )
 
@@ -779,7 +778,8 @@ class Client:
         Move torrent data to the new location.
 
         See Also:
-            `RPC Spec: moving-a-torrent <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
+            `RPC Spec: moving-a-torrent
+            <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#36-moving-a-torrent>`_
         """
         args = {"location": ensure_location_str(location), "move": bool(move)}
         self._request(RpcMethod.TorrentSetLocation, args, ids, True, timeout=timeout)
@@ -799,7 +799,8 @@ class Client:
             This is not the method to move torrent data directory,
 
         See Also:
-            `RPC Spec: renaming-a-torrents-path <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
+            `RPC Spec: renaming-a-torrents-path
+            <https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#37-renaming-a-torrents-path>`_
         """
         self._rpc_version_warning(15)
         torrent_id = _parse_torrent_id(torrent_id)
@@ -1094,13 +1095,23 @@ class Client:
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
         return result.get("blocklist-size")
 
-    def port_test(self, timeout: _Timeout | None = None) -> bool | None:
+    def port_test(
+        self, timeout: _Timeout | None = None, *, ip_protocol: Literal["ipv4", "ipv6"] | None = None
+    ) -> PortTestResult:
         """
         Tests to see if your incoming peer port is accessible from the
         outside world.
+
+        https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#44-port-checking
+
+        Parameters:
+            ip_protocol: ``ipv4`` or ``ipv6``.
+                Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+            timeout: request timeout
         """
-        result = self._request(RpcMethod.PortTest, timeout=timeout)
-        return result.get("port-is-open")
+        return PortTestResult(
+            fields=self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
+        )
 
     def free_space(self, path: str | pathlib.Path, timeout: _Timeout | None = None) -> int | None:
         """

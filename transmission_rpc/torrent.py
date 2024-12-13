@@ -868,6 +868,15 @@ class Torrent(Container):
         """
         return RatioLimitMode(self.fields["seedRatioMode"])
 
+    @property
+    def sequential_download(self) -> bool:
+        """
+        download torrent pieces sequentially
+
+        add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        """
+        return self.fields["sequentialDownload"]
+
     def __repr__(self) -> str:
         return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
 
