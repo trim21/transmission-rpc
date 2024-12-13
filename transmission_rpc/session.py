@@ -112,7 +112,7 @@ class Session(Container):
     https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md#41-session-arguments
 
     Warnings:
-        setter on session's properties has been removed, please use :py:meth`Client.set_session` instead
+        setter on session's properties has been removed, please use :py:meth:`Client.set_session` instead
     """
 
     @property
@@ -307,7 +307,7 @@ class Session(Container):
     @property
     def seed_ratio_limit(self) -> float:
         """the default seed ratio for torrents to use"""
-        return self.fields["seedRatioLimit"]
+        return float(self.fields["seedRatioLimit"])
 
     @property
     def seed_ratio_limited(self) -> bool:

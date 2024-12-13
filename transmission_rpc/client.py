@@ -298,17 +298,19 @@ class Client:
             self.logger.exception('Request: "%s"', query)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
-                "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
+                "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
             ) from error
 
-        self.logger.debug(json.dumps(data, indent=2))
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug(json.dumps(data, indent=2))
+
         if "result" not in data:
             raise TransmissionError(
                 "Query failed, response data missing without result.",
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         if data["result"] != "success":
@@ -317,7 +319,7 @@ class Client:
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         res = data["arguments"]
@@ -339,7 +341,7 @@ class Client:
                     method=method,
                     argument=arguments,
                     response=data,
-                    rawResponse=http_data,
+                    raw_response=http_data,
                 )
         elif method == RpcMethod.SessionGet:
             self.__raw_session.update(res)
@@ -478,10 +480,12 @@ class Client:
         )
 
         torrent_data = _try_read_torrent(torrent)
-        if torrent_data:
-            kwargs["metainfo"] = torrent_data
-        else:
+        if torrent_data is None:
             kwargs["filename"] = torrent
+        else:
+            if not torrent_data:
+                raise ValueError("Torrent metadata is empty")
+            kwargs["metainfo"] = torrent_data
 
         return next(iter(self._request(RpcMethod.TorrentAdd, kwargs, timeout=timeout).values()))
 
@@ -761,7 +765,7 @@ class Client:
         if args:
             self._request(RpcMethod.TorrentSet, args, ids, True, timeout=timeout)
         else:
-            ValueError("No arguments to set")
+            raise ValueError("No arguments to set")
 
     def move_torrent_data(
         self,
@@ -891,7 +895,7 @@ class Client:
         script_torrent_done_filename: str | None = None,
         seed_queue_enabled: bool | None = None,
         seed_queue_size: int | None = None,
-        seed_ratio_limit: int | None = None,
+        seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,

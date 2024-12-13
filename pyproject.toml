@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transmission-rpc"
-version = "7.0.10"
+version = "7.0.11"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
 authors = [
     { name = "trim21", email = "trim21me@gmail.com" },
@@ -39,21 +39,21 @@ Homepage = 'https://github.com/Trim21/transmission-rpc'
 [project.optional-dependencies]
 dev = [
     # lint
-    'pre-commit==3.7.1 ; python_version >= "3.9"',
+    'pre-commit==4.0.1; python_version >= "3.9"',
     # tests
-    'yarl==1.9.4',
-    'pytest==8.2.2',
+    'yarl==1.13.1',
+    'pytest==8.3.3',
     'pytest-github-actions-annotate-failures==0.2.0',
-    'coverage==7.5.3',
+    'coverage==7.6.1',
     # types
-    'mypy==1.10.0',
+    'mypy==1.13.0',
     # docs
-    'sphinx==7.3.7 ; python_version >= "3.9"',
-    'furo==2024.5.6 ; python_version >= "3.9"',
-    'sphinx-copybutton==0.5.2 ; python_version >= "3.9"',
-    'sphinx-new-tab-link==0.4.0 ; python_version >= "3.9"',
-    'sphinx-github-style==1.2.2 ; python_version >= "3.9"',
-    'sphinx-autobuild==2024.4.16 ; python_version >= "3.9"',
+    'sphinx>=8,<=8.1.3; python_version >= "3.10"',
+    'furo==2024.8.6; python_version >= "3.10"',
+    'sphinx-copybutton==0.5.2 ; python_version >= "3.10"',
+    'sphinx-new-tab-link==0.6.1; python_version >= "3.10"',
+    'sphinx-github-style==1.2.2 ; python_version >= "3.10"',
+    'sphinx-autobuild==2024.10.3; python_version >= "3.10"',
 ]
 
 [tool.pytest.ini_options]
@@ -137,10 +137,10 @@ ignore = [
     'PLR0913',
     'RUF001',
     'SIM108',
-    'TCH003',
+    'TC001',
+    'TC003',
     'RUF003',
     'RET504',
-    'TCH001',
     'TRY300',
     'TRY003',
     'TRY201',

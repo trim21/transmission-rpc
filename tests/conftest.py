@@ -31,7 +31,7 @@ def pytest_configure():
             raise ConnectionError("timeout trying to connect to transmission-daemon, is transmission daemon started?")
 
 
-@pytest.fixture()
+@pytest.fixture
 def tr_client():
     LOGGER.setLevel("INFO")
     with Client(protocol=PROTOCOL, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
@@ -42,6 +42,6 @@ def tr_client():
             c.remove_torrent(torrent.id, delete_data=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_hash_factory():
     return lambda: secrets.token_hex(20)
