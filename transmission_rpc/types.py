@@ -30,10 +30,10 @@ class File(NamedTuple):
     completed: int
     """bytes completed"""
 
-    priority: Priority
+    priority: Priority | None
     """download priority"""
 
-    selected: bool
+    selected: bool | None
     """if selected for download"""
 
     id: int

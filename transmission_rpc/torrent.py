@@ -429,25 +429,25 @@ class Torrent(Container):
                 print(file.id)
 
         """
-        result: list[File] = []
-        if "files" in self.fields:
-            files = self.fields["files"]
-            indices = range(len(files))
-            priorities = self.fields["priorities"]
-            wanted = self.fields["wanted"]
-            result.extend(
-                File(
-                    selected=bool(raw_selected),
-                    priority=Priority(raw_priority),
-                    size=file["length"],
-                    name=file["name"],
-                    completed=file["bytesCompleted"],
-                    id=id,
-                )
-                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
+        files = self.fields["files"]
+        indices = range(len(files))
+        priorities: list[Priority | None] = (
+            [Priority(v) for v in self.fields["priorities"]] if "priorities" in self.fields else [None] * len(files)
+        )
+        wanted: list[bool | None] = (
+            [bool(v) for v in self.fields["wanted"]] if "wanted" in self.fields else [None] * len(files)
+        )
+        return [
+            File(
+                selected=selected,
+                priority=priority,
+                size=file["length"],
+                name=file["name"],
+                completed=file["bytesCompleted"],
+                id=id,
             )
-
-        return result
+            for id, file, priority, selected in zip(indices, files, priorities, wanted)
+        ]
 
     @property
     def file_stats(self) -> list[FileStat]:
