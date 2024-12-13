@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import base64
 import enum
 from datetime import datetime, timedelta, timezone
+from functools import cached_property
 from typing import Any
 
 from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
-from transmission_rpc.types import Container, File
+from transmission_rpc.types import BitMap, Container, File
 from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
@@ -429,27 +431,25 @@ class Torrent(Container):
                 print(file.id)
 
         """
-        result: list[File] = []
-        if "files" in self.fields:
-            files = self.fields["files"]
-            indices = range(len(files))
-            priorities = self.fields["priorities"]
-            wanted = self.fields["wanted"]
-            result.extend(
-                File(
-                    selected=bool(raw_selected),
-                    priority=Priority(raw_priority),
-                    size=file["length"],
-                    name=file["name"],
-                    completed=file["bytesCompleted"],
-                    id=id,
-                    begin_piece=file.get("beginPiece"),
-                    end_piece=file.get("endPiece"),
-                )
-                for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
+        files = self.fields["files"]
+        indices = range(len(files))
+        priorities: list[Priority | None] = (
+            [Priority(v) for v in self.fields["priorities"]] if "priorities" in self.fields else [None] * len(files)
+        )
+        wanted: list[bool | None] = (
+            [bool(v) for v in self.fields["wanted"]] if "wanted" in self.fields else [None] * len(files)
+        )
+        return [
+            File(
+                selected=selected,
+                priority=priority,
+                size=file["length"],
+                name=file["name"],
+                completed=file["bytesCompleted"],
+                id=id,
             )
-
-        return result
+            for id, file, priority, selected in zip(indices, files, priorities, wanted)
+        ]
 
     @property
     def file_stats(self) -> list[FileStat]:
@@ -569,15 +569,9 @@ class Torrent(Container):
         """
         return float(self.fields["percentDone"])
 
-    @property
-    def pieces(self) -> str:
-        """
-        A bitfield holding pieceCount flags which are set to 'true'
-        if we have the piece matching that position.
-
-        JSON doesn't allow raw binary data, so this is a base64-encoded string. (Source: tr_torrent)
-        """
-        return self.fields["pieces"]
+    @cached_property
+    def pieces(self) -> BitMap:
+        return BitMap(base64.b64decode(self.fields["pieces"].encode()))
 
     @property
     def piece_count(self) -> int:

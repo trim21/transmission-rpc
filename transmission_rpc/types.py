@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, NamedTuple, Optional, Tuple, TypeVar, Union
+from typing import Any, NamedTuple, TypeVar
 
 from transmission_rpc.constants import Priority
-
-_Number = Union[int, float]
-_Timeout = Optional[Union[_Number, Tuple[_Number, _Number]]]
 
 T = TypeVar("T")
 
@@ -31,10 +28,10 @@ class File(NamedTuple):
     completed: int
     """bytes completed"""
 
-    priority: Priority
+    priority: Priority | None
     """download priority"""
 
-    selected: bool
+    selected: bool | None
     """if selected for download"""
 
     id: int
@@ -104,3 +101,24 @@ class PortTestResult(Container):
         Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
         """
         return self.fields["ipProtocol"]
+
+
+class BitMap:
+    __value: bytes
+    __slots__ = ("__value",)
+
+    def __init__(self, b: bytes):
+        self.__value = b
+
+    def get(self, index: int) -> bool:
+        """
+        Args:
+            index: piece index
+        Returns:
+            this method always return a bool, even index overflow piece count of torrent.
+            This is because there is no reliable way to know piece count only based on `torrent.pieces`.
+        """
+        try:
+            return bool(self.__value[index // 8] & (1 << (7 - (index % 8))))
+        except IndexError:
+            return False

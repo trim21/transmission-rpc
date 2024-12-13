@@ -1,12 +1,8 @@
-default_stages: [commit]
-
 repos:
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.19
+    rev: v0.23
     hooks:
       - id: validate-pyproject
-        # Optional extra validations from SchemaStore:
-        additional_dependencies: ["validate-pyproject-schema-store[all]"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.14.0
@@ -15,7 +11,7 @@ repos:
         args: [--autofix, --indent, '2', '--preserve-quotes', --offset, '2']
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-case-conflict
       - id: check-ast
@@ -36,12 +32,12 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.5
+    rev: v0.8.0
     hooks:
       - id: ruff
         args: [--fix]
 
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.10.0
     hooks:
       - id: black

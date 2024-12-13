@@ -9,8 +9,8 @@ from unittest import mock
 
 import pytest
 
-from transmission_rpc import from_url, utils
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER
+from transmission_rpc import DEFAULT_TIMEOUT, from_url, utils
+from transmission_rpc.constants import LOGGER
 
 
 def assert_almost_eq(value: float, expected: float):
@@ -105,6 +105,14 @@ def test_format_timedelta(delta, expected):
             "host": "127.0.0.1",
             "port": 443,
             "path": "/",
+        },
+        "http+unix://%2Fvar%2Frun%2Ftransmission.sock/transmission/rpc": {
+            "protocol": "http+unix",
+            "username": None,
+            "password": None,
+            "host": "/var/run/transmission.sock",
+            "port": None,
+            "path": "/transmission/rpc",
         },
     }.items(),
 )
