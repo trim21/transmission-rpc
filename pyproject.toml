@@ -107,7 +107,7 @@ select = [
     "RUF",
     "SIM",
     "SLF",
-    "TCH",
+    "TC",
     "TID",
     "TRY",
     "YTT",
