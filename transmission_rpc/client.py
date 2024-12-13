@@ -155,11 +155,14 @@ class Client:
         self.__semver_version = None
 
         common_args: dict[str, Any] = {"host": host, "timeout": self.timeout, "retries": False}
-        self.__http_client = {
-            "http": urllib3.HTTPConnectionPool(port=port, **common_args),
-            "https": urllib3.HTTPSConnectionPool(port=port, ca_certs=certifi.where(), **common_args),
-            "http+unix": UnixHTTPConnectionPool(**common_args),
-        }[protocol]
+        if protocol == "http":
+            self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
+        elif protocol == "https":
+            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=certifi.where(), **common_args)
+        elif protocol == "http+unix":
+            self.__http_client = UnixHTTPConnectionPool(**common_args)
+        else:
+            raise ValueError(f"Unknown protocol {protocol!r}, only 'http', 'https' or 'http+unix' is supported")
         self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
