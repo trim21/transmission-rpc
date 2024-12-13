@@ -71,7 +71,7 @@ jobs:
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           flags: "unix-socket"
           token: ${{ secrets.CODECOV_TOKEN }}
