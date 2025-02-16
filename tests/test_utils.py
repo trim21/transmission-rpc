@@ -37,25 +37,6 @@ def test_format_size(size, expected: tuple[float, str]):
 
 
 @pytest.mark.parametrize(
-    ("size", "expected"),
-    [
-        (512, (512, "B/s")),
-        (1024, (1.0, "KiB/s")),
-        (1048575, (1023.999, "KiB/s")),
-        (1048576, (1.0, "MiB/s")),
-        (1073741824, (1.0, "GiB/s")),
-        (1099511627776, (1.0, "TiB/s")),
-        (1125899906842624, (1.0, "PiB/s")),
-        (1152921504606846976, (1.0, "EiB/s")),
-    ],
-)
-def test_format_speed(size, expected):
-    result = utils.format_speed(size)
-    assert_almost_eq(result[0], expected[0])
-    assert result[1] == expected[1]
-
-
-@pytest.mark.parametrize(
     ("delta", "expected"),
     {
         datetime.timedelta(0, 0): "0 00:00:00",

@@ -148,8 +148,12 @@ ignore = [
 ]
 
 [tool.pyright]
+root = '.'
 include = ['./transmission_rpc/']
-exclude = ['./tests/', './.venv/', './docs/']
+ignore = ['./tests/', './docs/']
 pythonVersion = '3.8'
 pythonPlatform = 'Linux'
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
+# reportUnnecessaryComparison = false
+reportUnnecessaryIsInstance = false
+reportUnknownVariableType = false

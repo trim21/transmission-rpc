@@ -10,8 +10,6 @@ from typing import Any
 
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
-from urllib3.util.connection import _TYPE_SOCKET_OPTIONS
-from urllib3.util.timeout import _DEFAULT_TIMEOUT
 
 
 class UnixHTTPConnection(HTTPConnection):
@@ -20,7 +18,7 @@ class UnixHTTPConnection(HTTPConnection):
         host: str,
         *,
         # The default socket options include `TCP_NODELAY` which won't work here.
-        socket_options: None | _TYPE_SOCKET_OPTIONS = None,
+        socket_options: None | list[tuple[int, int, int | bytes]] = None,
         **kwargs: Any,
     ):
         self.socket_path = host
@@ -37,10 +35,10 @@ class UnixHTTPConnection(HTTPConnection):
 
         socket_options = self.socket_options
         if socket_options is not None:
-            for opt in socket_options:
-                sock.setsockopt(*opt)
+            for lvl, opt, value in socket_options:
+                sock.setsockopt(lvl, opt, value)
 
-        if self.timeout is not _DEFAULT_TIMEOUT:  # type: ignore
+        if self.timeout is not None:
             sock.settimeout(self.timeout)
         sock.connect(self.socket_path)
         return sock
