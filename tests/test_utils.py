@@ -3,7 +3,6 @@
 # Licensed under the MIT license.
 from __future__ import annotations
 
-import datetime
 from typing import Any
 from unittest import mock
 
@@ -34,22 +33,6 @@ def test_format_size(size, expected: tuple[float, str]):
     result = utils.format_size(size)
     assert_almost_eq(result[0], expected[0])
     assert result[1] == expected[1]
-
-
-@pytest.mark.parametrize(
-    ("delta", "expected"),
-    {
-        datetime.timedelta(0, 0): "0 00:00:00",
-        datetime.timedelta(0, 10): "0 00:00:10",
-        datetime.timedelta(0, 60): "0 00:01:00",
-        datetime.timedelta(0, 61): "0 00:01:01",
-        datetime.timedelta(0, 3661): "0 01:01:01",
-        datetime.timedelta(1, 3661): "1 01:01:01",
-        datetime.timedelta(13, 65660): "13 18:14:20",
-    }.items(),
-)
-def test_format_timedelta(delta, expected):
-    assert utils.format_timedelta(delta), expected
 
 
 @pytest.mark.parametrize(
