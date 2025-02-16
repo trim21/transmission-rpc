@@ -148,5 +148,7 @@ ignore = [
 ]
 
 [tool.pyright]
+exclude = ['tests']
 pythonVersion = '3.8'
 pythonPlatform = 'Linux'
+typeCheckingMode = "strict"
