@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "transmission-rpc"
-version = "8.0.0a0"
+version = "8.0.0a1"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
 authors = [{ name = "trim21", email = "trim21me@gmail.com" }]
 readme = 'README.md'
