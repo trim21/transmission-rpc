@@ -15,7 +15,7 @@ tasks:
         sh: yq '.project.version' pyproject.toml
     cmds:
       - git add pyproject.toml
-      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git commit -m "release: {{.VERSION}}"'
       - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
 
   lint:
