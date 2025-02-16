@@ -47,7 +47,7 @@ class UnixHTTPConnection(HTTPConnection):
 
 
 class UnixHTTPConnectionPool(HTTPConnectionPool):
-    ConnectionCls = UnixHTTPConnection
+    ConnectionCls = UnixHTTPConnection  # type: ignore
 
     def __str__(self) -> str:
         return f"{type(self).__name__}(host={self.host})"

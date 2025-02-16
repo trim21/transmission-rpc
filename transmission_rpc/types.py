@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, NamedTuple, TypeVar
+from typing import Any, NamedTuple
 
 from transmission_rpc.constants import Priority
-
-T = TypeVar("T")
 
 
 class Container:
@@ -13,7 +11,7 @@ class Container:
     def __init__(self, *, fields: dict[str, Any]):
         self.fields = fields
 
-    def get(self, key: str, default: T | None = None) -> Any:
+    def get(self, key: str, default: Any | None = None) -> Any:
         """get the raw value by the **raw rpc response key**"""
         return self.fields.get(key, default)
 
