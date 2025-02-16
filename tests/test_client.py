@@ -8,10 +8,9 @@ import pytest
 from typing_extensions import Literal
 
 from tests.util import ServerTooLowError, skip_on
-from transmission_rpc.client import Client, ensure_location_str
+from transmission_rpc.client import Client, _try_read_torrent, ensure_location_str
 from transmission_rpc.error import TransmissionAuthError
 from transmission_rpc.types import File
-from transmission_rpc.utils import _try_read_torrent
 
 
 @pytest.mark.parametrize(
