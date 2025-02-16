@@ -55,3 +55,18 @@ jobs:
       - run: pip install -e '.[dev]'
 
       - run: sphinx-build -W docs/ dist/
+
+  pyright:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - run: uv pip install -r pyproject.toml --extra dev --system
+
+      - uses: jakebailey/pyright-action@v2

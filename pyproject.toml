@@ -6,9 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "transmission-rpc"
 version = "8.0.0a0"
 description = "Python module that implements the Transmission bittorent client JSON-RPC protocol"
-authors = [
-    { name = "trim21", email = "trim21me@gmail.com" },
-]
+authors = [{ name = "trim21", email = "trim21me@gmail.com" }]
 readme = 'README.md'
 requires-python = "~=3.8"
 license = { text = 'MIT' }
@@ -27,7 +25,6 @@ classifiers = [
     'Programming Language :: Python :: Implementation :: CPython',
     'Programming Language :: Python :: Implementation :: PyPy',
 ]
-
 dependencies = [
     'urllib3~=2.2',
     'certifi>=2017.4.17',
@@ -66,11 +63,12 @@ ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = true
 show_error_codes = true
+warn_unused_ignores = false
+platform = "linux"
 
 [tool.black]
 line-length = 120
 target-version = ['py38']
-
 
 [tool.ruff]
 target-version = "py38"
@@ -114,9 +112,7 @@ select = [
     "FA100",
     "FA102"
 ]
-
 extend-fixable = ['UP']
-
 ignore = [
     'PLR0911',
     'INP001',
@@ -150,3 +146,10 @@ ignore = [
     'PGH003',
     'TC002',
 ]
+
+[tool.pyright]
+include = ['./transmission_rpc/']
+exclude = ['./tests/', './.venv/', './docs/']
+pythonVersion = '3.8'
+pythonPlatform = 'Linux'
+typeCheckingMode = "standard"
