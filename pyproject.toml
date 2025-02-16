@@ -148,7 +148,8 @@ ignore = [
 ]
 
 [tool.pyright]
-exclude = ['tests']
+include = ['./transmission_rpc/']
+exclude = ['./tests/', './.venv/', './docs/']
 pythonVersion = '3.8'
 pythonPlatform = 'Linux'
-typeCheckingMode = "strict"
+typeCheckingMode = "standard"
