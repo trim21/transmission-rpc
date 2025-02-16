@@ -18,7 +18,7 @@ from urllib3 import Timeout
 from urllib3.util import make_headers
 
 from transmission_rpc._unix_socket import UnixHTTPConnectionPool
-from transmission_rpc.constants import LOGGER, RpcMethod
+from transmission_rpc.constants import LOGGER, RpcMethod, get_torrent_arguments
 from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
@@ -28,7 +28,6 @@ from transmission_rpc.error import (
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group, PortTestResult
-from transmission_rpc.utils import get_torrent_arguments
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
