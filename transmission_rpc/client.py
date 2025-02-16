@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import importlib.metadata
 import json
 import logging
@@ -8,6 +9,7 @@ import string
 import time
 import types
 from typing import Any, BinaryIO, Iterable, List, TypeVar, Union
+from urllib.parse import urlparse
 
 import certifi
 import urllib3
@@ -16,7 +18,7 @@ from urllib3 import Timeout
 from urllib3.util import make_headers
 
 from transmission_rpc._unix_socket import UnixHTTPConnectionPool
-from transmission_rpc.constants import LOGGER, RpcMethod
+from transmission_rpc.constants import LOGGER, RpcMethod, get_torrent_arguments
 from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
@@ -26,7 +28,6 @@ from transmission_rpc.error import (
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group, PortTestResult
-from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
@@ -66,7 +67,7 @@ def ensure_location_str(s: str | pathlib.Path) -> str:
     return str(s)
 
 
-def _parse_torrent_id(raw_torrent_id: int | str) -> int | str:
+def _parse_torrent_id(raw_torrent_id: Any) -> int | str:
     if isinstance(raw_torrent_id, int):
         if raw_torrent_id >= 0:
             return raw_torrent_id
@@ -327,10 +328,10 @@ class Client:
 
         res = data["arguments"]
 
-        results = {}
         if method == RpcMethod.TorrentGet:
             return res
         if method == RpcMethod.TorrentAdd:
+            results: dict[str, Any] = {}
             item = None
             if "torrent-added" in res:
                 item = res["torrent-added"]
@@ -346,24 +347,16 @@ class Client:
                     response=data,
                     raw_response=http_data,
                 )
-        elif method == RpcMethod.SessionGet:
+            return results
+        if method == RpcMethod.SessionGet:
             self.__raw_session.update(res)
-        elif method == RpcMethod.SessionStats:
+        if method == RpcMethod.SessionStats:
             # older versions of T has the return data in "session-stats"
             if "session-stats" in res:
                 return res["session-stats"]
             return res
-        elif method in (
-            RpcMethod.PortTest,
-            RpcMethod.BlocklistUpdate,
-            RpcMethod.FreeSpace,
-            RpcMethod.TorrentRenamePath,
-        ):
-            return res
-        else:
-            return res
 
-        return results
+        return res
 
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
@@ -460,9 +453,6 @@ class Client:
                 Array of string labels.
                 Add in rpc 17.
         """
-        if torrent is None:
-            raise ValueError("add_torrent requires data or a URI.")
-
         if labels is not None:
             self._rpc_version_warning(17)
 
@@ -581,8 +571,6 @@ class Client:
         else:
             arguments = self.__torrent_get_arguments
         torrent_id = _parse_torrent_id(torrent_id)
-        if torrent_id is None:
-            raise ValueError("Invalid id")
 
         result = self._request(
             RpcMethod.TorrentGet,
@@ -853,7 +841,7 @@ class Client:
         Get session parameters. See the Session class for more information.
         """
 
-        data = {}
+        data: dict[str, Any] = {}
         if arguments:
             data["fields"] = list(arguments)
 
@@ -1217,3 +1205,27 @@ def list_or_none(v: Iterable[T] | None) -> list[T] | None:
 
 def remove_unset_value(data: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in data.items() if value is not None}
+
+
+def _try_read_torrent(torrent: BinaryIO | str | bytes | pathlib.Path) -> str | None:
+    """
+    if torrent should be encoded with base64, return a non-None value.
+    """
+    # torrent is a str, may be a url
+    if isinstance(torrent, str):
+        parsed_uri = urlparse(torrent)
+        # torrent starts with file, read from local disk and encode it to base64 url.
+        if parsed_uri.scheme in ["https", "http", "magnet"]:
+            return None
+
+        if parsed_uri.scheme in ["file"]:
+            raise ValueError("support for `file://` URL has been removed.")
+    elif isinstance(torrent, pathlib.Path):
+        return base64.b64encode(torrent.read_bytes()).decode("utf-8")
+    elif isinstance(torrent, bytes):
+        return base64.b64encode(torrent).decode("utf-8")
+    # maybe a file, try read content and encode it.
+    elif hasattr(torrent, "read"):
+        return base64.b64encode(torrent.read()).decode("utf-8")
+
+    return None

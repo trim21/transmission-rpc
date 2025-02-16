@@ -204,3 +204,19 @@ class RpcMethod(str, enum.Enum):
     PortTest = "port-test"
 
     BlocklistUpdate = "blocklist-update"
+
+
+def get_torrent_arguments(rpc_version: int) -> list[str]:
+    """
+    Get torrent arguments for method in specified Transmission RPC version.
+    """
+    accessible: list[str] = []
+    for argument, info in TORRENT_GET_ARGS.items():
+        valid_version = True
+        if rpc_version < info.added_version:
+            valid_version = False
+        if info.removed_version is not None and info.removed_version <= rpc_version:
+            valid_version = False
+        if valid_version:
+            accessible.append(argument)
+    return accessible
