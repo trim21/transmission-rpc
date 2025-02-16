@@ -48,7 +48,7 @@ def test_client_parse_url(protocol: Literal["http", "https"], username, password
             path=path,
         )
 
-        assert client._url == f'{protocol}://{host}:{port}{urljoin(path, "rpc")}'  # noqa: SLF001
+        assert client._url == f"{protocol}://{host}:{port}{urljoin(path, 'rpc')}"  # noqa: SLF001
 
 
 def hash_to_magnet(h):
