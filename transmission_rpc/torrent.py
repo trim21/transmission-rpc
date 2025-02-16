@@ -10,6 +10,7 @@ from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import BitMap, Container, File
+from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
     0: "stopped",
@@ -802,20 +803,20 @@ class Torrent(Container):
             return None
         return datetime.fromtimestamp(done_date).astimezone()
 
-    # def format_eta(self) -> str:
-    #     """
-    #     Returns the attribute *eta* formatted as a string.
+    def format_eta(self) -> str:
+        """
+        Returns the attribute *eta* formatted as a string.
 
-    #     * If eta is -1 the result is 'not available'
-    #     * If eta is -2 the result is 'unknown'
-    #     * Otherwise eta is formatted as <days> <hours>:<minutes>:<seconds>.
-    #     """
-    #     eta = self.fields["eta"]
-    #     if eta == -1:
-    #         return "not available"
-    #     if eta == -2:
-    #         return "unknown"
-    #     return format_timedelta(timedelta(seconds=eta))
+        * If eta is -1 the result is 'not available'
+        * If eta is -2 the result is 'unknown'
+        * Otherwise eta is formatted as <days> <hours>:<minutes>:<seconds>.
+        """
+        eta = self.fields["eta"]
+        if eta == -1:
+            return "not available"
+        if eta == -2:
+            return "unknown"
+        return format_timedelta(timedelta(seconds=eta))
 
     # @property
     # def download_limit(self) -> Optional[int]:
