@@ -16,10 +16,12 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: pipx run flit publish
-        env:
-          FLIT_USERNAME: '__token__'
-          FLIT_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      - run: pipx run build
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
+          attestations: false
 
       - name: Get Previous Tag
         id: tag
