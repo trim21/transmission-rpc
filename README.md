@@ -19,6 +19,9 @@ should works fine with newer rpc version but some new feature may be missing.
 `transmission-rpc` follow [Semantic Versioning](https://semver.org/),
 report an issue if you found unexpected API break changes at same major version.
 
+Due to the tradition of python packaging community,
+dropping support for EOL python versions will not be considered breaking change.
+
 ## Install
 
 ```console
