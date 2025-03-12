@@ -411,6 +411,7 @@ class Client:
         cookies: str | None = None,
         labels: Iterable[str] | None = None,
         bandwidthPriority: int | None = None,
+        sequential_download: bool | None = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -452,9 +453,15 @@ class Client:
             labels:
                 Array of string labels.
                 Add in rpc 17.
+            sequential_download:
+                download torrent pieces sequentially.
+                Add in rpc 18.
         """
         if labels is not None:
             self._rpc_version_warning(17)
+
+        if sequential_download is not None:
+            self._rpc_version_warning(18)
 
         kwargs: dict[str, Any] = remove_unset_value(
             {
@@ -467,6 +474,7 @@ class Client:
                 "priority-low": priority_low,
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
+                "sequential_download": sequential_download,
                 "cookies": cookies,
                 "labels": list_or_none(_single_str_as_list(labels)),
             }
@@ -746,7 +754,7 @@ class Client:
                 "labels": list_or_none(_single_str_as_list(labels)),
                 "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
                 "group": group,
-                "sequentialDownload": sequential_download,
+                "sequential_download": sequential_download,
             }
         )
 
@@ -1101,7 +1109,7 @@ class Client:
             timeout: request timeout
         """
         return PortTestResult(
-            fields=self._request(RpcMethod.PortTest, remove_unset_value({"ipProtocol": ip_protocol}), timeout=timeout)
+            fields=self._request(RpcMethod.PortTest, remove_unset_value({"ip_protocol": ip_protocol}), timeout=timeout)
         )
 
     def free_space(self, path: str | pathlib.Path, timeout: _Timeout | None = None) -> int | None:

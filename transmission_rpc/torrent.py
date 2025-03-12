@@ -447,6 +447,8 @@ class Torrent(Container):
                 name=file["name"],
                 completed=file["bytesCompleted"],
                 id=id,
+                begin_piece=file.get("begin_piece"),
+                end_piece=file.get("end_piece"),
             )
             for id, file, priority, selected in zip(indices, files, priorities, wanted)
         ]
@@ -875,7 +877,7 @@ class Torrent(Container):
 
         add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
         """
-        return self.fields["sequentialDownload"]
+        return self.fields["sequential_download"]
 
     def __repr__(self) -> str:
         return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"

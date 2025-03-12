@@ -98,7 +98,7 @@ class PortTestResult(Container):
 
         Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
         """
-        return self.fields["ipProtocol"]
+        return self.fields["ip_protocol"]
 
 
 class BitMap:
