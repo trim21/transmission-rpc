@@ -32,9 +32,9 @@ jobs:
           PASS: my-secret-password
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -48,7 +48,7 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: my-secret-password
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5
         with:
           flags: "${{ matrix.python }}"
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -60,11 +60,11 @@ jobs:
     # currently in beta.
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - run: sudo apt-get install -y transmission-daemon
       - run: mkdir -p $HOME/Downloads
       - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
         with:
           python-version: '3.10'
           cache: pip
@@ -73,7 +73,7 @@ jobs:
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5
         with:
           flags: "unix-socket"
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -82,8 +82,8 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
         with:
           python-version: "3.x"
 
