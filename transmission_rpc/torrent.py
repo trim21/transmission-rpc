@@ -533,7 +533,7 @@ class Torrent(Container):
         return self.fields["peer-limit"]
 
     @property
-    def peers(self) -> int:
+    def peers(self) -> list[dict]:
         return self.fields["peers"]
 
     @property
@@ -542,7 +542,7 @@ class Torrent(Container):
         return self.fields["peersConnected"]
 
     @property
-    def peers_from(self) -> int:
+    def peers_from(self) -> dict:
         """How many peers we found out about from the tracker, or from pex,
         or from incoming connections, or from our resume file."""
         return self.fields["peersFrom"]
