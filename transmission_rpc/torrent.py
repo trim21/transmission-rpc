@@ -88,6 +88,108 @@ class Status(str, enum.Enum):
     def __str__(self) -> str:
         return self.value
 
+class Peer(Container):
+    """
+    type for :py:meth:`Torrent.peers`
+    """
+
+    @property
+    def address(self) -> str:
+        return self.fields["address"]
+
+    @property
+    def clientName(self) -> str:
+        return self.fields["clientName"]
+
+    @property
+    def clientIsChoked(self) -> bool:
+        return self.fields["clientIsChoked"]
+
+    @property
+    def clientIsInterested(self) -> bool:
+        return self.fields["clientIsInterested"]
+
+    @property
+    def flagStr(self) -> str:
+        return self.fields["flagStr"]
+
+    @property
+    def isDownloadingFrom(self) -> bool:
+        return self.fields["isDownloadingFrom"]
+
+    @property
+    def isEncrypted(self) -> bool:
+        return self.fields["isEncrypted"]
+
+    @property
+    def isIncoming(self) -> bool:
+        return self.fields["isIncoming"]
+
+    @property
+    def isUploadingTo(self) -> bool:
+        return self.fields["isUploadingTo"]
+
+    @property
+    def isUTP(self) -> bool:
+        return self.fields["isUTP"]
+
+    @property
+    def peerIsChoked(self) -> bool:
+        return self.fields["peerIsChoked"]
+
+    @property
+    def peerIsInterested(self) -> bool:
+        return self.fields["peerIsInterested"]
+
+    @property
+    def port(self) -> int:
+        return self.fields["port"]
+
+    @property
+    def progress(self) -> float:
+        return self.fields["progress"]
+
+    @property
+    def rateToClient(self) -> float:
+        return self.fields["rateToClient"]
+
+    @property
+    def rateToPeer(self) -> float:
+        return self.fields["rateToPeer"]
+
+class PeersFrom(Container):
+    """
+    type for :py:meth:`Torrent.peersFrom`
+    """
+
+    @property
+    def fromCache(self) -> float:
+        return self.fields["fromCache"]
+
+    @property
+    def fromDht(self) -> float:
+        return self.fields["fromDht"]
+
+    @property
+    def fromIncoming(self) -> float:
+        return self.fields["fromIncoming"]
+
+    @property
+    def fromLpd(self) -> float:
+        return self.fields["fromLpd"]
+
+    @property
+    def fromLtep(self) -> float:
+        return self.fields["fromLtep"]
+
+    @property
+    def fromPex(self) -> float:
+        return self.fields["fromPex"]
+
+    @property
+    def fromTracker(self) -> float:
+        return self.fields["fromTracker"]
+
 
 class FileStat(Container):
     """
@@ -533,8 +635,9 @@ class Torrent(Container):
         return self.fields["peer-limit"]
 
     @property
-    def peers(self) -> list[dict]:
-        return self.fields["peers"]
+    def peers(self) -> list[Peer]:
+        return [Peer(fields=x) for x in self.fields["peers"]]
+
 
     @property
     def peers_connected(self) -> int:
@@ -542,10 +645,10 @@ class Torrent(Container):
         return self.fields["peersConnected"]
 
     @property
-    def peers_from(self) -> dict:
+    def peers_from(self) -> PeersFrom:
         """How many peers we found out about from the tracker, or from pex,
         or from incoming connections, or from our resume file."""
-        return self.fields["peersFrom"]
+        return PeersFrom(fields=self.fields["peersFrom"])
 
     @property
     def peers_getting_from_us(self) -> int:
