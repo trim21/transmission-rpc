@@ -98,47 +98,47 @@ class Peer(Container):
         return self.fields["address"]
 
     @property
-    def clientName(self) -> str:
+    def client_name(self) -> str:
         return self.fields["clientName"]
 
     @property
-    def clientIsChoked(self) -> bool:
+    def client_is_choked(self) -> bool:
         return self.fields["clientIsChoked"]
 
     @property
-    def clientIsInterested(self) -> bool:
+    def client_is_interested(self) -> bool:
         return self.fields["clientIsInterested"]
 
     @property
-    def flagStr(self) -> str:
+    def flag_str(self) -> str:
         return self.fields["flagStr"]
 
     @property
-    def isDownloadingFrom(self) -> bool:
+    def is_downloading_from(self) -> bool:
         return self.fields["isDownloadingFrom"]
 
     @property
-    def isEncrypted(self) -> bool:
+    def is_encrypted(self) -> bool:
         return self.fields["isEncrypted"]
 
     @property
-    def isIncoming(self) -> bool:
+    def is_incoming(self) -> bool:
         return self.fields["isIncoming"]
 
     @property
-    def isUploadingTo(self) -> bool:
+    def is_uploading_to(self) -> bool:
         return self.fields["isUploadingTo"]
 
     @property
-    def isUTP(self) -> bool:
+    def is_utp(self) -> bool:
         return self.fields["isUTP"]
 
     @property
-    def peerIsChoked(self) -> bool:
+    def peer_is_choked(self) -> bool:
         return self.fields["peerIsChoked"]
 
     @property
-    def peerIsInterested(self) -> bool:
+    def peer_is_interested(self) -> bool:
         return self.fields["peerIsInterested"]
 
     @property
@@ -150,11 +150,11 @@ class Peer(Container):
         return self.fields["progress"]
 
     @property
-    def rateToClient(self) -> float:
+    def rate_to_client(self) -> float:
         return self.fields["rateToClient"]
 
     @property
-    def rateToPeer(self) -> float:
+    def rate_to_peer(self) -> float:
         return self.fields["rateToPeer"]
 
 class PeersFrom(Container):
@@ -163,31 +163,31 @@ class PeersFrom(Container):
     """
 
     @property
-    def fromCache(self) -> float:
+    def from_cache(self) -> float:
         return self.fields["fromCache"]
 
     @property
-    def fromDht(self) -> float:
+    def from_dht(self) -> float:
         return self.fields["fromDht"]
 
     @property
-    def fromIncoming(self) -> float:
+    def from_incoming(self) -> float:
         return self.fields["fromIncoming"]
 
     @property
-    def fromLpd(self) -> float:
+    def from_lpd(self) -> float:
         return self.fields["fromLpd"]
 
     @property
-    def fromLtep(self) -> float:
+    def from_ltep(self) -> float:
         return self.fields["fromLtep"]
 
     @property
-    def fromPex(self) -> float:
+    def from_pex(self) -> float:
         return self.fields["fromPex"]
 
     @property
-    def fromTracker(self) -> float:
+    def from_tracker(self) -> float:
         return self.fields["fromTracker"]
 
 
