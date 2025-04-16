@@ -88,6 +88,7 @@ class Status(str, enum.Enum):
     def __str__(self) -> str:
         return self.value
 
+
 class Peer(Container):
     """
     type for :py:meth:`Torrent.peers`
@@ -156,6 +157,7 @@ class Peer(Container):
     @property
     def rate_to_peer(self) -> float:
         return self.fields["rateToPeer"]
+
 
 class PeersFrom(Container):
     """
@@ -637,7 +639,6 @@ class Torrent(Container):
     @property
     def peers(self) -> list[Peer]:
         return [Peer(fields=x) for x in self.fields["peers"]]
-
 
     @property
     def peers_connected(self) -> int:
