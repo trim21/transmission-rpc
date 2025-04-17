@@ -1127,7 +1127,7 @@ class Client:
         """Get session statistics"""
         result = self._request(RpcMethod.SessionStats, timeout=timeout)
         return SessionStats(fields=result)
-    
+
     def session_close(self, timeout: _Timeout | None = None) -> None:
         """
         This method tells the transmission session to shut down.
