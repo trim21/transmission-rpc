@@ -1131,6 +1131,12 @@ class Client:
     def session_close(self, timeout: _Timeout | None = None) -> None:
         """
         This method tells the transmission session to shut down.
+
+        Warning:
+            This method only sends a session-close RPC request.
+            It does not manage or enforce session state on the client side.
+            Developers are responsible for tracking session state and avoiding
+            further requests after the session is closed.
         """
         self._request(RpcMethod.SessionClose, timeout=timeout)
 
