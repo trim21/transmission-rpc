@@ -175,6 +175,7 @@ class RpcMethod(str, enum.Enum):
     SessionSet = "session-set"
     SessionGet = "session-get"
     SessionStats = "session-stats"
+    SessionClose = "session-close"
 
     TorrentGet = "torrent-get"
     TorrentAdd = "torrent-add"
