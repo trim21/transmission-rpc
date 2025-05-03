@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v6
 
       - run: uv pip install -r pyproject.toml --extra dev --system
 
