@@ -42,7 +42,7 @@ dev = [
     'pytest-github-actions-annotate-failures==0.3.0',
     'coverage~=7.6',
     # types
-    'mypy==1.15.0; python_version >= "3.12"',
+    'mypy==1.16.0; python_version >= "3.12"',
     # docs
     'sphinx==8.2.3; python_version >= "3.12"',
     'furo==2024.8.6; python_version >= "3.12"',
