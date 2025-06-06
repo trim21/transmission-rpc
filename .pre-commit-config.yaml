@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: validate-pyproject
         language: python
-        additional_dependencies: ["validate-pyproject-schema-store[all]==2025.4.28"]
+        additional_dependencies: ["validate-pyproject-schema-store[all]==2025.5.12"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.14.0
@@ -34,7 +34,7 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.11.13
     hooks:
       - id: ruff
         args: [--fix]
