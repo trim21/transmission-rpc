@@ -4,10 +4,10 @@ repos:
     hooks:
       - id: validate-pyproject
         language: python
-        additional_dependencies: ["validate-pyproject-schema-store[all]==2025.5.12"]
+        additional_dependencies: ["validate-pyproject-schema-store[all]==2025.7.7"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
+    rev: v2.15.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', '--preserve-quotes', --offset, '2']
@@ -34,7 +34,7 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.13
+    rev: v0.12.3
     hooks:
       - id: ruff
         args: [--fix]

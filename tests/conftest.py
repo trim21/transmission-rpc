@@ -1,4 +1,3 @@
-# ruff: noqa: SIM117
 import contextlib
 import os
 import secrets
