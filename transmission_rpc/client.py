@@ -1194,6 +1194,9 @@ class Client:
 
         return {x["name"]: Group(fields=x) for x in result["group"]}
 
+    def close(self) -> None:
+        self.__http_client.close()
+
     def __enter__(self) -> Self:
         return self
 
@@ -1203,7 +1206,7 @@ class Client:
         exc_val: BaseException | None,
         exc_tb: types.TracebackType | None,
     ) -> None:
-        self.__http_client.close()
+        self.close()
 
 
 T = TypeVar("T")
