@@ -45,7 +45,7 @@ dev = [
     'mypy==1.18.2; python_version >= "3.12"',
     # docs
     'sphinx==8.2.3; python_version >= "3.12"',
-    'furo==2025.7.19; python_version >= "3.12"',
+    'furo==2025.9.25; python_version >= "3.12"',
     'sphinx-copybutton==0.5.2 ; python_version >= "3.12"',
     'sphinx-new-tab-link==0.8.0; python_version >= "3.12"',
     'sphinx-github-style==1.2.2 ; python_version >= "3.12"',
