@@ -18,7 +18,7 @@ repos:
       - id: check-case-conflict
       - id: check-ast
       - id: check-builtin-literals
-      - id: check-byte-order-marker
+      - id: fix-byte-order-marker
       - id: check-toml
       - id: check-yaml
       - id: check-json
