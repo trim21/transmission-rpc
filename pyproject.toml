@@ -49,7 +49,7 @@ dev = [
     'sphinx-copybutton==0.5.2 ; python_version >= "3.12"',
     'sphinx-new-tab-link==0.8.0; python_version >= "3.12"',
     'sphinx-github-style==1.2.2 ; python_version >= "3.12"',
-    'sphinx-autobuild==2024.10.3; python_version >= "3.12"',
+    'sphinx-autobuild==2025.8.25; python_version >= "3.12"',
 ]
 
 [tool.pytest.ini_options]
