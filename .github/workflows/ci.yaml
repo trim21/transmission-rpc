@@ -32,7 +32,7 @@ jobs:
           PASS: my-secret-password
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
@@ -60,7 +60,7 @@ jobs:
     # currently in beta.
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: sudo apt-get install -y transmission-daemon
       - run: mkdir -p $HOME/Downloads
       - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
