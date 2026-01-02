@@ -554,7 +554,7 @@ class Torrent(Container):
                 begin_piece=file.get("begin_piece"),
                 end_piece=file.get("end_piece"),
             )
-            for id, file, priority, selected in zip(indices, files, priorities, wanted)
+            for id, file, priority, selected in zip(indices, files, priorities, wanted, strict=False)
         ]
 
     @property

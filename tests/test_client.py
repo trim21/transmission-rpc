@@ -1,11 +1,11 @@
 import base64
 import pathlib
 import time
+from typing import Literal
 from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
-from typing_extensions import Literal
 
 from tests.util import ServerTooLowError, skip_on
 from transmission_rpc.client import Client, _try_read_torrent, ensure_location_str
@@ -35,8 +35,9 @@ from transmission_rpc.types import File
     ],
 )
 def test_client_parse_url(protocol: Literal["http", "https"], username, password, host, port, path):
-    with mock.patch("transmission_rpc.client.Client._request"), mock.patch(
-        "transmission_rpc.client.Client.get_session"
+    with (
+        mock.patch("transmission_rpc.client.Client._request"),
+        mock.patch("transmission_rpc.client.Client.get_session"),
     ):
         client = Client(
             protocol=protocol,
