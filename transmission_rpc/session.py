@@ -367,7 +367,9 @@ class Session(Container):
         """
         trackers = self.get("default-trackers")
         if trackers:
-            return trackers.split("\n")
+            if isinstance(trackers, str):
+                return trackers.split("\n")
+            return trackers
         return None
 
     @property

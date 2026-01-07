@@ -907,7 +907,7 @@ class Torrent(Container):
         # so if doneDate is zero return None
         if done_date == 0:
             return None
-        return datetime.fromtimestamp(done_date).astimezone()
+        return datetime.fromtimestamp(done_date, timezone.utc)
 
     def format_eta(self) -> str:
         """
