@@ -4,14 +4,13 @@ repos:
     hooks:
       - id: validate-pyproject
         language: python
-        additional_dependencies:
-          ["validate-pyproject-schema-store[all]==2026.1.8"]
+        additional_dependencies: ["validate-pyproject-schema-store[all]==2026.1.8"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.15.0
     hooks:
       - id: pretty-format-yaml
-        args: [--autofix, --indent, "2", "--preserve-quotes", --offset, "2"]
+        args: [--autofix, --indent, '2', '--preserve-quotes', --offset, '2']
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
