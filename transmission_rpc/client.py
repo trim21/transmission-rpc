@@ -4,6 +4,7 @@ import base64
 import importlib.metadata
 import json
 import logging
+import os
 import pathlib
 import string
 import time
@@ -48,6 +49,8 @@ DEFAULT_TIMEOUT = 30.0
 
 # urllib3 may remove support for int/float in the future
 _Timeout = Timeout | int | float
+
+_TLS_CERT_FILE_DEFAULT = os.getenv("TRANSMISSION_RPC_PY_CERT_FILE")
 
 
 class ResponseData(TypedDict):
@@ -107,6 +110,7 @@ class Client:
         path: str = "/transmission/rpc",
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
+        tls_cert_file: str | None = _TLS_CERT_FILE_DEFAULT,
     ):
         """
 
@@ -119,6 +123,10 @@ class Client:
             path: rpc request target path, default ``/transmission/rpc``
             timeout:
             logger:
+            tls_cert_file:
+                Path to a custom CA bundle file (PEM format) to use for SSL verification.
+                Defaults to TRANSMISSION_RPC_PY_CERT_FILE env var if set.
+                If None, uses certifi's default bundle.
 
         To connect to a Unix socket, pass "http+unix" as `protocol` and the path to
         the socket as `host`.
@@ -160,7 +168,8 @@ class Client:
         if protocol == "http":
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
-            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=certifi.where(), **common_args)
+            ca_certs = tls_cert_file or certifi.where()
+            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=ca_certs, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:
