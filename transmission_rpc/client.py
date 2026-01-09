@@ -33,7 +33,7 @@ from transmission_rpc.types import Group, PortTestResult
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
-except ImportError:
+except ImportError:  # pragma: no cover
     __version__ = "develop"
 
 __USER_AGENT__ = f"transmission-rpc/{__version__} (https://github.com/trim21/transmission-rpc)"

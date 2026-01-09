@@ -7,6 +7,9 @@ example_hash = "51ba7d0dd45ab9b9564329c33f4f97493b677924"
 
 @pytest.mark.parametrize("arg", [float(1), "non-hash-string"])
 def test_parse_id_raise(arg):
+    """
+    Verify that `_parse_torrent_id` raises ValueError for invalid input types or formats.
+    """
     with pytest.raises(ValueError, match=f"{arg} is not valid torrent id"):
         _parse_torrent_id(arg)
 
@@ -22,10 +25,16 @@ def test_parse_id_raise(arg):
     ],
 )
 def test_parse_torrent_ids(arg, expected):
+    """
+    Verify that `_parse_torrent_ids` correctly parses various input formats into a list of IDs or a specific string.
+    """
     assert _parse_torrent_ids(arg) == expected, f"parse_torrent_ids({arg}) != {expected}"
 
 
 @pytest.mark.parametrize("arg", ["not-recently-active", "non-hash-string", -1, 1.1, "5:10", "5,6,8,9,10"])
 def test_parse_torrent_ids_value_error(arg):
+    """
+    Verify that `_parse_torrent_ids` raises ValueError for invalid inputs.
+    """
     with pytest.raises(ValueError, match="torrent id"):
         _parse_torrent_ids(arg)
