@@ -265,3 +265,37 @@ def test_client_default_ca_bundle():
         # Check that the pool was initialized with certifi's bundle
         _, kwargs = mock_pool.call_args
         assert kwargs["ca_certs"] == certifi.where()
+
+
+def test_client_env_var_ca_bundle(tmp_path: pathlib.Path):
+    """Verify that we fall back to TRANSMISSION_RPC_PY_CERT_FILE if provided."""
+    # Use tmp_path to generate a safe path string that satisfies Ruff S108
+    custom_ca = str(tmp_path / "env-ca.pem")
+
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+        mock.patch.dict("os.environ", {"TRANSMISSION_RPC_PY_CERT_FILE": custom_ca}),
+    ):
+        # Case: No arg provided, but Env Var is set
+        Client(protocol="https")
+
+        _, kwargs = mock_pool.call_args
+        assert kwargs["ca_certs"] == custom_ca
+
+
+def test_client_arg_priority_over_env(tmp_path: pathlib.Path):
+    """Verify that the explicit argument overrides the environment variable."""
+    env_ca = str(tmp_path / "env-ca.pem")
+    arg_ca = str(tmp_path / "arg-ca.pem")
+
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+        mock.patch.dict("os.environ", {"TRANSMISSION_RPC_PY_CERT_FILE": env_ca}),
+    ):
+        # Case: Both Arg and Env Var exist
+        Client(protocol="https", tls_cert_file=arg_ca)
+
+        _, kwargs = mock_pool.call_args
+        assert kwargs["ca_certs"] == arg_ca

@@ -4,6 +4,7 @@ import base64
 import importlib.metadata
 import json
 import logging
+import os
 import pathlib
 import string
 import time
@@ -107,7 +108,7 @@ class Client:
         path: str = "/transmission/rpc",
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
-        tls_cert_file: str | None = None,  # <--- Added parameter
+        tls_cert_file: str | None = None,
     ):
         """
 
@@ -165,8 +166,12 @@ class Client:
         if protocol == "http":
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
-            # Determine CA bundle: use provided file or fall back to certifi
-            ca_certs = tls_cert_file or certifi.where()
+            # Priority: Argument > Env Var > certifi default
+            if tls_cert_file is None:
+                tls_cert_file = os.getenv("TRANSMISSION_RPC_PY_CERT_FILE")
+
+            ca_certs = tls_cert_file if tls_cert_file else certifi.where()
+
             self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=ca_certs, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
