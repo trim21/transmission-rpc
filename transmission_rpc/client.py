@@ -107,6 +107,7 @@ class Client:
         path: str = "/transmission/rpc",
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
+        tls_cert_file: str | None = None,  # <--- Added parameter
     ):
         """
 
@@ -119,6 +120,10 @@ class Client:
             path: rpc request target path, default ``/transmission/rpc``
             timeout:
             logger:
+            tls_cert_file:
+                Path to a custom CA bundle file (PEM format) to use for SSL verification.
+                Useful for self-signed certs or using the system CA store.
+                If None, uses certifi's default bundle.
 
         To connect to a Unix socket, pass "http+unix" as `protocol` and the path to
         the socket as `host`.
@@ -160,7 +165,9 @@ class Client:
         if protocol == "http":
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
-            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=certifi.where(), **common_args)
+            # Determine CA bundle: use provided file or fall back to certifi
+            ca_certs = tls_cert_file if tls_cert_file else certifi.where()
+            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=ca_certs, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:

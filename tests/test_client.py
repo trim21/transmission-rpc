@@ -5,6 +5,7 @@ from typing import Literal
 from unittest import mock
 from urllib.parse import urljoin
 
+import certifi
 import pytest
 
 from tests.util import ServerTooLowError, skip_on
@@ -234,3 +235,33 @@ def test_groups(tr_client: Client):
     groups = tr_client.get_groups()
 
     assert "test.1" in groups
+
+
+def test_client_custom_ca_bundle():
+    """Verify that tls_cert_file is passed to the HTTPSConnectionPool."""
+    custom_ca = "/path/to/custom/ca.pem"
+
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+    ):
+        # Case 1: Custom CA file provided
+        Client(protocol="https", tls_cert_file=custom_ca)
+
+        # Check that the pool was initialized with our custom CA
+        _, kwargs = mock_pool.call_args
+        assert kwargs["ca_certs"] == custom_ca
+
+
+def test_client_default_ca_bundle():
+    """Verify that we fall back to certifi when no tls_cert_file is provided."""
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+    ):
+        # Case 2: No custom CA file (default behavior)
+        Client(protocol="https")
+
+        # Check that the pool was initialized with certifi's bundle
+        _, kwargs = mock_pool.call_args
+        assert kwargs["ca_certs"] == certifi.where()
