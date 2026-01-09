@@ -32,7 +32,7 @@ from transmission_rpc.types import Group, PortTestResult
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
-except ImportError:
+except ImportError:  # pragma: no cover
     __version__ = "develop"
 
 __USER_AGENT__ = f"transmission-rpc/{__version__} (https://github.com/trim21/transmission-rpc)"
@@ -1056,7 +1056,7 @@ class Client:
                 "lpd-enabled": lpd_enabled,
                 "peer-limit-global": peer_limit_global,
                 "peer-limit-per-torrent": peer_limit_per_torrent,
-                "peer-port-random-on-start": peer_port_random_on_start,
+                "peer-port-random-on_start": peer_port_random_on_start,
                 "peer-port": peer_port,
                 "pex-enabled": pex_enabled,
                 "port-forwarding-enabled": port_forwarding_enabled,

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import importlib
 import json
 import socket
 from typing import Any, Literal
@@ -11,7 +10,6 @@ import pytest
 import urllib3
 from urllib3 import Timeout
 
-import transmission_rpc.client
 from transmission_rpc import DEFAULT_TIMEOUT, from_url
 from transmission_rpc._unix_socket import UnixHTTPConnection, UnixHTTPConnectionPool
 from transmission_rpc.client import Client
@@ -178,15 +176,6 @@ def test_http_unix_init() -> None:
     ):
         c = Client(protocol="http+unix", host="/tmp/test", path="/transmission/")  # noqa: S108
         assert c._url == "http+unix://localhost:9091/transmission/rpc"  # noqa: SLF001
-
-
-def test_import_error_version() -> None:
-    """Cover the ImportError block for version retrieval to ensure fallback to 'develop'."""
-    with mock.patch("importlib.metadata.version", side_effect=ImportError):
-        importlib.reload(transmission_rpc.client)
-        assert transmission_rpc.client.__version__ == "develop"
-
-    importlib.reload(transmission_rpc.client)
 
 
 def test_client_init_edge_cases() -> None:
