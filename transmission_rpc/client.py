@@ -1065,7 +1065,7 @@ class Client:
                 "lpd-enabled": lpd_enabled,
                 "peer-limit-global": peer_limit_global,
                 "peer-limit-per-torrent": peer_limit_per_torrent,
-                "peer-port-random-on_start": peer_port_random_on_start,
+                "peer-port-random-on-start": peer_port_random_on_start,
                 "peer-port": peer_port,
                 "pex-enabled": pex_enabled,
                 "port-forwarding-enabled": port_forwarding_enabled,
