@@ -166,7 +166,7 @@ class Client:
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
             # Determine CA bundle: use provided file or fall back to certifi
-            ca_certs = tls_cert_file if tls_cert_file else certifi.where()
+            ca_certs = tls_cert_file or certifi.where()
             self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=ca_certs, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
