@@ -11,6 +11,9 @@ from transmission_rpc.types import BitMap, Container, Group, PortTestResult
 
 
 def check_properties(cls: type, obj: Any) -> None:
+    """
+    Helper function to access all properties of a class instance to ensure no errors are raised.
+    """
     for prop in dir(cls):
         if isinstance(getattr(cls, prop), property):
             with contextlib.suppress(KeyError, DeprecationWarning):
@@ -18,32 +21,39 @@ def check_properties(cls: type, obj: Any) -> None:
 
 
 def test_container_repr() -> None:
-    """Test Container.__repr__ which is missing coverage."""
+    """Verify that `Container.__repr__` returns the expected string format."""
     c = Container(fields={"key": "value"})
     assert repr(c) == "<Container fields={'key': 'value'}>"
 
 
 def test_peer_properties_access() -> None:
+    """Verify that all properties of the `Peer` class can be accessed without error."""
     p = Peer(fields={})
     check_properties(Peer, p)
 
 
 def test_peers_from_properties_access() -> None:
+    """Verify that all properties of the `PeersFrom` class can be accessed without error."""
     p = PeersFrom(fields={})
     check_properties(PeersFrom, p)
 
 
 def test_tracker_properties_access() -> None:
+    """Verify that all properties of the `Tracker` class can be accessed without error."""
     t = Tracker(fields={})
     check_properties(Tracker, t)
 
 
 def test_tracker_stats_properties_access() -> None:
+    """Verify that all properties of the `TrackerStats` class can be accessed without error."""
     t = TrackerStats(fields={})
     check_properties(TrackerStats, t)
 
 
 def test_group_properties() -> None:
+    """
+    Verify that the `Group` class correctly maps fields to properties.
+    """
     fields = {
         "name": "g1",
         "honorsSessionLimits": True,
@@ -62,6 +72,9 @@ def test_group_properties() -> None:
 
 
 def test_port_test_result_properties() -> None:
+    """
+    Verify that the `PortTestResult` class correctly maps fields to properties.
+    """
     fields = {"port-is-open": True, "ip_protocol": "ipv4"}
     r = PortTestResult(fields=fields)
     assert r.port_is_open is True
@@ -69,6 +82,9 @@ def test_port_test_result_properties() -> None:
 
 
 def test_bitmap() -> None:
+    """
+    Verify that `BitMap` correctly interprets bytes as a sequence of boolean flags.
+    """
     # 1 byte: 10101010 -> 0xAA.
     # Index 0 is MSB.
     # 0xAA = 170.
@@ -82,18 +98,27 @@ def test_bitmap() -> None:
 
 
 def test_args_repr_str() -> None:
+    """
+    Verify `Args.__repr__` and `Args.__str__` output formats.
+    """
     arg = Args(Type.number, 1, description="desc")
     assert repr(arg) == "Args('number', 1, None, None, None, 'desc')"
     assert str(arg) == "Args<type=number, 1, description='desc')"
 
 
 def test_get_torrent_arguments() -> None:
+    """
+    Verify that `get_torrent_arguments` returns the expected set of arguments for a given RPC version.
+    """
     args = get_torrent_arguments(1)
     assert "id" in args
     assert "group" not in args  # added in 17
 
 
 def test_error_str_with_original() -> None:
+    """
+    Verify that `TransmissionError` correctly formats its string representation when wrapping another exception.
+    """
     original = mock.Mock()
     original.__str__ = mock.Mock(return_value="original error")  # type: ignore[method-assign]
     type(original).__name__ = "OriginalError"
@@ -102,6 +127,9 @@ def test_error_str_with_original() -> None:
 
 
 def test_deprecated_raw_response() -> None:
+    """
+    Verify that accessing the deprecated `rawResponse` attribute of `TransmissionError` emits a warning.
+    """
     err = TransmissionError("message", raw_response="raw")
     with pytest.warns(DeprecationWarning, match="use .raw_response instead"):
         assert err.rawResponse == "raw"

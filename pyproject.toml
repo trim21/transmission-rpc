@@ -25,9 +25,9 @@ classifiers = [
     'Programming Language :: Python :: Implementation :: PyPy',
 ]
 dependencies = [
-    'urllib3~=2.6',
-    'certifi>=2026.1.4',
-    'typing-extensions>=4.15.0',
+    'urllib3~=2.2',
+    'certifi>=2017.4.17',
+    'typing-extensions>=4.5.0',
 ]
 
 [project.urls]
@@ -50,6 +50,9 @@ dev = [
     'sphinx-github-style==1.2.2 ; python_version >= "3.12"',
     'sphinx-autobuild==2025.8.25; python_version >= "3.12"',
 ]
+
+[tool.coverage.run]
+omit = ["tests/*"]
 
 [tool.coverage.report]
 fail_under = 100

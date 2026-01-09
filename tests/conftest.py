@@ -4,7 +4,7 @@ import secrets
 import socket
 import time
 from collections.abc import Callable, Generator
-from typing import Literal
+from typing import Literal, cast
 
 import pytest
 
@@ -49,7 +49,7 @@ def tr_client(ensure_transmission_running: None) -> Generator[Client, None, None
     """
     LOGGER.setLevel("INFO")
     # Cast PROTOCOL to the Literal type expected by Client
-    protocol_arg: Literal["http", "https", "http+unix"] = PROTOCOL  # type: ignore[assignment]
+    protocol_arg = cast("Literal['http', 'https', 'http+unix']", PROTOCOL)
     with Client(protocol=protocol_arg, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
@@ -60,4 +60,5 @@ def tr_client(ensure_transmission_running: None) -> Generator[Client, None, None
 
 @pytest.fixture
 def fake_hash_factory() -> Callable[[], str]:
+    """Generates a random SHA1 hash string for testing."""
     return lambda: secrets.token_hex(20)

@@ -1,4 +1,3 @@
-# ruff: noqa: SLF001
 import json
 from unittest import mock
 
@@ -16,60 +15,50 @@ from transmission_rpc.error import (
 
 
 def test_http_query_connection_error(client: Client) -> None:
-    client._Client__http_client.request.side_effect = urllib3.exceptions.ConnectionError("fail")  # type: ignore[attr-defined]
+    """Verify that connection errors from urllib3 are raised as TransmissionConnectError."""
+    client._Client__http_client.request.side_effect = urllib3.exceptions.ConnectionError("fail")  # type: ignore[attr-defined]  # noqa: SLF001
     with pytest.raises(TransmissionConnectError):
-        client._http_query({})
+        client._http_query({})  # noqa: SLF001
 
 
 def test_http_query_timeout_error(client: Client) -> None:
-    client._Client__http_client.request.side_effect = urllib3.exceptions.TimeoutError("fail")  # type: ignore[attr-defined]
+    """Verify that timeout errors from urllib3 are raised as TransmissionTimeoutError."""
+    client._Client__http_client.request.side_effect = urllib3.exceptions.TimeoutError("fail")  # type: ignore[attr-defined]  # noqa: SLF001
     with pytest.raises(TransmissionTimeoutError):
-        client._http_query({})
+        client._http_query({})  # noqa: SLF001
 
 
 def test_http_query_auth_error(client: Client) -> None:
-    client._Client__http_client.request.return_value = mock.Mock(status=401, headers={}, data=b"")  # type: ignore[attr-defined]
+    """Verify that 401/403 responses are raised as TransmissionAuthError."""
+    client._Client__http_client.request.return_value = mock.Mock(status=401, headers={}, data=b"")  # type: ignore[attr-defined]  # noqa: SLF001
     with pytest.raises(TransmissionAuthError):
-        client._http_query({})
+        client._http_query({})  # noqa: SLF001
 
 
 def test_http_query_too_many_requests(client: Client) -> None:
+    """Verify that the client enforces a retry limit on 409 Conflict responses."""
     conflict_resp = mock.Mock(status=409, headers={"x-transmission-session-id": "new_id"}, data=b"")
-    client._Client__http_client.request.side_effect = [conflict_resp, conflict_resp, conflict_resp, conflict_resp]  # type: ignore[attr-defined]
+    client._Client__http_client.request.side_effect = [conflict_resp, conflict_resp, conflict_resp, conflict_resp]  # type: ignore[attr-defined]  # noqa: SLF001
     with pytest.raises(TransmissionError, match="too much request"):
-        client._http_query({})
+        client._http_query({})  # noqa: SLF001
 
 
 def test_request_invalid_json(client: Client) -> None:
-    client._Client__http_client.request.return_value = mock.Mock(status=200, headers={}, data=b"invalid json")  # type: ignore[attr-defined]
+    """Verify that invalid JSON in the response raises a TransmissionError and logs the exception."""
+    client.logger = mock.Mock()
+    client._Client__http_client.request.return_value = mock.Mock(status=200, headers={}, data=b"invalid json")  # type: ignore[attr-defined]  # noqa: SLF001
     with pytest.raises(TransmissionError, match="failed to parse response"):
-        client._request(RpcMethod.TorrentGet)
+        client._request(RpcMethod.TorrentGet)  # noqa: SLF001
+    client.logger.exception.assert_called()
 
 
 def test_request_failure_result(client: Client) -> None:
-    client._Client__http_client.request.return_value = mock.Mock(  # type: ignore[attr-defined]
+    """Verify that a JSON response with 'result': 'failure' raises a TransmissionError."""
+    client._Client__http_client.request.return_value = mock.Mock(  # type: ignore[attr-defined]  # noqa: SLF001
         status=200, headers={}, data=json.dumps({"result": "failure", "arguments": {}}).encode()
     )
     with pytest.raises(TransmissionError, match='Query failed with result "failure"'):
-        client._request(RpcMethod.TorrentGet)
-
-
-def test_json_decode_error() -> None:
-    """Cover JSON decode error handling in _request"""
-    # Patch get_session so init doesn't make network calls
-    with mock.patch.object(Client, "get_session", autospec=True):
-        c = Client()
-        # Mock _http_query to return non-json string
-        # We need to mock the instance method on the created instance 'c'
-        c._http_query = mock.Mock(return_value="not json")  # type: ignore[method-assign]
-        # We need a logger mock
-        c.logger = mock.Mock()
-
-        # Now call _request
-        with pytest.raises(TransmissionError) as excinfo:
-            c._request("method")  # type: ignore[arg-type]
-        assert "failed to parse response as json" in str(excinfo.value)
-        c.logger.exception.assert_called()
+        client._request(RpcMethod.TorrentGet)  # noqa: SLF001
 
 
 def test_request_errors() -> None:
@@ -80,15 +69,15 @@ def test_request_errors() -> None:
 
         # Method check
         with pytest.raises(TypeError, match="request takes method as string"):
-            c._request(method=123)  # type: ignore
+            c._request(method=123)  # type: ignore  # noqa: SLF001
 
         # Arguments check
         with pytest.raises(TypeError, match="request takes arguments should be dict"):
-            c._request(method="m", arguments="not dict")  # type: ignore
+            c._request(method="m", arguments="not dict")  # type: ignore  # noqa: SLF001
 
         # Require ids
         with pytest.raises(ValueError, match="request require ids"):
-            c._request(method="m", require_ids=True)  # type: ignore[arg-type]
+            c._request(method="m", require_ids=True)  # type: ignore[arg-type]  # noqa: SLF001
 
 
 def test_request_response_logic() -> None:
@@ -101,8 +90,8 @@ def test_request_response_logic() -> None:
 
         # Mock _http_query
         # 1. Missing result
-        c._http_query = mock.Mock(return_value=json.dumps({"arguments": {}}))  # type: ignore[method-assign]
+        c._http_query = mock.Mock(return_value=json.dumps({"arguments": {}}))  # type: ignore[method-assign]  # noqa: SLF001
         with pytest.raises(TransmissionError, match="missing without result"):
-            c._request("method")  # type: ignore[arg-type]
+            c._request("method")  # type: ignore[arg-type]  # noqa: SLF001
 
         c.logger.debug.assert_called()

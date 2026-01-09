@@ -10,6 +10,9 @@ from transmission_rpc.client import Client
 
 @pytest.fixture
 def mock_http_client() -> Generator[mock.MagicMock, None, None]:
+    """
+    Mock the low-level urllib3 connection to simulate RPC responses without a real daemon.
+    """
     with mock.patch("transmission_rpc.client.urllib3.HTTPConnectionPool") as m:
         m.return_value.request.return_value = mock.Mock(
             status=200,
@@ -26,4 +29,7 @@ def mock_http_client() -> Generator[mock.MagicMock, None, None]:
 
 @pytest.fixture
 def client(mock_http_client: Any) -> Client:
+    """
+    Create a Client instance with the mocked HTTP client.
+    """
     return Client()

@@ -359,6 +359,7 @@ class Session(Container):
         """long version str `$version ($revision)`"""
         return self.fields["version"]
 
+    # Defensive check: handles legacy newline-separated strings and anticipates the JSON-RPC 2.0 shift to native arrays.
     @property
     def default_trackers(self) -> list[str] | None:
         """
