@@ -62,6 +62,9 @@ def test_attributes():
         "addedDate": calendar.timegm((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
         "startDate": calendar.timegm((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
+        "dateCreated": calendar.timegm((2008, 12, 11, 7, 0, 0, 0, 0, -1)),
+        "availability": [1, 1, 0, -1],
+        "priorities": [1, 0, -1],
     }
 
     torrent = transmission_rpc.Torrent(fields=data)
@@ -76,6 +79,13 @@ def test_attributes():
     assert torrent.added_date == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=datetime.timezone.utc)
     assert torrent.start_date == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=datetime.timezone.utc)
     assert torrent.done_date == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=datetime.timezone.utc)
+    assert torrent.date_created == datetime.datetime(2008, 12, 11, 7, 0, 0, tzinfo=datetime.timezone.utc)
+    assert torrent.availability == [1, 1, 0, -1]
+    assert torrent.priorities == [
+        transmission_rpc.constants.Priority.High,
+        transmission_rpc.constants.Priority.Normal,
+        transmission_rpc.constants.Priority.Low,
+    ]
 
     assert torrent.format_eta() == transmission_rpc.utils.format_timedelta(torrent.eta)
 

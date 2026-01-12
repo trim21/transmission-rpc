@@ -401,10 +401,13 @@ class Torrent(Container):
         bytes_avail = self.desired_available + bytes_done
         return float((bytes_avail / bytes_all) * 100 if bytes_all else 0)
 
-    # @property
-    # def availability(self) -> list:
-    #     """TODO"""
-    # return self.fields["availability"]
+    @property
+    def availability(self) -> list[int]:
+        """
+        An array of piece_count numbers representing the number of connected peers
+        that have each piece, or -1 if we already have the piece ourselves.
+        """
+        return self.fields["availability"]
 
     @property
     def bandwidth_priority(self) -> Priority:
@@ -428,10 +431,12 @@ class Torrent(Container):
     def creator(self) -> str:
         return self.fields["creator"]
 
-    # TODO
-    # @property
-    # def date_created(self):
-    #     return self.fields["dateCreated"]
+    @property
+    def date_created(self) -> datetime:
+        """
+        The date when the torrent file was created (by the torrent creator).
+        """
+        return datetime.fromtimestamp(self.fields["dateCreated"], timezone.utc)
 
     @property
     def desired_available(self) -> int:
@@ -687,10 +692,12 @@ class Torrent(Container):
     def piece_size(self) -> int:
         return self.fields["pieceSize"]
 
-    # TODO
-    # @property
-    # def priorities(self):
-    #     return self.fields["priorities"]
+    @property
+    def priorities(self) -> list[Priority]:
+        """
+        A list of bandwidth priorities for each file in the torrent.
+        """
+        return [Priority(x) for x in self.fields["priorities"]]
 
     @property
     def primary_mime_type(self) -> str:
@@ -727,10 +734,16 @@ class Torrent(Container):
     def seed_idle_limit(self) -> int:
         return self.fields["seedIdleLimit"]
 
-    # @property
-    # def seed_idle_mode(self) -> int:
-    #     """	which seeding inactivity to use. See tr_idlelimit"""
-    #     return self.fields["seedIdleMode"]
+    @property
+    def seed_idle_mode(self) -> IdleMode:
+        """
+        Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
+
+         * global, use session seed idle limit.
+         * single, use torrent seed idle limit. See seed_idle_limit.
+         * unlimited, no seed idle limit.
+        """
+        return IdleMode(self.fields["seedIdleMode"])
 
     @property
     def size_when_done(self) -> int:
@@ -924,16 +937,6 @@ class Torrent(Container):
             return "unknown"
         return format_timedelta(timedelta(seconds=eta))
 
-    # @property
-    # def download_limit(self) -> Optional[int]:
-    #     """The download limit.
-    #
-    #     Can be a number or None.
-    #     """
-    #     if self.fields["downloadLimited"]:
-    #         return self.fields["downloadLimit"]
-    #     return None
-
     @property
     def priority(self) -> Priority:
         """
@@ -942,17 +945,6 @@ class Torrent(Container):
         """
 
         return Priority(self.fields["bandwidthPriority"])
-
-    @property
-    def seed_idle_mode(self) -> IdleMode:
-        """
-        Seed idle mode as string. Can be one of 'global', 'single' or 'unlimited'.
-
-         * global, use session seed idle limit.
-         * single, use torrent seed idle limit. See seed_idle_limit.
-         * unlimited, no seed idle limit.
-        """
-        return IdleMode(self.fields["seedIdleMode"])
 
     @property
     def seed_ratio_limit(self) -> float:
