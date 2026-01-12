@@ -1,5 +1,6 @@
 import contextlib
 import time
+from collections.abc import Callable
 
 from tests.util import ServerTooLowError, skip_on
 from transmission_rpc.client import Client
@@ -12,22 +13,22 @@ def hash_to_magnet(h: str) -> str:
     return f"magnet:?xt=urn:btih:{h}"
 
 
-torrent_hash = "e84213a794f3ccd890382a54a64ca68b7e925433"
-magnet_url = f"magnet:?xt=urn:btih:{torrent_hash}"
-torrent_url = "https://github.com/trim21/transmission-rpc/raw/v4.1.0/tests/fixtures/iso.torrent"
+TORRENT_HASH = "e84213a794f3ccd890382a54a64ca68b7e925433"
+MAGNET_URL = f"magnet:?xt=urn:btih:{TORRENT_HASH}"
+TORRENT_URL = "https://github.com/trim21/transmission-rpc/raw/v4.1.0/tests/fixtures/iso.torrent"
 
 
 def test_add_magnet(tr_client: Client) -> None:
     """
     Integration test: Verify adding a torrent via magnet link actually adds it to the daemon.
     """
-    tr_client.add_torrent(magnet_url)
+    tr_client.add_torrent(MAGNET_URL)
     assert len(tr_client.get_torrents()) == 1, "Transmission daemon should have exactly 1 task after adding magnet link"
 
 
-def test_add_torrent_fd(tr_client: Client) -> None:
+def test_add_torrent_file_object(tr_client: Client) -> None:
     """
-    Integration test: Verify adding a torrent via an open file descriptor.
+    Integration test: Verify adding a torrent via an open file object.
     """
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
@@ -40,50 +41,52 @@ def test_add_torrent_http(tr_client: Client) -> None:
     """
     Integration test: Verify adding a torrent via an HTTP URL.
     """
-    tr_client.add_torrent(torrent_url)
+    tr_client.add_torrent(TORRENT_URL)
     assert len(tr_client.get_torrents()) == 1, "Transmission daemon should have exactly 1 task after adding HTTP URL"
 
 
-def test_stop(tr_client: Client, fake_hash_factory: object) -> None:
+def test_stop(tr_client: Client, generate_random_hash: Callable[[], str]) -> None:
     """
     Integration test: Verify stopping a torrent works.
     """
-    # fake_hash_factory is a fixture, typing as object or Callable is fine
-    # assuming it's a Callable[[], str] from conftest
-    info_hash = fake_hash_factory()  # type: ignore[operator]
+    info_hash = generate_random_hash()
     url = hash_to_magnet(info_hash)
     tr_client.add_torrent(url)
     tr_client.stop_torrent(info_hash)
-    assert len(tr_client.get_torrents()) == 1, "Transmission should still have the task listed"
-    ret = False
 
+    assert len(tr_client.get_torrents()) == 1, "Transmission should still have the task listed"
+
+    is_stopped = False
     for _ in range(50):
         time.sleep(0.2)
         if tr_client.get_torrents()[0].status == "stopped":
-            ret = True
+            is_stopped = True
             break
 
-    assert ret, "Torrent status should eventually become 'stopped'"
+    assert is_stopped, "Torrent status should eventually become 'stopped'"
 
 
 def test_torrent_start_all(tr_client: Client) -> None:
     """
     Integration test: Verify `start_all` starts all paused torrents.
     """
-    tr_client.add_torrent(torrent_url, paused=True, timeout=10)
+    tr_client.add_torrent(TORRENT_URL, paused=True, timeout=10)
+
     for torrent in tr_client.get_torrents():
         assert torrent.stopped or torrent.checking, "Newly added torrent should be stopped or checking initially"
 
     tr_client.start_all()
+
     for torrent in tr_client.get_torrents():
         assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start_all"
 
 
-def test_session_get(tr_client: Client) -> None:
+def test_session_get_returns_valid_rpc_version(tr_client: Client) -> None:
     """
     Integration test: Verify `get_session` returns session information without error.
     """
-    tr_client.get_session()
+    session = tr_client.get_session()
+    assert session.rpc_version > 0
 
 
 def test_free_space(tr_client: Client) -> None:
@@ -91,6 +94,8 @@ def test_free_space(tr_client: Client) -> None:
     Integration test: Verify `free_space` returns valid information for the download directory.
     """
     session = tr_client.get_session()
+    # Depending on the docker/test env, this path might not exist or return an error,
+    # but the call itself should be handled.
     with contextlib.suppress(TransmissionError):
         tr_client.free_space(session.download_dir)
 
@@ -99,7 +104,8 @@ def test_session_stats(tr_client: Client) -> None:
     """
     Integration test: Verify `session_stats` returns statistics without error.
     """
-    tr_client.session_stats()
+    stats = tr_client.session_stats()
+    assert stats is not None
 
 
 def test_torrent_attr_type(tr_client: Client) -> None:
@@ -108,6 +114,7 @@ def test_torrent_attr_type(tr_client: Client) -> None:
     """
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
+
     for torrent in tr_client.get_torrents():
         assert isinstance(torrent.id, int), "Torrent ID should be an integer"
         assert isinstance(torrent.name, str), "Torrent name should be a string"
@@ -119,7 +126,9 @@ def test_torrent_get_files(tr_client: Client) -> None:
     """
     with open("tests/fixtures/iso.torrent", "rb") as f:
         tr_client.add_torrent(f)
+
     assert len(tr_client.get_torrents()) == 1, "Transmission should have exactly 1 task"
+
     for torrent in tr_client.get_torrents():
         files = torrent.get_files()
         assert len(files) > 0, "Torrent should have files"

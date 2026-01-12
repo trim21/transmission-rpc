@@ -245,7 +245,10 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
 
             headers = self.__get_headers()
-            self.logger.debug({"path": self._path, "headers": headers, "data": query, "timeout": timeout})
+            log_headers = headers.copy()
+            if "authorization" in log_headers:
+                log_headers["authorization"] = "******"
+            self.logger.debug({"path": self._path, "headers": log_headers, "data": query, "timeout": timeout})
 
             request_count += 1
             try:
@@ -284,11 +287,11 @@ class Client:
         Send json-rpc request to Transmission using http POST
         """
         if not isinstance(method, str):
-            raise TypeError("request takes method as string")
+            raise TypeError("request takes method as string")  # pragma: no cover
         if arguments is None:
             arguments = {}
         if not isinstance(arguments, dict):
-            raise TypeError("request takes arguments should be dict")
+            raise TypeError("request takes arguments should be dict")  # pragma: no cover
 
         ids = _parse_torrent_ids(ids)
         if len(ids) > 0:

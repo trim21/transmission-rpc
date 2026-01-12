@@ -1,23 +1,10 @@
-import contextlib
-from typing import Any
-from unittest import mock
-
 import pytest
 
+from tests.util import check_properties
 from transmission_rpc.constants import Args, Type, get_torrent_arguments
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.torrent import Peer, PeersFrom, Tracker, TrackerStats
 from transmission_rpc.types import BitMap, Container, Group, PortTestResult
-
-
-def check_properties(cls: type, obj: Any) -> None:
-    """
-    Helper function to access all properties of a class instance to ensure no errors are raised.
-    """
-    for prop in dir(cls):
-        if isinstance(getattr(cls, prop), property):
-            with contextlib.suppress(KeyError, DeprecationWarning):
-                getattr(obj, prop)
 
 
 def test_container_repr() -> None:
@@ -119,11 +106,14 @@ def test_error_str_with_original() -> None:
     """
     Verify that `TransmissionError` correctly formats its string representation when wrapping another exception.
     """
-    original = mock.Mock()
-    original.__str__ = mock.Mock(return_value="original error")  # type: ignore[method-assign]
-    type(original).__name__ = "OriginalError"
+
+    class MockError(Exception):
+        def __str__(self) -> str:
+            return "original error"
+
+    original = MockError()
     err = TransmissionError("message", original=original)
-    assert str(err) == 'message Original exception: OriginalError, "original error"'
+    assert str(err) == 'message Original exception: MockError, "original error"'
 
 
 def test_deprecated_raw_response() -> None:

@@ -19,7 +19,7 @@ PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
 @pytest.fixture(scope="session")
-def ensure_transmission_running() -> None:
+def wait_for_transmission() -> None:
     """
     Waits for the Transmission daemon to be available.
 
@@ -40,12 +40,12 @@ def ensure_transmission_running() -> None:
 
 
 @pytest.fixture
-def tr_client(ensure_transmission_running: None) -> Generator[Client, None, None]:
+def tr_client(wait_for_transmission: None) -> Generator[Client, None, None]:
     """
     Provides a Client instance connected to the Transmission daemon.
 
     This fixture cleans up torrents before and after the test.
-    It depends on 'ensure_transmission_running' to ensure the daemon is reachable.
+    It depends on 'wait_for_transmission' to ensure the daemon is reachable.
     """
     LOGGER.setLevel("INFO")
     # Cast PROTOCOL to the Literal type expected by Client
@@ -59,6 +59,6 @@ def tr_client(ensure_transmission_running: None) -> Generator[Client, None, None
 
 
 @pytest.fixture
-def fake_hash_factory() -> Callable[[], str]:
+def generate_random_hash() -> Callable[[], str]:
     """Generates a random SHA1 hash string for testing."""
     return lambda: secrets.token_hex(20)

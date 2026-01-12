@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import socket
-from typing import Any
+from typing import Any, cast
 
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
@@ -45,7 +45,7 @@ class UnixHTTPConnection(HTTPConnection):
 
 
 class UnixHTTPConnectionPool(HTTPConnectionPool):
-    ConnectionCls = UnixHTTPConnection  # type: ignore
+    ConnectionCls = cast("Any", UnixHTTPConnection)
 
     def __str__(self) -> str:
         return f"{type(self).__name__}(host={self.host})"

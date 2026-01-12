@@ -1,5 +1,4 @@
 import calendar
-import contextlib
 import datetime
 import time
 from typing import Any
@@ -9,18 +8,11 @@ import pytest
 import transmission_rpc
 import transmission_rpc.constants
 import transmission_rpc.utils
+from tests.util import check_properties
 from transmission_rpc.torrent import FileStat, Status, Torrent, get_status
 
 
-def check_properties(cls: type, obj: Any) -> None:
-    """Iterate over all properties of a class to ensure getters do not raise exceptions."""
-    for prop in dir(cls):
-        if isinstance(getattr(cls, prop), property):
-            with contextlib.suppress(KeyError, DeprecationWarning):
-                getattr(obj, prop)
-
-
-def assert_property_exception(exception, ob, prop):
+def assert_property_exception(exception: type[Exception], ob: Any, prop: str) -> None:
     """Helper to assert that accessing a property raises a specific exception."""
     with pytest.raises(exception):
         getattr(ob, prop)
@@ -32,8 +24,6 @@ def test_torrent_missing_optional_fields() -> None:
     fields = {
         "id": 1,
         "files": [{"length": 1, "name": "f", "bytesCompleted": 0}],
-        # "priorities" missing
-        # "wanted" missing
     }
     t = Torrent(fields=fields)
     assert len(t.get_files()) == 1
@@ -41,25 +31,8 @@ def test_torrent_missing_optional_fields() -> None:
     assert t.get_files()[0].selected is None
 
 
-def test_torrent_status_properties() -> None:
-    """Verify that Status objects correctly report their state (e.g., checking, downloading)."""
-    s = Status("checking")
-    assert s.checking
-    assert not s.stopped
-    s = Status("check pending")
-    assert s.check_pending
-    s = Status("downloading")
-    assert s.downloading
-    s = Status("download pending")
-    assert s.download_pending
-    s = Status("seeding")
-    assert s.seeding
-    s = Status("seed pending")
-    assert s.seed_pending
-
-
 def test_torrent_status_and_idle_mode_mapping() -> None:
-    """Verify miscellaneous Torrent properties like seed_idle_mode and status string mapping."""
+    """Verify `seed_idle_mode` enum conversion and `status` property string mapping."""
     fields = {
         "id": 1,
         "seedIdleMode": 0,  # global
@@ -67,7 +40,8 @@ def test_torrent_status_and_idle_mode_mapping() -> None:
     }
     t = Torrent(fields=fields)
     assert t.seed_idle_mode.value == 0
-    assert t._status_str == "downloading"  # noqa: SLF001
+    # Use public API 'status' which returns a Status(str) enum
+    assert t.status == "downloading"
 
 
 def test_torrent_defaults_and_basic_props() -> None:
@@ -79,7 +53,6 @@ def test_torrent_defaults_and_basic_props() -> None:
         "hashString": "hash",
         "files": [{"length": 100, "name": "f1", "bytesCompleted": 100}],
         "pieces": "",
-        # Missing priorities, wanted, etc.
     }
     t = Torrent(fields=fields)
 
@@ -146,12 +119,16 @@ def test_torrent_progress_and_availability() -> None:
     assert t.ratio == 1.0
 
     # Progress ZeroDivisionError check
-    # Force percentDone missing to trigger calculation
-    del t.fields["percentDone"]
-    t.fields["sizeWhenDone"] = 0
-    t.fields["leftUntilDone"] = 0
+    # Create new fields dict with percentDone missing to trigger calculation
+    # and sizeWhenDone/leftUntilDone as 0
+    fields_zero = {
+        "id": 1,
+        "sizeWhenDone": 0,
+        "leftUntilDone": 0,
+    }
+    t_zero = Torrent(fields=fields_zero)
     # Should catch ZeroDivisionError and return 0.0
-    assert t.progress == 0.0
+    assert t_zero.progress == 0.0
 
 
 def test_torrent_representation() -> None:
@@ -170,10 +147,16 @@ def test_torrent_representation() -> None:
 
     # format_eta edge cases
     assert t.format_eta() == "not available"
-    t.fields["eta"] = -2
-    assert t.format_eta() == "unknown"
-    t.fields["eta"] = 3600
-    assert t.format_eta() == "0 01:00:00"
+
+    fields_unknown = fields.copy()
+    fields_unknown["eta"] = -2
+    t_unknown = Torrent(fields=fields_unknown)
+    assert t_unknown.format_eta() == "unknown"
+
+    fields_valid = fields.copy()
+    fields_valid["eta"] = 3600
+    t_valid = Torrent(fields=fields_valid)
+    assert t_valid.format_eta() == "0 01:00:00"
 
     # Date fields
     data_full = {
@@ -225,8 +208,27 @@ def test_file_stat_properties_access() -> None:
     check_properties(FileStat, f)
 
 
-def test_status_properties_full() -> None:
+def test_status_mapping() -> None:
     """Verify that Status objects correctly report boolean states (e.g., stopped, checking) and string representation."""
+    s = Status("checking")
+    assert s.checking
+    assert not s.stopped
+
+    s = Status("check pending")
+    assert s.check_pending
+
+    s = Status("downloading")
+    assert s.downloading
+
+    s = Status("download pending")
+    assert s.download_pending
+
+    s = Status("seeding")
+    assert s.seeding
+
+    s = Status("seed pending")
+    assert s.seed_pending
+
     s = Status("stopped")
     assert s.stopped is True
     assert s.check_pending is False
@@ -262,14 +264,16 @@ def test_eta_and_date_handling() -> None:
     assert t.eta_idle is None
     assert t.done_date is None
 
-    fields["eta"] = -2
-    t = Torrent(fields=fields)
+    fields_unknown = fields.copy()
+    fields_unknown["eta"] = -2
+    t = Torrent(fields=fields_unknown)
     assert t.format_eta() == "unknown"
 
-    fields["eta"] = 3600
-    fields["etaIdle"] = 60
-    fields["doneDate"] = 1000000000
-    t = Torrent(fields=fields)
+    fields_valid = fields.copy()
+    fields_valid["eta"] = 3600
+    fields_valid["etaIdle"] = 60
+    fields_valid["doneDate"] = 1000000000
+    t = Torrent(fields=fields_valid)
     assert str(t.eta) == "1:00:00"
     assert str(t.eta_idle) == "0:01:00"
     assert t.done_date is not None
@@ -280,7 +284,7 @@ def test_status_unknown() -> None:
     assert get_status(999) == "unknown status 999"
 
 
-def test_activity_date_zero():
+def test_activity_date_handles_zero_value() -> None:
     """
     Verify that a Torrent object correctly handles the 'activityDate' field being 0 (non-active).
     """

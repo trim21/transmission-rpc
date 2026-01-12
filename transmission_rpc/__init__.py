@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+from typing import Any, cast
 
 from transmission_rpc.client import DEFAULT_TIMEOUT, Client
 from transmission_rpc.constants import LOGGER, IdleMode, Priority, RatioLimitMode
@@ -77,7 +78,7 @@ def from_url(
         raise ValueError(f"unknown url scheme {u.scheme}")
 
     return Client(
-        protocol=protocol,  # type: ignore
+        protocol=cast("Any", protocol),
         username=u.username,
         password=u.password,
         host=host or "127.0.0.1",
