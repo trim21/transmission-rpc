@@ -245,7 +245,10 @@ class Client:
                 raise TransmissionError("too much request, try enable logger to see what happened")
 
             headers = self.__get_headers()
-            self.logger.debug({"path": self._path, "headers": headers, "data": query, "timeout": timeout})
+            log_headers = headers.copy()
+            if "authorization" in log_headers:
+                log_headers["authorization"] = "******"
+            self.logger.debug({"path": self._path, "headers": log_headers, "data": query, "timeout": timeout})
 
             request_count += 1
             try:
