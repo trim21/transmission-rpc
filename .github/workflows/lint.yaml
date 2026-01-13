@@ -38,8 +38,6 @@ jobs:
         with:
           python-version: "3.x"
 
-      - run: pip install pre-commit
-
       - uses: trim21/actions/prek@master
 
   sphinx:
