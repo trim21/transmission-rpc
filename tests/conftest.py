@@ -3,6 +3,8 @@ import os
 import secrets
 import socket
 import time
+from collections.abc import Callable, Generator
+from typing import Literal, cast
 
 import pytest
 
@@ -16,7 +18,14 @@ USER = os.getenv("TR_USER", "admin")
 PASSWORD = os.getenv("TR_PASSWORD", "password")
 
 
-def pytest_configure():
+@pytest.fixture(scope="session")
+def wait_for_transmission() -> None:
+    """
+    Waits for the Transmission daemon to be available.
+
+    This fixture is session-scoped, so it runs once per test session,
+    but only if a test actually requests it (directly or indirectly).
+    """
     start = time.time()
     while True:
         with contextlib.suppress(ConnectionError, FileNotFoundError):
@@ -31,9 +40,17 @@ def pytest_configure():
 
 
 @pytest.fixture
-def tr_client():
+def tr_client(wait_for_transmission: None) -> Generator[Client, None, None]:
+    """
+    Provides a Client instance connected to the Transmission daemon.
+
+    This fixture cleans up torrents before and after the test.
+    It depends on 'wait_for_transmission' to ensure the daemon is reachable.
+    """
     LOGGER.setLevel("INFO")
-    with Client(protocol=PROTOCOL, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
+    # Cast PROTOCOL to the Literal type expected by Client
+    protocol_arg = cast("Literal['http', 'https', 'http+unix']", PROTOCOL)
+    with Client(protocol=protocol_arg, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
         yield c
@@ -42,5 +59,6 @@ def tr_client():
 
 
 @pytest.fixture
-def fake_hash_factory():
+def generate_random_hash() -> Callable[[], str]:
+    """Generates a random SHA1 hash string for testing."""
     return lambda: secrets.token_hex(20)

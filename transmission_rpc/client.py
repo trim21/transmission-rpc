@@ -33,7 +33,7 @@ from transmission_rpc.types import Group, PortTestResult
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
-except ImportError:
+except ImportError:  # pragma: no cover
     __version__ = "develop"
 
 __USER_AGENT__ = f"transmission-rpc/{__version__} (https://github.com/trim21/transmission-rpc)"
@@ -287,11 +287,11 @@ class Client:
         Send json-rpc request to Transmission using http POST
         """
         if not isinstance(method, str):
-            raise TypeError("request takes method as string")
+            raise TypeError("request takes method as string")  # pragma: no cover
         if arguments is None:
             arguments = {}
         if not isinstance(arguments, dict):
-            raise TypeError("request takes arguments should be dict")
+            raise TypeError("request takes arguments should be dict")  # pragma: no cover
 
         ids = _parse_torrent_ids(ids)
         if len(ids) > 0:
