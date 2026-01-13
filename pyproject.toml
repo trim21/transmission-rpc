@@ -36,10 +36,10 @@ Homepage = 'https://github.com/Trim21/transmission-rpc'
 [project.optional-dependencies]
 dev = [
     # tests
-    'yarl~=1.3',
+    'yarl~=1.22',
     'pytest==9.0.2',
     'pytest-github-actions-annotate-failures==0.3.0',
-    'coverage~=7.6',
+    'coverage~=7.13',
     # types
     'mypy==1.19.1; python_version >= "3.12"',
     # docs
@@ -50,6 +50,13 @@ dev = [
     'sphinx-github-style==1.2.2 ; python_version >= "3.12"',
     'sphinx-autobuild==2025.8.25; python_version >= "3.12"',
 ]
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
@@ -109,7 +116,7 @@ select = [
     "YTT",
     "UP",
     "FA100",
-    "FA102"
+    "FA102",
 ]
 extend-fixable = ['UP']
 ignore = [

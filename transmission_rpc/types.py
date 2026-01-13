@@ -7,6 +7,7 @@ from transmission_rpc.constants import Priority
 
 class Container:
     fields: dict[str, Any]  #: raw response data
+    __slots__ = ("fields",)
 
     def __init__(self, *, fields: dict[str, Any]):
         self.fields = fields
@@ -14,6 +15,9 @@ class Container:
     def get(self, key: str, default: Any | None = None) -> Any:
         """get the raw value by the **raw rpc response key**"""
         return self.fields.get(key, default)
+
+    def __repr__(self) -> str:
+        return f"<Container fields={self.fields!r}>"
 
 
 class File(NamedTuple):
@@ -46,6 +50,8 @@ class Group(Container):
     """
     https://github.com/transmission/transmission/blob/4.0.5/docs/rpc-spec.md#482-bandwidth-group-accessor-group-get
     """
+
+    __slots__ = ()
 
     @property
     def name(self) -> str:
@@ -84,6 +90,8 @@ class PortTestResult(Container):
 
     https://github.com/transmission/transmission/blob/5d159e0/docs/rpc-spec.md#44-port-checking
     """
+
+    __slots__ = ()
 
     @property
     def port_is_open(self) -> bool:

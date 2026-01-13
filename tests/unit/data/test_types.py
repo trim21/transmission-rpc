@@ -1,0 +1,125 @@
+import pytest
+
+from tests.util import check_properties
+from transmission_rpc.constants import Args, Type, get_torrent_arguments
+from transmission_rpc.error import TransmissionError
+from transmission_rpc.torrent import Peer, PeersFrom, Tracker, TrackerStats
+from transmission_rpc.types import BitMap, Container, Group, PortTestResult
+
+
+def test_container_repr() -> None:
+    """Verify that `Container.__repr__` returns the expected string format."""
+    c = Container(fields={"key": "value"})
+    assert repr(c) == "<Container fields={'key': 'value'}>"
+
+
+def test_peer_properties_access() -> None:
+    """Verify that all properties of the `Peer` class can be accessed without error."""
+    p = Peer(fields={})
+    check_properties(Peer, p)
+
+
+def test_peers_from_properties_access() -> None:
+    """Verify that all properties of the `PeersFrom` class can be accessed without error."""
+    p = PeersFrom(fields={})
+    check_properties(PeersFrom, p)
+
+
+def test_tracker_properties_access() -> None:
+    """Verify that all properties of the `Tracker` class can be accessed without error."""
+    t = Tracker(fields={})
+    check_properties(Tracker, t)
+
+
+def test_tracker_stats_properties_access() -> None:
+    """Verify that all properties of the `TrackerStats` class can be accessed without error."""
+    t = TrackerStats(fields={})
+    check_properties(TrackerStats, t)
+
+
+def test_group_properties() -> None:
+    """
+    Verify that the `Group` class correctly maps fields to properties.
+    """
+    fields = {
+        "name": "g1",
+        "honorsSessionLimits": True,
+        "speed-limit-down-enabled": False,
+        "speed-limit-down": 100,
+        "speed-limit-up-enabled": False,
+        "speed-limit-up": 100,
+    }
+    g = Group(fields=fields)
+    assert g.name == "g1"
+    assert g.honors_session_limits is True
+    assert g.speed_limit_down_enabled is False
+    assert g.speed_limit_down == 100
+    assert g.speed_limit_up_enabled is False
+    assert g.speed_limit_up == 100
+
+
+def test_port_test_result_properties() -> None:
+    """
+    Verify that the `PortTestResult` class correctly maps fields to properties.
+    """
+    fields = {"port-is-open": True, "ip_protocol": "ipv4"}
+    r = PortTestResult(fields=fields)
+    assert r.port_is_open is True
+    assert r.ip_protocol == "ipv4"
+
+
+def test_bitmap() -> None:
+    """
+    Verify that `BitMap` correctly interprets bytes as a sequence of boolean flags.
+    """
+    # 1 byte: 10101010 -> 0xAA.
+    # Index 0 is MSB.
+    # 0xAA = 170.
+    # 10101010
+    # 0: True, 1: False, 2: True, 3: False...
+    b = BitMap(b"\xaa")
+    assert b.get(0) is True
+    assert b.get(1) is False
+    assert b.get(7) is False
+    assert b.get(8) is False  # out of bounds
+
+
+def test_args_repr_str() -> None:
+    """
+    Verify `Args.__repr__` and `Args.__str__` output formats.
+    """
+    arg = Args(Type.number, 1, description="desc")
+    assert repr(arg) == "Args('number', 1, None, None, None, 'desc')"
+    assert str(arg) == "Args<type=number, 1, description='desc')"
+
+
+def test_get_torrent_arguments() -> None:
+    """
+    Verify that `get_torrent_arguments` returns the expected set of arguments for a given RPC version.
+    """
+    args = get_torrent_arguments(1)
+    assert "id" in args
+    assert "group" not in args  # added in 17
+
+
+def test_error_str_with_original() -> None:
+    """
+    Verify that `TransmissionError` correctly formats its string representation when wrapping another exception.
+    """
+
+    class MockError(Exception):
+        def __str__(self) -> str:
+            return "original error"
+
+    original = MockError()
+    err = TransmissionError("message", original=original)
+    assert str(err) == 'message Original exception: MockError, "original error"'
+
+
+def test_deprecated_raw_response() -> None:
+    """
+    Verify that accessing the deprecated `rawResponse` attribute of `TransmissionError` emits a warning.
+    """
+    err = TransmissionError("message", raw_response="raw")
+    with pytest.warns(DeprecationWarning, match="use .raw_response instead"):
+        assert err.rawResponse == "raw"
