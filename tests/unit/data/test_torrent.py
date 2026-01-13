@@ -173,6 +173,9 @@ def test_torrent_representation() -> None:
         "addedDate": calendar.timegm((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
         "startDate": calendar.timegm((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
         "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
+        "dateCreated": calendar.timegm((2008, 12, 11, 7, 0, 0, 0, 0, -1)),
+        "availability": [1, 1, 0, -1],
+        "priorities": [1, 0, -1],
     }
 
     torrent_dates = transmission_rpc.Torrent(fields=data_full)
@@ -181,7 +184,13 @@ def test_torrent_representation() -> None:
     assert torrent_dates.added_date == datetime.datetime(2008, 12, 11, 8, 5, 10, tzinfo=datetime.timezone.utc)
     assert torrent_dates.start_date == datetime.datetime(2008, 12, 11, 9, 10, 5, tzinfo=datetime.timezone.utc)
     assert torrent_dates.done_date == datetime.datetime(2008, 12, 11, 10, 0, 15, tzinfo=datetime.timezone.utc)
-    assert torrent_dates.format_eta() == transmission_rpc.utils.format_timedelta(torrent_dates.eta)
+    assert torrent_dates.date_created == datetime.datetime(2008, 12, 11, 7, 0, 0, tzinfo=datetime.timezone.utc)
+    assert torrent_dates.availability == [1, 1, 0, -1]
+    assert torrent_dates.priorities == [
+        transmission_rpc.constants.Priority.High,
+        transmission_rpc.constants.Priority.Normal,
+        transmission_rpc.constants.Priority.Low,
+    ]
 
     # Zero date check
     data_zero_date = {
