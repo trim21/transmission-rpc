@@ -513,6 +513,7 @@ class Torrent(Container):
 
     @property
     def eta_idle(self) -> timedelta | None:
+        """If seeding, number of seconds left until the idle time limit is reached."""
         v = self.fields["etaIdle"]
         if v >= 0:
             return timedelta(seconds=v)
@@ -724,10 +725,12 @@ class Torrent(Container):
 
     @property
     def seconds_downloading(self) -> int:
+        """Cumulative seconds the torrent's ever spent downloading"""
         return self.fields["secondsDownloading"]
 
     @property
     def seconds_seeding(self) -> int:
+        """Cumulative seconds the torrent's ever spent seeding"""
         return self.fields["secondsSeeding"]
 
     @property
@@ -747,6 +750,7 @@ class Torrent(Container):
 
     @property
     def size_when_done(self) -> int:
+        """byte count of all the wanted data"""
         return self.fields["sizeWhenDone"]
 
     @property
