@@ -425,6 +425,7 @@ class Client:
         labels: Iterable[str] | None = None,
         bandwidthPriority: int | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -469,11 +470,17 @@ class Client:
             sequential_download:
                 download torrent pieces sequentially.
                 Add in rpc 18.
+            sequential_download_from_piece:
+                download from a specific piece when sequential download is enabled.
+                Add in rpc 18.
         """
         if labels is not None:
             self._rpc_version_warning(17)
 
         if sequential_download is not None:
+            self._rpc_version_warning(18)
+
+        if sequential_download_from_piece is not None:
             self._rpc_version_warning(18)
 
         kwargs: dict[str, Any] = remove_unset_value(
@@ -488,6 +495,7 @@ class Client:
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
                 "cookies": cookies,
                 "labels": list_or_none(_single_str_as_list(labels)),
             }
@@ -673,6 +681,7 @@ class Client:
         group: str | None = None,
         tracker_list: Iterable[Iterable[str]] | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
         tracker_add: Iterable[str] | None = None,
         tracker_replace: Iterable[tuple[int, str]] | None = None,
         tracker_remove: Iterable[int] | None = None,
@@ -714,6 +723,9 @@ class Client:
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
             sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
+
+            sequential_download_from_piece: download from a specific piece when sequential download is enabled.
+                Add in Transmission 4.1.0, rpc-version 18.
 
             tracker_add: Array of string with announce URLs to add.
                 **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
@@ -768,6 +780,7 @@ class Client:
                 "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
                 "group": group,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
             }
         )
 
@@ -884,12 +897,13 @@ class Client:
         blocklist_enabled: bool | None = None,
         blocklist_url: str | None = None,
         cache_size_mb: int | None = None,
+        cache_size_mib: int | None = None,
         dht_enabled: bool | None = None,
         default_trackers: Iterable[str] | None = None,
         download_dir: str | None = None,
         download_queue_enabled: bool | None = None,
         download_queue_size: int | None = None,
-        encryption: Literal["required", "preferred", "tolerated"] | None = None,
+        encryption: Literal["required", "preferred", "tolerated", "allowed"] | None = None,
         idle_seeding_limit: int | None = None,
         idle_seeding_limit_enabled: bool | None = None,
         incomplete_dir: str | None = None,
@@ -901,6 +915,7 @@ class Client:
         peer_port_random_on_start: bool | None = None,
         pex_enabled: bool | None = None,
         port_forwarding_enabled: bool | None = None,
+        preferred_transports: list[str] | None = None,
         queue_stalled_enabled: bool | None = None,
         queue_stalled_minutes: int | None = None,
         rename_partial_files: bool | None = None,
@@ -910,6 +925,7 @@ class Client:
         seed_queue_size: int | None = None,
         seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
+        sequential_download: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,
         speed_limit_up: int | None = None,
@@ -948,7 +964,11 @@ class Client:
             blocklist_url:
                 Location of the block list. Updated with blocklist-update.
             cache_size_mb:
-                The maximum size of the disk cache in MB
+                The maximum size of the disk cache in MB.
+                Renamed to ``cache_size_mib`` in Transmission 4.1.0.
+            cache_size_mib:
+                The maximum size of the disk cache in MiB.
+                Added in Transmission 4.1.0 (rpc-version 18).
             default_trackers:
                 list of default trackers to use on public torrents.
             dht_enabled:
@@ -960,7 +980,8 @@ class Client:
             download_queue_size:
                 Number of slots in the download queue.
             encryption:
-                Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
+                Set the session encryption mode, one of ``required``, ``preferred``, ``tolerated``, or ``allowed``.
+                Note: ``allowed`` replaces ``tolerated`` in Transmission 4.1.0.
             idle_seeding_limit:
                 The default seed inactivity limit in minutes.
             idle_seeding_limit_enabled:
@@ -984,6 +1005,9 @@ class Client:
                 Allowing PEX in public torrents.
             port_forwarding_enabled:
                 Enables port forwarding.
+            preferred_transports:
+                Preference of transport protocols. Added in Transmission 4.1.0 (rpc-version 18).
+                Replaces the deprecated ``utp_enabled`` field.
             queue_stalled_enabled:
                 Enable tracking of stalled transfers.
             queue_stalled_minutes:
@@ -999,6 +1023,9 @@ class Client:
                 Seed ratio limit. 1.0 means 1:1 download and upload ratio.
             seed_ratio_limited:
                 Enables seed ration limit.
+            sequential_download:
+                true means sequential download is enabled by default for added torrents.
+                Added in Transmission 4.1.0 (rpc-version 18).
             speed_limit_down:
                 Download speed limit (in Kib/s).
             speed_limit_down_enabled:
@@ -1031,7 +1058,7 @@ class Client:
             transmission-rpc will merge ``kwargs`` in rpc arguments **as-is**
         """
 
-        if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:
+        if encryption is not None and encryption not in ["required", "preferred", "tolerated", "allowed"]:
             raise ValueError("Invalid encryption value")
 
         if default_trackers is not None:
@@ -1044,6 +1071,12 @@ class Client:
             self._rpc_version_warning(17)
         if script_torrent_added_filename is not None:
             self._rpc_version_warning(17)
+        if preferred_transports is not None:
+            self._rpc_version_warning(18)
+        if sequential_download is not None:
+            self._rpc_version_warning(18)
+        if cache_size_mib is not None:
+            self._rpc_version_warning(18)
 
         args: dict[str, Any] = remove_unset_value(
             {
@@ -1057,6 +1090,7 @@ class Client:
                 "blocklist-enabled": blocklist_enabled,
                 "blocklist-url": blocklist_url,
                 "cache-size-mb": cache_size_mb,
+                "cache-size-mib": cache_size_mib,
                 "dht-enabled": dht_enabled,
                 "download-dir": download_dir,
                 "download-queue-enabled": download_queue_enabled,
@@ -1072,6 +1106,7 @@ class Client:
                 "peer-port": peer_port,
                 "pex-enabled": pex_enabled,
                 "port-forwarding-enabled": port_forwarding_enabled,
+                "preferred-transports": preferred_transports,
                 "queue-stalled-enabled": queue_stalled_enabled,
                 "queue-stalled-minutes": queue_stalled_minutes,
                 "rename-partial-files": rename_partial_files,
@@ -1081,6 +1116,7 @@ class Client:
                 "seed-queue-size": seed_queue_size,
                 "seedRatioLimit": seed_ratio_limit,
                 "seedRatioLimited": seed_ratio_limited,
+                "sequential-download": sequential_download,
                 "speed-limit-down": speed_limit_down,
                 "speed-limit-down-enabled": speed_limit_down_enabled,
                 "speed-limit-up": speed_limit_up,

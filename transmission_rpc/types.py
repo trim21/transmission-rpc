@@ -128,3 +128,28 @@ class BitMap:
             return bool(self.__value[index // 8] & (1 << (7 - (index % 8))))
         except IndexError:
             return False
+
+
+class WebseedEx(Container):
+    """
+    type for :py:attr:`Torrent.webseeds_ex`
+
+    Added in Transmission 4.2.0 (rpc-version 19).
+    """
+
+    __slots__ = ()
+
+    @property
+    def url(self) -> str:
+        """URL of the webseed."""
+        return self.fields["url"]
+
+    @property
+    def is_downloading(self) -> bool:
+        """True if the webseed is currently downloading."""
+        return self.fields["is_downloading"]
+
+    @property
+    def download_bytes_per_second(self) -> int:
+        """Download rate in bytes per second."""
+        return self.fields["download_bytes_per_second"]

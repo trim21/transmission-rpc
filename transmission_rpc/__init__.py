@@ -12,7 +12,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats, Stats
 from transmission_rpc.torrent import FileStat, Status, Torrent, Tracker, TrackerStats
-from transmission_rpc.types import File, Group, PortTestResult
+from transmission_rpc.types import File, Group, PortTestResult, WebseedEx
 
 __all__ = [
     "DEFAULT_TIMEOUT",
@@ -36,6 +36,7 @@ __all__ = [
     "TransmissionConnectError",
     "TransmissionError",
     "TransmissionTimeoutError",
+    "WebseedEx",
     "from_url",
 ]
 
