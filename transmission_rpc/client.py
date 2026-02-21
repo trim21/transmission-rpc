@@ -29,7 +29,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group, PortTestResult
+from transmission_rpc.types import Group, PortTestResult, _FieldDict, _to_snake
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
@@ -157,12 +157,14 @@ class Client:
         self._url = str(url)
         self._path = path
 
-        self.__raw_session: dict[str, Any] = {}
+        self.__raw_session: _FieldDict = _FieldDict()
         self.__session_id = "0"
 
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
         self.__semver_version = None
+        self.__use_jsonrpc2: bool = False
+        self.__request_id_counter: int = 0
 
         common_args: dict[str, Any] = {"host": host, "timeout": self.timeout, "retries": False}
         if protocol == "http":
@@ -231,9 +233,12 @@ class Client:
 
         return self.__auth_headers
 
-    def _http_query(self, query: dict[str, Any], timeout: _Timeout | None = None) -> str:
+    def _http_query(self, method: RpcMethod, arguments: dict[str, Any], timeout: _Timeout | None = None) -> str:
         """
-        Query Transmission through HTTP.
+        Build a query and send it to Transmission via HTTP, handling CSRF and protocol detection.
+
+        The query format (old bespoke protocol vs JSON-RPC 2.0) is determined per-iteration
+        so that a protocol switch detected from a CSRF 409 header takes effect on the retry.
         """
         request_count = 0
 
@@ -243,6 +248,24 @@ class Client:
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
+
+            # Build the query in the current protocol format.  Re-built on every
+            # iteration so that a mid-loop protocol switch (from the 409 header) is
+            # reflected in the retry without an extra round-trip.
+            if self.__use_jsonrpc2:
+                self.__request_id_counter += 1
+                snake_method = method.replace("-", "_")
+                snake_args: dict[str, Any] = {_to_snake(k): v for k, v in arguments.items()}
+                if "fields" in snake_args:
+                    snake_args["fields"] = [_to_snake(f) for f in snake_args["fields"]]
+                query: dict[str, Any] = {
+                    "jsonrpc": "2.0",
+                    "method": snake_method,
+                    "params": snake_args,
+                    "id": self.__request_id_counter,
+                }
+            else:
+                query = {"method": method, "arguments": arguments}
 
             headers = self.__get_headers()
             log_headers = headers.copy()
@@ -272,6 +295,22 @@ class Client:
             if _header_session_id_key in r.headers:
                 self.__session_id = r.headers[_header_session_id_key]
 
+            # Detect JSON-RPC 2.0 support from the Transmission-specific header
+            # present in the CSRF 409 response (available from rpc-version-semver 6.0.0).
+            # Setting the flag here means the *next* loop iteration builds the query in
+            # the new format, so the actual retry goes out in JSON-RPC 2.0 form.
+            if r.status == 409 and not self.__use_jsonrpc2:
+                rpc_ver_header = r.headers.get("x-transmission-rpc-version", "")
+                if rpc_ver_header:
+                    try:
+                        major = int(rpc_ver_header.split(".")[0])
+                        if major >= 6:
+                            self.__use_jsonrpc2 = True
+                    except (ValueError, IndexError):
+                        self.logger.debug(
+                            "Could not parse X-Transmission-Rpc-Version header: %r", rpc_ver_header
+                        )
+
             if r.status != 409:
                 return r.data.decode("utf-8")
 
@@ -299,11 +338,9 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = {"method": method, "arguments": arguments}
-
         start = time.monotonic()
         try:
-            http_data = self._http_query(query, timeout)
+            http_data = self._http_query(method, arguments, timeout)
         finally:
             elapsed = time.monotonic() - start
             self.logger.debug("http request took %.3f s", elapsed)
@@ -312,7 +349,7 @@ class Client:
             data: ResponseData = json.loads(http_data)
         except json.JSONDecodeError as error:
             self.logger.exception("Error:")
-            self.logger.exception('Request: "%s"', query)
+            self.logger.exception('Request: method=%s arguments=%s', method, arguments)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
                 "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
@@ -321,25 +358,39 @@ class Client:
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(json.dumps(data, indent=2))
 
-        if "result" not in data:
-            raise TransmissionError(
-                "Query failed, response data missing without result.",
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
+        if self.__use_jsonrpc2:
+            # JSON-RPC 2.0: errors are in "error", data is in "result"
+            if "error" in data:
+                err = data["error"]
+                raise TransmissionError(
+                    err.get("message", "unknown error"),
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
+            res = _FieldDict(data.get("result") or {})
+        else:
+            # Legacy bespoke protocol: status in "result" string, data in "arguments"
+            if "result" not in data:
+                raise TransmissionError(
+                    "Query failed, response data missing without result.",
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
 
-        if data["result"] != "success":
-            raise TransmissionError(
-                f'Query failed with result "{data["result"]}".',
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
+            if data["result"] != "success":
+                raise TransmissionError(
+                    f'Query failed with result "{data["result"]}".',
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
 
-        res = data["arguments"]
+            res = _FieldDict(data.get("arguments") or {})
 
         if method == RpcMethod.TorrentGet:
             return res
@@ -376,6 +427,8 @@ class Client:
         self.__semver_version = self.__raw_session.get("rpc-version-semver")
         self.__server_version = self.__raw_session["version"]
         self.__protocol_version = self.__raw_session["rpc-version"]
+        # Enable JSON-RPC 2.0 for Transmission 4.1.0+ (rpc-version-semver >= 6.0.0 / rpc-version >= 18)
+        self.__use_jsonrpc2 = self.__protocol_version >= 18
 
     @property
     @deprecated("use .get_session().rpc_version_semver instead")
