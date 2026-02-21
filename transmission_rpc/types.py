@@ -1,16 +1,68 @@
 from __future__ import annotations
 
+import re
 from typing import Any, NamedTuple
 
 from transmission_rpc.constants import Priority
 
+_RE_CAMEL1 = re.compile(r"(.)([A-Z][a-z]+)")
+_RE_CAMEL2 = re.compile(r"([a-z0-9])([A-Z])")
+
+
+def _to_snake(name: str) -> str:
+    """Convert camelCase or kebab-case to snake_case.
+
+    Examples::
+
+        _to_snake("hashString")         -> "hash_string"
+        _to_snake("file-count")         -> "file_count"
+        _to_snake("trackerStats")       -> "tracker_stats"
+        _to_snake("peersGettingFromUs") -> "peers_getting_from_us"
+    """
+    name = name.replace("-", "_")
+    name = _RE_CAMEL1.sub(r"\1_\2", name)
+    return _RE_CAMEL2.sub(r"\1_\2", name).lower()
+
+
+class _FieldDict(dict):  # type: ignore[type-arg]
+    """A ``dict`` subclass that transparently falls back to snake_case key lookup.
+
+    When a key is not found, the lookup is retried with the snake_case equivalent of
+    the key.  This lets all existing property accessors that use camelCase or
+    kebab-case keys work seamlessly with JSON-RPC 2.0 responses, which use snake_case
+    field names.
+
+    Example: accessor uses ``self.fields["hashString"]``; if the response contained
+    ``hash_string`` (JSON-RPC 2.0), the dict transparently returns the right value.
+    """
+
+    def __missing__(self, key: str) -> Any:
+        snake = _to_snake(key)
+        if snake != key and snake in self:
+            return self[snake]
+        raise KeyError(key)
+
+    def __contains__(self, key: object) -> bool:
+        if super().__contains__(key):
+            return True
+        if isinstance(key, str):
+            snake = _to_snake(key)
+            return snake != key and super().__contains__(snake)
+        return False
+
+    def get(self, key: str, default: Any = None) -> Any:  # type: ignore[override]
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
 
 class Container:
-    fields: dict[str, Any]  #: raw response data
+    fields: _FieldDict  #: raw response data
     __slots__ = ("fields",)
 
     def __init__(self, *, fields: dict[str, Any]):
-        self.fields = fields
+        self.fields = _FieldDict(fields)
 
     def get(self, key: str, default: Any | None = None) -> Any:
         """get the raw value by the **raw rpc response key**"""
@@ -128,3 +180,28 @@ class BitMap:
             return bool(self.__value[index // 8] & (1 << (7 - (index % 8))))
         except IndexError:
             return False
+
+
+class WebseedEx(Container):
+    """
+    type for :py:attr:`Torrent.webseeds_ex`
+
+    Added in Transmission 4.2.0 (rpc-version 19).
+    """
+
+    __slots__ = ()
+
+    @property
+    def url(self) -> str:
+        """URL of the webseed."""
+        return self.fields["url"]
+
+    @property
+    def is_downloading(self) -> bool:
+        """True if the webseed is currently downloading."""
+        return self.fields["is_downloading"]
+
+    @property
+    def download_bytes_per_second(self) -> int:
+        """Download rate in bytes per second."""
+        return self.fields["download_bytes_per_second"]
