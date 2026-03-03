@@ -6,6 +6,7 @@ Torrent
 
 .. autoclass:: Torrent
     :members:
+    :undoc-members:
 
 .. autoclass:: Status
     :members:
