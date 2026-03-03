@@ -67,4 +67,4 @@ jobs:
 
       - run: uv pip install -r pyproject.toml --extra dev --system
 
-      - uses: jakebailey/pyright-action@v2
+      - uses: jakebailey/pyright-action@v3
