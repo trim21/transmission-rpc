@@ -38,7 +38,7 @@ dev = [
     # tests
     'yarl~=1.22',
     'pytest==9.0.2',
-    'pytest-github-actions-annotate-failures==0.3.0',
+    'pytest-github-actions-annotate-failures==0.4.0',
     'coverage~=7.13',
     # types
     'mypy==1.19.1; python_version >= "3.12"',
