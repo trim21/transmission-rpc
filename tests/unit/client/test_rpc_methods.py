@@ -5,6 +5,29 @@ from unittest import mock
 import pytest
 
 from transmission_rpc.client import Client
+from transmission_rpc.error import TransmissionError
+
+
+def _jsonrpc2_response(data: dict[str, Any] | None = None, *, req_id: int = 1) -> mock.Mock:
+    """Helper: build a JSON-RPC 2.0 success response mock."""
+    return mock.Mock(
+        status=200,
+        headers={"x-transmission-session-id": "sess"},
+        data=json.dumps({"jsonrpc": "2.0", "result": data or {}, "id": req_id}).encode(),
+    )
+
+
+def _jsonrpc2_init_response() -> mock.Mock:
+    """Helper: build the session-get bootstrap response for a Transmission 4.1.0 server."""
+    # The first request always uses the old protocol; the server still answers it.
+    return mock.Mock(
+        status=200,
+        headers={"x-transmission-session-id": "sess"},
+        data=json.dumps({
+            "result": "success",
+            "arguments": {"rpc-version": 18, "rpc-version-semver": "6.0.0", "version": "4.1.0"},
+        }).encode(),
+    )
 
 
 def test_start_all_bypass_queue(mock_network: Any, success_response: Any) -> None:
@@ -335,3 +358,145 @@ def test_session_stats_modern(mock_network: Any, success_response: Any) -> None:
     c = Client()
     stats = c.session_stats()
     assert stats.active_torrent_count == 5
+
+
+# ---------------------------------------------------------------------------
+# JSON-RPC 2.0 protocol tests
+# ---------------------------------------------------------------------------
+
+
+def test_jsonrpc2_request_format_for_transmission_4_1() -> None:
+    """
+    Verify that the client automatically uses JSON-RPC 2.0 format (snake_case method
+    name, ``params`` key, ``jsonrpc`` field) for Transmission 4.1.0+ servers.
+    """
+    with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
+        # Bootstrap: old-protocol response for the mandatory session-get in __init__
+        mock_req.side_effect = [
+            _jsonrpc2_init_response(),
+            _jsonrpc2_response({"torrents": []}),
+        ]
+        c = Client()
+        assert c._Client__use_jsonrpc2 is True  # type: ignore[attr-defined]
+        c.get_torrents(arguments=["id", "hashString", "name"])
+
+        sent = mock_req.call_args[1]["json"]
+        assert sent.get("jsonrpc") == "2.0"
+        assert sent.get("method") == "torrent_get", f"Expected snake_case method, got: {sent}"
+        assert "params" in sent, "JSON-RPC 2.0 must use 'params', not 'arguments'"
+        assert "hash_string" in sent["params"]["fields"], "Field names must be snake_case in JSON-RPC 2.0"
+
+
+def test_jsonrpc2_old_protocol_unchanged_for_legacy_server(
+    mock_network: Any, success_response: Any
+) -> None:
+    """
+    Verify that the client continues to use the old bespoke protocol for servers
+    with rpc-version < 18 (Transmission < 4.1.0).
+    """
+    mock_network.side_effect = [success_response(), success_response({"torrents": []})]
+    c = Client()
+    assert c._Client__use_jsonrpc2 is False  # type: ignore[attr-defined]
+    c.get_torrents(arguments=["id", "hashString"])
+
+    sent = mock_network.call_args[1]["json"]
+    assert "jsonrpc" not in sent, "Old protocol must NOT include 'jsonrpc'"
+    assert sent.get("method") == "torrent-get", "Old protocol must use hyphenated method names"
+    assert "arguments" in sent, "Old protocol must use 'arguments', not 'params'"
+
+
+def test_jsonrpc2_response_parsed_correctly() -> None:
+    """
+    Verify that a JSON-RPC 2.0 torrent response with snake_case field names is
+    returned correctly and accessible via both snake_case and camelCase property names.
+    """
+    with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
+        mock_req.side_effect = [
+            _jsonrpc2_init_response(),
+            _jsonrpc2_response({"torrents": [{"id": 1, "hash_string": "abc" * 14, "name": "T"}]}),
+        ]
+        c = Client()
+        torrents = c.get_torrents(arguments=["id", "hashString", "name"])
+
+        assert len(torrents) == 1
+        t = torrents[0]
+        # The snake_case key from the JSON-RPC 2.0 response must be accessible via
+        # the camelCase property accessor through _FieldDict key normalisation.
+        assert t.fields.get("hash_string") == "abc" * 14
+        assert t.name == "T"
+
+
+def test_jsonrpc2_error_response_raises_transmission_error() -> None:
+    """
+    Verify that a JSON-RPC 2.0 error response (``"error"`` key) is translated into
+    a ``TransmissionError`` whose message matches the server-provided text.
+    """
+    with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
+        error_resp = mock.Mock(
+            status=200,
+            headers={"x-transmission-session-id": "sess"},
+            data=json.dumps({
+                "jsonrpc": "2.0",
+                "error": {"code": -32600, "message": "Invalid params"},
+                "id": 2,
+            }).encode(),
+        )
+        mock_req.side_effect = [_jsonrpc2_init_response(), error_resp]
+        c = Client()
+        with pytest.raises(TransmissionError, match="Invalid params"):
+            c.get_torrents()
+
+
+def test_jsonrpc2_torrent_add_snake_case_response() -> None:
+    """
+    Verify that a JSON-RPC 2.0 ``torrent_add`` response that uses ``torrent_added``
+    (snake_case) is handled correctly and returns a valid ``Torrent`` object.
+    """
+    with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
+        add_resp = _jsonrpc2_response(
+            {"torrent_added": {"id": 42, "hash_string": "abc" * 14, "name": "New"}}
+        )
+        mock_req.side_effect = [_jsonrpc2_init_response(), add_resp]
+        c = Client()
+        t = c.add_torrent("magnet:?xt=urn:btih:abc")
+        assert t.id == 42
+        assert t.name == "New"
+
+
+def test_jsonrpc2_409_header_detection_switches_protocol() -> None:
+    """
+    Verify that the ``X-Transmission-Rpc-Version`` header in a CSRF 409 response
+    is used to detect JSON-RPC 2.0 support, and that the *retry* of that same
+    request is sent in JSON-RPC 2.0 format (not the old bespoke format).
+    """
+    response_409 = mock.Mock(
+        status=409,
+        headers={
+            "x-transmission-session-id": "new_sess",
+            "x-transmission-rpc-version": "6.0.0",
+        },
+        data=b"",
+    )
+    # The retry after 409 uses JSON-RPC 2.0; server echoes the new protocol back.
+    response_ok = mock.Mock(
+        status=200,
+        headers={"x-transmission-session-id": "new_sess"},
+        data=json.dumps({
+            "jsonrpc": "2.0",
+            "result": {"rpc_version": 18, "rpc_version_semver": "6.0.0", "version": "4.1.0"},
+            "id": 1,
+        }).encode(),
+    )
+
+    with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
+        mock_req.side_effect = [response_409, response_ok]
+        c = Client()
+
+        # The flag must have been set during 409 processing.
+        assert c._Client__use_jsonrpc2 is True  # type: ignore[attr-defined]
+
+        # The *second* HTTP call (the retry after 409) must be in JSON-RPC 2.0 format.
+        retry_call = mock_req.call_args_list[1]
+        sent = retry_call[1]["json"]
+        assert sent.get("jsonrpc") == "2.0", f"Retry after 409 must use JSON-RPC 2.0, got: {sent}"
+        assert sent.get("method") == "session_get", f"Method must be snake_case: {sent}"
