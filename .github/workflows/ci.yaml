@@ -48,7 +48,7 @@ jobs:
           TR_USER: admin
           TR_PASSWORD: my-secret-password
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           flags: "${{ matrix.python }}"
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -73,7 +73,7 @@ jobs:
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           flags: "unix-socket"
           token: ${{ secrets.CODECOV_TOKEN }}
