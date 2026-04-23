@@ -4,7 +4,7 @@ from tests.util import check_properties
 from transmission_rpc.constants import Args, Type, get_torrent_arguments
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.torrent import Peer, PeersFrom, Tracker, TrackerStats
-from transmission_rpc.types import BitMap, Container, Group, PortTestResult
+from transmission_rpc.types import BitMap, Container, Group, PortTestResult, _FieldDict, _to_snake
 
 
 def test_container_repr() -> None:
@@ -123,3 +123,86 @@ def test_deprecated_raw_response() -> None:
     err = TransmissionError("message", raw_response="raw")
     with pytest.warns(DeprecationWarning, match="use .raw_response instead"):
         assert err.rawResponse == "raw"
+
+
+# ---------------------------------------------------------------------------
+# _to_snake and _FieldDict tests
+# ---------------------------------------------------------------------------
+
+
+def test_to_snake_camel_case() -> None:
+    """Verify camelCase is correctly converted to snake_case."""
+    assert _to_snake("hashString") == "hash_string"
+    assert _to_snake("downloadDir") == "download_dir"
+    assert _to_snake("trackerStats") == "tracker_stats"
+    assert _to_snake("peersGettingFromUs") == "peers_getting_from_us"
+    assert _to_snake("isUTP") == "is_utp"
+    assert _to_snake("seedRatioLimit") == "seed_ratio_limit"
+    assert _to_snake("bandwidthPriority") == "bandwidth_priority"
+    assert _to_snake("webseedsSendingToUs") == "webseeds_sending_to_us"
+    assert _to_snake("rateToClient") == "rate_to_client"
+
+
+def test_to_snake_kebab_case() -> None:
+    """Verify kebab-case is correctly converted to snake_case."""
+    assert _to_snake("file-count") == "file_count"
+    assert _to_snake("peer-limit") == "peer_limit"
+    assert _to_snake("alt-speed-down") == "alt_speed_down"
+    assert _to_snake("rpc-version-semver") == "rpc_version_semver"
+    assert _to_snake("speed-limit-down-enabled") == "speed_limit_down_enabled"
+
+
+def test_to_snake_already_snake() -> None:
+    """Verify that already-snake_case strings are not changed."""
+    assert _to_snake("sequential_download") == "sequential_download"
+    assert _to_snake("hash_string") == "hash_string"
+    assert _to_snake("id") == "id"
+    assert _to_snake("name") == "name"
+
+
+def test_field_dict_camel_fallback() -> None:
+    """Verify _FieldDict falls back to snake_case lookup for camelCase keys."""
+    d = _FieldDict({"hash_string": "abc", "download_dir": "/tmp", "file_count": 5})
+    assert d["hashString"] == "abc"
+    assert d["downloadDir"] == "/tmp"
+    assert d["file-count"] == 5  # kebab → snake
+
+
+def test_field_dict_direct_hit() -> None:
+    """Verify _FieldDict returns values directly when the key is already present."""
+    d = _FieldDict({"hashString": "abc", "download_dir": "/tmp"})
+    assert d["hashString"] == "abc"  # exact hit
+    assert d["download_dir"] == "/tmp"  # exact hit
+
+
+def test_field_dict_missing_key_raises() -> None:
+    """Verify _FieldDict raises KeyError for truly absent keys."""
+    d = _FieldDict({"name": "test"})
+    with pytest.raises(KeyError):
+        _ = d["nonexistent"]
+
+
+def test_field_dict_contains() -> None:
+    """Verify __contains__ also uses snake_case fallback."""
+    d = _FieldDict({"hash_string": "abc"})
+    assert "hashString" in d  # camelCase lookup of snake_case key
+    assert "hash_string" in d  # direct lookup
+    assert "missing" not in d
+
+
+def test_field_dict_get() -> None:
+    """Verify .get() uses snake_case fallback and returns default for missing keys."""
+    d = _FieldDict({"tracker_stats": []})
+    assert d.get("trackerStats") == []  # camelCase → snake_case
+    assert d.get("missing", 42) == 42
+
+
+def test_container_uses_field_dict() -> None:
+    """Verify Container wraps fields in _FieldDict so snake_case responses work."""
+    # Simulate a JSON-RPC 2.0 response with snake_case keys
+    c = Container(fields={"hash_string": "deadbeef", "download_dir": "/var/data"})
+    # Property accessors use camelCase / kebab; _FieldDict makes them find snake_case
+    assert c.fields["hashString"] == "deadbeef"
+    assert c.fields["downloadDir"] == "/var/data"
+    assert c.get("hashString") == "deadbeef"
+    assert c.get("missing_key", "default") == "default"

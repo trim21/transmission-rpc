@@ -121,6 +121,11 @@ class Session(Container):
         return self.fields["alt-speed-down"]
 
     @property
+    def anti_brute_force_enabled(self) -> bool:
+        """True means to enable a basic brute force protection for RPC server."""
+        return self.fields["anti-brute-force-enabled"]
+
+    @property
     def alt_speed_enabled(self) -> bool:
         # true means use the alt speeds
         return self.fields["alt-speed-enabled"]
@@ -169,6 +174,14 @@ class Session(Container):
     def cache_size_mb(self) -> int:
         """maximum size of the disk cache (MB)"""
         return self.fields["cache-size-mb"]
+
+    @property
+    def cache_size_mib(self) -> int:
+        """maximum size of the disk cache (MiB).
+
+        Renamed from ``cache_size_mb`` in Transmission 4.1.0 (rpc-version 18).
+        """
+        return self.fields.get("cache-size-mib") or self.fields["cache-size-mb"]
 
     @property
     def config_dir(self) -> str:
@@ -260,6 +273,15 @@ class Session(Container):
         return self.fields["port-forwarding-enabled"]
 
     @property
+    def preferred_transports(self) -> list[str] | None:
+        """preference of transport protocols.
+
+        Added in Transmission 4.1.0 (rpc-version 18).
+        Replaces the deprecated ``utp_enabled`` and ``tcp_enabled`` fields.
+        """
+        return self.get("preferred-transports")
+
+    @property
     def queue_stalled_enabled(self) -> bool:
         """whether or not to consider idle torrents as stalled"""
         return self.fields["queue-stalled-enabled"]
@@ -273,6 +295,11 @@ class Session(Container):
     def rename_partial_files(self) -> bool:
         """true means append `.part` to incomplete files"""
         return self.fields["rename-partial-files"]
+
+    @property
+    def reqq(self) -> int | None:
+        """The number of outstanding block requests a peer is allowed to queue in the client."""
+        return self.get("reqq")
 
     @property
     def rpc_version_minimum(self) -> int:
@@ -313,6 +340,22 @@ class Session(Container):
     def seed_ratio_limited(self) -> bool:
         """true if seedRatioLimit is honored by default"""
         return self.fields["seedRatioLimited"]
+
+    @property
+    def sequential_download(self) -> bool | None:
+        """true means sequential download is enabled by default for added torrents.
+
+        Added in Transmission 4.1.0 (rpc-version 18).
+        """
+        return self.get("sequential-download")
+
+    @property
+    def session_id(self) -> str | None:
+        """the current X-Transmission-Session-Id value.
+
+        Added in Transmission 3.00 (rpc-version 16).
+        """
+        return self.get("session-id")
 
     @property
     def speed_limit_down_enabled(self) -> bool:
