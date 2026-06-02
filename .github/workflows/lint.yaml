@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - uses: liskin/gh-problem-matcher-wrap@v3
+      - uses: liskin/gh-problem-matcher-wrap@v4
         with:
           action: add
           linters: mypy
