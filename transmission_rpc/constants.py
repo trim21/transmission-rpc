@@ -148,6 +148,9 @@ TORRENT_GET_ARGS: dict[str, Args] = {
     "seedRatioLimit": Args(Type.double, 5, None, None, None, "Seed ratio limit."),
     "seedRatioMode": Args(Type.number, 5, description="Use global (0), torrent (1), or unlimited (2) limit."),
     "sequential_download": Args(Type.boolean, 18, description="download torrent pieces sequentially"),
+    "sequential_download_from_piece": Args(
+        Type.number, 18, description="download from a specific piece when sequential download is enabled"
+    ),
     "sizeWhenDone": Args(Type.number, 1, description="Size of the torrent download in bytes."),
     "startDate": Args(Type.number, 1, description="The date when the torrent was last started."),
     "status": Args(Type.number, 1, None, None, None, "Current status, see source"),
@@ -161,6 +164,7 @@ TORRENT_GET_ARGS: dict[str, Args] = {
     "uploadRatio": Args(Type.double, 1, None, None, None, "Seed ratio."),
     "wanted": Args(Type.array, 1, description="Array of booleans indicated wanted files."),
     "webseeds": Args(Type.array, 1, None, None, None, "Array of webseeds objects"),
+    "webseeds_ex": Args(Type.array, 19, description="Array of webseed objects with url, is_downloading, and download_bytes_per_second"),
     "webseedsSendingToUs": Args(Type.number, 1, None, None, None, "Number of webseeds seeding to us."),
     "file-count": Args(Type.number, 17),
     "trackerList": Args(

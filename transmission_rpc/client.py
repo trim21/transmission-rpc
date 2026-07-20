@@ -29,7 +29,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group, PortTestResult
+from transmission_rpc.types import Group, PortTestResult, _FieldDict, _to_snake
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
@@ -157,12 +157,14 @@ class Client:
         self._url = str(url)
         self._path = path
 
-        self.__raw_session: dict[str, Any] = {}
+        self.__raw_session: _FieldDict = _FieldDict()
         self.__session_id = "0"
 
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
         self.__semver_version = None
+        self.__use_jsonrpc2: bool = False
+        self.__request_id_counter: int = 0
 
         common_args: dict[str, Any] = {"host": host, "timeout": self.timeout, "retries": False}
         if protocol == "http":
@@ -231,9 +233,12 @@ class Client:
 
         return self.__auth_headers
 
-    def _http_query(self, query: dict[str, Any], timeout: _Timeout | None = None) -> str:
+    def _http_query(self, method: RpcMethod, arguments: dict[str, Any], timeout: _Timeout | None = None) -> str:
         """
-        Query Transmission through HTTP.
+        Build a query and send it to Transmission via HTTP, handling CSRF and protocol detection.
+
+        The query format (old bespoke protocol vs JSON-RPC 2.0) is determined per-iteration
+        so that a protocol switch detected from a CSRF 409 header takes effect on the retry.
         """
         request_count = 0
 
@@ -243,6 +248,24 @@ class Client:
         while True:
             if request_count >= 3:
                 raise TransmissionError("too much request, try enable logger to see what happened")
+
+            # Build the query in the current protocol format.  Re-built on every
+            # iteration so that a mid-loop protocol switch (from the 409 header) is
+            # reflected in the retry without an extra round-trip.
+            if self.__use_jsonrpc2:
+                self.__request_id_counter += 1
+                snake_method = method.replace("-", "_")
+                snake_args: dict[str, Any] = {_to_snake(k): v for k, v in arguments.items()}
+                if "fields" in snake_args:
+                    snake_args["fields"] = [_to_snake(f) for f in snake_args["fields"]]
+                query: dict[str, Any] = {
+                    "jsonrpc": "2.0",
+                    "method": snake_method,
+                    "params": snake_args,
+                    "id": self.__request_id_counter,
+                }
+            else:
+                query = {"method": method, "arguments": arguments}
 
             headers = self.__get_headers()
             log_headers = headers.copy()
@@ -272,6 +295,22 @@ class Client:
             if _header_session_id_key in r.headers:
                 self.__session_id = r.headers[_header_session_id_key]
 
+            # Detect JSON-RPC 2.0 support from the Transmission-specific header
+            # present in the CSRF 409 response (available from rpc-version-semver 6.0.0).
+            # Setting the flag here means the *next* loop iteration builds the query in
+            # the new format, so the actual retry goes out in JSON-RPC 2.0 form.
+            if r.status == 409 and not self.__use_jsonrpc2:
+                rpc_ver_header = r.headers.get("x-transmission-rpc-version", "")
+                if rpc_ver_header:
+                    try:
+                        major = int(rpc_ver_header.split(".")[0])
+                        if major >= 6:
+                            self.__use_jsonrpc2 = True
+                    except (ValueError, IndexError):
+                        self.logger.debug(
+                            "Could not parse X-Transmission-Rpc-Version header: %r", rpc_ver_header
+                        )
+
             if r.status != 409:
                 return r.data.decode("utf-8")
 
@@ -299,11 +338,9 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = {"method": method, "arguments": arguments}
-
         start = time.monotonic()
         try:
-            http_data = self._http_query(query, timeout)
+            http_data = self._http_query(method, arguments, timeout)
         finally:
             elapsed = time.monotonic() - start
             self.logger.debug("http request took %.3f s", elapsed)
@@ -312,7 +349,7 @@ class Client:
             data: ResponseData = json.loads(http_data)
         except json.JSONDecodeError as error:
             self.logger.exception("Error:")
-            self.logger.exception('Request: "%s"', query)
+            self.logger.exception('Request: method=%s arguments=%s', method, arguments)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
                 "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
@@ -321,25 +358,39 @@ class Client:
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(json.dumps(data, indent=2))
 
-        if "result" not in data:
-            raise TransmissionError(
-                "Query failed, response data missing without result.",
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
+        if self.__use_jsonrpc2:
+            # JSON-RPC 2.0: errors are in "error", data is in "result"
+            if "error" in data:
+                err = data["error"]
+                raise TransmissionError(
+                    err.get("message", "unknown error"),
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
+            res = _FieldDict(data.get("result") or {})
+        else:
+            # Legacy bespoke protocol: status in "result" string, data in "arguments"
+            if "result" not in data:
+                raise TransmissionError(
+                    "Query failed, response data missing without result.",
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
 
-        if data["result"] != "success":
-            raise TransmissionError(
-                f'Query failed with result "{data["result"]}".',
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
+            if data["result"] != "success":
+                raise TransmissionError(
+                    f'Query failed with result "{data["result"]}".',
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
 
-        res = data["arguments"]
+            res = _FieldDict(data.get("arguments") or {})
 
         if method == RpcMethod.TorrentGet:
             return res
@@ -376,6 +427,8 @@ class Client:
         self.__semver_version = self.__raw_session.get("rpc-version-semver")
         self.__server_version = self.__raw_session["version"]
         self.__protocol_version = self.__raw_session["rpc-version"]
+        # Enable JSON-RPC 2.0 for Transmission 4.1.0+ (rpc-version-semver >= 6.0.0 / rpc-version >= 18)
+        self.__use_jsonrpc2 = self.__protocol_version >= 18
 
     @property
     @deprecated("use .get_session().rpc_version_semver instead")
@@ -425,6 +478,7 @@ class Client:
         labels: Iterable[str] | None = None,
         bandwidthPriority: int | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -469,11 +523,17 @@ class Client:
             sequential_download:
                 download torrent pieces sequentially.
                 Add in rpc 18.
+            sequential_download_from_piece:
+                download from a specific piece when sequential download is enabled.
+                Add in rpc 18.
         """
         if labels is not None:
             self._rpc_version_warning(17)
 
         if sequential_download is not None:
+            self._rpc_version_warning(18)
+
+        if sequential_download_from_piece is not None:
             self._rpc_version_warning(18)
 
         kwargs: dict[str, Any] = remove_unset_value(
@@ -488,6 +548,7 @@ class Client:
                 "priority-normal": priority_normal,
                 "bandwidthPriority": bandwidthPriority,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
                 "cookies": cookies,
                 "labels": list_or_none(_single_str_as_list(labels)),
             }
@@ -673,6 +734,7 @@ class Client:
         group: str | None = None,
         tracker_list: Iterable[Iterable[str]] | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
         tracker_add: Iterable[str] | None = None,
         tracker_replace: Iterable[tuple[int, str]] | None = None,
         tracker_remove: Iterable[int] | None = None,
@@ -714,6 +776,9 @@ class Client:
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
 
             sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
+
+            sequential_download_from_piece: download from a specific piece when sequential download is enabled.
+                Add in Transmission 4.1.0, rpc-version 18.
 
             tracker_add: Array of string with announce URLs to add.
                 **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
@@ -768,6 +833,7 @@ class Client:
                 "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
                 "group": group,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
             }
         )
 
@@ -884,12 +950,13 @@ class Client:
         blocklist_enabled: bool | None = None,
         blocklist_url: str | None = None,
         cache_size_mb: int | None = None,
+        cache_size_mib: int | None = None,
         dht_enabled: bool | None = None,
         default_trackers: Iterable[str] | None = None,
         download_dir: str | None = None,
         download_queue_enabled: bool | None = None,
         download_queue_size: int | None = None,
-        encryption: Literal["required", "preferred", "tolerated"] | None = None,
+        encryption: Literal["required", "preferred", "tolerated", "allowed"] | None = None,
         idle_seeding_limit: int | None = None,
         idle_seeding_limit_enabled: bool | None = None,
         incomplete_dir: str | None = None,
@@ -901,6 +968,7 @@ class Client:
         peer_port_random_on_start: bool | None = None,
         pex_enabled: bool | None = None,
         port_forwarding_enabled: bool | None = None,
+        preferred_transports: list[str] | None = None,
         queue_stalled_enabled: bool | None = None,
         queue_stalled_minutes: int | None = None,
         rename_partial_files: bool | None = None,
@@ -910,6 +978,7 @@ class Client:
         seed_queue_size: int | None = None,
         seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
+        sequential_download: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,
         speed_limit_up: int | None = None,
@@ -948,7 +1017,11 @@ class Client:
             blocklist_url:
                 Location of the block list. Updated with blocklist-update.
             cache_size_mb:
-                The maximum size of the disk cache in MB
+                The maximum size of the disk cache in MB.
+                Renamed to ``cache_size_mib`` in Transmission 4.1.0.
+            cache_size_mib:
+                The maximum size of the disk cache in MiB.
+                Added in Transmission 4.1.0 (rpc-version 18).
             default_trackers:
                 list of default trackers to use on public torrents.
             dht_enabled:
@@ -960,7 +1033,8 @@ class Client:
             download_queue_size:
                 Number of slots in the download queue.
             encryption:
-                Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
+                Set the session encryption mode, one of ``required``, ``preferred``, ``tolerated``, or ``allowed``.
+                Note: ``allowed`` replaces ``tolerated`` in Transmission 4.1.0.
             idle_seeding_limit:
                 The default seed inactivity limit in minutes.
             idle_seeding_limit_enabled:
@@ -984,6 +1058,9 @@ class Client:
                 Allowing PEX in public torrents.
             port_forwarding_enabled:
                 Enables port forwarding.
+            preferred_transports:
+                Preference of transport protocols. Added in Transmission 4.1.0 (rpc-version 18).
+                Replaces the deprecated ``utp_enabled`` field.
             queue_stalled_enabled:
                 Enable tracking of stalled transfers.
             queue_stalled_minutes:
@@ -999,6 +1076,9 @@ class Client:
                 Seed ratio limit. 1.0 means 1:1 download and upload ratio.
             seed_ratio_limited:
                 Enables seed ration limit.
+            sequential_download:
+                true means sequential download is enabled by default for added torrents.
+                Added in Transmission 4.1.0 (rpc-version 18).
             speed_limit_down:
                 Download speed limit (in Kib/s).
             speed_limit_down_enabled:
@@ -1031,7 +1111,7 @@ class Client:
             transmission-rpc will merge ``kwargs`` in rpc arguments **as-is**
         """
 
-        if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:
+        if encryption is not None and encryption not in ["required", "preferred", "tolerated", "allowed"]:
             raise ValueError("Invalid encryption value")
 
         if default_trackers is not None:
@@ -1044,6 +1124,12 @@ class Client:
             self._rpc_version_warning(17)
         if script_torrent_added_filename is not None:
             self._rpc_version_warning(17)
+        if preferred_transports is not None:
+            self._rpc_version_warning(18)
+        if sequential_download is not None:
+            self._rpc_version_warning(18)
+        if cache_size_mib is not None:
+            self._rpc_version_warning(18)
 
         args: dict[str, Any] = remove_unset_value(
             {
@@ -1057,6 +1143,7 @@ class Client:
                 "blocklist-enabled": blocklist_enabled,
                 "blocklist-url": blocklist_url,
                 "cache-size-mb": cache_size_mb,
+                "cache-size-mib": cache_size_mib,
                 "dht-enabled": dht_enabled,
                 "download-dir": download_dir,
                 "download-queue-enabled": download_queue_enabled,
@@ -1072,6 +1159,7 @@ class Client:
                 "peer-port": peer_port,
                 "pex-enabled": pex_enabled,
                 "port-forwarding-enabled": port_forwarding_enabled,
+                "preferred-transports": preferred_transports,
                 "queue-stalled-enabled": queue_stalled_enabled,
                 "queue-stalled-minutes": queue_stalled_minutes,
                 "rename-partial-files": rename_partial_files,
@@ -1081,6 +1169,7 @@ class Client:
                 "seed-queue-size": seed_queue_size,
                 "seedRatioLimit": seed_ratio_limit,
                 "seedRatioLimited": seed_ratio_limited,
+                "sequential-download": sequential_download,
                 "speed-limit-down": speed_limit_down,
                 "speed-limit-down-enabled": speed_limit_down_enabled,
                 "speed-limit-up": speed_limit_up,

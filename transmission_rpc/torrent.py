@@ -9,7 +9,7 @@ from typing import Any
 from typing_extensions import deprecated
 
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
-from transmission_rpc.types import BitMap, Container, File
+from transmission_rpc.types import BitMap, Container, File, WebseedEx
 from transmission_rpc.utils import format_timedelta
 
 _STATUS_NEW_MAPPING = {
@@ -229,6 +229,11 @@ class Tracker(Container):
         return self.fields["scrape"]
 
     @property
+    def sitename(self) -> str:
+        """Tracker site name. Added in Transmission 4.0.0 (rpc-version 17)."""
+        return self.fields["sitename"]
+
+    @property
     def tier(self) -> int:
         return self.fields["tier"]
 
@@ -253,6 +258,11 @@ class TrackerStats(Container):
     @property
     def download_count(self) -> int:
         return self.fields["downloadCount"]
+
+    @property
+    def downloader_count(self) -> int:
+        """Number of leechers. Added in Transmission 4.1.0 (rpc-version 18)."""
+        return self.fields["downloaderCount"]
 
     @property
     def has_announced(self) -> bool:
@@ -809,6 +819,16 @@ class Torrent(Container):
         return self.fields["webseeds"]
 
     @property
+    def webseeds_ex(self) -> list[WebseedEx]:
+        """
+        Array of webseed objects with detailed information.
+
+        Added in Transmission 4.2.0 (rpc-version 19).
+        Replaces the deprecated ``webseeds`` field.
+        """
+        return [WebseedEx(fields=x) for x in self.fields["webseeds_ex"]]
+
+    @property
     def webseeds_sending_to_us(self) -> int:
         """Number of webseeds that are sending data to us."""
         return self.fields["webseedsSendingToUs"]
@@ -973,11 +993,20 @@ class Torrent(Container):
     @property
     def sequential_download(self) -> bool:
         """
-        download torrent pieces sequentially
+        Download torrent pieces sequentially.
 
-        add in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        Added in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
         """
         return self.fields["sequential_download"]
+
+    @property
+    def sequential_download_from_piece(self) -> int:
+        """
+        Download from a specific piece when sequential download is enabled.
+
+        Added in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        """
+        return self.fields["sequential_download_from_piece"]
 
     def __repr__(self) -> str:
         return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
