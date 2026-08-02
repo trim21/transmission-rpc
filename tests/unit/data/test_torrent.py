@@ -131,6 +131,17 @@ def test_torrent_progress_and_availability() -> None:
     assert t_zero.progress == 0.0
 
 
+def test_tracker_list_preserves_tiers() -> None:
+    raw = "https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce\n"
+
+    torrent = Torrent(fields={"id": 1, "trackerList": raw})
+
+    assert torrent.tracker_list == [
+        ["https://a.example/announce", "https://b.example/announce"],
+        ["https://backup.example/announce"],
+    ]
+
+
 def test_torrent_representation() -> None:
     """Verify string representations, ETA formatting, and date handling."""
     fields = {

@@ -8,6 +8,7 @@ from typing import Any
 
 from typing_extensions import deprecated
 
+from transmission_rpc._tracker_list import parse_tracker_list
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import BitMap, Container, File
 from transmission_rpc.utils import format_timedelta
@@ -759,9 +760,17 @@ class Torrent(Container):
         return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
-    def tracker_list(self) -> list[str]:
-        """list of str of announce URLs"""
-        return [x for x in self.fields["trackerList"].splitlines() if x]
+    def tracker_list(self) -> list[list[str]]:
+        """Announce URLs grouped by tracker tier.
+
+        Each inner list contains the trackers in one tier.
+
+        .. versionchanged:: 8.0.0
+            Earlier versions returned a flat list and discarded tier boundaries.
+            Flatten the tiered result explicitly when tier information is not needed:
+            ``[url for tier in torrent.tracker_list for url in tier]``.
+        """
+        return parse_tracker_list(self.fields["trackerList"])
 
     @property
     def tracker_stats(self) -> list[TrackerStats]:

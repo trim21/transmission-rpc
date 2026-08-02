@@ -136,6 +136,27 @@ def test_torrent_get_files(tr_client: Client) -> None:
             assert isinstance(file, File), "Each item in get_files should be a File object"
 
 
+@skip_on(ServerTooLowError, "trackerList is added in rpc version 17")
+def test_tracker_list_round_trip(tr_client: Client) -> None:
+    if tr_client.get_session().rpc_version < 17:
+        raise ServerTooLowError
+
+    with open("tests/fixtures/iso.torrent", "rb") as torrent_file:
+        torrent = tr_client.add_torrent(torrent_file, paused=True)
+
+    expected = [
+        ["https://a.example/announce", "https://b.example/announce"],
+        ["https://backup.example/announce"],
+    ]
+    tr_client.change_torrent(torrent.id, tracker_list=expected)
+
+    refetched = tr_client.get_torrent(torrent.id, arguments=["trackerList"])
+    assert refetched.tracker_list == expected
+
+    tr_client.change_torrent(refetched.id, tracker_list=refetched.tracker_list)
+    assert tr_client.get_torrent(torrent.id, arguments=["trackerList"]).tracker_list == expected
+
+
 @skip_on(ServerTooLowError, "group methods is added in rpc version 17")
 def test_groups(tr_client: Client) -> None:
     """

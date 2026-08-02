@@ -164,9 +164,9 @@ TORRENT_GET_ARGS: dict[str, Args] = {
     "webseedsSendingToUs": Args(Type.number, 1, None, None, None, "Number of webseeds seeding to us."),
     "file-count": Args(Type.number, 17),
     "trackerList": Args(
-        Type.array,
+        Type.string,
         17,
-        description="A Iterable[Iterable[str]] for a set of announce URLs, each inner list is for a tier",
+        description="Announce URLs, one per line, with a blank line between tracker tiers.",
     ),
 }
 
