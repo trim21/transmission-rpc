@@ -1,7 +1,7 @@
 import pytest
 
 from tests.util import check_properties
-from transmission_rpc.constants import Args, Type, get_torrent_arguments
+from transmission_rpc.constants import TORRENT_GET_ARGS, Args, Type, get_torrent_arguments
 from transmission_rpc.error import TransmissionError
 from transmission_rpc.torrent import Peer, PeersFrom, Tracker, TrackerStats
 from transmission_rpc.types import BitMap, Container, Group, PortTestResult
@@ -100,6 +100,7 @@ def test_get_torrent_arguments() -> None:
     args = get_torrent_arguments(1)
     assert "id" in args
     assert "group" not in args  # added in 17
+    assert TORRENT_GET_ARGS["trackerList"].type == Type.string
 
 
 def test_error_str_with_original() -> None:

@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from transmission_rpc.client import Client
+from transmission_rpc.torrent import Torrent
 
 
 def test_start_all_bypass_queue(mock_network: Any, success_response: Any) -> None:
@@ -98,6 +99,35 @@ def test_change_torrent_no_args(mock_network: Any, success_response: Any) -> Non
     c = Client()
     with pytest.raises(ValueError, match="No arguments to set"):
         c.change_torrent(ids=1)
+
+
+def test_change_torrent_round_trips_tracker_tiers(mock_network: Any, success_response: Any) -> None:
+    mock_network.side_effect = [success_response(), success_response()]
+    client = Client()
+    torrent = Torrent(
+        fields={
+            "id": 1,
+            "trackerList": (
+                "https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce\n"
+            ),
+        }
+    )
+
+    client.change_torrent(ids=torrent.id, tracker_list=torrent.tracker_list)
+
+    sent = mock_network.call_args.kwargs["json"]["arguments"]["trackerList"]
+    assert sent == ("https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce")
+
+
+def test_change_torrent_rejects_flat_tracker_list_before_request(mock_network: Any, success_response: Any) -> None:
+    mock_network.return_value = success_response()
+    client = Client()
+    calls_before = mock_network.call_count
+
+    with pytest.raises(TypeError, match="contain tracker tiers"):
+        client.change_torrent(ids=1, tracker_list=["https://tracker.example/announce"])  # type: ignore[list-item]
+
+    assert mock_network.call_count == calls_before
 
 
 def test_set_session_warnings_full(mock_network: Any, success_response: Any) -> None:

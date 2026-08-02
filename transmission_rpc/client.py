@@ -19,6 +19,7 @@ from typing_extensions import Self, TypedDict, deprecated
 from urllib3 import Timeout
 from urllib3.util import make_headers
 
+from transmission_rpc._tracker_list import serialize_tracker_list
 from transmission_rpc._unix_socket import UnixHTTPConnectionPool
 from transmission_rpc.constants import LOGGER, RpcMethod, get_torrent_arguments
 from transmission_rpc.error import (
@@ -706,12 +707,15 @@ class Client:
             labels: Array of string labels. Add in rpc 16.
             group: The name of this torrent's bandwidth group. Add in rpc 17.
 
-            tracker_list: A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            tracker_list: An ``Iterable[Iterable[str]]`` whose inner iterables are tracker tiers.
 
                 Add in rpc 17.
 
                 Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
+
+                An empty outer iterable clears the tracker list. Strings are not accepted as tiers, and empty tiers,
+                empty tracker URLs, non-string tracker URLs, and tracker URLs containing CR or LF are rejected.
 
             sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
 
@@ -765,7 +769,7 @@ class Client:
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
                 "labels": list_or_none(_single_str_as_list(labels)),
-                "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
+                "trackerList": None if tracker_list is None else serialize_tracker_list(tracker_list),
                 "group": group,
                 "sequential_download": sequential_download,
             }
