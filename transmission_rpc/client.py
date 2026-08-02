@@ -267,7 +267,7 @@ class Client:
 
             self.logger.debug(r.data)
             if r.status in {401, 403}:
-                self.logger.debug(headers)
+                self.logger.debug(log_headers)
                 raise TransmissionAuthError("transmission daemon require auth", original=r)
 
             if _header_session_id_key in r.headers:

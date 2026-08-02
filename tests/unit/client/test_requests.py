@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import pathlib
@@ -33,12 +34,22 @@ def test_http_query_timeout_error() -> None:
             Client()
 
 
-def test_http_query_auth_error() -> None:
-    """Verify that 401/403 responses are raised as TransmissionAuthError."""
+@pytest.mark.parametrize("status_code", [401, 403])
+def test_http_query_auth_error(status_code: int) -> None:
+    """Verify that auth errors do not expose Basic credentials in debug logs."""
+    logger = mock.Mock(spec=logging.Logger)
+    raw_credentials = b"rpc-user:rpc-password"
+    username, password = raw_credentials.decode().split(":", maxsplit=1)
+    encoded_credentials = base64.b64encode(raw_credentials).decode()
+
     with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
-        mock_req.return_value = mock.Mock(status=401, headers={}, data=b"")
+        mock_req.return_value = mock.Mock(status=status_code, headers={}, data=b"")
         with pytest.raises(TransmissionAuthError):
-            Client()
+            Client(username=username, password=password, logger=logger)
+
+    debug_output = "\n".join(str(call) for call in logger.debug.call_args_list)
+    assert "'authorization': '******'" in debug_output
+    assert encoded_credentials not in debug_output
 
 
 def test_http_query_too_many_requests() -> None:
