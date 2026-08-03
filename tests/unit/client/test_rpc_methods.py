@@ -8,23 +8,27 @@ from transmission_rpc.client import Client
 from transmission_rpc.torrent import Torrent
 
 
-def test_start_all_bypass_queue(mock_network: Any, success_response: Any) -> None:
-    """
-    Verify that `start_all(bypass_queue=True)` correctly calls `torrent-start-now`
-    after fetching the list of torrents.
-    """
+@pytest.mark.parametrize(
+    ("bypass_queue", "expected_method"),
+    [(False, "torrent-start"), (True, "torrent-start-now")],
+)
+def test_start_all_uses_single_action_request(
+    mock_network: Any,
+    success_response: Any,
+    bypass_queue: bool,
+    expected_method: str,
+) -> None:
+    """Verify that start_all delegates the all-torrent action directly to Transmission."""
     mock_network.side_effect = [
         success_response(),  # init
-        success_response({"torrents": [{"id": 1, "queuePosition": 1, "hashString": "a"}]}),  # get_torrents
         success_response(),  # start
     ]
     c = Client()
-    c.start_all(bypass_queue=True)
+    assert c.start_all(bypass_queue=bypass_queue) is None
 
-    # Verify the last call was torrent-start-now
-    assert mock_network.call_count == 3
+    assert mock_network.call_count == 2
     last_call_json = mock_network.call_args_list[-1][1]["json"]
-    assert last_call_json["method"] == "torrent-start-now"
+    assert last_call_json == {"method": expected_method, "arguments": {}}
 
 
 def test_get_torrent_with_args(mock_network: Any, success_response: Any) -> None:
@@ -271,9 +275,7 @@ def test_passthrough_rpc_commands(mock_network: Any, success_response: Any) -> N
     """Verify execution of client command methods."""
     mock_network.side_effect = [
         success_response(),  # init
-        # return a valid torrent for start_all to operate on
-        success_response({"torrents": [{"id": 1, "queuePosition": 0, "hashString": "h"}]}),  # start_all (get)
-        success_response(),  # start_all (start)
+        success_response(),  # start_all
         success_response({"blocklist-size": 10}),  # blocklist
     ]
     c = Client()
