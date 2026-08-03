@@ -407,6 +407,9 @@ class Torrent(Container):
         """
         An array of piece_count numbers representing the number of connected peers
         that have each piece, or -1 if we already have the piece ourselves.
+
+        :available: transmission version 4.0.0.
+        :available: RPC version 17.
         """
         return self.fields["availability"]
 

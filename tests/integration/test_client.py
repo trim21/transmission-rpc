@@ -120,6 +120,30 @@ def test_torrent_attr_type(tr_client: Client) -> None:
         assert isinstance(torrent.name, str), "Torrent name should be a string"
 
 
+@skip_on(ServerTooLowError, "availability is added in rpc version 17")
+def test_torrent_availability_is_fetched_by_default(tr_client: Client) -> None:
+    if tr_client.get_session().rpc_version < 17:
+        raise ServerTooLowError
+
+    with open("tests/fixtures/iso.torrent", "rb") as torrent_file:
+        added = tr_client.add_torrent(torrent_file, paused=True)
+
+    default_torrent = tr_client.get_torrent(added.id)
+    explicit_torrent = tr_client.get_torrent(added.id, arguments=["availability", "pieceCount"])
+    default_torrents = tr_client.get_torrents(ids=[added.id])
+    explicit_torrents = tr_client.get_torrents(ids=[added.id], arguments=["availability", "pieceCount"])
+
+    assert len(default_torrents) == 1
+    assert len(explicit_torrents) == 1
+
+    expected = explicit_torrent.availability
+    for torrent in (default_torrent, explicit_torrent, default_torrents[0], explicit_torrents[0]):
+        assert isinstance(torrent.availability, list)
+        assert all(isinstance(value, int) for value in torrent.availability)
+        assert len(torrent.availability) == torrent.piece_count
+        assert torrent.availability == expected
+
+
 def test_torrent_get_files(tr_client: Client) -> None:
     """
     Integration test: Verify that `get_files` returns a list of File objects.
