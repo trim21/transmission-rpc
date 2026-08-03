@@ -101,6 +101,9 @@ def test_get_torrent_arguments() -> None:
     assert "id" in args
     assert "group" not in args  # added in 17
     assert TORRENT_GET_ARGS["trackerList"].type == Type.string
+    assert TORRENT_GET_ARGS["availability"].type == Type.array
+    assert "availability" not in get_torrent_arguments(16)
+    assert "availability" in get_torrent_arguments(17)
 
 
 def test_error_str_with_original() -> None:
