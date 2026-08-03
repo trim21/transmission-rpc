@@ -120,6 +120,7 @@ select = [
 ]
 extend-fixable = ['UP']
 ignore = [
+    'PLR0917',
     'PLR0911',
     'INP001',
     'N806',
