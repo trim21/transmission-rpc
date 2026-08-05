@@ -8,15 +8,9 @@ from transmission_rpc.client import Client
 from transmission_rpc.torrent import Torrent
 
 
-@pytest.mark.parametrize(
-    ("bypass_queue", "expected_method"),
-    [(False, "torrent-start"), (True, "torrent-start-now")],
-)
 def test_start_all_uses_single_action_request(
     mock_network: Any,
     success_response: Any,
-    bypass_queue: bool,
-    expected_method: str,
 ) -> None:
     """Verify that start_all delegates the all-torrent action directly to Transmission."""
     mock_network.side_effect = [
@@ -24,11 +18,11 @@ def test_start_all_uses_single_action_request(
         success_response(),  # start
     ]
     c = Client()
-    assert c.start_all(bypass_queue=bypass_queue) is None
+    assert c.start_all() is None
 
     assert mock_network.call_count == 2
     last_call_json = mock_network.call_args_list[-1][1]["json"]
-    assert last_call_json == {"method": expected_method, "arguments": {}}
+    assert last_call_json == {"method": "torrent-start", "arguments": {}}
 
 
 def test_get_torrent_with_args(mock_network: Any, success_response: Any) -> None:
@@ -280,8 +274,8 @@ def test_passthrough_rpc_commands(mock_network: Any, success_response: Any) -> N
     ]
     c = Client()
 
-    # start_all bypass_queue
-    c.start_all(bypass_queue=True)
+    # start_all
+    c.start_all()
 
     # blocklist_update
     assert c.blocklist_update() == 10

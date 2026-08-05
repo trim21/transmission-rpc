@@ -525,12 +525,9 @@ class Client:
             method = RpcMethod.TorrentStartNow
         self._request(method, {}, ids, True, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
+    def start_all(self, timeout: _Timeout | None = None) -> None:
         """Start all torrents respecting the queue order"""
-        method = RpcMethod.TorrentStart
-        if bypass_queue:
-            method = RpcMethod.TorrentStartNow
-        self._request(method, timeout=timeout)
+        self._request(RpcMethod.TorrentStart, timeout=timeout)
 
     def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """stop torrent(s) with provided id(s)"""
