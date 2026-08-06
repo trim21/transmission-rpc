@@ -8,23 +8,52 @@ from transmission_rpc.client import Client
 from transmission_rpc.torrent import Torrent
 
 
-def test_start_all_bypass_queue(mock_network: Any, success_response: Any) -> None:
-    """
-    Verify that `start_all(bypass_queue=True)` correctly calls `torrent-start-now`
-    after fetching the list of torrents.
-    """
+@pytest.mark.parametrize(
+    ("method_name", "expected_method"),
+    [("start_torrent", "torrent-start"), ("start_torrent_now", "torrent-start-now")],
+)
+def test_start_methods_use_all_torrents_by_default(
+    mock_network: Any,
+    success_response: Any,
+    method_name: str,
+    expected_method: str,
+) -> None:
+    """Verify that each start method omits ids by default, applying its action to all torrents."""
     mock_network.side_effect = [
         success_response(),  # init
-        success_response({"torrents": [{"id": 1, "queuePosition": 1, "hashString": "a"}]}),  # get_torrents
         success_response(),  # start
     ]
     c = Client()
-    c.start_all(bypass_queue=True)
+    assert getattr(c, method_name)() is None
 
-    # Verify the last call was torrent-start-now
-    assert mock_network.call_count == 3
+    assert mock_network.call_count == 2
     last_call_json = mock_network.call_args_list[-1][1]["json"]
-    assert last_call_json["method"] == "torrent-start-now"
+    assert last_call_json == {"method": expected_method, "arguments": {}}
+
+
+@pytest.mark.parametrize(
+    ("method_name", "expected_method"),
+    [("start_torrent", "torrent-start"), ("start_torrent_now", "torrent-start-now")],
+)
+@pytest.mark.parametrize(
+    ("ids", "expected_arguments"),
+    [(None, {}), ([], {}), (1, {"ids": [1]})],
+)
+def test_start_methods_pass_torrent_ids(
+    mock_network: Any,
+    success_response: Any,
+    method_name: str,
+    expected_method: str,
+    ids: Any,
+    expected_arguments: dict[str, Any],
+) -> None:
+    """Verify that start actions omit empty ids and pass explicit ids to Transmission."""
+    mock_network.return_value = success_response()
+    c = Client()
+    assert getattr(c, method_name)(ids=ids) is None
+
+    sent_json = mock_network.call_args_list[-1][1]["json"]
+    assert sent_json == {"method": expected_method, "arguments": expected_arguments}
 
 
 def test_get_torrent_with_args(mock_network: Any, success_response: Any) -> None:
@@ -271,15 +300,13 @@ def test_passthrough_rpc_commands(mock_network: Any, success_response: Any) -> N
     """Verify execution of client command methods."""
     mock_network.side_effect = [
         success_response(),  # init
-        # return a valid torrent for start_all to operate on
-        success_response({"torrents": [{"id": 1, "queuePosition": 0, "hashString": "h"}]}),  # start_all (get)
-        success_response(),  # start_all (start)
+        success_response(),  # start_torrent_now
         success_response({"blocklist-size": 10}),  # blocklist
     ]
     c = Client()
 
-    # start_all bypass_queue
-    c.start_all(bypass_queue=True)
+    # start_torrent_now
+    c.start_torrent_now()
 
     # blocklist_update
     assert c.blocklist_update() == 10
@@ -291,15 +318,6 @@ def test_set_session_invalid_encryption_value(mock_network: Any, success_respons
     c = Client()
     with pytest.raises(ValueError, match="Invalid encryption value"):
         c.set_session(encryption=cast("Any", "invalid"))
-
-
-def test_start_torrent_bypass_queue_argument(mock_network: Any, success_response: Any) -> None:
-    """Verify that start_torrent uses 'torrent-start-now' method when bypass_queue is True."""
-    mock_network.return_value = success_response()
-    c = Client()
-    c.start_torrent(ids=1, bypass_queue=True)
-    sent_json = mock_network.call_args[1]["json"]
-    assert sent_json["method"] == "torrent-start-now"
 
 
 def test_free_space_success_and_failure(mock_network: Any, success_response: Any) -> None:

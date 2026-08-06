@@ -25,7 +25,8 @@ def test_start_torrent_raises_on_invalid_id(mock_network: Any, success_response:
         ("51ba7d0dd45ab9b9564329c33f4f97493b677924", ["51ba7d0dd45ab9b9564329c33f4f97493b677924"]),
         ((2, "51ba7d0dd45ab9b9564329c33f4f97493b677924"), [2, "51ba7d0dd45ab9b9564329c33f4f97493b677924"]),
         (3, [3]),
-        (None, []),
+        (None, None),
+        ([], None),
     ],
 )
 def test_parse_torrent_ids_structure(mock_network: Any, success_response: Any, arg: Any, expected_ids: Any) -> None:
@@ -35,13 +36,6 @@ def test_parse_torrent_ids_structure(mock_network: Any, success_response: Any, a
     mock_network.return_value = success_response()
     c = Client()
 
-    # start_torrent(ids=None) raises ValueError "request require ids" because
-    # the internal parser returns [] which is then rejected by require_ids=True.
-    if expected_ids == []:
-        with pytest.raises(ValueError, match="request require ids"):
-            c.start_torrent(ids=arg)
-        return
-
     c.start_torrent(ids=arg)
 
     # Check what was sent to the network
@@ -49,6 +43,16 @@ def test_parse_torrent_ids_structure(mock_network: Any, success_response: Any, a
     sent_ids = sent_json["arguments"].get("ids")
 
     assert sent_ids == expected_ids
+
+
+@pytest.mark.parametrize("arg", [None, []])
+def test_stop_torrent_requires_ids(mock_network: Any, success_response: Any, arg: Any) -> None:
+    """Verify that allowing empty ids for start actions does not change methods that require ids."""
+    mock_network.return_value = success_response()
+    c = Client()
+
+    with pytest.raises(ValueError, match="request require ids"):
+        c.stop_torrent(ids=arg)
 
 
 @pytest.mark.parametrize("arg", ["not-recently-active", "non-hash-string", -1, 1.1, "5:10", "5,6,8,9,10"])
