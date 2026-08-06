@@ -518,16 +518,13 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
-        """Start torrent(s) with provided id(s)"""
-        method = RpcMethod.TorrentStart
-        if bypass_queue:
-            method = RpcMethod.TorrentStartNow
-        self._request(method, {}, ids, True, timeout=timeout)
+    def start_torrent(self, ids: _TorrentIDs = None, timeout: _Timeout | None = None) -> None:
+        """Start torrent(s), or all torrents if ids is empty, respecting the queue order."""
+        self._request(RpcMethod.TorrentStart, {}, ids, timeout=timeout)
 
-    def start_all(self, timeout: _Timeout | None = None) -> None:
-        """Start all torrents respecting the queue order"""
-        self._request(RpcMethod.TorrentStart, timeout=timeout)
+    def start_torrent_now(self, ids: _TorrentIDs = None, timeout: _Timeout | None = None) -> None:
+        """Start torrent(s), or all torrents if ids is empty, bypassing the queue order."""
+        self._request(RpcMethod.TorrentStartNow, {}, ids, timeout=timeout)
 
     def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """stop torrent(s) with provided id(s)"""

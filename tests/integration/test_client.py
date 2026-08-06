@@ -2,6 +2,8 @@ import contextlib
 import time
 from collections.abc import Callable
 
+import pytest
+
 from tests.util import ServerTooLowError, skip_on
 from transmission_rpc.client import Client
 from transmission_rpc.error import TransmissionError
@@ -66,19 +68,20 @@ def test_stop(tr_client: Client, generate_random_hash: Callable[[], str]) -> Non
     assert is_stopped, "Torrent status should eventually become 'stopped'"
 
 
-def test_torrent_start_all(tr_client: Client) -> None:
+@pytest.mark.parametrize("method_name", ["start_torrent", "start_torrent_now"])
+def test_torrent_start_without_ids(tr_client: Client, method_name: str) -> None:
     """
-    Integration test: Verify `start_all` starts all paused torrents.
+    Integration test: Verify start actions without ids start all paused torrents.
     """
     tr_client.add_torrent(TORRENT_URL, paused=True, timeout=10)
 
     for torrent in tr_client.get_torrents():
         assert torrent.stopped or torrent.checking, "Newly added torrent should be stopped or checking initially"
 
-    tr_client.start_all()
+    getattr(tr_client, method_name)()
 
     for torrent in tr_client.get_torrents():
-        assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start_all"
+        assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start"
 
 
 def test_session_get_returns_valid_rpc_version(tr_client: Client) -> None:
