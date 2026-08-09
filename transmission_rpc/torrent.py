@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import warnings
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -93,7 +94,13 @@ class FileStat(Container):
     """
 
     @property
+    @deprecated("use .bytes_completed instead")
     def bytesCompleted(self) -> int:
+        """Compatibility alias for :attr:`bytes_completed`."""
+        return self.bytes_completed
+
+    @property
+    def bytes_completed(self) -> int:
         return self.fields["bytesCompleted"]
 
     @property
@@ -267,9 +274,10 @@ class Torrent(Container):
         return self.fields["name"]
 
     @property
+    @deprecated("use .hash_string instead")
     def hashString(self) -> str:
-        """Torrent info hash string, can also be used as Torrent ID"""
-        return self.fields["hashString"]
+        """Compatibility alias for :attr:`hash_string`."""
+        return self.hash_string
 
     @property
     def hash_string(self) -> str:
@@ -278,14 +286,14 @@ class Torrent(Container):
 
     @property
     def info_hash(self) -> str:
-        """alias of ``hashString``"""
-        return self.hashString
+        """Alias of :attr:`hash_string`."""
+        return self.hash_string
 
     @property
     @deprecated("this is a typo, do not use this. use `.info_hash` instead")
     def into_hash(self) -> str:
-        """alias of ``hashString``"""
-        return self.hashString
+        """Alias of :attr:`info_hash`."""
+        return self.info_hash
 
     @property
     def available(self) -> float:
@@ -445,6 +453,13 @@ class Torrent(Container):
                     id=id,
                 )
                 for id, file, raw_priority, raw_selected in zip(indices, files, priorities, wanted)
+            )
+
+        else:
+            warnings.warn(
+                "get_files() will raise KeyError in v8 when the files field was not fetched",
+                DeprecationWarning,
+                stacklevel=2,
             )
 
         return result
@@ -873,7 +888,7 @@ class Torrent(Container):
         return RatioLimitMode(self.fields["seedRatioMode"])
 
     def __repr__(self) -> str:
-        return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
+        return f"<transmission_rpc.Torrent hashString={self.hash_string!r}>"
 
     def __str__(self) -> str:
         return f"<transmission_rpc.Torrent {self.name!r}>"

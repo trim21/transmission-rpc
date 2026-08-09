@@ -9,12 +9,14 @@ import pathlib
 from typing import BinaryIO
 from urllib.parse import urlparse
 
+from typing_extensions import deprecated
+
 from transmission_rpc import constants
 
 UNITS = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
 
 
-def format_size(size: int) -> tuple[float, str]:
+def _format_size(size: int) -> tuple[float, str]:
     """
     Format byte size into IEC prefixes, B, KiB, MiB ...
     """
@@ -26,11 +28,18 @@ def format_size(size: int) -> tuple[float, str]:
     return s, UNITS[i]
 
 
+@deprecated("will be removed in v8 without replacement")
+def format_size(size: int) -> tuple[float, str]:
+    """Format byte size into IEC prefixes, B, KiB, MiB ..."""
+    return _format_size(size)
+
+
+@deprecated("will be removed in v8 without replacement")
 def format_speed(size: int) -> tuple[float, str]:
     """
     Format bytes per second speed into IEC prefixes, B/s, KiB/s, MiB/s ...
     """
-    (s, unit) = format_size(size)
+    (s, unit) = _format_size(size)
     return s, f"{unit}/s"
 
 
@@ -43,20 +52,10 @@ def format_timedelta(delta: datetime.timedelta) -> str:
     return f"{delta.days:d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
+@deprecated("import get_torrent_arguments from transmission_rpc.constants instead")
 def get_torrent_arguments(rpc_version: int) -> list[str]:
-    """
-    Get torrent arguments for method in specified Transmission RPC version.
-    """
-    accessible = []
-    for argument, info in constants.TORRENT_GET_ARGS.items():
-        valid_version = True
-        if rpc_version < info.added_version:
-            valid_version = False
-        if info.removed_version is not None and info.removed_version <= rpc_version:
-            valid_version = False
-        if valid_version:
-            accessible.append(argument)
-    return accessible
+    """Compatibility import for :func:`transmission_rpc.constants.get_torrent_arguments`."""
+    return constants.get_torrent_arguments(rpc_version)
 
 
 def _try_read_torrent(torrent: BinaryIO | str | bytes | pathlib.Path) -> str | None:

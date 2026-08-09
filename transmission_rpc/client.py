@@ -6,6 +6,7 @@ import pathlib
 import string
 import time
 import types
+import warnings
 from typing import Any, BinaryIO, Iterable, List, TypeVar, Union
 from urllib.parse import quote
 
@@ -14,7 +15,7 @@ import requests.auth
 import requests.exceptions
 from typing_extensions import Literal, Self, TypedDict, deprecated
 
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, RpcMethod, get_torrent_arguments
 from transmission_rpc.error import (
     TransmissionAuthError,
     TransmissionConnectError,
@@ -24,7 +25,7 @@ from transmission_rpc.error import (
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
 from transmission_rpc.types import Group, _Timeout
-from transmission_rpc.utils import _try_read_torrent, get_torrent_arguments
+from transmission_rpc.utils import _try_read_torrent
 
 _hex_chars = frozenset(string.hexdigits.lower())
 
@@ -272,7 +273,7 @@ class Client:
             self.logger.exception('Request: "%s"', query)
             self.logger.exception('HTTP data: "%s"', http_data)
             raise TransmissionError(
-                "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
+                "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
             ) from error
 
         if self.logger.isEnabledFor(logging.DEBUG):
@@ -284,7 +285,7 @@ class Client:
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         if data["result"] != "success":
@@ -293,7 +294,7 @@ class Client:
                 method=method,
                 argument=arguments,
                 response=data,
-                rawResponse=http_data,
+                raw_response=http_data,
             )
 
         res = data["arguments"]
@@ -315,7 +316,7 @@ class Client:
                     method=method,
                     argument=arguments,
                     response=data,
-                    rawResponse=http_data,
+                    raw_response=http_data,
                 )
         elif method == RpcMethod.SessionGet:
             self.__raw_session.update(res)
@@ -388,6 +389,7 @@ class Client:
         priority_normal: list[int] | None = None,
         cookies: str | None = None,
         labels: Iterable[str] | None = None,
+        bandwidth_priority: int | None = None,
         bandwidthPriority: int | None = None,
     ) -> Torrent:
         """
@@ -406,8 +408,10 @@ class Client:
                 torrent to add
             timeout:
                 request timeout
-            bandwidthPriority:
+            bandwidth_priority:
                 Priority for this transfer.
+            bandwidthPriority:
+                Deprecated. Use ``bandwidth_priority`` instead.
             cookies:
                 One or more HTTP cookie(s).
             download_dir:
@@ -437,6 +441,16 @@ class Client:
         if labels is not None:
             self._rpc_version_warning(17)
 
+        if bandwidth_priority is not None and bandwidthPriority is not None:
+            raise ValueError("bandwidth_priority and bandwidthPriority cannot both be set")
+        if bandwidthPriority is not None:
+            warnings.warn(
+                "bandwidthPriority is deprecated; use bandwidth_priority instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            bandwidth_priority = bandwidthPriority
+
         kwargs: dict[str, Any] = remove_unset_value(
             {
                 "download-dir": download_dir,
@@ -447,7 +461,7 @@ class Client:
                 "priority-high": priority_high,
                 "priority-low": priority_low,
                 "priority-normal": priority_normal,
-                "bandwidthPriority": bandwidthPriority,
+                "bandwidthPriority": bandwidth_priority,
                 "cookies": cookies,
                 "labels": list_or_none(_single_str_as_list(labels)),
             }
@@ -477,13 +491,26 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
-        """Start torrent(s) with provided id(s)"""
+    def start_torrent(
+        self, ids: _TorrentIDs = None, bypass_queue: bool | None = None, timeout: _Timeout | None = None
+    ) -> None:
+        """Start torrent(s), or all torrents if ``ids`` is omitted."""
         method = RpcMethod.TorrentStart
+        if bypass_queue is not None:
+            warnings.warn(
+                "bypass_queue is deprecated; use start_torrent_now() to bypass the queue",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if bypass_queue:
             method = RpcMethod.TorrentStartNow
-        self._request(method, {}, ids, True, timeout=timeout)
+        self._request(method, {}, ids, timeout=timeout)
 
+    def start_torrent_now(self, ids: _TorrentIDs = None, timeout: _Timeout | None = None) -> None:
+        """Start torrent(s), or all torrents if ``ids`` is omitted, bypassing the queue."""
+        self._request(RpcMethod.TorrentStartNow, {}, ids, timeout=timeout)
+
+    @deprecated("use start_torrent() or start_torrent_now() without ids instead")
     def start_all(self, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
         """Start all torrents respecting the queue order"""
         method = RpcMethod.TorrentStart
@@ -835,6 +862,7 @@ class Client:
         alt_speed_up: int | None = None,
         blocklist_enabled: bool | None = None,
         blocklist_url: str | None = None,
+        cache_size_mib: int | None = None,
         cache_size_mb: int | None = None,
         dht_enabled: bool | None = None,
         default_trackers: Iterable[str] | None = None,
@@ -899,8 +927,10 @@ class Client:
                 Enables the block list
             blocklist_url:
                 Location of the block list. Updated with blocklist-update.
+            cache_size_mib:
+                The maximum size of the disk cache in MiB.
             cache_size_mb:
-                The maximum size of the disk cache in MB
+                Deprecated. Use ``cache_size_mib`` instead.
             default_trackers:
                 list of default trackers to use on public torrents.
             dht_enabled:
@@ -986,6 +1016,16 @@ class Client:
         if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:
             raise ValueError("Invalid encryption value")
 
+        if cache_size_mib is not None and cache_size_mb is not None:
+            raise ValueError("cache_size_mib and cache_size_mb cannot both be set")
+        if cache_size_mb is not None:
+            warnings.warn(
+                "cache_size_mb is deprecated; use cache_size_mib instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            cache_size_mib = cache_size_mb
+
         if default_trackers is not None:
             self._rpc_version_warning(17)
         if script_torrent_done_seeding_filename is not None:
@@ -1008,7 +1048,7 @@ class Client:
                 "alt-speed-up": alt_speed_up,
                 "blocklist-enabled": blocklist_enabled,
                 "blocklist-url": blocklist_url,
-                "cache-size-mb": cache_size_mb,
+                "cache-size-mb": cache_size_mib,
                 "dht-enabled": dht_enabled,
                 "download-dir": download_dir,
                 "download-queue-enabled": download_queue_enabled,

@@ -10,7 +10,7 @@ from unittest import mock
 import pytest
 
 from transmission_rpc import from_url, utils
-from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER
+from transmission_rpc.constants import DEFAULT_TIMEOUT, LOGGER, get_torrent_arguments
 
 
 def assert_almost_eq(value: float, expected: float):
@@ -31,7 +31,8 @@ def assert_almost_eq(value: float, expected: float):
     }.items(),
 )
 def test_format_size(size, expected: tuple[float, str]):
-    result = utils.format_size(size)
+    with pytest.warns(DeprecationWarning, match="removed in v8"):
+        result = utils.format_size(size)
     assert_almost_eq(result[0], expected[0])
     assert result[1] == expected[1]
 
@@ -50,7 +51,8 @@ def test_format_size(size, expected: tuple[float, str]):
     ],
 )
 def test_format_speed(size, expected):
-    result = utils.format_speed(size)
+    with pytest.warns(DeprecationWarning, match="removed in v8"):
+        result = utils.format_speed(size)
     assert_almost_eq(result[0], expected[0])
     assert result[1] == expected[1]
 
@@ -69,6 +71,12 @@ def test_format_speed(size, expected):
 )
 def test_format_timedelta(delta, expected):
     assert utils.format_timedelta(delta), expected
+
+
+def test_get_torrent_arguments_moved_to_constants():
+    expected = get_torrent_arguments(17)
+    with pytest.warns(DeprecationWarning, match="constants"):
+        assert utils.get_torrent_arguments(17) == expected
 
 
 @pytest.mark.parametrize(

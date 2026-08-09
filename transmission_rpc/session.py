@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing_extensions import Literal
+from typing_extensions import Literal, deprecated
 
 from transmission_rpc.types import Container
 
@@ -166,9 +166,15 @@ class Session(Container):
         return self.fields["blocklist-url"]
 
     @property
-    def cache_size_mb(self) -> int:
-        """maximum size of the disk cache (MB)"""
+    def cache_size_mib(self) -> int:
+        """maximum size of the disk cache (MiB)"""
         return self.fields["cache-size-mb"]
+
+    @property
+    @deprecated("use .cache_size_mib instead")
+    def cache_size_mb(self) -> int:
+        """Compatibility alias for :attr:`cache_size_mib`."""
+        return self.cache_size_mib
 
     @property
     def config_dir(self) -> str:
@@ -186,6 +192,7 @@ class Session(Container):
         return self.fields["download-dir"]
 
     @property
+    @deprecated("use Client.free_space() instead")
     def download_dir_free_space(self) -> int:
         """**DEPRECATED** Use the `free-space` method instead."""
         return self.fields["download-dir-free-space"]

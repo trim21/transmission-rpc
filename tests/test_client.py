@@ -77,19 +77,20 @@ def test_client_add_kwargs():
     with mock.patch("transmission_rpc.client.Client._request", m):
         with mock.patch("transmission_rpc.client.Client.get_session"):
             c = Client()
-            c.add_torrent(
-                torrent_url,
-                download_dir="dd",
-                files_unwanted=[1, 2],
-                files_wanted=[3, 4],
-                paused=False,
-                peer_limit=5,
-                priority_high=[6],
-                priority_low=[7],
-                priority_normal=[8],
-                cookies="coo",
-                bandwidthPriority=4,
-            )
+            with pytest.warns(DeprecationWarning, match="bandwidth_priority"):
+                c.add_torrent(
+                    torrent_url,
+                    download_dir="dd",
+                    files_unwanted=[1, 2],
+                    files_wanted=[3, 4],
+                    paused=False,
+                    peer_limit=5,
+                    priority_high=[6],
+                    priority_low=[7],
+                    priority_normal=[8],
+                    cookies="coo",
+                    bandwidthPriority=4,
+                )
         m.assert_called_with(
             "torrent-add",
             {
@@ -107,6 +108,67 @@ def test_client_add_kwargs():
             },
             timeout=None,
         )
+
+
+def test_client_add_new_bandwidth_priority_name():
+    request = mock.Mock(return_value={1: mock.sentinel.torrent})
+    with mock.patch("transmission_rpc.client.Client._request", request), mock.patch(
+        "transmission_rpc.client.Client.get_session"
+    ):
+        client = Client()
+        assert client.add_torrent(torrent_url, bandwidth_priority=4) is mock.sentinel.torrent
+
+    assert request.call_args.args[1]["bandwidthPriority"] == 4
+
+
+def test_client_add_rejects_both_bandwidth_priority_names():
+    with mock.patch("transmission_rpc.client.Client._request"), mock.patch(
+        "transmission_rpc.client.Client.get_session"
+    ):
+        client = Client()
+        with pytest.raises(ValueError, match="cannot both be set"):
+            client.add_torrent(torrent_url, bandwidth_priority=1, bandwidthPriority=1)
+
+
+def test_start_api_migration():
+    request = mock.Mock()
+    with mock.patch("transmission_rpc.client.Client._request", request), mock.patch(
+        "transmission_rpc.client.Client.get_session"
+    ):
+        client = Client()
+
+        client.start_torrent(1)
+        request.assert_called_with("torrent-start", {}, 1, timeout=None)
+
+        client.start_torrent_now(1)
+        request.assert_called_with("torrent-start-now", {}, 1, timeout=None)
+
+        with pytest.warns(DeprecationWarning, match="bypass_queue"):
+            client.start_torrent(1, bypass_queue=True)
+        request.assert_called_with("torrent-start-now", {}, 1, timeout=None)
+
+        with pytest.warns(DeprecationWarning, match="start_torrent"), mock.patch.object(
+            client, "get_torrents", return_value=[]
+        ):
+            client.start_all()
+
+
+def test_set_session_cache_size_migration():
+    request = mock.Mock()
+    with mock.patch("transmission_rpc.client.Client._request", request), mock.patch(
+        "transmission_rpc.client.Client.get_session"
+    ):
+        client = Client()
+
+        client.set_session(cache_size_mib=8)
+        assert request.call_args.args[1]["cache-size-mb"] == 8
+
+        with pytest.warns(DeprecationWarning, match="cache_size_mib"):
+            client.set_session(cache_size_mb=8)
+        assert request.call_args.args[1]["cache-size-mb"] == 8
+
+        with pytest.raises(ValueError, match="cannot both be set"):
+            client.set_session(cache_size_mib=8, cache_size_mb=8)
 
 
 def test_client_add_url():
@@ -177,7 +239,8 @@ def test_real_torrent_start_all(tr_client: Client, fake_hash_factory):
     for torrent in tr_client.get_torrents():
         assert torrent.stopped or torrent.checking, "all torrent should be stopped"
 
-    tr_client.start_all()
+    with pytest.warns(DeprecationWarning, match="start_torrent"):
+        tr_client.start_all()
     for torrent in tr_client.get_torrents():
         assert torrent.downloading or torrent.checking, "all torrent should be downloading"
 

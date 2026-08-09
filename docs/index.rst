@@ -64,6 +64,7 @@ you can find rpc version by transmission version from
     :caption: Contents:
 
     client.rst
+    migration-v8.rst
     torrent.rst
     enum.rst
     session.rst

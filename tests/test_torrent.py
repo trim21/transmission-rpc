@@ -45,7 +45,8 @@ def test_attributes():
 
     with pytest.raises(KeyError):
         torrent.format_eta()
-    assert not torrent.get_files()
+    with pytest.warns(DeprecationWarning, match="will raise KeyError in v8"):
+        assert not torrent.get_files()
 
     data = {
         "id": 1,
@@ -102,3 +103,25 @@ def test_status():
     assert not Status("downloading").download_pending
     assert Status("download pending").download_pending
     assert Status("download pending") in {"download pending", "o"}
+
+
+def test_deprecated_torrent_property_names():
+    torrent = transmission_rpc.Torrent(fields={"id": 42, "hashString": "hash"})
+    with pytest.warns(DeprecationWarning, match="hash_string"):
+        assert torrent.hashString == "hash"
+    assert torrent.hash_string == "hash"
+
+    file_stat = transmission_rpc.FileStat(fields={"bytesCompleted": 10})
+    with pytest.warns(DeprecationWarning, match="bytes_completed"):
+        assert file_stat.bytesCompleted == 10
+    assert file_stat.bytes_completed == 10
+
+
+def test_deprecated_session_cache_size_name():
+    session = transmission_rpc.Session(fields={"cache-size-mb": 4, "download-dir-free-space": 1024})
+    with pytest.warns(DeprecationWarning, match="cache_size_mib"):
+        assert session.cache_size_mb == 4
+    assert session.cache_size_mib == 4
+
+    with pytest.warns(DeprecationWarning, match="Client.free_space"):
+        assert session.download_dir_free_space == 1024
