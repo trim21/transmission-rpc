@@ -12,7 +12,7 @@ tasks:
   bump:
     vars:
       VERSION:
-        sh: yq '.project.version' pyproject.toml
+        sh: tq --raw '.project.version' -f pyproject.toml
     cmds:
       - git add pyproject.toml
       - 'git commit -m "bump: {{.VERSION}}"'
