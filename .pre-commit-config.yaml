@@ -6,7 +6,7 @@ repos:
     hooks:
       - id: validate-pyproject
         # Optional extra validations from SchemaStore:
-        additional_dependencies: ["validate-pyproject-schema-store[all]"]
+        additional_dependencies: ["validate-pyproject-schema-store[all]==2024.8.19"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.14.0

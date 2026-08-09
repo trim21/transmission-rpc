@@ -26,7 +26,7 @@ class TransmissionError(Exception):
     raw_response: str | None  # raw text http response
     original: Response | None  # original http requests
 
-    def __init__(  # noqa: PLR0917
+    def __init__(
         self,
         message: str = "",
         method: Any | None = None,
