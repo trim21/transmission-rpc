@@ -11,13 +11,34 @@ from transmission_rpc.client import Client
 @pytest.fixture
 def success_response() -> Any:
     """
-    Helper to create a standard success response mock.
+    Helper to create a standard JSON-RPC 2.0 success response mock.
     Returns a callable that produces the response.
+    """
+
+    def _response(result: dict[str, Any] | None = None) -> mock.Mock:
+        result = result or {}
+        # Inject default version info required for Client init
+        result.setdefault("rpc_version", 18)
+        result.setdefault("version", "4.1.0")
+        result.setdefault("rpc_version_semver", "6.0.0")
+
+        return mock.Mock(
+            status=200,
+            headers={"x-transmission-session-id": "0"},
+            data=json.dumps({"jsonrpc": "2.0", "result": result, "id": 1}).encode(),
+        )
+
+    return _response
+
+
+@pytest.fixture
+def legacy_response() -> Any:
+    """
+    Helper to create a legacy (pre-4.1.0 bespoke) success response mock.
     """
 
     def _response(arguments: dict[str, Any] | None = None) -> mock.Mock:
         args = arguments or {}
-        # Inject default version info required for Client init
         args.setdefault("rpc-version", 17)
         args.setdefault("version", "4.0.0")
         args.setdefault("rpc-version-semver", "5.0.0")
@@ -56,8 +77,9 @@ def mock_http_client() -> Generator[mock.MagicMock, None, None]:
             headers={"x-transmission-session-id": "session_id"},
             data=json.dumps(
                 {
-                    "result": "success",
-                    "arguments": {"rpc-version": 17, "rpc-version-semver": "5.3.0", "version": "4.0.0"},
+                    "jsonrpc": "2.0",
+                    "result": {"rpc_version": 18, "rpc_version_semver": "6.0.0", "version": "4.1.0"},
+                    "id": 1,
                 }
             ).encode("utf-8"),
         )

@@ -73,17 +73,21 @@ def test_request_invalid_json(success_response: Any) -> None:
 
 
 def test_request_failure_result(success_response: Any) -> None:
-    """Verify that a JSON response with 'result': 'failure' raises a TransmissionError."""
+    """Verify that a JSON-RPC error response raises a TransmissionError."""
     with mock.patch("urllib3.HTTPConnectionPool.request") as mock_req:
         # 1. Init success
         mock_req.side_effect = [
             success_response(),
-            # 2. Failure response
-            mock.Mock(status=200, headers={}, data=json.dumps({"result": "failure", "arguments": {}}).encode()),
+            # 2. Error response
+            mock.Mock(
+                status=200,
+                headers={},
+                data=json.dumps({"jsonrpc": "2.0", "error": {"code": -32601, "message": "failure"}, "id": 1}).encode(),
+            ),
         ]
 
         c = Client()
-        with pytest.raises(TransmissionError, match='Query failed with result "failure"'):
+        with pytest.raises(TransmissionError, match="failure"):
             c.get_torrents()
 
 
@@ -130,13 +134,13 @@ def test_void_methods_return_none_on_success(mock_network: Any, success_response
     assert c.rename_torrent_path(1, "/path", "name") == ("/a", "b")
 
     # port_test returns object
-    mock_network.return_value = success_response({"port-is-open": True})
+    mock_network.return_value = success_response({"port_is_open": True})
     assert c.port_test().port_is_open is True
 
 
 def test_blocklist_update(mock_network: Any, success_response: Any) -> None:
     """Verify that blocklist_update calls the correct RPC method and returns the blocklist size integer."""
-    mock_network.side_effect = [success_response(), success_response({"blocklist-size": 123})]
+    mock_network.side_effect = [success_response(), success_response({"blocklist_size": 123})]
     c = Client()
     assert c.blocklist_update() == 123
 
@@ -158,6 +162,6 @@ def test_get_recently_active_with_arguments(mock_network: Any, success_response:
     # Passing arguments triggers the 'if arguments:' block
     c.get_recently_active_torrents(arguments=["name"])
 
-    sent_args = mock_network.call_args[1]["json"]["arguments"]["fields"]
+    sent_args = mock_network.call_args[1]["json"]["params"]["fields"]
     assert "name" in sent_args
-    assert "hashString" in sent_args
+    assert "hash_string" in sent_args

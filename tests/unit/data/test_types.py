@@ -43,11 +43,11 @@ def test_group_properties() -> None:
     """
     fields = {
         "name": "g1",
-        "honorsSessionLimits": True,
-        "speed-limit-down-enabled": False,
-        "speed-limit-down": 100,
-        "speed-limit-up-enabled": False,
-        "speed-limit-up": 100,
+        "honors_session_limits": True,
+        "speed_limit_down_enabled": False,
+        "speed_limit_down": 100,
+        "speed_limit_up_enabled": False,
+        "speed_limit_up": 100,
     }
     g = Group(fields=fields)
     assert g.name == "g1"
@@ -62,7 +62,7 @@ def test_port_test_result_properties() -> None:
     """
     Verify that the `PortTestResult` class correctly maps fields to properties.
     """
-    fields = {"port-is-open": True, "ip_protocol": "ipv4"}
+    fields = {"port_is_open": True, "ip_protocol": "ipv4"}
     r = PortTestResult(fields=fields)
     assert r.port_is_open is True
     assert r.ip_protocol == "ipv4"
@@ -100,7 +100,7 @@ def test_get_torrent_arguments() -> None:
     args = get_torrent_arguments(1)
     assert "id" in args
     assert "group" not in args  # added in 17
-    assert TORRENT_GET_ARGS["trackerList"].type == Type.string
+    assert TORRENT_GET_ARGS["tracker_list"].type == Type.string
     assert TORRENT_GET_ARGS["availability"].type == Type.array
     assert "availability" not in get_torrent_arguments(16)
     assert "availability" in get_torrent_arguments(17)

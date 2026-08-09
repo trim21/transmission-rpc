@@ -138,8 +138,8 @@ def test_deprecated_properties(client: Client) -> None:
     with pytest.warns(DeprecationWarning, match="do not use"):
         assert isinstance(client.url, str)
     with pytest.warns(DeprecationWarning, match="do not use"):
-        # Verify it matches the constant for the current mocked version (17)
-        assert client.torrent_get_arguments == get_torrent_arguments(17)
+        # Verify it matches the constant for the current mocked version (18)
+        assert client.torrent_get_arguments == get_torrent_arguments(18)
     with pytest.warns(DeprecationWarning, match="do not use"):
         assert isinstance(client.raw_session, dict)
     with pytest.warns(DeprecationWarning, match="do not use"):
@@ -150,7 +150,7 @@ def test_deprecated_properties(client: Client) -> None:
     with pytest.warns(DeprecationWarning, match="use .get_session"):
         assert client.semver_version is not None
     with pytest.warns(DeprecationWarning, match="use .get_session"):
-        assert client.rpc_version == 17
+        assert client.rpc_version == 18
 
 
 def test_client_init_no_auth(success_response: Any) -> None:
@@ -225,7 +225,7 @@ def test_client_init_path_correction() -> None:
             status=200,
             headers={},
             data=json.dumps(
-                {"result": "success", "arguments": {"rpc-version": 17, "version": "1.0", "rpc-version-semver": "1.0.0"}}
+                {"result": "success", "arguments": {"rpc_version": 17, "version": "1.0", "rpc_version_semver": "1.0.0"}}
             ).encode(),
         )
 

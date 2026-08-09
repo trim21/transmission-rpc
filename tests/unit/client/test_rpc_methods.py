@@ -1,4 +1,3 @@
-import json
 from typing import Any, cast
 from unittest import mock
 
@@ -10,7 +9,7 @@ from transmission_rpc.torrent import Torrent
 
 @pytest.mark.parametrize(
     ("method_name", "expected_method"),
-    [("start_torrent", "torrent-start"), ("start_torrent_now", "torrent-start-now")],
+    [("start_torrent", "torrent_start"), ("start_torrent_now", "torrent_start_now")],
 )
 def test_start_methods_use_all_torrents_by_default(
     mock_network: Any,
@@ -28,12 +27,14 @@ def test_start_methods_use_all_torrents_by_default(
 
     assert mock_network.call_count == 2
     last_call_json = mock_network.call_args_list[-1][1]["json"]
-    assert last_call_json == {"method": expected_method, "arguments": {}}
+    assert last_call_json["jsonrpc"] == "2.0"
+    assert last_call_json["method"] == expected_method
+    assert last_call_json["params"] == {}
 
 
 @pytest.mark.parametrize(
     ("method_name", "expected_method"),
-    [("start_torrent", "torrent-start"), ("start_torrent_now", "torrent-start-now")],
+    [("start_torrent", "torrent_start"), ("start_torrent_now", "torrent_start_now")],
 )
 @pytest.mark.parametrize(
     ("ids", "expected_arguments"),
@@ -53,7 +54,9 @@ def test_start_methods_pass_torrent_ids(
     assert getattr(c, method_name)(ids=ids) is None
 
     sent_json = mock_network.call_args_list[-1][1]["json"]
-    assert sent_json == {"method": expected_method, "arguments": expected_arguments}
+    assert sent_json["jsonrpc"] == "2.0"
+    assert sent_json["method"] == expected_method
+    assert sent_json["params"] == expected_arguments
 
 
 def test_get_torrent_with_args(mock_network: Any, success_response: Any) -> None:
@@ -73,7 +76,7 @@ def test_get_torrent_return_found(mock_network: Any, success_response: Any) -> N
     """
     mock_network.side_effect = [
         success_response(),
-        success_response({"torrents": [{"id": 1, "hashString": "hash1", "name": "found"}]}),
+        success_response({"torrents": [{"id": 1, "hash_string": "hash1", "name": "found"}]}),
     ]
     c = Client()
     t = c.get_torrent(1)
@@ -91,24 +94,20 @@ def test_get_torrents_with_arguments(mock_network: Any, success_response: Any) -
     c.get_torrents(arguments=["name", "id"])
 
     # Verify we sent the combined set of arguments
-    sent_args = mock_network.call_args[1]["json"]["arguments"]["fields"]
+    sent_args = mock_network.call_args[1]["json"]["params"]["fields"]
     assert "name" in sent_args
-    assert "hashString" in sent_args  # Added by the logic
+    assert "hash_string" in sent_args  # Added by the logic
 
 
-def test_change_torrent_warnings_v1_protocol(mock_network: Any, success_response: Any) -> None:
+def test_change_torrent_warnings_v1_protocol(mock_network: Any, legacy_response: Any) -> None:
     """Verify warnings are issued when using `change_torrent` features not supported by the current server version."""
-    # Mock init to return version 1
+    # Mock a pre-4.1.0 server: the initial JSON-RPC probe falls back to legacy
+    # and the request is resent once.
     mock_network.side_effect = [
-        mock.Mock(
-            status=200,
-            headers={"x-transmission-session-id": "0"},
-            data=json.dumps(
-                {"result": "success", "arguments": {"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}}
-            ).encode(),
-        ),
-        success_response(),
-        success_response(),
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init probe
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init legacy retry
+        legacy_response(),  # change_torrent tracker_list
+        legacy_response(),  # change_torrent group
     ]
 
     c = Client()
@@ -136,7 +135,7 @@ def test_change_torrent_round_trips_tracker_tiers(mock_network: Any, success_res
     torrent = Torrent(
         fields={
             "id": 1,
-            "trackerList": (
+            "tracker_list": (
                 "https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce\n"
             ),
         }
@@ -144,7 +143,7 @@ def test_change_torrent_round_trips_tracker_tiers(mock_network: Any, success_res
 
     client.change_torrent(ids=torrent.id, tracker_list=torrent.tracker_list)
 
-    sent = mock_network.call_args.kwargs["json"]["arguments"]["trackerList"]
+    sent = mock_network.call_args.kwargs["json"]["params"]["tracker_list"]
     assert sent == ("https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce")
 
 
@@ -159,21 +158,16 @@ def test_change_torrent_rejects_flat_tracker_list_before_request(mock_network: A
     assert mock_network.call_count == calls_before
 
 
-def test_set_session_warnings_full(mock_network: Any, success_response: Any) -> None:
+def test_set_session_warnings_full(mock_network: Any, legacy_response: Any) -> None:
     """Verify warnings are issued when using `set_session` features not supported by the current server version."""
     # Mock init to return version 1
     mock_network.side_effect = [
-        mock.Mock(
-            status=200,
-            headers={"x-transmission-session-id": "0"},
-            data=json.dumps(
-                {"result": "success", "arguments": {"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}}
-            ).encode(),
-        ),
-        success_response(),
-        success_response(),
-        success_response(),
-        success_response(),
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init probe
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init legacy retry
+        legacy_response(),  # set_session 1
+        legacy_response(),  # set_session 2
+        legacy_response(),  # set_session 3
+        legacy_response(),  # set_session 4
     ]
 
     c = Client()
@@ -192,12 +186,12 @@ def test_set_session_warnings_full(mock_network: Any, success_response: Any) -> 
         mock_warn.assert_called()
 
 
-def test_set_session_default_trackers(mock_network: Any, success_response: Any) -> None:
+def test_set_session_default_trackers(mock_network: Any, legacy_response: Any) -> None:
     """
     Verify warning trigger for default_trackers.
     """
     # Return rpc-version 16 so that default_trackers (req 17) triggers warning
-    mock_network.return_value = success_response({"rpc-version": 16, "version": "3.00", "rpc-version-semver": "3.0.0"})
+    mock_network.return_value = legacy_response({"rpc-version": 16, "version": "3.00", "rpc-version-semver": "3.0.0"})
     c = Client()
 
     with mock.patch.object(c.logger, "warning") as mock_warn:
@@ -205,18 +199,13 @@ def test_set_session_default_trackers(mock_network: Any, success_response: Any) 
         mock_warn.assert_called()
 
 
-def test_set_group_warning(mock_network: Any, success_response: Any) -> None:
+def test_set_group_warning(mock_network: Any, legacy_response: Any) -> None:
     """Verify warning is issued when using `set_group` on a server version that doesn't support it."""
     # Mock init to return version 1
     mock_network.side_effect = [
-        mock.Mock(
-            status=200,
-            headers={"x-transmission-session-id": "0"},
-            data=json.dumps(
-                {"result": "success", "arguments": {"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}}
-            ).encode(),
-        ),
-        success_response(),
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init probe
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init legacy retry
+        legacy_response(),  # set_group
     ]
     c = Client()
 
@@ -225,21 +214,16 @@ def test_set_group_warning(mock_network: Any, success_response: Any) -> None:
         mock_warn.assert_called()
 
 
-def test_change_torrent_version_warnings(mock_network: Any, success_response: Any) -> None:
+def test_change_torrent_version_warnings(mock_network: Any, legacy_response: Any) -> None:
     """Verify specific warnings for `change_torrent` based on RPC version thresholds."""
     # We need to simulate different versions.
     # Case 1: Version 1 (low)
     mock_network.side_effect = [
-        mock.Mock(
-            status=200,
-            headers={"x-transmission-session-id": "0"},
-            data=json.dumps(
-                {"result": "success", "arguments": {"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}}
-            ).encode(),
-        ),
-        success_response(),
-        success_response(),
-        success_response(),
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init probe
+        legacy_response({"rpc-version": 1, "version": "1.0", "rpc-version-semver": "1.0.0"}),  # init legacy retry
+        legacy_response(),  # change_torrent labels
+        legacy_response(),  # change_torrent group
+        legacy_response(),  # change_torrent tracker_list
     ]
     c = Client()
     with mock.patch.object(c.logger, "warning") as mock_warn:
@@ -283,7 +267,7 @@ def test_group_operations(mock_network: Any, success_response: Any) -> None:
 
     # Test get_groups with list
     c.get_groups(["test_g"])
-    assert mock_network.call_args[1]["json"]["arguments"]["group"] == ["test_g"]
+    assert mock_network.call_args[1]["json"]["params"]["group"] == ["test_g"]
 
 
 def test_get_group_empty(mock_network: Any, success_response: Any) -> None:
@@ -301,7 +285,7 @@ def test_passthrough_rpc_commands(mock_network: Any, success_response: Any) -> N
     mock_network.side_effect = [
         success_response(),  # init
         success_response(),  # start_torrent_now
-        success_response({"blocklist-size": 10}),  # blocklist
+        success_response({"blocklist_size": 10}),  # blocklist
     ]
     c = Client()
 
@@ -326,11 +310,11 @@ def test_free_space_success_and_failure(mock_network: Any, success_response: Any
     c = Client()
 
     # Success case
-    mock_network.return_value = success_response({"path": "/test/path", "size-bytes": 100})
+    mock_network.return_value = success_response({"path": "/test/path", "size_bytes": 100})
     assert c.free_space("/test/path") == 100
 
     # Failure/Mismatch case
-    mock_network.return_value = success_response({"path": "/other", "size-bytes": 0})
+    mock_network.return_value = success_response({"path": "/other", "size_bytes": 0})
     assert c.free_space("/test/path") is None
 
 
@@ -348,14 +332,14 @@ def test_session_stats_legacy(mock_network: Any, success_response: Any) -> None:
         success_response(),
         success_response(
             {
-                "session-stats": {
-                    "activeTorrentCount": 5,
-                    "downloadSpeed": 1000,
-                    "pausedTorrentCount": 0,
-                    "torrentCount": 5,
-                    "uploadSpeed": 1000,
-                    "cumulative-stats": {},
-                    "current-stats": {},
+                "session_stats": {
+                    "active_torrent_count": 5,
+                    "download_speed": 1000,
+                    "paused_torrent_count": 0,
+                    "torrent_count": 5,
+                    "upload_speed": 1000,
+                    "cumulative_stats": {},
+                    "current_stats": {},
                 }
             }
         ),
@@ -370,13 +354,13 @@ def test_session_stats_modern(mock_network: Any, success_response: Any) -> None:
         success_response(),
         success_response(
             {
-                "activeTorrentCount": 5,
-                "downloadSpeed": 1000,
-                "pausedTorrentCount": 0,
-                "torrentCount": 5,
-                "uploadSpeed": 1000,
-                "cumulative-stats": {},
-                "current-stats": {},
+                "active_torrent_count": 5,
+                "download_speed": 1000,
+                "paused_torrent_count": 0,
+                "torrent_count": 5,
+                "upload_speed": 1000,
+                "cumulative_stats": {},
+                "current_stats": {},
             }
         ),
     ]

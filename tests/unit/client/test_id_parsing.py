@@ -6,7 +6,7 @@ import pytest
 from transmission_rpc.client import Client
 
 
-@pytest.mark.parametrize("arg", [float(1), "non-hash-string"])
+@pytest.mark.parametrize("arg", [float(1), "non_hash_string"])
 def test_start_torrent_raises_on_invalid_id(mock_network: Any, success_response: Any, arg: Any) -> None:
     """
     Verify that invalid torrent IDs raise ValueError.
@@ -21,7 +21,7 @@ def test_start_torrent_raises_on_invalid_id(mock_network: Any, success_response:
 @pytest.mark.parametrize(
     ("arg", "expected_ids"),
     [
-        ("recently-active", "recently-active"),
+        ("recently_active", "recently_active"),
         ("51ba7d0dd45ab9b9564329c33f4f97493b677924", ["51ba7d0dd45ab9b9564329c33f4f97493b677924"]),
         ((2, "51ba7d0dd45ab9b9564329c33f4f97493b677924"), [2, "51ba7d0dd45ab9b9564329c33f4f97493b677924"]),
         (3, [3]),
@@ -40,7 +40,7 @@ def test_parse_torrent_ids_structure(mock_network: Any, success_response: Any, a
 
     # Check what was sent to the network
     sent_json = mock_network.call_args[1]["json"]
-    sent_ids = sent_json["arguments"].get("ids")
+    sent_ids = sent_json["params"].get("ids")
 
     assert sent_ids == expected_ids
 
@@ -55,7 +55,7 @@ def test_stop_torrent_requires_ids(mock_network: Any, success_response: Any, arg
         c.stop_torrent(ids=arg)
 
 
-@pytest.mark.parametrize("arg", ["not-recently-active", "non-hash-string", -1, 1.1, "5:10", "5,6,8,9,10"])
+@pytest.mark.parametrize("arg", ["not_recently_active", "non_hash_string", -1, 1.1, "5:10", "5,6,8,9,10"])
 def test_parse_torrent_ids_value_error(mock_network: Any, success_response: Any, arg: Any) -> None:
     """
     Verify that invalid ID inputs raise ValueError via the public API.

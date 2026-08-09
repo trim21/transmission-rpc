@@ -132,9 +132,9 @@ def test_torrent_availability_is_fetched_by_default(tr_client: Client) -> None:
         added = tr_client.add_torrent(torrent_file, paused=True)
 
     default_torrent = tr_client.get_torrent(added.id)
-    explicit_torrent = tr_client.get_torrent(added.id, arguments=["availability", "pieceCount"])
+    explicit_torrent = tr_client.get_torrent(added.id, arguments=["availability", "piece_count"])
     default_torrents = tr_client.get_torrents(ids=[added.id])
-    explicit_torrents = tr_client.get_torrents(ids=[added.id], arguments=["availability", "pieceCount"])
+    explicit_torrents = tr_client.get_torrents(ids=[added.id], arguments=["availability", "piece_count"])
 
     assert len(default_torrents) == 1
     assert len(explicit_torrents) == 1
@@ -177,11 +177,11 @@ def test_tracker_list_round_trip(tr_client: Client) -> None:
     ]
     tr_client.change_torrent(torrent.id, tracker_list=expected)
 
-    refetched = tr_client.get_torrent(torrent.id, arguments=["trackerList"])
+    refetched = tr_client.get_torrent(torrent.id, arguments=["tracker_list"])
     assert refetched.tracker_list == expected
 
     tr_client.change_torrent(refetched.id, tracker_list=refetched.tracker_list)
-    assert tr_client.get_torrent(torrent.id, arguments=["trackerList"]).tracker_list == expected
+    assert tr_client.get_torrent(torrent.id, arguments=["tracker_list"]).tracker_list == expected
 
 
 @skip_on(ServerTooLowError, "group methods is added in rpc version 17")

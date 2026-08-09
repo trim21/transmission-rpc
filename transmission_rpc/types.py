@@ -2,19 +2,41 @@ from __future__ import annotations
 
 from typing import Any, NamedTuple
 
+from transmission_rpc._compat import field_names, to_snake
 from transmission_rpc.constants import Priority
+
+_MISSING = object()
+
+
+def get_field(fields: dict[str, Any], key: str, default: Any = _MISSING) -> Any:
+    """Read a canonical snake_case field, falling back to legacy RPC names."""
+    for candidate in field_names(key):
+        if candidate in fields:
+            return fields[candidate]
+    if default is _MISSING:
+        raise KeyError(key)
+    return default
 
 
 class Container:
-    fields: dict[str, Any]  #: raw response data
+    fields: dict[str, Any]  #: raw response data (snake_case when using JSON-RPC 2.0)
     __slots__ = ("fields",)
 
     def __init__(self, *, fields: dict[str, Any]):
         self.fields = fields
 
+    def _get_field(self, key: str) -> Any:
+        """Look up a snake_case field, falling back to its legacy variants.
+
+        Raises KeyError when the field is missing in either form.
+        """
+        return get_field(self.fields, key)
+
     def get(self, key: str, default: Any | None = None) -> Any:
-        """get the raw value by the **raw rpc response key**"""
-        return self.fields.get(key, default)
+        """get the raw value, accepting both the JSON-RPC 2.0 (snake_case)
+        and the legacy (kebab-case/camelCase) field name."""
+        snake = to_snake(key)
+        return get_field(self.fields, snake, default)
 
     def __repr__(self) -> str:
         return f"<Container fields={self.fields!r}>"
@@ -40,10 +62,10 @@ class File(NamedTuple):
     """id of the file of this torrent, not should not be used outside the torrent scope"""
 
     begin_piece: int | None = None
-    """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
+    """added in Transmission 4.1.0 rpc-version-semver 6.0.0, rpc-version 18"""
 
     end_piece: int | None = None
-    """add in Transmission 4.1.0 rpc-version-semver 5.4.0, rpc-version 18"""
+    """added in Transmission 4.1.0 rpc-version-semver 6.0.0, rpc-version 18"""
 
 
 class Group(Container):
@@ -56,32 +78,32 @@ class Group(Container):
     @property
     def name(self) -> str:
         """Bandwidth group name"""
-        return self.fields["name"]
+        return self._get_field("name")
 
     @property
     def honors_session_limits(self) -> bool:
         """true if session upload limits are honored"""
-        return self.fields["honorsSessionLimits"]
+        return self._get_field("honors_session_limits")
 
     @property
     def speed_limit_down_enabled(self) -> bool:
         """true means enabled"""
-        return self.fields["speed-limit-down-enabled"]
+        return self._get_field("speed_limit_down_enabled")
 
     @property
     def speed_limit_down(self) -> int:
         """max global download speed (KBps)"""
-        return self.fields["speed-limit-down"]
+        return self._get_field("speed_limit_down")
 
     @property
     def speed_limit_up_enabled(self) -> bool:
         """true means enabled"""
-        return self.fields["speed-limit-up-enabled"]
+        return self._get_field("speed_limit_up_enabled")
 
     @property
     def speed_limit_up(self) -> int:
         """max global upload speed (KBps)"""
-        return self.fields["speed-limit-up"]
+        return self._get_field("speed_limit_up")
 
 
 class PortTestResult(Container):
@@ -96,7 +118,7 @@ class PortTestResult(Container):
     @property
     def port_is_open(self) -> bool:
         """available on all transmission version"""
-        return self.fields["port-is-open"]
+        return self._get_field("port_is_open")
 
     @property
     def ip_protocol(self) -> str:
@@ -104,9 +126,9 @@ class PortTestResult(Container):
         ``ipv6`` if the test was carried out on IPv6,
         unset if it cannot be determined
 
-        Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+        Available in Transmission 4.1.0 (rpc-version-semver 6.0.0, rpc-version: 18)
         """
-        return self.fields["ip_protocol"]
+        return self._get_field("ip_protocol")
 
 
 class BitMap:

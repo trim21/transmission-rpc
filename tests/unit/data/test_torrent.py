@@ -23,7 +23,7 @@ def test_torrent_missing_optional_fields() -> None:
     # files present but priorities/wanted missing
     fields = {
         "id": 1,
-        "files": [{"length": 1, "name": "f", "bytesCompleted": 0}],
+        "files": [{"length": 1, "name": "f", "bytes_completed": 0}],
     }
     t = Torrent(fields=fields)
     assert len(t.get_files()) == 1
@@ -35,7 +35,7 @@ def test_torrent_status_and_idle_mode_mapping() -> None:
     """Verify `seed_idle_mode` enum conversion and `status` property string mapping."""
     fields = {
         "id": 1,
-        "seedIdleMode": 0,  # global
+        "seed_idle_mode": 0,  # global
         "status": 4,  # downloading
     }
     t = Torrent(fields=fields)
@@ -48,10 +48,10 @@ def test_torrent_defaults_and_basic_props() -> None:
     """Verify default values, basic properties, and error handling for missing fields."""
     fields = {
         "id": 1,
-        "file-count": 5,
-        "primary-mime-type": "text/plain",
-        "hashString": "hash",
-        "files": [{"length": 100, "name": "f1", "bytesCompleted": 100}],
+        "file_count": 5,
+        "primary_mime_type": "text/plain",
+        "hash_string": "hash",
+        "files": [{"length": 100, "name": "f1", "bytes_completed": 100}],
         "pieces": "",
     }
     t = Torrent(fields=fields)
@@ -99,13 +99,13 @@ def test_torrent_progress_and_availability() -> None:
     """Verify calculations for progress, availability, and ratio, including division by zero checks."""
     fields = {
         "id": 1,
-        "sizeWhenDone": 100,
-        "leftUntilDone": 50,
-        "uploadRatio": 1.0,
-        "percentDone": 0.5,
-        "totalSize": 100,
-        "fileStats": [{"bytesCompleted": 100, "wanted": True, "priority": 1}],
-        "desiredAvailable": 0,
+        "size_when_done": 100,
+        "left_until_done": 50,
+        "upload_ratio": 1.0,
+        "percent_done": 0.5,
+        "total_size": 100,
+        "file_stats": [{"bytes_completed": 100, "wanted": True, "priority": 1}],
+        "desired_available": 0,
     }
     t = Torrent(fields=fields)
 
@@ -123,8 +123,8 @@ def test_torrent_progress_and_availability() -> None:
     # and sizeWhenDone/leftUntilDone as 0
     fields_zero = {
         "id": 1,
-        "sizeWhenDone": 0,
-        "leftUntilDone": 0,
+        "size_when_done": 0,
+        "left_until_done": 0,
     }
     t_zero = Torrent(fields=fields_zero)
     # Should catch ZeroDivisionError and return 0.0
@@ -134,7 +134,7 @@ def test_torrent_progress_and_availability() -> None:
 def test_tracker_list_preserves_tiers() -> None:
     raw = "https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce\n"
 
-    torrent = Torrent(fields={"id": 1, "trackerList": raw})
+    torrent = Torrent(fields={"id": 1, "tracker_list": raw})
 
     assert torrent.tracker_list == [
         ["https://a.example/announce", "https://b.example/announce"],
@@ -147,7 +147,7 @@ def test_torrent_representation() -> None:
     fields = {
         "id": 1,
         "name": "test",
-        "hashString": "hash",
+        "hash_string": "hash",
         "eta": -1,
     }
     t = Torrent(fields=fields)
@@ -173,18 +173,18 @@ def test_torrent_representation() -> None:
     data_full = {
         "id": 1,
         "status": 4,
-        "sizeWhenDone": 1000,
-        "leftUntilDone": 500,
-        "uploadedEver": 1000,
-        "downloadedEver": 2000,
-        "uploadRatio": 0.5,
+        "size_when_done": 1000,
+        "left_until_done": 500,
+        "uploaded_ever": 1000,
+        "downloaded_ever": 2000,
+        "upload_ratio": 0.5,
         "eta": 3600,
-        "percentDone": 0.5,
-        "activityDate": calendar.timegm((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
-        "addedDate": calendar.timegm((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
-        "startDate": calendar.timegm((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
-        "doneDate": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
-        "dateCreated": calendar.timegm((2008, 12, 11, 7, 0, 0, 0, 0, -1)),
+        "percent_done": 0.5,
+        "activity_date": calendar.timegm((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
+        "added_date": calendar.timegm((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
+        "start_date": calendar.timegm((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
+        "done_date": calendar.timegm((2008, 12, 11, 10, 0, 15, 0, 0, -1)),
+        "date_created": calendar.timegm((2008, 12, 11, 7, 0, 0, 0, 0, -1)),
         "availability": [1, 1, 0, -1],
         "priorities": [1, 0, -1],
     }
@@ -206,10 +206,10 @@ def test_torrent_representation() -> None:
     # Zero date check
     data_zero_date = {
         "id": 1,
-        "activityDate": time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
-        "addedDate": time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
-        "startDate": time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
-        "doneDate": 0,
+        "activity_date": time.mktime((2008, 12, 11, 11, 15, 30, 0, 0, -1)),
+        "added_date": time.mktime((2008, 12, 11, 8, 5, 10, 0, 0, -1)),
+        "start_date": time.mktime((2008, 12, 11, 9, 10, 5, 0, 0, -1)),
+        "done_date": 0,
     }
 
     torrent_zero = transmission_rpc.Torrent(fields=data_zero_date)
@@ -262,21 +262,21 @@ def test_eta_and_date_handling() -> None:
     fields = {
         "id": 1,
         "eta": -1,
-        "etaIdle": -1,
+        "eta_idle": -1,
         "pieces": "AA==",  # base64 for 0x00
-        "fileStats": [],
+        "file_stats": [],
         "files": [],
         "priorities": [],
         "wanted": [],
         "peers": [],
         "trackers": [],
-        "trackerStats": [],
-        "trackerList": "",
+        "tracker_stats": [],
+        "tracker_list": "",
         "status": 0,
-        "activityDate": 0,
-        "addedDate": 0,
-        "startDate": 0,
-        "doneDate": 0,
+        "activity_date": 0,
+        "added_date": 0,
+        "start_date": 0,
+        "done_date": 0,
     }
     t = Torrent(fields=fields)
     assert t.format_eta() == "not available"
@@ -291,8 +291,8 @@ def test_eta_and_date_handling() -> None:
 
     fields_valid = fields.copy()
     fields_valid["eta"] = 3600
-    fields_valid["etaIdle"] = 60
-    fields_valid["doneDate"] = 1000000000
+    fields_valid["eta_idle"] = 60
+    fields_valid["done_date"] = 1000000000
     t = Torrent(fields=fields_valid)
     assert str(t.eta) == "1:00:00"
     assert str(t.eta_idle) == "0:01:00"
@@ -310,8 +310,29 @@ def test_activity_date_handles_zero_value() -> None:
     """
     data = {
         "id": 1,
-        "activityDate": 0,
+        "activity_date": 0,
     }
 
     torrent = transmission_rpc.Torrent(fields=data)
     assert torrent.activity_date
+
+
+def test_jsonrpc_2_torrent_fields() -> None:
+    torrent = transmission_rpc.Torrent(
+        fields={
+            "id": 1,
+            "bytes_completed": [12],
+            "sequential_download_from_piece": 4,
+            "tracker_stats": [{"downloader_count": 3}],
+            "webseeds_ex": [
+                {"url": "https://example.com/file", "is_downloading": True, "download_bytes_per_second": 100}
+            ],
+        }
+    )
+
+    assert torrent.bytes_completed == [12]
+    assert torrent.sequential_download_from_piece == 4
+    assert torrent.tracker_stats[0].downloader_count == 3
+    assert torrent.webseeds_ex[0].url == "https://example.com/file"
+    assert torrent.webseeds_ex[0].is_downloading is True
+    assert torrent.webseeds_ex[0].download_bytes_per_second == 100

@@ -10,7 +10,7 @@ import string
 import time
 import types
 from collections.abc import Iterable
-from typing import Any, BinaryIO, Literal, TypeVar
+from typing import Any, BinaryIO, Literal, TypeVar, cast
 from urllib.parse import urlparse
 
 import certifi
@@ -19,6 +19,7 @@ from typing_extensions import Self, TypedDict, deprecated
 from urllib3 import Timeout
 from urllib3.util import make_headers
 
+from transmission_rpc._compat import convert_jsonrpc_args, convert_request_args
 from transmission_rpc._tracker_list import serialize_tracker_list
 from transmission_rpc._unix_socket import UnixHTTPConnectionPool
 from transmission_rpc.constants import LOGGER, RpcMethod, get_torrent_arguments
@@ -30,7 +31,7 @@ from transmission_rpc.error import (
 )
 from transmission_rpc.session import Session, SessionStats
 from transmission_rpc.torrent import Torrent
-from transmission_rpc.types import Group, PortTestResult
+from transmission_rpc.types import Group, PortTestResult, get_field
 
 try:
     __version__ = importlib.metadata.version("transmission-rpc")
@@ -54,10 +55,40 @@ _Timeout = Timeout | int | float
 _TLS_CERT_FILE_DEFAULT = os.getenv("TRANSMISSION_RPC_PY_CERT_FILE")
 
 
-class ResponseData(TypedDict):
+class ResponseData(TypedDict, total=False):
+    """Transmission RPC response, either JSON-RPC 2.0 or the legacy format."""
+
+    jsonrpc: str
+    result: Any
+    error: Any
+    id: int | str | None
     arguments: Any
     tag: int
+
+
+class LegacyResponseData(TypedDict):
+    arguments: dict[str, Any]
     result: str
+
+
+def _is_jsonrpc_response(data: Any) -> bool:
+    """A response is JSON-RPC 2.0 iff it carries the ``jsonrpc`` field.
+
+    Legacy (pre-4.1.0) servers never emit that field, so its presence is a
+    reliable protocol probe. Errors also carry it, so this stays true for
+    error responses.
+    """
+    return isinstance(data, dict) and cast("dict[str, Any]", data).get("jsonrpc") == "2.0"
+
+
+# RPC methods whose legacy ``download_dir`` argument uses camelCase rather
+# than the kebab-case used by the rest of the legacy API.
+_TORRENT_METHODS = frozenset(
+    {
+        RpcMethod.TorrentGet,
+        RpcMethod.TorrentSet,
+    }
+)
 
 
 def ensure_location_str(s: str | pathlib.Path) -> str:
@@ -89,8 +120,8 @@ def _parse_torrent_ids(args: Any) -> str | list[str | int]:
     if isinstance(args, int):
         return [_parse_torrent_id(args)]
     if isinstance(args, str):
-        if args == "recently-active":
-            return args
+        if args in {"recently-active", "recently_active"}:
+            return "recently_active"
         return [_parse_torrent_id(args)]
     if isinstance(args, (list, tuple)):
         return [_parse_torrent_id(item) for item in args]
@@ -160,6 +191,9 @@ class Client:
 
         self.__raw_session: dict[str, Any] = {}
         self.__session_id = "0"
+        # None = protocol not yet probed; True = JSON-RPC 2.0; False = legacy
+        self.__use_jsonrpc: bool | None = None
+        self.__request_id = 0
 
         self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
@@ -175,7 +209,7 @@ class Client:
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:
             raise ValueError(f"Unknown protocol {protocol!r}, only 'http', 'https' or 'http+unix' is supported")
-        self.get_session(arguments=["rpc-version", "rpc-version-semver", "version"])
+        self.get_session(arguments=["rpc_version", "rpc_version_semver", "version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
 
     @property
@@ -285,7 +319,11 @@ class Client:
         timeout: _Timeout | None = None,
     ) -> dict[str, Any]:
         """
-        Send json-rpc request to Transmission using http POST
+        Send an RPC request to Transmission using HTTP POST.
+
+        Uses the JSON-RPC 2.0 protocol when the server supports it (4.1.0+),
+        probing on the first request and permanently falling back to the legacy
+        bespoke protocol for older servers.
         """
         if not isinstance(method, str):
             raise TypeError("request takes method as string")  # pragma: no cover
@@ -300,7 +338,7 @@ class Client:
         elif require_ids:
             raise ValueError("request require ids")
 
-        query = {"method": method, "arguments": arguments}
+        query = self._build_query(method, arguments)
 
         start = time.monotonic()
         try:
@@ -322,35 +360,40 @@ class Client:
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(json.dumps(data, indent=2))
 
-        if "result" not in data:
-            raise TransmissionError(
-                "Query failed, response data missing without result.",
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
+        if self.__use_jsonrpc is None:
+            # The first request doubles as the protocol probe. A response
+            # without the `jsonrpc` field means a pre-4.1.0 server: fall back
+            # to the legacy protocol and resend the request once.
+            if _is_jsonrpc_response(data):
+                self.__use_jsonrpc = True
+            else:
+                self.__use_jsonrpc = False
+                self.logger.debug("server does not support JSON-RPC 2.0, falling back to legacy protocol")
+                start = time.monotonic()
+                try:
+                    http_data = self._http_query(self._build_query(method, arguments), timeout)
+                finally:
+                    elapsed = time.monotonic() - start
+                    self.logger.debug("legacy retry took %.3f s", elapsed)
+                try:
+                    data = json.loads(http_data)
+                except json.JSONDecodeError as error:
+                    self.logger.exception("Error:")
+                    self.logger.exception('Request: "%s"', query)
+                    self.logger.exception('HTTP data: "%s"', http_data)
+                    raise TransmissionError(
+                        "failed to parse response as json", method=method, argument=arguments, raw_response=http_data
+                    ) from error
 
-        if data["result"] != "success":
-            raise TransmissionError(
-                f'Query failed with result "{data["result"]}".',
-                method=method,
-                argument=arguments,
-                response=data,
-                raw_response=http_data,
-            )
-
-        res = data["arguments"]
+        res = self._parse_response(method, data, arguments, http_data)
 
         if method == RpcMethod.TorrentGet:
             return res
         if method == RpcMethod.TorrentAdd:
             results: dict[str, Any] = {}
-            item = None
-            if "torrent-added" in res:
-                item = res["torrent-added"]
-            elif "torrent-duplicate" in res:
-                item = res["torrent-duplicate"]
+            item = get_field(res, "torrent_added", None)
+            if item is None:
+                item = get_field(res, "torrent_duplicate", None)
             if item:
                 results[item["id"]] = Torrent(fields=item)
             else:
@@ -365,18 +408,92 @@ class Client:
         if method == RpcMethod.SessionGet:
             self.__raw_session.update(res)
         if method == RpcMethod.SessionStats:
-            # older versions of T has the return data in "session-stats"
-            if "session-stats" in res:
-                return res["session-stats"]
+            # older versions of T have the return data in "session-stats"
+            session_stats = get_field(res, "session_stats", None)
+            if session_stats is not None:
+                return session_stats
             return res
 
         return res
 
+    def _build_query(self, method: RpcMethod, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Build the request payload in the current protocol format.
+
+        An unprobed client (``__use_jsonrpc is None``) sends JSON-RPC 2.0,
+        since that first request doubles as the protocol probe.
+        """
+        self.__request_id += 1
+        if self.__use_jsonrpc is not False:
+            return {
+                "jsonrpc": "2.0",
+                "method": method.value.replace("-", "_"),
+                "params": convert_jsonrpc_args(arguments),
+                "id": self.__request_id,
+            }
+        return {
+            "method": method.value,
+            "arguments": convert_request_args(arguments, torrent=method in _TORRENT_METHODS),
+        }
+
+    def _parse_response(
+        self,
+        method: RpcMethod,
+        data: ResponseData,
+        arguments: dict[str, Any],
+        http_data: str,
+    ) -> dict[str, Any]:
+        """Extract the result object from a response, raising on errors."""
+        if self.__use_jsonrpc:
+            if "error" in data:
+                error = data["error"]
+                error_data = cast("dict[str, Any]", error) if isinstance(error, dict) else {}
+                message = error_data.get("message", "unknown error")
+                details = error_data.get("data")
+                if isinstance(details, dict) and "error_string" in details:
+                    message = f"{message}: {details['error_string']}"
+                raise TransmissionError(
+                    message,
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
+            if "result" not in data:
+                raise TransmissionError(
+                    "Query failed, response data missing without result.",
+                    method=method,
+                    argument=arguments,
+                    response=data,
+                    raw_response=http_data,
+                )
+            return data["result"]
+
+        if "result" not in data:
+            raise TransmissionError(
+                "Query failed, response data missing without result.",
+                method=method,
+                argument=arguments,
+                response=data,
+                raw_response=http_data,
+            )
+
+        legacy_data = cast("LegacyResponseData", data)
+        if legacy_data["result"] != "success":
+            raise TransmissionError(
+                f'Query failed with result "{legacy_data["result"]}".',
+                method=method,
+                argument=arguments,
+                response=data,
+                raw_response=http_data,
+            )
+
+        return legacy_data["arguments"]
+
     def _update_server_version(self) -> None:
         """Decode the Transmission version string, if available."""
-        self.__semver_version = self.__raw_session.get("rpc-version-semver")
-        self.__server_version = self.__raw_session["version"]
-        self.__protocol_version = self.__raw_session["rpc-version"]
+        self.__semver_version = get_field(self.__raw_session, "rpc_version_semver", None)
+        self.__server_version = get_field(self.__raw_session, "version")
+        self.__protocol_version = get_field(self.__raw_session, "rpc_version")
 
     @property
     @deprecated("use .get_session().rpc_version_semver instead")
@@ -424,8 +541,10 @@ class Client:
         priority_normal: list[int] | None = None,
         cookies: str | None = None,
         labels: Iterable[str] | None = None,
+        bandwidth_priority: int | None = None,
         bandwidthPriority: int | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
     ) -> Torrent:
         """
         Add torrent to transfers list. ``torrent`` can be:
@@ -443,8 +562,11 @@ class Client:
                 torrent to add
             timeout:
                 request timeout
-            bandwidthPriority:
+            bandwidth_priority:
                 Priority for this transfer.
+            bandwidthPriority:
+                .. deprecated:: 8.0.0
+                    Use ``bandwidth_priority`` instead.
             cookies:
                 One or more HTTP cookie(s).
             download_dir:
@@ -470,25 +592,34 @@ class Client:
             sequential_download:
                 download torrent pieces sequentially.
                 Add in rpc 18.
+            sequential_download_from_piece:
+                first piece to download when sequential download is enabled.
+                Add in rpc 18.
         """
         if labels is not None:
             self._rpc_version_warning(17)
 
-        if sequential_download is not None:
+        if sequential_download is not None or sequential_download_from_piece is not None:
             self._rpc_version_warning(18)
+
+        if bandwidth_priority is not None and bandwidthPriority is not None:
+            raise ValueError("bandwidth_priority and bandwidthPriority cannot both be set")
+        if bandwidth_priority is None:
+            bandwidth_priority = bandwidthPriority
 
         kwargs: dict[str, Any] = remove_unset_value(
             {
-                "download-dir": download_dir,
-                "files-unwanted": files_unwanted,
-                "files-wanted": files_wanted,
+                "download_dir": download_dir,
+                "files_unwanted": files_unwanted,
+                "files_wanted": files_wanted,
                 "paused": paused,
-                "peer-limit": peer_limit,
-                "priority-high": priority_high,
-                "priority-low": priority_low,
-                "priority-normal": priority_normal,
-                "bandwidthPriority": bandwidthPriority,
+                "peer_limit": peer_limit,
+                "priority_high": priority_high,
+                "priority_low": priority_low,
+                "priority_normal": priority_normal,
+                "bandwidth_priority": bandwidth_priority,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
                 "cookies": cookies,
                 "labels": list_or_none(_single_str_as_list(labels)),
             }
@@ -512,7 +643,7 @@ class Client:
         """
         self._request(
             RpcMethod.TorrentRemove,
-            {"delete-local-data": delete_data},
+            {"delete_local_data": delete_data},
             ids,
             True,
             timeout=timeout,
@@ -576,7 +707,7 @@ class Client:
             KeyError: torrent with given ``torrent_id`` not found
         """
         if arguments:
-            arguments = list(set(arguments) | {"id", "hashString"})
+            arguments = list(set(arguments) | {"id", "hash_string"})
         else:
             arguments = self.__torrent_get_arguments
         torrent_id = _parse_torrent_id(torrent_id)
@@ -590,7 +721,7 @@ class Client:
         )
 
         for torrent in result["torrents"]:
-            if torrent.get("hashString") == torrent_id or torrent.get("id") == torrent_id:
+            if get_field(torrent, "hash_string", None) == torrent_id or get_field(torrent, "id", None) == torrent_id:
                 return Torrent(fields=torrent)
         raise KeyError("Torrent not found in result")
 
@@ -606,7 +737,7 @@ class Client:
         Returns a list of Torrent object.
         """
         if arguments:
-            arguments = list(set(arguments) | {"id", "hashString"})
+            arguments = list(set(arguments) | {"id", "hash_string"})
         else:
             arguments = self.__torrent_get_arguments
         return [
@@ -626,11 +757,11 @@ class Client:
                 list of recently active torrents and list of torrent-id of recently-removed torrents.
         """
         if arguments:
-            arguments = list(set(arguments) | {"id", "hashString"})
+            arguments = list(set(arguments) | {"id", "hash_string"})
         else:
             arguments = self.__torrent_get_arguments
 
-        result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently-active", timeout=timeout)
+        result = self._request(RpcMethod.TorrentGet, {"fields": arguments}, "recently_active", timeout=timeout)
 
         return [Torrent(fields=x) for x in result["torrents"]], result["removed"]
 
@@ -661,6 +792,7 @@ class Client:
         group: str | None = None,
         tracker_list: Iterable[Iterable[str]] | None = None,
         sequential_download: bool | None = None,
+        sequential_download_from_piece: int | None = None,
         tracker_add: Iterable[str] | None = None,
         tracker_replace: Iterable[tuple[int, str]] | None = None,
         tracker_remove: Iterable[int] | None = None,
@@ -705,6 +837,7 @@ class Client:
                 empty tracker URLs, non-string tracker URLs, and tracker URLs containing CR or LF are rejected.
 
             sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
+            sequential_download_from_piece: first piece to download in sequential mode. Add in rpc 18.
 
             tracker_add: Array of string with announce URLs to add.
                 **Deprecated** since transmission daemon 4.0.0, this argument is deprecated,
@@ -720,8 +853,7 @@ class Client:
 
         Warnings:
             ``kwargs`` is for the future features not supported yet, it's not compatibility promising.
-            It will be bypassed to request arguments **as-is**,
-            the underline in the key will not be replaced, so you should use kwargs like ``{'a-argument': 'value'}``
+            Known legacy argument names are normalized for the selected protocol.
         """
         if labels is not None:
             self._rpc_version_warning(16)
@@ -732,33 +864,37 @@ class Client:
         if group is not None:
             self._rpc_version_warning(17)
 
+        if sequential_download is not None or sequential_download_from_piece is not None:
+            self._rpc_version_warning(18)
+
         args: dict[str, Any] = remove_unset_value(
             {
-                "bandwidthPriority": bandwidth_priority,
-                "downloadLimit": download_limit,
-                "downloadLimited": download_limited,
-                "uploadLimit": upload_limit,
-                "uploadLimited": upload_limited,
-                "files-unwanted": list_or_none(files_unwanted),
-                "files-wanted": list_or_none(files_wanted),
-                "honorsSessionLimits": honors_session_limits,
+                "bandwidth_priority": bandwidth_priority,
+                "download_limit": download_limit,
+                "download_limited": download_limited,
+                "upload_limit": upload_limit,
+                "upload_limited": upload_limited,
+                "files_unwanted": list_or_none(files_unwanted),
+                "files_wanted": list_or_none(files_wanted),
+                "honors_session_limits": honors_session_limits,
                 "location": location,
-                "peer-limit": peer_limit,
-                "priority-high": list_or_none(priority_high),
-                "priority-low": list_or_none(priority_low),
-                "priority-normal": list_or_none(priority_normal),
-                "queuePosition": queue_position,
-                "seedIdleLimit": seed_idle_limit,
-                "seedIdleMode": seed_idle_mode,
-                "seedRatioLimit": seed_ratio_limit,
-                "seedRatioMode": seed_ratio_mode,
-                "trackerAdd": tracker_add,
-                "trackerRemove": tracker_remove,
-                "trackerReplace": tracker_replace,
+                "peer_limit": peer_limit,
+                "priority_high": list_or_none(priority_high),
+                "priority_low": list_or_none(priority_low),
+                "priority_normal": list_or_none(priority_normal),
+                "queue_position": queue_position,
+                "seed_idle_limit": seed_idle_limit,
+                "seed_idle_mode": seed_idle_mode,
+                "seed_ratio_limit": seed_ratio_limit,
+                "seed_ratio_mode": seed_ratio_mode,
+                "tracker_add": tracker_add,
+                "tracker_remove": tracker_remove,
+                "tracker_replace": tracker_replace,
                 "labels": list_or_none(_single_str_as_list(labels)),
-                "trackerList": None if tracker_list is None else serialize_tracker_list(tracker_list),
+                "tracker_list": None if tracker_list is None else serialize_tracker_list(tracker_list),
                 "group": group,
                 "sequential_download": sequential_download,
+                "sequential_download_from_piece": sequential_download_from_piece,
             }
         )
 
@@ -872,15 +1008,17 @@ class Client:
         alt_speed_time_enabled: bool | None = None,
         alt_speed_time_end: int | None = None,
         alt_speed_up: int | None = None,
+        anti_brute_force_enabled: bool | None = None,
         blocklist_enabled: bool | None = None,
         blocklist_url: str | None = None,
+        cache_size_mib: int | None = None,
         cache_size_mb: int | None = None,
         dht_enabled: bool | None = None,
         default_trackers: Iterable[str] | None = None,
         download_dir: str | None = None,
         download_queue_enabled: bool | None = None,
         download_queue_size: int | None = None,
-        encryption: Literal["required", "preferred", "tolerated"] | None = None,
+        encryption: Literal["required", "preferred", "allowed", "tolerated"] | None = None,
         idle_seeding_limit: int | None = None,
         idle_seeding_limit_enabled: bool | None = None,
         incomplete_dir: str | None = None,
@@ -892,15 +1030,18 @@ class Client:
         peer_port_random_on_start: bool | None = None,
         pex_enabled: bool | None = None,
         port_forwarding_enabled: bool | None = None,
+        preferred_transports: Iterable[Literal["utp", "tcp"]] | None = None,
         queue_stalled_enabled: bool | None = None,
         queue_stalled_minutes: int | None = None,
         rename_partial_files: bool | None = None,
+        reqq: int | None = None,
         script_torrent_done_enabled: bool | None = None,
         script_torrent_done_filename: str | None = None,
         seed_queue_enabled: bool | None = None,
         seed_queue_size: int | None = None,
         seed_ratio_limit: float | None = None,
         seed_ratio_limited: bool | None = None,
+        sequential_download: bool | None = None,
         speed_limit_down: int | None = None,
         speed_limit_down_enabled: bool | None = None,
         speed_limit_up: int | None = None,
@@ -938,8 +1079,11 @@ class Client:
                 Enables the block list
             blocklist_url:
                 Location of the block list. Updated with blocklist-update.
-            cache_size_mb:
+            cache_size_mib:
                 The maximum size of the disk cache in MB
+            cache_size_mb:
+                .. deprecated:: 8.0.0
+                    Use ``cache_size_mib`` instead.
             default_trackers:
                 list of default trackers to use on public torrents.
             dht_enabled:
@@ -951,7 +1095,8 @@ class Client:
             download_queue_size:
                 Number of slots in the download queue.
             encryption:
-                Set the session encryption mode, one of ``required``, ``preferred`` or ``tolerated``.
+                Set the session encryption mode. JSON-RPC 2.0 uses ``allowed``;
+                the legacy spelling ``tolerated`` is accepted for compatibility.
             idle_seeding_limit:
                 The default seed inactivity limit in minutes.
             idle_seeding_limit_enabled:
@@ -1019,11 +1164,16 @@ class Client:
 
         Warnings:
             ``kwargs`` is pass the arguments not supported yet future, it's not compatibility promising.
-            transmission-rpc will merge ``kwargs`` in rpc arguments **as-is**
+            Known legacy argument names are normalized for the selected protocol.
         """
 
-        if encryption is not None and encryption not in ["required", "preferred", "tolerated"]:
+        if encryption is not None and encryption not in ["required", "preferred", "allowed", "tolerated"]:
             raise ValueError("Invalid encryption value")
+
+        if cache_size_mib is not None and cache_size_mb is not None:
+            raise ValueError("cache_size_mib and cache_size_mb cannot both be set")
+        if cache_size_mib is None:
+            cache_size_mib = cache_size_mb
 
         if default_trackers is not None:
             self._rpc_version_warning(17)
@@ -1035,56 +1185,62 @@ class Client:
             self._rpc_version_warning(17)
         if script_torrent_added_filename is not None:
             self._rpc_version_warning(17)
+        if preferred_transports is not None or sequential_download is not None:
+            self._rpc_version_warning(18)
 
         args: dict[str, Any] = remove_unset_value(
             {
-                "alt-speed-down": alt_speed_down,
-                "alt-speed-enabled": alt_speed_enabled,
-                "alt-speed-time-begin": alt_speed_time_begin,
-                "alt-speed-time-day": alt_speed_time_day,
-                "alt-speed-time-enabled": alt_speed_time_enabled,
-                "alt-speed-time-end": alt_speed_time_end,
-                "alt-speed-up": alt_speed_up,
-                "blocklist-enabled": blocklist_enabled,
-                "blocklist-url": blocklist_url,
-                "cache-size-mb": cache_size_mb,
-                "dht-enabled": dht_enabled,
-                "download-dir": download_dir,
-                "download-queue-enabled": download_queue_enabled,
-                "download-queue-size": download_queue_size,
-                "idle-seeding-limit-enabled": idle_seeding_limit_enabled,
-                "idle-seeding-limit": idle_seeding_limit,
-                "incomplete-dir": incomplete_dir,
-                "incomplete-dir-enabled": incomplete_dir_enabled,
-                "lpd-enabled": lpd_enabled,
-                "peer-limit-global": peer_limit_global,
-                "peer-limit-per-torrent": peer_limit_per_torrent,
-                "peer-port-random-on-start": peer_port_random_on_start,
-                "peer-port": peer_port,
-                "pex-enabled": pex_enabled,
-                "port-forwarding-enabled": port_forwarding_enabled,
-                "queue-stalled-enabled": queue_stalled_enabled,
-                "queue-stalled-minutes": queue_stalled_minutes,
-                "rename-partial-files": rename_partial_files,
-                "script-torrent-done-enabled": script_torrent_done_enabled,
-                "script-torrent-done-filename": script_torrent_done_filename,
-                "seed-queue-enabled": seed_queue_enabled,
-                "seed-queue-size": seed_queue_size,
-                "seedRatioLimit": seed_ratio_limit,
-                "seedRatioLimited": seed_ratio_limited,
-                "speed-limit-down": speed_limit_down,
-                "speed-limit-down-enabled": speed_limit_down_enabled,
-                "speed-limit-up": speed_limit_up,
-                "speed-limit-up-enabled": speed_limit_up_enabled,
-                "start-added-torrents": start_added_torrents,
-                "trash-original-torrent-files": trash_original_torrent_files,
-                "utp-enabled": utp_enabled,
+                "alt_speed_down": alt_speed_down,
+                "alt_speed_enabled": alt_speed_enabled,
+                "alt_speed_time_begin": alt_speed_time_begin,
+                "alt_speed_time_day": alt_speed_time_day,
+                "alt_speed_time_enabled": alt_speed_time_enabled,
+                "alt_speed_time_end": alt_speed_time_end,
+                "alt_speed_up": alt_speed_up,
+                "anti_brute_force_enabled": anti_brute_force_enabled,
+                "blocklist_enabled": blocklist_enabled,
+                "blocklist_url": blocklist_url,
+                "cache_size_mib": cache_size_mib,
+                "dht_enabled": dht_enabled,
+                "download_dir": download_dir,
+                "download_queue_enabled": download_queue_enabled,
+                "download_queue_size": download_queue_size,
+                "idle_seeding_limit_enabled": idle_seeding_limit_enabled,
+                "idle_seeding_limit": idle_seeding_limit,
+                "incomplete_dir": incomplete_dir,
+                "incomplete_dir_enabled": incomplete_dir_enabled,
+                "lpd_enabled": lpd_enabled,
+                "peer_limit_global": peer_limit_global,
+                "peer_limit_per_torrent": peer_limit_per_torrent,
+                "peer_port_random_on_start": peer_port_random_on_start,
+                "peer_port": peer_port,
+                "pex_enabled": pex_enabled,
+                "port_forwarding_enabled": port_forwarding_enabled,
+                "preferred_transports": list_or_none(preferred_transports),
+                "queue_stalled_enabled": queue_stalled_enabled,
+                "queue_stalled_minutes": queue_stalled_minutes,
+                "rename_partial_files": rename_partial_files,
+                "reqq": reqq,
+                "script_torrent_done_enabled": script_torrent_done_enabled,
+                "script_torrent_done_filename": script_torrent_done_filename,
+                "seed_queue_enabled": seed_queue_enabled,
+                "seed_queue_size": seed_queue_size,
+                "seed_ratio_limit": seed_ratio_limit,
+                "seed_ratio_limited": seed_ratio_limited,
+                "sequential_download": sequential_download,
+                "speed_limit_down": speed_limit_down,
+                "speed_limit_down_enabled": speed_limit_down_enabled,
+                "speed_limit_up": speed_limit_up,
+                "speed_limit_up_enabled": speed_limit_up_enabled,
+                "start_added_torrents": start_added_torrents,
+                "trash_original_torrent_files": trash_original_torrent_files,
+                "utp_enabled": utp_enabled,
                 "encryption": encryption,
-                "script-torrent-added-filename": script_torrent_added_filename,
-                "script-torrent-done-seeding-filename": script_torrent_done_seeding_filename,
-                "script-torrent-done-seeding-enabled": script_torrent_done_seeding_enabled,
-                "script-torrent-added-enabled": script_torrent_added_enabled,
-                "default-trackers": "\n".join(default_trackers) if default_trackers is not None else None,
+                "script_torrent_added_filename": script_torrent_added_filename,
+                "script_torrent_done_seeding_filename": script_torrent_done_seeding_filename,
+                "script_torrent_done_seeding_enabled": script_torrent_done_seeding_enabled,
+                "script_torrent_added_enabled": script_torrent_added_enabled,
+                "default_trackers": "\n".join(default_trackers) if default_trackers is not None else None,
             }
         )
 
@@ -1096,7 +1252,7 @@ class Client:
     def blocklist_update(self, timeout: _Timeout | None = None) -> int | None:
         """Update block list. Returns the size of the block list."""
         result = self._request(RpcMethod.BlocklistUpdate, timeout=timeout)
-        return result.get("blocklist-size")
+        return get_field(result, "blocklist_size", None)
 
     def port_test(
         self, timeout: _Timeout | None = None, *, ip_protocol: Literal["ipv4", "ipv6"] | None = None
@@ -1109,7 +1265,7 @@ class Client:
 
         Parameters:
             ip_protocol: ``ipv4`` or ``ipv6``.
-                Available in Transmission 4.1.0 (rpc-version-semver 5.4.0, rpc-version: 18)
+                Available in Transmission 4.1.0 (rpc-version-semver 6.0.0, rpc-version: 18)
             timeout: request timeout
         """
         return PortTestResult(
@@ -1123,8 +1279,8 @@ class Client:
         self._rpc_version_warning(15)
         path = ensure_location_str(path)
         result: dict[str, Any] = self._request(RpcMethod.FreeSpace, {"path": path}, timeout=timeout)
-        if result["path"] == path:
-            return result["size-bytes"]
+        if get_field(result, "path") == path:
+            return get_field(result, "size_bytes")
         return None
 
     def session_stats(self, timeout: _Timeout | None = None) -> SessionStats:
@@ -1170,11 +1326,11 @@ class Client:
         arguments: dict[str, Any] = remove_unset_value(
             {
                 "name": name,
-                "honorsSessionLimits": honors_session_limits,
-                "speed-limit-down": speed_limit_down,
-                "speed-limit-up-enabled": speed_limit_up_enabled,
-                "speed-limit-up": speed_limit_up,
-                "speed-limit-down-enabled": speed_limit_down_enabled,
+                "honors_session_limits": honors_session_limits,
+                "speed_limit_down": speed_limit_down,
+                "speed_limit_up_enabled": speed_limit_up_enabled,
+                "speed_limit_up": speed_limit_up,
+                "speed_limit_down_enabled": speed_limit_down_enabled,
             }
         )
 

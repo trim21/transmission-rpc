@@ -7,7 +7,7 @@ def test_session_property_explicit() -> None:
     Verify that explicit session properties (like `script_torrent_done_seeding_enabled`)
     are correctly populated from the initialization fields.
     """
-    s = Session(fields={"script-torrent-done-seeding-enabled": True})
+    s = Session(fields={"script_torrent_done_seeding_enabled": True})
     val = s.script_torrent_done_seeding_enabled
     assert val is True
 
@@ -20,11 +20,11 @@ def test_session_default_trackers_list_input() -> None:
     - Missing fields (None).
     """
     # Case 1: default-trackers is a newline-separated string
-    s1 = Session(fields={"default-trackers": "http://t1.com\nhttp://t2.com"})
+    s1 = Session(fields={"default_trackers": "http://t1.com\nhttp://t2.com"})
     assert s1.default_trackers == ["http://t1.com", "http://t2.com"]
 
     # Case 2: default-trackers is already a list
-    s2 = Session(fields={"default-trackers": ["http://t3.com"]})
+    s2 = Session(fields={"default_trackers": ["http://t3.com"]})
     assert s2.default_trackers == ["http://t3.com"]
 
     # Case 3: default-trackers is missing
@@ -36,7 +36,7 @@ def test_script_torrent_added_filename() -> None:
     """
     Verify that `script_torrent_added_filename` is correctly retrieved from fields.
     """
-    s = Session(fields={"script-torrent-added-filename": "my_script.sh"})
+    s = Session(fields={"script_torrent_added_filename": "my_script.sh"})
     assert s.script_torrent_added_filename == "my_script.sh"
 
 
@@ -76,5 +76,25 @@ def test_session_missing_properties() -> None:
     """
     Verify that session properties are correctly accessed even when initialized with minimal fields.
     """
-    s = Session(fields={"script-torrent-done-seeding-enabled": True})
+    s = Session(fields={"script_torrent_done_seeding_enabled": True})
     assert s.script_torrent_done_seeding_enabled is True
+
+
+def test_jsonrpc_2_session_fields() -> None:
+    session = Session(
+        fields={
+            "anti_brute_force_enabled": True,
+            "encryption": "allowed",
+            "preferred_transports": ["utp", "tcp"],
+            "reqq": 128,
+            "sequential_download": True,
+            "session_id": "session-id",
+        }
+    )
+
+    assert session.anti_brute_force_enabled is True
+    assert session.encryption == "allowed"
+    assert session.preferred_transports == ["utp", "tcp"]
+    assert session.reqq == 128
+    assert session.sequential_download is True
+    assert session.session_id == "session-id"
