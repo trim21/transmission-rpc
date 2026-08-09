@@ -73,6 +73,11 @@ class Type:
 TORRENT_GET_ARGS: dict[str, Args] = {
     "activityDate": Args(Type.number, 1, description="Last time of upload or download activity."),
     "addedDate": Args(Type.number, 1, description="The date when this torrent was first added."),
+    "availability": Args(
+        Type.array,
+        17,
+        description="Number of connected peers that have each piece; -1 if the client has the piece.",
+    ),
     "bandwidthPriority": Args(Type.number, 5, description="Bandwidth priority. Low (-1), Normal (0) or High (1)."),
     "comment": Args(Type.string, 1, description="Torrent comment."),
     "corruptEver": Args(Type.number, 1, description="Number of bytes of corrupt data downloaded."),
@@ -168,9 +173,9 @@ TORRENT_GET_ARGS: dict[str, Args] = {
     "webseedsSendingToUs": Args(Type.number, 1, None, None, None, "Number of webseeds seeding to us."),
     "file-count": Args(Type.number, 17),
     "trackerList": Args(
-        Type.array,
+        Type.string,
         17,
-        description="A Iterable[Iterable[str]] for a set of announce URLs, each inner list is for a tier",
+        description="Announce URLs, one per line, with a blank line between tracker tiers.",
     ),
 }
 

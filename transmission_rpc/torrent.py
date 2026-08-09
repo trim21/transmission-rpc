@@ -8,6 +8,7 @@ from typing import Any
 
 from typing_extensions import deprecated
 
+from transmission_rpc._tracker_list import parse_tracker_list
 from transmission_rpc.constants import IdleMode, Priority, RatioLimitMode
 from transmission_rpc.types import BitMap, Container, File, WebseedEx
 from transmission_rpc.utils import format_timedelta
@@ -416,6 +417,9 @@ class Torrent(Container):
         """
         An array of piece_count numbers representing the number of connected peers
         that have each piece, or -1 if we already have the piece ourselves.
+
+        :available: transmission version 4.0.0.
+        :available: RPC version 17.
         """
         return self.fields["availability"]
 
@@ -523,6 +527,7 @@ class Torrent(Container):
 
     @property
     def eta_idle(self) -> timedelta | None:
+        """If seeding, number of seconds left until the idle time limit is reached."""
         v = self.fields["etaIdle"]
         if v >= 0:
             return timedelta(seconds=v)
@@ -734,10 +739,12 @@ class Torrent(Container):
 
     @property
     def seconds_downloading(self) -> int:
+        """Cumulative seconds the torrent's ever spent downloading"""
         return self.fields["secondsDownloading"]
 
     @property
     def seconds_seeding(self) -> int:
+        """Cumulative seconds the torrent's ever spent seeding"""
         return self.fields["secondsSeeding"]
 
     @property
@@ -757,6 +764,7 @@ class Torrent(Container):
 
     @property
     def size_when_done(self) -> int:
+        """byte count of all the wanted data"""
         return self.fields["sizeWhenDone"]
 
     @property
@@ -765,9 +773,17 @@ class Torrent(Container):
         return [Tracker(fields=x) for x in self.fields["trackers"]]
 
     @property
-    def tracker_list(self) -> list[str]:
-        """list of str of announce URLs"""
-        return [x for x in self.fields["trackerList"].splitlines() if x]
+    def tracker_list(self) -> list[list[str]]:
+        """Announce URLs grouped by tracker tier.
+
+        Each inner list contains the trackers in one tier.
+
+        .. versionchanged:: 8.0.0
+            Earlier versions returned a flat list and discarded tier boundaries.
+            Flatten the tiered result explicitly when tier information is not needed:
+            ``[url for tier in torrent.tracker_list for url in tier]``.
+        """
+        return parse_tracker_list(self.fields["trackerList"])
 
     @property
     def tracker_stats(self) -> list[TrackerStats]:

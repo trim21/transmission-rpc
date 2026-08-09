@@ -18,7 +18,7 @@ class UnixHTTPConnection(HTTPConnection):
         host: str,
         *,
         # The default socket options include `TCP_NODELAY` which won't work here.
-        socket_options: None | list[tuple[int, int, int | bytes]] = None,
+        socket_options: list[tuple[int, int, int | bytes]] | None = None,
         **kwargs: Any,
     ):
         self.socket_path = host

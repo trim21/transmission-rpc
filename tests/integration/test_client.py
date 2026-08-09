@@ -2,6 +2,8 @@ import contextlib
 import time
 from collections.abc import Callable
 
+import pytest
+
 from tests.util import ServerTooLowError, skip_on
 from transmission_rpc.client import Client
 from transmission_rpc.error import TransmissionError
@@ -66,19 +68,20 @@ def test_stop(tr_client: Client, generate_random_hash: Callable[[], str]) -> Non
     assert is_stopped, "Torrent status should eventually become 'stopped'"
 
 
-def test_torrent_start_all(tr_client: Client) -> None:
+@pytest.mark.parametrize("method_name", ["start_torrent", "start_torrent_now"])
+def test_torrent_start_without_ids(tr_client: Client, method_name: str) -> None:
     """
-    Integration test: Verify `start_all` starts all paused torrents.
+    Integration test: Verify start actions without ids start all paused torrents.
     """
     tr_client.add_torrent(TORRENT_URL, paused=True, timeout=10)
 
     for torrent in tr_client.get_torrents():
         assert torrent.stopped or torrent.checking, "Newly added torrent should be stopped or checking initially"
 
-    tr_client.start_all()
+    getattr(tr_client, method_name)()
 
     for torrent in tr_client.get_torrents():
-        assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start_all"
+        assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start"
 
 
 def test_session_get_returns_valid_rpc_version(tr_client: Client) -> None:
@@ -120,6 +123,30 @@ def test_torrent_attr_type(tr_client: Client) -> None:
         assert isinstance(torrent.name, str), "Torrent name should be a string"
 
 
+@skip_on(ServerTooLowError, "availability is added in rpc version 17")
+def test_torrent_availability_is_fetched_by_default(tr_client: Client) -> None:
+    if tr_client.get_session().rpc_version < 17:
+        raise ServerTooLowError
+
+    with open("tests/fixtures/iso.torrent", "rb") as torrent_file:
+        added = tr_client.add_torrent(torrent_file, paused=True)
+
+    default_torrent = tr_client.get_torrent(added.id)
+    explicit_torrent = tr_client.get_torrent(added.id, arguments=["availability", "pieceCount"])
+    default_torrents = tr_client.get_torrents(ids=[added.id])
+    explicit_torrents = tr_client.get_torrents(ids=[added.id], arguments=["availability", "pieceCount"])
+
+    assert len(default_torrents) == 1
+    assert len(explicit_torrents) == 1
+
+    expected = explicit_torrent.availability
+    for torrent in (default_torrent, explicit_torrent, default_torrents[0], explicit_torrents[0]):
+        assert isinstance(torrent.availability, list)
+        assert all(isinstance(value, int) for value in torrent.availability)
+        assert len(torrent.availability) == torrent.piece_count
+        assert torrent.availability == expected
+
+
 def test_torrent_get_files(tr_client: Client) -> None:
     """
     Integration test: Verify that `get_files` returns a list of File objects.
@@ -134,6 +161,27 @@ def test_torrent_get_files(tr_client: Client) -> None:
         assert len(files) > 0, "Torrent should have files"
         for file in files:
             assert isinstance(file, File), "Each item in get_files should be a File object"
+
+
+@skip_on(ServerTooLowError, "trackerList is added in rpc version 17")
+def test_tracker_list_round_trip(tr_client: Client) -> None:
+    if tr_client.get_session().rpc_version < 17:
+        raise ServerTooLowError
+
+    with open("tests/fixtures/iso.torrent", "rb") as torrent_file:
+        torrent = tr_client.add_torrent(torrent_file, paused=True)
+
+    expected = [
+        ["https://a.example/announce", "https://b.example/announce"],
+        ["https://backup.example/announce"],
+    ]
+    tr_client.change_torrent(torrent.id, tracker_list=expected)
+
+    refetched = tr_client.get_torrent(torrent.id, arguments=["trackerList"])
+    assert refetched.tracker_list == expected
+
+    tr_client.change_torrent(refetched.id, tracker_list=refetched.tracker_list)
+    assert tr_client.get_torrent(torrent.id, arguments=["trackerList"]).tracker_list == expected
 
 
 @skip_on(ServerTooLowError, "group methods is added in rpc version 17")

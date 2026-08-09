@@ -19,6 +19,7 @@ from typing_extensions import Self, TypedDict, deprecated
 from urllib3 import Timeout
 from urllib3.util import make_headers
 
+from transmission_rpc._tracker_list import serialize_tracker_list
 from transmission_rpc._unix_socket import UnixHTTPConnectionPool
 from transmission_rpc.constants import LOGGER, RpcMethod, get_torrent_arguments
 from transmission_rpc.error import (
@@ -578,26 +579,13 @@ class Client:
             timeout=timeout,
         )
 
-    def start_torrent(self, ids: _TorrentIDs, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
-        """Start torrent(s) with provided id(s)"""
-        method = RpcMethod.TorrentStart
-        if bypass_queue:
-            method = RpcMethod.TorrentStartNow
-        self._request(method, {}, ids, True, timeout=timeout)
+    def start_torrent(self, ids: _TorrentIDs = None, timeout: _Timeout | None = None) -> None:
+        """Start torrent(s), or all torrents if ids is empty, respecting the queue order."""
+        self._request(RpcMethod.TorrentStart, {}, ids, timeout=timeout)
 
-    def start_all(self, bypass_queue: bool = False, timeout: _Timeout | None = None) -> None:
-        """Start all torrents respecting the queue order"""
-        method = RpcMethod.TorrentStart
-        if bypass_queue:
-            method = RpcMethod.TorrentStartNow
-        torrent_list = sorted(self.get_torrents(), key=lambda t: t.queue_position)
-        self._request(
-            method,
-            {},
-            ids=[x.id for x in torrent_list],
-            require_ids=True,
-            timeout=timeout,
-        )
+    def start_torrent_now(self, ids: _TorrentIDs = None, timeout: _Timeout | None = None) -> None:
+        """Start torrent(s), or all torrents if ids is empty, bypassing the queue order."""
+        self._request(RpcMethod.TorrentStartNow, {}, ids, timeout=timeout)
 
     def stop_torrent(self, ids: _TorrentIDs, timeout: _Timeout | None = None) -> None:
         """stop torrent(s) with provided id(s)"""
@@ -768,12 +756,15 @@ class Client:
             labels: Array of string labels. Add in rpc 16.
             group: The name of this torrent's bandwidth group. Add in rpc 17.
 
-            tracker_list: A ``Iterable[Iterable[str]]``, each ``Iterable[str]`` for a tracker tier.
+            tracker_list: An ``Iterable[Iterable[str]]`` whose inner iterables are tracker tiers.
 
                 Add in rpc 17.
 
                 Example: ``[['https://tracker1/announce', 'https://tracker2/announce'],
                 ['https://backup1.example.com/announce'], ['https://backup2.example.com/announce']]``.
+
+                An empty outer iterable clears the tracker list. Strings are not accepted as tiers, and empty tiers,
+                empty tracker URLs, non-string tracker URLs, and tracker URLs containing CR or LF are rejected.
 
             sequential_download: download torrent pieces sequentially. Add in Transmission 4.1.0, rpc-version 18.
 
@@ -830,7 +821,7 @@ class Client:
                 "trackerRemove": tracker_remove,
                 "trackerReplace": tracker_replace,
                 "labels": list_or_none(_single_str_as_list(labels)),
-                "trackerList": None if tracker_list is None else "\n\n".join("\n".join(tier) for tier in tracker_list),
+                "trackerList": None if tracker_list is None else serialize_tracker_list(tracker_list),
                 "group": group,
                 "sequential_download": sequential_download,
                 "sequential_download_from_piece": sequential_download_from_piece,
