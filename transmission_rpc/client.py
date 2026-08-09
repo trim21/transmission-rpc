@@ -54,10 +54,13 @@ _Timeout = Timeout | int | float
 _TLS_CERT_FILE_DEFAULT = os.getenv("TRANSMISSION_RPC_PY_CERT_FILE")
 
 
-class ResponseData(TypedDict):
+class ResponseData(TypedDict, total=False):
     arguments: Any
     tag: int
-    result: str
+    result: str | dict[str, Any] | None
+    jsonrpc: str
+    error: dict[str, Any]
+    id: int | None
 
 
 def ensure_location_str(s: str | pathlib.Path) -> str:
@@ -370,7 +373,8 @@ class Client:
                     response=data,
                     raw_response=http_data,
                 )
-            res = _FieldDict(data.get("result") or {})
+            result = data.get("result")
+            res = _FieldDict(result if isinstance(result, dict) else {})
         else:
             # Legacy bespoke protocol: status in "result" string, data in "arguments"
             if "result" not in data:
