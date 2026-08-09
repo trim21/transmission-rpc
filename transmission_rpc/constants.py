@@ -109,9 +109,9 @@ TORRENT_GET_ARGS: dict[str, Args] = {
         15,
         description="Estimated number of seconds left until the idle time limit is reached. -1 means not available and -2 means unknown.",
     ),
-    "files": Args(Type.array, 1, description="Array of file object containing key, bytesCompleted, length and name."),
+    "files": Args(Type.array, 1, description="Array of file object containing key, bytes_completed, length and name."),
     "file_stats": Args(
-        Type.array, 5, description="Away of file statistics containing bytesCompleted, wanted and priority."
+        Type.array, 5, description="Array of file statistics containing bytes_completed, wanted and priority."
     ),
     "group": Args(Type.string, 17, description="The name of this torrent's bandwidth group"),
     "hash_string": Args(Type.string, 1, description="Hashstring unique for the torrent even between sessions."),

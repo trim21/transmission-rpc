@@ -60,6 +60,13 @@ def test_torrent_defaults_and_basic_props() -> None:
     assert t.file_count == 5
     assert t.primary_mime_type == "text/plain"
 
+    with pytest.warns(DeprecationWarning, match="hash_string"):
+        assert t.hashString == "hash"
+
+    file_stat = FileStat(fields={"bytes_completed": 100})
+    with pytest.warns(DeprecationWarning, match="bytes_completed"):
+        assert file_stat.bytesCompleted == 100
+
     # Deprecated into_hash
     with pytest.warns(DeprecationWarning, match="typo"):
         assert t.into_hash == "hash"

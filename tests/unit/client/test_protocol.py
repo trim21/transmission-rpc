@@ -60,6 +60,57 @@ def test_probe_falls_back_to_legacy(mock_network: Any, legacy_response: Any) -> 
     assert c._Client__use_jsonrpc is False  # noqa: SLF001
 
 
+def test_legacy_probe_retry_rejects_invalid_json(mock_network: Any, legacy_response: Any) -> None:
+    mock_network.side_effect = [
+        legacy_response(),
+        mock.Mock(status=200, headers={}, data=b"invalid json"),
+    ]
+
+    with pytest.raises(TransmissionError, match="failed to parse response"):
+        Client()
+
+
+def test_legacy_response_errors(mock_network: Any, legacy_response: Any) -> None:
+    mock_network.side_effect = [legacy_response(), legacy_response()]
+    client = Client()
+
+    mock_network.side_effect = None
+    mock_network.return_value = mock.Mock(
+        status=200,
+        headers={},
+        data=json.dumps({"arguments": {}}).encode(),
+    )
+    with pytest.raises(TransmissionError, match="missing without result"):
+        client.get_session()
+
+    mock_network.return_value = mock.Mock(
+        status=200,
+        headers={},
+        data=json.dumps({"result": "legacy failure", "arguments": {}}).encode(),
+    )
+    with pytest.raises(TransmissionError, match="legacy failure"):
+        client.get_session()
+
+
+def test_rpc_version_warnings_for_new_fields(mock_network: Any, legacy_response: Any) -> None:
+    mock_network.side_effect = [legacy_response(), legacy_response(), legacy_response(), legacy_response()]
+    client = Client()
+
+    with mock.patch.object(client.logger, "warning") as warning:
+        client.change_torrent(1, sequential_download_from_piece=3)
+        client.set_session(preferred_transports=["tcp"])
+
+    assert warning.call_count == 2
+
+
+def test_authenticated_request_redacts_debug_headers(mock_network: Any, success_response: Any) -> None:
+    mock_network.return_value = success_response()
+
+    client = Client(username="user", password="password")  # noqa: S106
+
+    assert client.get_session().rpc_version == 18
+
+
 def test_legacy_requests_convert_args_by_method(mock_network: Any, legacy_response: Any) -> None:
     """Verify snake_case request args are converted to the correct legacy
     variant depending on the method context."""

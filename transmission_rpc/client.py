@@ -694,7 +694,7 @@ class Client:
 
         Parameters:
             torrent_id:
-                torrent id can be an int or a torrent ``info_hash`` (``hashString`` property of the ``Torrent`` object).
+                torrent id can be an int or a torrent ``info_hash`` (``hash_string`` property of the ``Torrent`` object).
 
             arguments:
                 fetched torrent arguments, in most cases you don't need to set this,

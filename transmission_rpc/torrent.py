@@ -212,7 +212,13 @@ class FileStat(Container):
     """
 
     @property
+    @deprecated("use `.bytes_completed` instead")
     def bytesCompleted(self) -> int:
+        """Compatibility alias for :attr:`bytes_completed`.
+
+        .. deprecated:: 8.0.0
+            Use :attr:`bytes_completed` instead.
+        """
         return self._get_field("bytes_completed")
 
     @property
@@ -412,8 +418,13 @@ class Torrent(Container):
         return self._get_field("name")
 
     @property
+    @deprecated("use `.hash_string` instead")
     def hashString(self) -> str:
-        """Torrent info hash string, can also be used as Torrent ID"""
+        """Compatibility alias for :attr:`hash_string`.
+
+        .. deprecated:: 8.0.0
+            Use :attr:`hash_string` instead.
+        """
         return self._get_field("hash_string")
 
     @property
@@ -423,14 +434,14 @@ class Torrent(Container):
 
     @property
     def info_hash(self) -> str:
-        """alias of ``hashString``"""
-        return self.hashString
+        """Alias of :attr:`hash_string`."""
+        return self.hash_string
 
     @property
     @deprecated("this is a typo, do not use this. use `.info_hash` instead")
     def into_hash(self) -> str:
-        """alias of ``hashString``"""
-        return self.hashString
+        """Alias of :attr:`info_hash`."""
+        return self.info_hash
 
     @property
     def available(self) -> float:
@@ -1042,7 +1053,7 @@ class Torrent(Container):
         return [Webseed(fields=item) for item in self._get_field("webseeds_ex")]
 
     def __repr__(self) -> str:
-        return f"<transmission_rpc.Torrent hashString={self.hashString!r}>"
+        return f"<transmission_rpc.Torrent hashString={self.hash_string!r}>"
 
     def __str__(self) -> str:
         return f"<transmission_rpc.Torrent {self.name!r}>"
