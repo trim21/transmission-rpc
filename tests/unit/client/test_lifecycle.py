@@ -15,7 +15,7 @@ from urllib3 import Timeout
 import transmission_rpc.client
 from transmission_rpc import DEFAULT_TIMEOUT, from_url
 from transmission_rpc.client import Client
-from transmission_rpc.constants import LOGGER, get_torrent_arguments
+from transmission_rpc.constants import LOGGER
 from transmission_rpc.error import TransmissionAuthError
 
 
@@ -133,24 +133,17 @@ def test_timeout_property(client: Client) -> None:
         client.timeout = cast("Any", 5.0)
 
 
-def test_deprecated_properties(client: Client) -> None:
-    """Verify that accessing deprecated properties emits a DeprecationWarning and returns expected values."""
-    with pytest.warns(DeprecationWarning, match="do not use"):
-        assert isinstance(client.url, str)
-    with pytest.warns(DeprecationWarning, match="do not use"):
-        # Verify it matches the constant for the current mocked version (18)
-        assert client.torrent_get_arguments == get_torrent_arguments(18)
-    with pytest.warns(DeprecationWarning, match="do not use"):
-        assert isinstance(client.raw_session, dict)
-    with pytest.warns(DeprecationWarning, match="do not use"):
-        # Expect session_id from the fixture (mock_http_client in conftest)
-        assert client.session_id == "session_id"
-    with pytest.warns(DeprecationWarning, match="do not use"):
-        assert client.server_version is not None
-    with pytest.warns(DeprecationWarning, match="use .get_session"):
-        assert client.semver_version is not None
-    with pytest.warns(DeprecationWarning, match="use .get_session"):
-        assert client.rpc_version == 18
+def test_v7_deprecated_properties_removed() -> None:
+    for name in (
+        "raw_session",
+        "rpc_version",
+        "semver_version",
+        "server_version",
+        "session_id",
+        "torrent_get_arguments",
+        "url",
+    ):
+        assert not hasattr(Client, name)
 
 
 def test_client_init_no_auth(success_response: Any) -> None:
@@ -296,7 +289,7 @@ def test_session_close_and_context_manager() -> None:
         ),
     ],
 )
-def test_legacy_client_url_construction(
+def test_legacy_client_path_normalization(
     protocol: Literal["http", "https"], username: str, password: str | None, host: str, port: int, path: str
 ) -> None:
     """
@@ -312,9 +305,7 @@ def test_legacy_client_url_construction(
             path=path,
         )
 
-        expected_url = f"{protocol}://{host}:{port}{urljoin(path, 'rpc')}"
-        with pytest.warns(DeprecationWarning, match="do not use"):
-            assert client.url == expected_url
+        assert client._path == urljoin(path, "rpc")  # noqa: SLF001
 
 
 @pytest.mark.parametrize(

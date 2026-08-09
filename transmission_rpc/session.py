@@ -171,11 +171,6 @@ class Session(Container):
         return self._get_field("cache_size_mib")
 
     @property
-    def cache_size_mb(self) -> int:
-        """Compatibility alias for :attr:`cache_size_mib`."""
-        return self.cache_size_mib
-
-    @property
     def config_dir(self) -> str:
         """location of transmission's configuration directory"""
         return self._get_field("config_dir")
@@ -189,11 +184,6 @@ class Session(Container):
     def download_dir(self) -> str:
         """default path to download torrents"""
         return self._get_field("download_dir")
-
-    @property
-    def download_dir_free_space(self) -> int:
-        """**DEPRECATED** Use the `free-space` method instead."""
-        return self._get_field("download_dir_free_space")
 
     @property
     def download_queue_enabled(self) -> bool:

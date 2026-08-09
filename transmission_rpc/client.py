@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 import certifi
 import urllib3
-from typing_extensions import Self, TypedDict, deprecated
+from typing_extensions import Self, TypedDict
 from urllib3 import Timeout
 from urllib3.util import make_headers
 
@@ -184,9 +184,6 @@ class Client:
         if path == "/transmission/":
             path = "/transmission/rpc"
 
-        url_host = "localhost" if protocol == "http+unix" else host
-        url = f"{protocol}://{url_host}{'' if port is None else f':{port}'}{path}"
-        self._url = str(url)
         self._path = path
 
         self.__raw_session: dict[str, Any] = {}
@@ -195,9 +192,7 @@ class Client:
         self.__use_jsonrpc: bool | None = None
         self.__request_id = 0
 
-        self.__server_version: str = "(unknown)"
         self.__protocol_version: int = 17  # default 17
-        self.__semver_version = None
 
         common_args: dict[str, Any] = {"host": host, "timeout": self.timeout, "retries": False}
         if protocol == "http":
@@ -209,33 +204,8 @@ class Client:
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:
             raise ValueError(f"Unknown protocol {protocol!r}, only 'http', 'https' or 'http+unix' is supported")
-        self.get_session(arguments=["rpc_version", "rpc_version_semver", "version"])
+        self.get_session(arguments=["rpc_version"])
         self.__torrent_get_arguments = get_torrent_arguments(self.__protocol_version)
-
-    @property
-    @deprecated("do not use internal property")
-    def url(self) -> str:
-        return self._url
-
-    @property
-    @deprecated("do not use internal property, use `get_torrent_arguments(rpc_version)` if you need")
-    def torrent_get_arguments(self) -> list[str]:
-        return self.__torrent_get_arguments
-
-    @property
-    @deprecated("do not use internal property, use `.get_session()` instead")
-    def raw_session(self) -> dict[str, Any]:
-        return self.__raw_session
-
-    @property
-    @deprecated("do not use internal property")
-    def session_id(self) -> str:
-        return self.__session_id
-
-    @property
-    @deprecated("do not use internal property, use `.get_session().version` instead")
-    def server_version(self) -> str:
-        return self.__server_version
 
     @property
     def timeout(self) -> Timeout | None:
@@ -489,31 +459,9 @@ class Client:
 
         return legacy_data["arguments"]
 
-    def _update_server_version(self) -> None:
-        """Decode the Transmission version string, if available."""
-        self.__semver_version = get_field(self.__raw_session, "rpc_version_semver", None)
-        self.__server_version = get_field(self.__raw_session, "version")
+    def _update_rpc_version(self) -> None:
+        """Cache the Transmission RPC version used for field selection."""
         self.__protocol_version = get_field(self.__raw_session, "rpc_version")
-
-    @property
-    @deprecated("use .get_session().rpc_version_semver instead")
-    def semver_version(self) -> str | None:
-        """Get the Transmission daemon RPC version.
-
-        .. deprecated:: 7.0.5
-            Use ``.get_session().rpc_version_semver`` instead
-        """
-        return self.__semver_version
-
-    @property
-    @deprecated("use .get_session().rpc_version instead")
-    def rpc_version(self) -> int:
-        """Get the Transmission daemon RPC version.
-
-        .. deprecated:: 7.0.5
-            Use ``.get_session().rpc_version`` instead
-        """
-        return self.__protocol_version
 
     def _rpc_version_warning(self, required_version: int) -> None:
         """
@@ -542,7 +490,6 @@ class Client:
         cookies: str | None = None,
         labels: Iterable[str] | None = None,
         bandwidth_priority: int | None = None,
-        bandwidthPriority: int | None = None,
         sequential_download: bool | None = None,
         sequential_download_from_piece: int | None = None,
     ) -> Torrent:
@@ -564,9 +511,6 @@ class Client:
                 request timeout
             bandwidth_priority:
                 Priority for this transfer.
-            bandwidthPriority:
-                .. deprecated:: 8.0.0
-                    Use ``bandwidth_priority`` instead.
             cookies:
                 One or more HTTP cookie(s).
             download_dir:
@@ -601,11 +545,6 @@ class Client:
 
         if sequential_download is not None or sequential_download_from_piece is not None:
             self._rpc_version_warning(18)
-
-        if bandwidth_priority is not None and bandwidthPriority is not None:
-            raise ValueError("bandwidth_priority and bandwidthPriority cannot both be set")
-        if bandwidth_priority is None:
-            bandwidth_priority = bandwidthPriority
 
         kwargs: dict[str, Any] = remove_unset_value(
             {
@@ -994,7 +933,7 @@ class Client:
             data["fields"] = list(arguments)
 
         self._request(RpcMethod.SessionGet, timeout=timeout, arguments=data)
-        self._update_server_version()
+        self._update_rpc_version()
         return Session(fields=self.__raw_session)
 
     def set_session(
@@ -1012,7 +951,6 @@ class Client:
         blocklist_enabled: bool | None = None,
         blocklist_url: str | None = None,
         cache_size_mib: int | None = None,
-        cache_size_mb: int | None = None,
         dht_enabled: bool | None = None,
         default_trackers: Iterable[str] | None = None,
         download_dir: str | None = None,
@@ -1081,9 +1019,6 @@ class Client:
                 Location of the block list. Updated with blocklist-update.
             cache_size_mib:
                 The maximum size of the disk cache in MB
-            cache_size_mb:
-                .. deprecated:: 8.0.0
-                    Use ``cache_size_mib`` instead.
             default_trackers:
                 list of default trackers to use on public torrents.
             dht_enabled:
@@ -1169,11 +1104,6 @@ class Client:
 
         if encryption is not None and encryption not in ["required", "preferred", "allowed", "tolerated"]:
             raise ValueError("Invalid encryption value")
-
-        if cache_size_mib is not None and cache_size_mb is not None:
-            raise ValueError("cache_size_mib and cache_size_mb cannot both be set")
-        if cache_size_mib is None:
-            cache_size_mib = cache_size_mb
 
         if default_trackers is not None:
             self._rpc_version_warning(17)

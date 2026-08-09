@@ -1,5 +1,3 @@
-import pytest
-
 from tests.util import check_properties
 from transmission_rpc.constants import TORRENT_GET_ARGS, Args, Type, get_torrent_arguments
 from transmission_rpc.error import TransmissionError
@@ -120,10 +118,5 @@ def test_error_str_with_original() -> None:
     assert str(err) == 'message Original exception: MockError, "original error"'
 
 
-def test_deprecated_raw_response() -> None:
-    """
-    Verify that accessing the deprecated `rawResponse` attribute of `TransmissionError` emits a warning.
-    """
-    err = TransmissionError("message", raw_response="raw")
-    with pytest.warns(DeprecationWarning, match="use .raw_response instead"):
-        assert err.rawResponse == "raw"
+def test_v7_deprecated_error_property_removed() -> None:
+    assert not hasattr(TransmissionError, "rawResponse")

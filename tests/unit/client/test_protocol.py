@@ -186,7 +186,8 @@ def test_legacy_response_fields_use_getter_fallback(mock_network: Any, legacy_re
 
     session = Session(fields={"cache-size-mb": 8})
     assert session.cache_size_mib == 8
-    assert session.cache_size_mb == 8
+    assert not hasattr(Session, "cache_size_mb")
+    assert not hasattr(Session, "download_dir_free_space")
 
 
 def test_jsonrpc_error_response(success_response: Any) -> None:
@@ -280,20 +281,3 @@ def test_legacy_torrent_add_uses_kebab_download_dir(mock_network: Any, legacy_re
     assert mock_network.call_args.kwargs["json"]["arguments"]["download-dir"] == "/downloads"
     assert torrent.fields["hashString"] == "hash"
     assert torrent.hash_string == "hash"
-
-
-def test_legacy_python_keyword_aliases(mock_network: Any, success_response: Any) -> None:
-    mock_network.return_value = success_response({"torrent_added": {"id": 1, "name": "test", "hash_string": "hash"}})
-    client = Client()
-
-    client.add_torrent("magnet:?xt=urn:btih:hash", bandwidthPriority=1)
-    assert mock_network.call_args.kwargs["json"]["params"]["bandwidth_priority"] == 1
-
-    client.set_session(cache_size_mb=8)
-    assert mock_network.call_args.kwargs["json"]["params"]["cache_size_mib"] == 8
-
-    with pytest.raises(ValueError, match="cannot both be set"):
-        client.add_torrent("magnet:?xt=urn:btih:hash", bandwidth_priority=1, bandwidthPriority=1)
-
-    with pytest.raises(ValueError, match="cannot both be set"):
-        client.set_session(cache_size_mib=8, cache_size_mb=8)

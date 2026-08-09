@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import typing_extensions
 from urllib3 import BaseHTTPResponse
 
 
@@ -45,11 +44,6 @@ class TransmissionError(Exception):
             original_name = type(self.original).__name__
             return f'{self.message} Original exception: {original_name}, "{self.original}"'
         return self.message
-
-    @property
-    @typing_extensions.deprecated("use .raw_response instead")
-    def rawResponse(self) -> str | None:
-        return self.raw_response
 
 
 class TransmissionAuthError(TransmissionError):
