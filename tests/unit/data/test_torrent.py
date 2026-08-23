@@ -135,6 +135,20 @@ def test_torrent_progress_and_availability() -> None:
     assert t_zero.progress == 0.0
 
 
+def test_torrent_progress_never_rounds_up_to_complete() -> None:
+    """Verify an unfinished torrent never reports 100.0."""
+    almost = Torrent(fields={"id": 1, "percent_done": 0.999996})
+    assert almost.progress == 99.99
+
+    # Same, via the size_when_done fallback.
+    almost_fallback = Torrent(fields={"id": 1, "size_when_done": 1_000_000, "left_until_done": 4})
+    assert almost_fallback.progress == 99.99
+
+    # 100.0 must still be reachable.
+    assert Torrent(fields={"id": 1, "percent_done": 1.0}).progress == 100.0
+    assert Torrent(fields={"id": 1, "size_when_done": 1_000_000, "left_until_done": 0}).progress == 100.0
+
+
 def test_tracker_list_preserves_tiers() -> None:
     raw = "https://a.example/announce\nhttps://b.example/announce\n\nhttps://backup.example/announce\n"
 
