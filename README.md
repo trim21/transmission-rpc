@@ -58,15 +58,18 @@ task lint
 
 ### Testing
 
-You need to have a transmission daemon running
+You need to have a transmission daemon running. The integration tests delete
+every torrent on it, downloaded data included, so use a daemon you can throw
+away.
 
 then add a `.env` file
 
 ```shell
+export TR_PROTOCOL="..."
 export TR_HOST="..."
 export TR_PORT="..."
 export TR_USER="..."
-export TR_PASS="..."
+export TR_PASSWORD="..."
 ```
 
 ```shell
