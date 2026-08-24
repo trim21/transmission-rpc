@@ -44,6 +44,8 @@ jobs:
       - name: test
         run: coverage run -m pytest
         env:
+          TR_PROTOCOL: http
+          TR_HOST: 127.0.0.1
           TR_PORT: 8080
           TR_USER: admin
           TR_PASSWORD: my-secret-password
@@ -73,6 +75,9 @@ jobs:
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
+          TR_PORT: 9091
+          TR_USER: admin
+          TR_PASSWORD: password
       - uses: codecov/codecov-action@v7
         with:
           flags: "unix-socket"

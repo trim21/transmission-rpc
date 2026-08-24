@@ -11,12 +11,6 @@ import pytest
 from transmission_rpc import LOGGER
 from transmission_rpc.client import Client
 
-PROTOCOL = os.getenv("TR_PROTOCOL", "http")
-HOST = os.getenv("TR_HOST", "127.0.0.1")
-PORT = int(os.getenv("TR_PORT", "9091"))
-USER = os.getenv("TR_USER", "admin")
-PASSWORD = os.getenv("TR_PASSWORD", "password")
-
 
 @pytest.fixture(scope="session")
 def wait_for_transmission() -> None:
@@ -26,13 +20,17 @@ def wait_for_transmission() -> None:
     This fixture is session-scoped, so it runs once per test session,
     but only if a test actually requests it (directly or indirectly).
     """
+    protocol = os.environ["TR_PROTOCOL"]
+    host = os.environ["TR_HOST"]
+    port = int(os.environ["TR_PORT"])
+
     start = time.time()
     while True:
         with contextlib.suppress(ConnectionError, FileNotFoundError):
-            is_unix = PROTOCOL == "http+unix"
+            is_unix = protocol == "http+unix"
             with socket.socket(socket.AF_UNIX if is_unix else socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(3)
-                sock.connect(HOST if is_unix else (HOST, PORT))
+                sock.connect(host if is_unix else (host, port))
                 break
 
         if time.time() - start > 30:
@@ -48,9 +46,17 @@ def tr_client(wait_for_transmission: None) -> Generator[Client, None, None]:
     It depends on 'wait_for_transmission' to ensure the daemon is reachable.
     """
     LOGGER.setLevel("INFO")
-    # Cast PROTOCOL to the Literal type expected by Client
-    protocol_arg = cast("Literal['http', 'https', 'http+unix']", PROTOCOL)
-    with Client(protocol=protocol_arg, host=HOST, port=PORT, username=USER, password=PASSWORD) as c:
+    # Cast TR_PROTOCOL to the Literal type expected by Client
+    protocol_arg = cast("Literal['http', 'https', 'http+unix']", os.environ["TR_PROTOCOL"])
+    host = os.environ["TR_HOST"]
+    port = int(os.environ["TR_PORT"])
+    with Client(
+        protocol=protocol_arg,
+        host=host,
+        port=port,
+        username=os.environ["TR_USER"],
+        password=os.environ["TR_PASSWORD"],
+    ) as c:
         for torrent in c.get_torrents():
             c.remove_torrent(torrent.id, delete_data=True)
         yield c
