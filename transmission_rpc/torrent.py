@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import enum
+import math
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from typing import Any
@@ -20,6 +21,11 @@ _STATUS_NEW_MAPPING = {
     5: "seed pending",
     6: "seeding",
 }
+
+
+def _truncate_percent(percent: float) -> float:
+    """Round a percentage down to two decimals, so it never overstates progress."""
+    return math.floor(percent * 100) / 100
 
 
 def get_status(code: int) -> str:
@@ -910,15 +916,18 @@ class Torrent(Container):
     def progress(self) -> float:
         """
         download progress in percent.
+
+        Rounded down, so an unfinished torrent never reports 100.0. To test
+        for completion, use ``left_until_done == 0``, which is exact.
         """
         try:
             # https://gist.github.com/jackiekazil/6201722#gistcomment-2788556
-            return round((100.0 * self._get_field("percent_done")), 2)
+            return _truncate_percent(100.0 * self._get_field("percent_done"))
         except KeyError:
             try:
                 size = self._get_field("size_when_done")
                 left = self._get_field("left_until_done")
-                return round((100.0 * (size - left) / float(size)), 2)
+                return _truncate_percent(100.0 * (size - left) / float(size))
             except ZeroDivisionError:
                 return 0.0
 
