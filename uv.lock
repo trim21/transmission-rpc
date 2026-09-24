@@ -1277,15 +1277,15 @@ wheels = [
 
 [[package]]
 name = "sphinx-new-tab-link"
-version = "0.8.1"
+version = "0.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sphinx" },
     { name = "sphinxcontrib-extdevhelper-kasane" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/06/a407a7bcaf4c8109b0be8a584084c5bd0975422b862043b4f58a7378dbab/sphinx_new_tab_link-0.8.1.tar.gz", hash = "sha256:f8b3b369b660824664fd51bacf126deb8f800364dae17b7142b5d0e17385f77f", size = 6624, upload-time = "2025-10-12T14:50:27Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/b9/ee505f904abefa6b574736c93813275a22821933cf2293c83893107eecb6/sphinx_new_tab_link-0.8.2.tar.gz", hash = "sha256:8a339fbfcb1712db8eb3d503c61b86da11a52f1216bd308d6f6dcec6139dd8ea", size = 7820, upload-time = "2026-08-26T13:08:21.037Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/2e/5f42ac3e8e68b3878fed18a986160a97b671e7c44bdb4c99c963618ebeb7/sphinx_new_tab_link-0.8.1-py3-none-any.whl", hash = "sha256:fd88be77deaab982b5fdd0be9ef63cfa93f14deab775ab423b6c856402a57ebd", size = 5624, upload-time = "2025-10-12T14:50:25.718Z" },
+    { url = "https://files.pythonhosted.org/packages/65/67/ff27727d2a27dcd8e7c5a3fc27102aacd2063dbb33364d4ad245bd915266/sphinx_new_tab_link-0.8.2-py3-none-any.whl", hash = "sha256:c347d2a228d24f522d8b2c7e9aa453fcea87cfc0a98f50617a4dac702e9e3f9f", size = 6154, upload-time = "2026-08-26T13:08:19.713Z" },
 ]
 
 [[package]]
@@ -1458,7 +1458,7 @@ requires-dist = [
     { name = "sphinx-autobuild", marker = "python_full_version >= '3.12' and extra == 'dev'", specifier = "==2025.8.25" },
     { name = "sphinx-copybutton", marker = "python_full_version >= '3.12' and extra == 'dev'", specifier = "==0.5.2" },
     { name = "sphinx-github-style", marker = "python_full_version >= '3.12' and extra == 'dev'", specifier = "==1.2.2" },
-    { name = "sphinx-new-tab-link", marker = "python_full_version >= '3.12' and extra == 'dev'", specifier = "==0.8.1" },
+    { name = "sphinx-new-tab-link", marker = "python_full_version >= '3.12' and extra == 'dev'", specifier = "==0.8.2" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
     { name = "urllib3", specifier = "~=2.2" },
     { name = "yarl", marker = "extra == 'dev'", specifier = "~=1.22" },
