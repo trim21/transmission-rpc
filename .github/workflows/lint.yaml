@@ -17,14 +17,18 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-          cache: pip
+
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          activate-environment: true
+          enable-cache: true
 
       - uses: liskin/gh-problem-matcher-wrap@v4
         with:
           action: add
           linters: mypy
 
-      - run: pip install -e '.[dev]'
+      - run: uv sync --frozen --extra dev
 
       - name: mypy
         run: mypy --show-column-numbers transmission_rpc
@@ -48,9 +52,13 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-          cache: pip
 
-      - run: pip install -e '.[dev]'
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          activate-environment: true
+          enable-cache: true
+
+      - run: uv sync --frozen --extra dev
 
       - run: sphinx-build -W docs/ dist/
 
@@ -64,7 +72,12 @@ jobs:
           python-version: "3.12"
 
       - uses: astral-sh/setup-uv@v9.0.0
+        id: setup-uv
+        with:
+          activate-environment: true
 
-      - run: uv pip install -r pyproject.toml --extra dev --system
+      - run: uv sync --frozen --extra dev
 
       - uses: jakebailey/pyright-action@v3
+        with:
+          python-path: ${{ steps.setup-uv.outputs.venv }}/bin/python
