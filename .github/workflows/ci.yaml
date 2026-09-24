@@ -105,3 +105,9 @@ jobs:
 
       - name: Check Files
         run: pipx run twine check --strict dist/*
+
+  test-checks:
+    needs: [test]
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo "all test checks passed"

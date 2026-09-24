@@ -3,5 +3,7 @@
     "github>Trim21/renovate-config",
     "github>Trim21/renovate-config:python",
     "github>Trim21/renovate-config:monthly"
-  ]
+  ],
+  "labels": ["ci:auto-merge", "dependencies"],
+  "rebaseWhen": "conflicted"
 }

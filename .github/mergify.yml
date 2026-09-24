@@ -1,3 +1,12 @@
+merge_queue:
+  max_parallel_checks: 1
+  queued_label: "ci:queued"
+  dequeued_label: "ci:dequeued"
+
+queue_rules:
+  - name: default
+    update_method: merge
+
 pull_request_rules:
   - name: label conflicts
     conditions:
@@ -6,3 +15,26 @@ pull_request_rules:
       label:
         toggle:
           - conflict
+
+  - name: automatic merge
+    conditions:
+      - base=master
+      - or:
+          - "#approved-reviews-by>=1"
+          - label=ci:auto-merge
+      - not:
+          and:
+            - "head*=renovate/lockfile-maintenance-*"
+            - "created-at>24h ago"
+      - check-success=test-checks
+      - check-success=test-unix-socket
+      - check-success=dist-files
+      - check-success=mypy
+      - check-success=pyright
+      - check-success=sphinx
+      - check-success=pre-commit
+      - check-success=codeql-checks
+      - check-success=lint
+    actions:
+      queue:
+        name: default
