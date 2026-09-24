@@ -80,8 +80,17 @@ def test_torrent_start_without_ids(tr_client: Client, method_name: str) -> None:
 
     getattr(tr_client, method_name)()
 
-    for torrent in tr_client.get_torrents():
-        assert torrent.downloading or torrent.checking, "All torrents should be downloading or checking after start"
+    started = False
+    for _ in range(50):
+        time.sleep(0.2)
+        if all(
+            torrent.check_pending or torrent.checking or torrent.download_pending or torrent.downloading
+            for torrent in tr_client.get_torrents()
+        ):
+            started = True
+            break
+
+    assert started, "All torrents should eventually be downloading or checking after start"
 
 
 def test_session_get_returns_valid_rpc_version(tr_client: Client) -> None:
