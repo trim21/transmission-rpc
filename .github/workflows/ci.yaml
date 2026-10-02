@@ -12,7 +12,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +65,7 @@ jobs:
     # an even later version because ubuntu-22.04 provides Transmission 3.0.0 but
     # Unix socket support was added in Transmission 4.0.0. Use 24.04 which is
     # currently in beta.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - run: sudo apt-get install -y transmission-daemon
@@ -93,7 +93,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   dist-files:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v7
