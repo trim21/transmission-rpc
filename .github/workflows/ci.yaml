@@ -68,8 +68,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: sudo apt-get update && sudo apt-get install -y transmission-daemon
-      - run: mkdir -p $HOME/Downloads
-      - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
       - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
@@ -79,7 +77,13 @@ jobs:
           enable-cache: true
           python-version: '3.10'
       - run: uv sync --frozen --extra dev
-      - run: coverage run -m pytest
+      - name: test over unix socket
+        run: |
+          mkdir -p $HOME/Downloads
+          transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket -f > /tmp/transmission-daemon.log 2>&1 &
+          timeout 60 bash -c 'until [ -S /tmp/transmission.socket ]; do sleep 0.5; done' \
+            || { cat /tmp/transmission-daemon.log; exit 1; }
+          coverage run -m pytest || { cat /tmp/transmission-daemon.log; exit 1; }
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
