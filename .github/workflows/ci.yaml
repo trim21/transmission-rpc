@@ -80,10 +80,15 @@ jobs:
       - name: test over unix socket
         run: |
           mkdir -p $HOME/Downloads
-          transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket -f > /tmp/transmission-daemon.log 2>&1 &
-          timeout 60 bash -c 'until [ -S /tmp/transmission.socket ]; do sleep 0.5; done' \
-            || { cat /tmp/transmission-daemon.log; exit 1; }
-          coverage run -m pytest || { cat /tmp/transmission-daemon.log; exit 1; }
+          transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket -f --log-level=debug > /tmp/transmission-daemon.log 2>&1 &
+          timeout 60 bash -c 'until [ -S /tmp/transmission.socket ]; do sleep 0.5; done' || {
+            tail -40 /tmp/transmission-daemon.log
+            ls -la /tmp
+            ps -eo user,pid,args | grep -i [t]ransmission
+            sudo dmesg | grep -i -E "apparmor|denied|transmission" | tail -20
+            exit 1
+          }
+          coverage run -m pytest
         env:
           TR_PROTOCOL: 'http+unix'
           TR_HOST: '/tmp/transmission.socket'
