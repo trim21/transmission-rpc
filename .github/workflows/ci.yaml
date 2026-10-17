@@ -61,34 +61,15 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   test-unix-socket:
-    # Unix socket support was added in Transmission 4.0.0, so run the daemon
-    # from the same pinned image the matrix above uses instead of whatever
-    # version the runner image happens to ship.
+    # Unix socket support was added in Transmission 4.0.0, so the distro
+    # provided daemon is new enough here. The runner image ships a stale apt
+    # index, so refresh it before installing.
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
-      - name: Run transmission on a unix socket
-        run: |
-          mkdir -p /tmp/transmission/{config,socket,config/downloads}
-          cat > /tmp/transmission/config/settings.json <<'EOF'
-          {
-            "rpc-bind-address": "unix:/socket/transmission.sock",
-            "rpc-socket-mode": "0777",
-            "rpc-authentication-required": true,
-            "rpc-username": "admin",
-            "rpc-password": "password",
-            "rpc-whitelist-enabled": false,
-            "download-dir": "/config/downloads"
-          }
-          EOF
-          docker run -d --name transmission \
-            --entrypoint /usr/bin/transmission-daemon \
-            -v /tmp/transmission/config:/config \
-            -v /tmp/transmission/socket:/socket \
-            linuxserver/transmission:4.1.3 \
-            -g /config -f
-          timeout 60 bash -c 'until [ -S /tmp/transmission/socket/transmission.sock ]; do sleep 0.5; done' \
-            || { docker logs transmission; exit 1; }
+      - run: sudo apt-get update && sudo apt-get install -y transmission-daemon
+      - run: mkdir -p $HOME/Downloads
+      - run: transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket
       - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
@@ -101,7 +82,7 @@ jobs:
       - run: coverage run -m pytest
         env:
           TR_PROTOCOL: 'http+unix'
-          TR_HOST: '/tmp/transmission/socket/transmission.sock'
+          TR_HOST: '/tmp/transmission.socket'
           TR_PORT: 9091
           TR_USER: admin
           TR_PASSWORD: password
