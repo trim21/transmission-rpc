@@ -63,7 +63,8 @@ jobs:
   test-unix-socket:
     # Unix socket support was added in Transmission 4.0.0, so the distro
     # provided daemon is new enough here. The runner image ships a stale apt
-    # index, so refresh it before installing.
+    # index, and its AppArmor profile for the daemon only allows inet sockets,
+    # so refresh the index and drop the profile before starting the daemon.
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
@@ -79,16 +80,11 @@ jobs:
       - run: uv sync --frozen --extra dev
       - name: test over unix socket
         run: |
-          sudo ls -l /etc/apparmor.d 2>/dev/null | grep -i transmission || true
-          sudo cat /etc/apparmor.d/*transmission* 2>/dev/null | head -80 || true
-          sudo apparmor_parser -R /etc/apparmor.d/*transmission* 2>&1 || true
+          sudo apparmor_parser -R /etc/apparmor.d/transmission || true
           mkdir -p $HOME/Downloads
           transmission-daemon --rpc-bind-address unix:/tmp/transmission.socket -f > /tmp/transmission-daemon.log 2>&1 &
-          timeout 60 bash -c 'until [ -S /tmp/transmission.socket ]; do sleep 0.5; done' || {
-            tail -40 /tmp/transmission-daemon.log
-            sudo dmesg | grep -i -E "apparmor|denied|transmission" | tail -20
-            exit 1
-          }
+          timeout 60 bash -c 'until [ -S /tmp/transmission.socket ]; do sleep 0.5; done' \
+            || { tail -40 /tmp/transmission-daemon.log; exit 1; }
           coverage run -m pytest
         env:
           TR_PROTOCOL: 'http+unix'
