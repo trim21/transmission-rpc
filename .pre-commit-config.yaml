@@ -1,10 +1,10 @@
 repos:
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: 0.26
+    rev: v0.27
     hooks:
       - id: validate-pyproject
         language: python
-        additional_dependencies: ["validate-pyproject-schema-store[all]==2026.10.17"]
+        additional_dependencies: ["validate-pyproject-schema-store[all]==2026.10.30"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.16.0
@@ -32,7 +32,7 @@ repos:
       - id: end-of-file-fixer
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.1
+    rev: v0.17.3
     hooks:
       - id: ruff-check
         args: [--fix]
