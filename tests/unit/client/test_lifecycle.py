@@ -347,6 +347,33 @@ def test_client_default_ca_bundle() -> None:
         assert kwargs["ca_certs"] == certifi.where()
 
 
+def test_client_tls_verify_disabled() -> None:
+    """Verify that tls_verify=False disables certificate and hostname checks."""
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+    ):
+        Client(protocol="https", tls_verify=False, tls_cert_file="/path/to/custom/ca.pem")
+
+        _, kwargs = mock_pool.call_args
+        assert kwargs["cert_reqs"] == "CERT_NONE"
+        assert kwargs["assert_hostname"] is False
+        assert "ca_certs" not in kwargs
+
+
+def test_client_tls_verify_default() -> None:
+    """Verify that certificates are verified by default."""
+    with (
+        mock.patch("transmission_rpc.client.Client.get_session"),
+        mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+    ):
+        Client(protocol="https")
+
+        _, kwargs = mock_pool.call_args
+        assert "cert_reqs" not in kwargs
+        assert "assert_hostname" not in kwargs
+
+
 def test_client_env_var_ca_bundle(tmp_path: pathlib.Path) -> None:
     """Verify that we fall back to TRANSMISSION_RPC_PY_CERT_FILE if provided."""
     custom_ca = str(tmp_path / "env-ca.pem")
@@ -362,6 +389,26 @@ def test_client_env_var_ca_bundle(tmp_path: pathlib.Path) -> None:
 
             _, kwargs = mock_pool.call_args
             assert kwargs["ca_certs"] == custom_ca
+
+    importlib.reload(transmission_rpc.client)
+
+
+def test_client_env_var_tls_verify_disabled() -> None:
+    """Verify that TRANSMISSION_RPC_PY_DISABLE_TLS_VERIFY=1 disables verification by default."""
+    with mock.patch.dict("os.environ", {"TRANSMISSION_RPC_PY_DISABLE_TLS_VERIFY": "1"}):
+        importlib.reload(transmission_rpc.client)
+
+        with (
+            mock.patch("transmission_rpc.client.Client.get_session"),
+            mock.patch("urllib3.HTTPSConnectionPool") as mock_pool,
+        ):
+            transmission_rpc.client.Client(protocol="https")
+            _, kwargs = mock_pool.call_args
+            assert kwargs["cert_reqs"] == "CERT_NONE"
+
+            transmission_rpc.client.Client(protocol="https", tls_verify=True)
+            _, kwargs = mock_pool.call_args
+            assert "cert_reqs" not in kwargs
 
     importlib.reload(transmission_rpc.client)
 
