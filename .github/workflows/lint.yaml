@@ -28,7 +28,7 @@ jobs:
           action: add
           linters: mypy
 
-      - run: uv sync --frozen --extra dev
+      - run: uv sync --locked --extra dev
 
       - name: mypy
         run: mypy --show-column-numbers transmission_rpc
@@ -58,7 +58,7 @@ jobs:
           activate-environment: true
           enable-cache: true
 
-      - run: uv sync --frozen --extra dev
+      - run: uv sync --locked --extra dev
 
       - run: sphinx-build -W docs/ dist/
 
@@ -76,7 +76,7 @@ jobs:
         with:
           activate-environment: true
 
-      - run: uv sync --frozen --extra dev
+      - run: uv sync --locked --extra dev
 
       - uses: jakebailey/pyright-action@v3
         with:
