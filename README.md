@@ -22,6 +22,20 @@ report an issue if you found unexpected API break changes at same major version.
 Due to the tradition of python packaging community,
 dropping support for EOL python versions will not be considered breaking change.
 
+## Upgrading from 7.x
+
+Version 8 removes the APIs deprecated in 7.0.12 and changes the return semantics
+of a few APIs that keep their names. Install `transmission-rpc==7.0.12` first and
+run your test suite with deprecation warnings treated as errors:
+
+```console
+pip install "transmission-rpc==7.0.12"
+pytest -W error::DeprecationWarning
+```
+
+Then follow the [v8 migration guide](https://transmission-rpc.readthedocs.io/en/latest/migration-v8.html),
+which also lists the behaviour changes that no warning can catch.
+
 ## Install
 
 ```console
