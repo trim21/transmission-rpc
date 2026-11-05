@@ -53,6 +53,7 @@ DEFAULT_TIMEOUT = 30.0
 _Timeout = Timeout | int | float
 
 _TLS_CERT_FILE_DEFAULT = os.getenv("TRANSMISSION_RPC_PY_CERT_FILE")
+_TLS_VERIFY_DEFAULT = os.getenv("TRANSMISSION_RPC_PY_DISABLE_TLS_VERIFY") != "1"
 
 
 class ResponseData(TypedDict, total=False):
@@ -143,6 +144,7 @@ class Client:
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
         logger: logging.Logger = LOGGER,
         tls_cert_file: str | None = _TLS_CERT_FILE_DEFAULT,
+        tls_verify: bool = _TLS_VERIFY_DEFAULT,
     ):
         """
 
@@ -159,6 +161,10 @@ class Client:
                 Path to a custom CA bundle file (PEM format) to use for SSL verification.
                 Defaults to TRANSMISSION_RPC_PY_CERT_FILE env var if set.
                 If None, uses certifi's default bundle.
+            tls_verify:
+                Verify the server's TLS certificate and hostname.
+                Defaults to False if TRANSMISSION_RPC_PY_DISABLE_TLS_VERIFY env var is "1", otherwise True.
+                If False, tls_cert_file is ignored.
 
         To connect to a Unix socket, pass "http+unix" as `protocol` and the path to
         the socket as `host`.
@@ -198,8 +204,11 @@ class Client:
         if protocol == "http":
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
-            ca_certs = tls_cert_file or certifi.where()
-            self.__http_client = urllib3.HTTPSConnectionPool(port=port, ca_certs=ca_certs, **common_args)
+            if tls_verify:
+                tls_args: dict[str, Any] = {"ca_certs": tls_cert_file or certifi.where()}
+            else:
+                tls_args = {"cert_reqs": "CERT_NONE", "assert_hostname": False}
+            self.__http_client = urllib3.HTTPSConnectionPool(port=port, **tls_args, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:
