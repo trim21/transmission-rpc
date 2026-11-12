@@ -21,7 +21,12 @@ tasks:
   lint:
     cmds:
       - pre-commit run -a
-      - mypy --show-column-numbers transmission_rpc
+      - task: typecheck
+
+  typecheck:
+    cmds:
+      - ty check transmission_rpc
+      - pyright .
 
   test:
     cmds:

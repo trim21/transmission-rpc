@@ -205,10 +205,11 @@ class Client:
             self.__http_client = urllib3.HTTPConnectionPool(port=port, **common_args)
         elif protocol == "https":
             if tls_verify:
-                tls_args: dict[str, Any] = {"ca_certs": tls_cert_file or certifi.where()}
+                common_args["ca_certs"] = tls_cert_file or certifi.where()
             else:
-                tls_args = {"cert_reqs": "CERT_NONE", "assert_hostname": False}
-            self.__http_client = urllib3.HTTPSConnectionPool(port=port, **tls_args, **common_args)
+                common_args["cert_reqs"] = "CERT_NONE"
+                common_args["assert_hostname"] = False
+            self.__http_client = urllib3.HTTPSConnectionPool(port=port, **common_args)
         elif protocol == "http+unix":
             self.__http_client = UnixHTTPConnectionPool(**common_args)
         else:
