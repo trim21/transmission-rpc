@@ -29,7 +29,7 @@ pull_request_rules:
       - check-success=test-checks
       - check-success=test-unix-socket
       - check-success=dist-files
-      - check-success=mypy
+      - check-success=ty
       - check-success=pyright
       - check-success=sphinx
       - check-success=pre-commit

@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  mypy:
+  ty:
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
@@ -23,15 +23,10 @@ jobs:
           activate-environment: true
           enable-cache: true
 
-      - uses: liskin/gh-problem-matcher-wrap@v4
-        with:
-          action: add
-          linters: mypy
-
       - run: uv sync --locked --extra dev
 
-      - name: mypy
-        run: mypy --show-column-numbers transmission_rpc
+      - name: ty
+        run: ty check transmission_rpc --output-format=github
 
   pre-commit:
     runs-on: ubuntu-26.04
